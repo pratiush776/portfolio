@@ -1570,6 +1570,7 @@ input, select, textarea {
 
 		.image > img:hover{
 			filter:blur(0);
+			transform:scale(0.9)
 		}
 		.image h3{
 			font-size: 0.8em;
