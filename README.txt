@@ -1,5 +1,7 @@
 Welcome Visitor!
 
+LINK: https://pratiush776.github.io/portfolio/
+
 This is my portfolio design which has links to some of my projects. This project is inpired by: 
 
 Astral by HTML5 UP
