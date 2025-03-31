@@ -1,4 +1,4 @@
-import { ChevronUp, Github, Linkedin, Send } from "lucide-react";
+import { Github, Linkedin, Send } from "lucide-react";
 import React from "react";
 import Form from "next/form";
 

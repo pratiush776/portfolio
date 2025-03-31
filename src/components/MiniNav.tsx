@@ -1,4 +1,3 @@
-import { Menu } from "lucide-react";
 import React from "react";
 
 interface NavProps {
