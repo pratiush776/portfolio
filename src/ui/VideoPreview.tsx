@@ -27,7 +27,7 @@ const VideoPreview: React.FC<VideoPreviewProps> = ({
       {/* Preview Container */}
       <motion.div
         onClick={() => setPlayVideo(true)}
-        className="relative bg-white rounded-[20px] min-h-[30vh] w-[90%] flex justify-center items-center overflow-hidden border-navy border-r-[4px] border-b-[4px] cursor-pointer"
+        className={`relative bg-white rounded-[20px] min-h-[30vh] w-[90%] flex justify-center items-center overflow-hidden border-navy border-r-[4px] border-b-[4px] cursor-pointer ${className}`}
       >
         {!playVideo && (
           <>
