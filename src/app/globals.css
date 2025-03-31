@@ -1,26 +1,97 @@
 @import "tailwindcss";
+@plugin "daisyui";
 
 :root {
   --background: #ffffff;
   --foreground: #171717;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+div::-webkit-scrollbar,
+main::-webkit-scrollbar {
+  display: none; /* Safari and Chrome */
+}
+body {
+  margin: 0;
+  padding: 0;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@import "tailwindcss";
+
+.h1 {
+  @apply text-[40px] leading-[40px] tracking-[0px];
+}
+.h1-desktop {
+  @apply text-[44px] leading-[52px] tracking-[0px];
+}
+
+.h2 {
+  @apply text-[32px] leading-[36px] tracking-[0.5px];
+}
+.h2-desktop {
+  @apply text-[36px] leading-[44px] tracking-[0.5px];
+}
+.title {
+  @apply text-[32px] leading-[36px] tracking-[0.25px] font-semibold text-navy md:leading-[40px] md:text-[40px] md:tracking-[-0.5px] mb-[16px];
+}
+.h3 {
+  @apply text-[28px] md:text-[32px] md:font-semibold leading-[36px] tracking-[0.25px];
+}
+.h3-desktop {
+  @apply text-[28px] leading-[32px] tracking-[0.25px];
+}
+
+.full-nav-btn:hover {
+  background-color: #f5efeb;
+  color: #2f4156;
+  transition: all 0.1s ease-out;
+}
+.full-nav-btn2:hover {
+  background-color: #2f4156;
+  color: #f5efeb;
+  transition: all 0.2s ease-out;
+  transform: scale(0.9);
+}
+button {
+  cursor: pointer;
+}
+.p {
+  @apply text-[16px] md:text-[18px] leading-[24px] tracking-[0px];
+}
+.button {
+  @apply text-[16px] cursor-pointer leading-[24px] tracking-[0.5px] py-[4px] px-[24px]  rounded-[10px] flex gap-[4px] items-center justify-center drop-shadow-md;
+}
+.btn-icon {
+  @apply h-[15px];
+}
+.container {
+  @apply relative h-[100vh] p-[32px] bg-beige min-w-[101vw]  shadow-2xl rounded-b-[20px] px-[32px];
+}
+
+@keyframes fadeAnimation {
+  30% {
+    opacity: 1;
+  }
+  70% {
+    opacity: 0.5;
+  }
+  100% {
+    opacity: 1;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+.animate-fade {
+  animation: fadeAnimation 1s ease-in-out infinite;
+}
+
+@theme {
+  /* Font families */
+  --font-pier: "Pier Sans", sans-serif;
+  --font-noto: "Noto Sans", sans-serif;
+
+  /* Color palette */
+  --color-navy: #2f4156;
+  --color-beige: #f5efeb;
+  --color-orange: #e2a47e;
+  --color-teal: #567c8d;
+  --color-sky: #c8d9e6;
 }
