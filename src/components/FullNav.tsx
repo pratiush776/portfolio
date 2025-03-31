@@ -16,7 +16,7 @@ const FullNav: React.FC<FullNavProps> = ({ className, setIsOpen }) => {
       <div className="h3 font-light flex flex-col items-center justify-evenly h-[50vh] ">
         <a
           onClick={() => {
-            setIsOpen && setIsOpen(false);
+            if (setIsOpen) setIsOpen(false);
           }}
           href="#about"
           className="text-beige -translate-x-[1em]"
@@ -27,7 +27,7 @@ const FullNav: React.FC<FullNavProps> = ({ className, setIsOpen }) => {
         </a>
         <a
           onClick={() => {
-            setIsOpen && setIsOpen(false);
+            if (setIsOpen) setIsOpen(false);
           }}
           href="#projects"
           className="text-beige"
@@ -38,7 +38,7 @@ const FullNav: React.FC<FullNavProps> = ({ className, setIsOpen }) => {
         </a>
         <a
           onClick={() => {
-            setIsOpen && setIsOpen(false);
+            if (setIsOpen) setIsOpen(false);
           }}
           href="#skills"
           className="text-beige -translate-x-[1em]"
@@ -79,7 +79,7 @@ const FullNav: React.FC<FullNavProps> = ({ className, setIsOpen }) => {
         <a href="#contact" className="text-beige col-span-3 row-span-2">
           <button
             onClick={() => {
-              setIsOpen && setIsOpen(false);
+              if (setIsOpen) setIsOpen(false);
             }}
             className="h-full w-full bg-beige full-nav-btn2 text-navy border-black border-r-[4px] border-b-[4px] rounded-[20px] px-3 py-1 flex items-center justify-center gap-[16px]"
           >

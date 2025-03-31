@@ -1,6 +1,7 @@
 import { motion, AnimatePresence } from "framer-motion";
 import React, { useState, useRef } from "react";
 import { ChevronLeft, Play } from "lucide-react"; // adjust import accordingly
+import Image from "next/image";
 
 interface VideoPreviewProps {
   className?: string;
@@ -36,9 +37,11 @@ const VideoPreview: React.FC<VideoPreviewProps> = ({
               size={36}
             />
             {thumbnailSrc && (
-              <img
+              <Image
                 src={thumbnailSrc}
                 alt="Demo Video"
+                fill
+                sizes="30vh"
                 className="w-full h-full object-cover rounded-[20px]"
               />
             )}

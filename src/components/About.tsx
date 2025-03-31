@@ -8,14 +8,12 @@ interface AboutProps {
 export default function About({ className }: AboutProps) {
   return (
     <div
-      // data-index="2"
-      // id="about"
       className={`container top-0 z-8 flex flex-col justify-center gap-[16px] ${className}`}
     >
       <div className="md:w-[40em] mx-auto">
         <h1 className="title">About</h1>
         <p className="p text-navy font-light">
-          I'm a passionate computer science student with a knack for crafting
+          I am a passionate computer science student with a knack for crafting
           digital experiences. My journey in software development is fueled by
           curiosity and a drive to turn innovative ideas into user-friendly
           websites and apps. With a solid foundation in programming and a love
