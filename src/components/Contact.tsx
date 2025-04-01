@@ -86,7 +86,7 @@ const Contact: React.FC<ContactProps> = ({ className }) => {
           <div className="flex gap-[8px] md:gap-[16px]">
             <Email className="border-navy hover:bg-navy hover:text-beige border-1 transition-all ease-out" />
             <a
-              href={"https:www.linkedin.com/in/pratiush-k-810324223"}
+              href={"https://www.linkedin.com/in/pratiush-k-810324223"}
               target="_blank"
               className="flex flex-col items-center gap-0 "
             >

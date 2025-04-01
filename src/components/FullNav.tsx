@@ -56,7 +56,7 @@ const FullNav: React.FC<FullNavProps> = ({ className, setIsOpen }) => {
       <div className="grid grid-cols-3 grid-rows-3 gap-x-[8px] gap-y-[16px]">
         <Email className="h-fit w-fit self-center place-self-center full-nav-btn2" />
         <a
-          href={"https:www.linkedin.com/in/pratiush-k-810324223"}
+          href={"https://www.linkedin.com/in/pratiush-k-810324223"}
           target="_blank"
           className="flex flex-col items-center justify-center"
         >
