@@ -17,7 +17,7 @@ export default function Home() {
               <Skills className="!sticky top-0" />
               <div className="absolute top-0">
                 <StackingComp height="3" id="projects">
-                  {/* <Projects className="!sticky top-0" /> */}
+                  <Projects className="!sticky top-0" />
                   <div className="absolute top-0">
                     <StackingComp height="2" id="about">
                       <About className="!sticky top-0" />
