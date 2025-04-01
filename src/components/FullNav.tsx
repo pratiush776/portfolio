@@ -1,7 +1,6 @@
 import { Download, Github, Linkedin, Send } from "lucide-react";
 import React from "react";
 import Email from "./Email";
-import Link from "next/link";
 
 interface FullNavProps {
   className?: string;
@@ -56,7 +55,7 @@ const FullNav: React.FC<FullNavProps> = ({ className, setIsOpen }) => {
       </div>
       <div className="grid grid-cols-3 grid-rows-3 gap-x-[8px] gap-y-[16px]">
         <Email className="h-fit w-fit self-center place-self-center full-nav-btn2" />
-        <Link
+        <a
           href={"https:www.linkedin.com/in/pratiush-k-810324223"}
           target="_blank"
           rel="noopener noreferrer"
@@ -65,8 +64,8 @@ const FullNav: React.FC<FullNavProps> = ({ className, setIsOpen }) => {
           <button className="button full-nav-btn2 bg-beige text-navy !rounded-[20px]">
             <Linkedin size={18} />
           </button>
-        </Link>
-        <Link
+        </a>
+        <a
           href={"https://github.com/pratiush776"}
           target="_blank"
           rel="noopener noreferrer"
@@ -75,7 +74,7 @@ const FullNav: React.FC<FullNavProps> = ({ className, setIsOpen }) => {
           <button className="button full-nav-btn2 bg-beige text-navy !rounded-[20px]">
             <Github size={18} />
           </button>
-        </Link>
+        </a>
         <a href="#contact" className="text-beige col-span-3 row-span-2">
           <button
             onClick={() => {

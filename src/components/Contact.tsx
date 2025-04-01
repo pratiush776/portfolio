@@ -86,7 +86,7 @@ const Contact: React.FC<ContactProps> = ({ className }) => {
           </div>
           <div className="flex gap-[8px] md:gap-[16px]">
             <Email className="border-navy hover:bg-navy hover:text-beige border-1 transition-all ease-out" />
-            <Link
+            <a
               href={"https:www.linkedin.com/in/pratiush-k-810324223"}
               target="_blank"
               rel="noopener noreferrer"
@@ -95,8 +95,8 @@ const Contact: React.FC<ContactProps> = ({ className }) => {
               <button className="button border-[#00000047] hover:bg-navy hover:text-beige border-1 transition-all ease-out bg-beige text-navy !rounded-[20px]">
                 <Linkedin size={18} />
               </button>
-            </Link>
-            <Link
+            </a>
+            <a
               href={"https://github.com/pratiush776"}
               target="_blank"
               rel="noopener noreferrer"
@@ -105,7 +105,7 @@ const Contact: React.FC<ContactProps> = ({ className }) => {
               <button className="button border-[#00000047] hover:bg-navy hover:text-beige border-1 transition-all ease-out bg-beige text-navy !rounded-[20px]">
                 <Github size={18} />
               </button>
-            </Link>
+            </a>
           </div>
         </div>
       </div>
