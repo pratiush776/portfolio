@@ -88,7 +88,6 @@ const Contact: React.FC<ContactProps> = ({ className }) => {
             <a
               href={"https:www.linkedin.com/in/pratiush-k-810324223"}
               target="_blank"
-              rel="noopener noreferrer"
               className="flex flex-col items-center gap-0 "
             >
               <button className="button border-[#00000047] hover:bg-navy hover:text-beige border-1 transition-all ease-out bg-beige text-navy !rounded-[20px]">
@@ -98,7 +97,6 @@ const Contact: React.FC<ContactProps> = ({ className }) => {
             <a
               href={"https://github.com/pratiush776"}
               target="_blank"
-              rel="noopener noreferrer"
               className="flex flex-col items-center gap-0"
             >
               <button className="button border-[#00000047] hover:bg-navy hover:text-beige border-1 transition-all ease-out bg-beige text-navy !rounded-[20px]">

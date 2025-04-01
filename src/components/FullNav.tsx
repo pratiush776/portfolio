@@ -58,7 +58,6 @@ const FullNav: React.FC<FullNavProps> = ({ className, setIsOpen }) => {
         <a
           href={"https:www.linkedin.com/in/pratiush-k-810324223"}
           target="_blank"
-          rel="noopener noreferrer"
           className="flex flex-col items-center justify-center"
         >
           <button className="button full-nav-btn2 bg-beige text-navy !rounded-[20px]">
@@ -68,7 +67,6 @@ const FullNav: React.FC<FullNavProps> = ({ className, setIsOpen }) => {
         <a
           href={"https://github.com/pratiush776"}
           target="_blank"
-          rel="noopener noreferrer"
           className="flex flex-col items-center justify-center "
         >
           <button className="button full-nav-btn2 bg-beige text-navy !rounded-[20px]">
