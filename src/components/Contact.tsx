@@ -3,7 +3,6 @@ import React from "react";
 import Form from "next/form";
 
 import Swal from "sweetalert2";
-import Link from "next/link";
 import Email from "./Email";
 
 interface ContactProps {
