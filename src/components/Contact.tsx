@@ -1,44 +1,48 @@
-import { Github, Linkedin, Send } from "lucide-react";
+"use client";
+import { Check, Github, Linkedin, Plus, Send } from "lucide-react";
 import React from "react";
 import Form from "next/form";
-
-import Swal from "sweetalert2";
 import Email from "./Email";
+import { motion } from "framer-motion";
+import { AnimatePresence } from "motion/react";
 
 interface ContactProps {
   className?: string;
 }
 
 const Contact: React.FC<ContactProps> = ({ className }) => {
+  const [status, setStatus] = React.useState("default");
+
   async function handleSubmit(formData: FormData) {
-    "use server";
-    formData.append("access_key", "03c13abd-95f8-4f30-ba8d-db8e8c0cb6e4");
+    if (status === "loading") return;
+    setStatus("loading");
+    setTimeout(async () => {
+      formData.append("access_key", "03c13abd-95f8-4f30-ba8d-db8e8c0cb6e4");
 
-    const object = Object.fromEntries(formData);
-    const json = JSON.stringify(object);
+      const object = Object.fromEntries(formData);
+      const json = JSON.stringify(object);
 
-    const response = await fetch("https://api.web3forms.com/submit", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-      },
-      body: json,
-    });
-    const result = await response.json();
-    if (result.success) {
-      Swal.fire({
-        title: "Thank you for reaching out",
-        text: "Message sent",
-        icon: "success",
+      const response = await fetch("https://api.web3forms.com/submit", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: json,
       });
-    } else {
-      Swal.fire({
-        title: "Thank you for trying reaching out",
-        text: "Fail to send the message",
-        icon: "error",
-      });
-    }
+      const result = await response.json();
+      if (result.success) {
+        setStatus("success");
+        setTimeout(() => {
+          setStatus("default");
+        }, 4000);
+      } else {
+        setStatus("error");
+        setTimeout(() => {
+          setStatus("default");
+        }, 4000);
+      }
+    }, 1000);
   }
 
   return (
@@ -76,10 +80,65 @@ const Contact: React.FC<ContactProps> = ({ className }) => {
                 required
               />
               <button
+                id="submit"
                 type="submit"
-                className="button !rounded-[20px] bg-navy opacity-90 text-beige "
+                style={{
+                  backgroundColor:
+                    status === "success"
+                      ? " #008000"
+                      : status === "error"
+                      ? "#950606"
+                      : "#001f3f",
+                  transition: "background-color 0.3s ease-out",
+                }}
+                className="button !rounded-[20px] opacity-90 text-beige border border-[#00000047] flex items-center justify-center gap-[8px] px-4 py-2"
               >
-                <Send size={18} />
+                <AnimatePresence mode="wait">
+                  {status === "default" && (
+                    <motion.span
+                      key="default"
+                      initial={{ opacity: 0, scale: 0.8, x: 0 }}
+                      animate={{ opacity: 1, scale: 1, x: 0 }}
+                      exit={{ opacity: 0, scale: 0.8, x: 100 }}
+                      transition={{ duration: 0.5 }}
+                    >
+                      <Send size={18} />
+                    </motion.span>
+                  )}
+                  {status === "loading" && (
+                    <motion.span
+                      key="loading"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.1 }}
+                    >
+                      <span className="loading loading-spinner loading-xs !h-[18px]"></span>
+                    </motion.span>
+                  )}
+                  {status === "success" && (
+                    <motion.span
+                      key="success"
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.8 }}
+                      transition={{ duration: 0.2 }}
+                    >
+                      <Check size={18} color="white" />
+                    </motion.span>
+                  )}
+                  {status === "error" && (
+                    <motion.span
+                      key="error"
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.8 }}
+                      transition={{ duration: 0.2 }}
+                    >
+                      <Plus size={18} className="rotate-45" />
+                    </motion.span>
+                  )}
+                </AnimatePresence>
               </button>
             </Form>
           </div>
