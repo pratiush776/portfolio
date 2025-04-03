@@ -1,3 +1,4 @@
+import { pierSans } from "@/lib/fonts";
 import { ChevronUp, ExternalLink } from "lucide-react";
 import React from "react";
 
@@ -11,7 +12,7 @@ export default function About({ className }: AboutProps) {
       className={`container top-0 z-8 flex flex-col justify-center gap-[16px] ${className}`}
     >
       <div className="md:w-[40em] mx-auto">
-        <h1 className="title">About</h1>
+        <h1 className={`title ${pierSans.className}`}>About</h1>
         <p className="p text-navy font-light">
           I am a passionate computer science student with a knack for crafting
           digital experiences. My journey in software development is fueled by

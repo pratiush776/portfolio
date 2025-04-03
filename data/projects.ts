@@ -10,19 +10,9 @@ export const projects = [
     url: "https://homedoc-backend.onrender.com/",
     videos: ["/projects_assets/HomeDoc/demo.mp4"],
   },
+
   {
     id: 2,
-    title: "Whisk It All",
-    description: "Digital Business Card",
-    fullDescription:
-      "I created a digital business card for an actual local busniess. The was a digital business card which could be scanned as a QR Code then the customers would be directed to this webpage when all the details and links were available to them in a neat and friendly manner.",
-    techStack: ["React", "CSS", "JS"],
-    logo: "/projects_assets/WhiskItAll/logo.png",
-    url: "https://whisk-it-all-business.web.app/",
-    imgs: ["/projects_assets/WhiskItAll/page.png"],
-  },
-  {
-    id: 3,
     title: "RoomMates",
     description: "Full stack home management app",
     fullDescription:
@@ -36,5 +26,16 @@ export const projects = [
       "/projects_assets/RoomMates/admin.png",
       "/projects_assets/RoomMates/welcome.png",
     ],
+  },
+  {
+    id: 3,
+    title: "Whisk It All",
+    description: "Digital Business Card",
+    fullDescription:
+      "I created a digital business card for an actual local busniess. The was a digital business card which could be scanned as a QR Code then the customers would be directed to this webpage when all the details and links were available to them in a neat and friendly manner.",
+    techStack: ["React", "CSS", "JS"],
+    logo: "/projects_assets/WhiskItAll/logo.png",
+    url: "https://whisk-it-all-business.web.app/",
+    imgs: ["/projects_assets/WhiskItAll/page.png"],
   },
 ];

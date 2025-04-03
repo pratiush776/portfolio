@@ -28,31 +28,32 @@ const VideoPreview: React.FC<VideoPreviewProps> = ({
       {/* Preview Container */}
       <motion.div
         onClick={() => setPlayVideo(true)}
-        className={`relative bg-white rounded-[20px] min-h-[30vh] w-[90%] flex justify-center items-center overflow-hidden border-navy border-r-[4px] border-b-[4px] cursor-pointer ${className}`}
+        className={`relative h-[30vh] bg-white rounded-[20px] w-[90%] flex justify-center items-center border-1 border-navy border-r-[4px] border-b-[4px] cursor-pointer ${className}`}
       >
-        {!playVideo && (
-          <>
-            <Play
-              className="absolute mx-auto opacity-80 z-10 bg-navy text-beige rounded-full p-2 cursor-pointer"
-              size={36}
-            />
-            {thumbnailSrc && (
-              <Image
-                src={thumbnailSrc}
-                alt="Demo Video"
-                fill
-                sizes="30vh"
-                className="w-full h-full object-cover rounded-[20px]"
+        <div className="relative h-full w-full aspect-square object-cover text-navy  rounded-[20px] bg-[#8d99aec2] hover:translate-0 -translate-[8px]">
+          {!playVideo && (
+            <>
+              <Play
+                className="absolute top-1/2 left-1/2 -translate-1/2 mx-auto opacity-80 z-10 bg-navy text-beige rounded-full p-2 cursor-pointer "
+                size={36}
               />
-            )}
-            :
-            {
-              <div className="h3 h-[30vh] aspect-square object-cover text-navy bg-white rounded-[20px] flex justify-center items-center">
-                Demo
-              </div>
-            }
-          </>
-        )}
+              {thumbnailSrc && (
+                <Image
+                  src={thumbnailSrc}
+                  alt="Demo Video"
+                  fill
+                  sizes="30vh"
+                  className="w-full h-full object-cover rounded-[20px]"
+                />
+              )}
+              {
+                <div className="h3 h-full flex justify-center items-center ">
+                  Demo
+                </div>
+              }
+            </>
+          )}
+        </div>
       </motion.div>
 
       {/* Fullscreen Video Overlay */}
@@ -64,7 +65,7 @@ const VideoPreview: React.FC<VideoPreviewProps> = ({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.5, ease: "easeInOut" }}
-            className="fixed bottom-0 inset-0 bg-black flex justify-center items-center z-50"
+            className="fixed pb-[1em] bottom-0 inset-0 bg-black flex rounded-[20px] justify-center items-center z-50"
             onClick={handleClose} // clicking the overlay closes it
           >
             {/* Back Button */}
@@ -73,7 +74,7 @@ const VideoPreview: React.FC<VideoPreviewProps> = ({
                 e.stopPropagation();
                 handleClose();
               }}
-              className="absolute cursor-pointer top-[12vh] left-5 bg-white text-navy p-2 rounded-full z-51"
+              className="absolute cursor-pointer top-[2em] left-5 bg-white text-navy p-2 rounded-full z-51"
             >
               <ChevronLeft size={16} />
             </button>

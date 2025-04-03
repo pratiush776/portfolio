@@ -27,7 +27,7 @@ const CollapsibleText: React.FC<CollapsibleTextProps> = ({
         {/* Fade overlay and "View More" button when collapsed */}
         {!expanded && (
           <>
-            <div className="absolute bottom-0 left-0 w-full h-8 bg-gradient-to-t from-[#ffffff90] to-transparent flex justify-center items-end pointer-events-none">
+            <div className="absolute bottom-0 left-0 w-full h-8  flex justify-center items-end pointer-events-none">
               <button
                 onClick={() => setExpanded(true)}
                 className="pointer-events-auto  mx-auto cursor-pointer flex flex-col translate-y-[.25rem] backdrop-blur-3xl rounded-[20px] items-center justify-center text-navy font-medium  px-2 "

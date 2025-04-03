@@ -46,11 +46,11 @@ const FilterSkills: React.FC = () => {
   const displayedSkills = getDisplayedSkills();
 
   return (
-    <div className="flex flex-col gap-[8px] md:gap-[12px] ">
+    <div className="flex  flex-col gap-[8px] md:gap-[12px] ">
       {/* Category Filter Buttons */}
 
       <div
-        className="relative flex gap-2 overflow-x-scroll w-full "
+        className="relative mb-[8px] flex gap-2 overflow-x-scroll w-full "
         style={{
           WebkitMaskImage:
             "linear-gradient(90deg, black 80%, transparent 100%)",
@@ -75,31 +75,33 @@ const FilterSkills: React.FC = () => {
 
       {/* Display Tech Logos */}
       <div
-        className=" bg-[#ffffff90] border-navy border-r-[4px] border-b-[4px] p-[8px] rounded-[20px]
-        grid grid-cols-5 gap-4 text-center place-items-center auto-rows-min w-full
-      h-[40vh] overflow-y-scroll"
+        className="float-animation border-1 border-navy border-r-[4px] border-b-[4px]  rounded-[20px]
+         w-full h-[40vh] overflow-visible"
       >
-        {displayedSkills.map((skill, index) => (
-          <Link
-            key={index}
-            href={skill.link}
-            target="_blank"
-            rel="noopener noreferrer"
-            className=" flex flex-col items-center gap-0 "
-          >
-            <Image
-              src={skill.logo}
-              alt={skill.name}
-              width={40}
-              height={40}
-              className="w-[36px] aspect-square drop-shadow-md"
-            />
-            <label className="text-[10px] tracking-[.5px] leading-[16px] font-extralight">
-              {skill.name}
-            </label>
-          </Link>
-        ))}
+        <div className=" h-full w-full overflow-y-scroll bg-[#8d99aec2] p-[16px] -translate-[8px] rounded-[20px] grid grid-cols-5 gap-4 text-center place-items-center auto-rows-min">
+          {displayedSkills.map((skill, index) => (
+            <Link
+              key={index}
+              href={skill.link}
+              target="_blank"
+              rel="noopener noreferrer"
+              className=" flex flex-col items-center gap-0 "
+            >
+              <Image
+                src={skill.logo}
+                alt={skill.name}
+                width={40}
+                height={40}
+                className="w-[36px] aspect-square drop-shadow-md"
+              />
+              <label className="text-[10px] tracking-[.75px] leading-[14px] opacity-75">
+                {skill.name}
+              </label>
+            </Link>
+          ))}
+        </div>
       </div>
+      <div className="float-shadow w-full h-[1em] absolute bottom-[-3em] bg-[#4a464634] rounded-[100%]  blur-xs "></div>
     </div>
   );
 };

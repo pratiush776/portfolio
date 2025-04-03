@@ -1,17 +1,8 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+
 import "./globals.css";
 import Nav from "@/components/Nav";
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+import { notoSans } from "@/lib/fonts";
 
 export const metadata: Metadata = {
   title: "Pratiush Karki | Software Developer & Portfolio",
@@ -28,9 +19,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased  bg-navy`}
-      >
+      <body className={` ${notoSans.className} antialiased w-[100vw]  bg-navy`}>
         <Nav className="z-2" />
         {children}
       </body>
