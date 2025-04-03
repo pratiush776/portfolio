@@ -46,7 +46,7 @@ const FilterSkills: React.FC = () => {
   const displayedSkills = getDisplayedSkills();
 
   return (
-    <div className="flex  flex-col gap-[8px] md:gap-[12px] ">
+    <div className="relative flex  flex-col gap-[8px] md:gap-[12px] ">
       {/* Category Filter Buttons */}
 
       <div

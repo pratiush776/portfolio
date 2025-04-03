@@ -27,7 +27,7 @@ const NavToggle: React.FC<NavToggleProps> = ({ className }) => {
       onAnimationStart={() => setIsAnimating(true)}
       onAnimationComplete={() => setIsAnimating(false)}
       className={`fixed w-[100vw] top-0 left-0 z-10  flex ${
-        isOpen ? "flex-col " : "justify-between items-start pt-[2.8vh] "
+        isOpen ? "flex-col " : "justify-between items-start pt-[2.9vh]"
       }  px-8 items-center rounded-b-[20px]  overflow-hidden ${className}`}
     >
       <span

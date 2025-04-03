@@ -39,7 +39,6 @@ export default function Hero({ className }: HeroProps) {
         repeat: -1,
         repeatDelay: 0.5,
         stagger: 0.2,
-        // toggleActions: "play pause resume reset",
       });
     }
   });
