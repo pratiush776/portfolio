@@ -4,36 +4,11 @@ import MiniNav from "./MiniNav";
 import FullNav from "./FullNav";
 import { AnimatePresence, motion } from "motion/react";
 import { Menu, Plus } from "lucide-react";
-import { useGSAP } from "@gsap/react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-
-gsap.registerPlugin(ScrollTrigger, useGSAP);
 
 interface NavToggleProps {
   className?: string;
 }
 const NavToggle: React.FC<NavToggleProps> = ({ className }) => {
-  useGSAP(() => {
-    const sections = ["#hero", "#about", "#projects", "#skills", "#contact"];
-
-    ScrollTrigger.create({
-      trigger: "#hero",
-      start: "top top",
-      endTrigger: "#contact",
-      end: "bottom bottom",
-
-      //snap: 1 / (sections.length - 1)
-
-      snap: {
-        snapTo: 1 / (sections.length - 1),
-        duration: { min: 0.25, max: 0.5 }, // the snap animation should be at least 0.25 seconds, but no more than 0.75 seconds (determined by velocity)
-        // delay: 0.125, // wait 0.125 seconds from the last scroll event before doing the snapping
-        ease: "power1.inOut", // the ease of the snap animation ("power3" by default)
-        directional: true, // snap in the direction of the scroll (true by default)
-      },
-    });
-  });
   const [isOpen, setIsOpen] = React.useState(false);
   const [isAnimating, setIsAnimating] = React.useState(false);
   return (

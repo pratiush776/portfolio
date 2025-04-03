@@ -19,7 +19,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={` ${notoSans.className} antialiased w-[100vw]  bg-navy`}>
+      <body
+        className={` ${notoSans.className} antialiased bg-navy scroll-smooth `}
+      >
         <Nav className="z-2" />
         {children}
       </body>
