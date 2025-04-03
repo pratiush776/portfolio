@@ -1,5 +1,4 @@
 "use client";
-import { pierSans } from "@/lib/fonts";
 import Lenis from "lenis";
 import React, { useEffect, useRef } from "react";
 
