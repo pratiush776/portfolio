@@ -54,7 +54,7 @@ const Contact: React.FC<ContactProps> = ({ className }) => {
           // id="contact"
           className=" float-animation relative md:justify-self-start  md:h-[30em] border-1  border-navy border-r-[4px] border-b-[4px] aspect-square flex flex-col items-center justify-center gap-[32px] md:gap-[44px] rounded-[20px] "
         >
-          <div className="p-[1rem] bg-[#8d99aec2] -translate-[8px] rounded-[20px] h-full w-full text-navy flex flex-col gap-[12px] md:gap-[28px] items-center">
+          <div className="p-[1rem] bg-[#8d99aec2] -translate-[8px] rounded-[20px] h-full w-full text-navy flex flex-col gap-[12px] md:gap-[28px] items-center justify-center">
             <h3 className="p  opacity-[80%]">send me a message</h3>
             <Form
               action={handleSubmit}
