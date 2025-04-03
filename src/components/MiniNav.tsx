@@ -1,6 +1,6 @@
 "use client";
 // import Lenis from "lenis";
-import React, { useEffect, useRef } from "react";
+import React from "react";
 
 interface NavProps {
   className?: string;
