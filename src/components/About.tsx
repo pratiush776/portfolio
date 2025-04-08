@@ -23,7 +23,8 @@ export default function About({ className }: AboutProps) {
         </p>
         <a
           href="/CV.pdf"
-          download
+          target="_blank"
+          rel="noopener noreferrer"
           className="button mt-[16px] bg-neutral-700 text-beige max-w-fit flex justify-center items-center gap-2"
         >
           <h3>Resume</h3>

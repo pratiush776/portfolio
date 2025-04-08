@@ -46,7 +46,13 @@ const FullNav: React.FC<FullNavProps> = ({ className, setIsOpen }) => {
             Skills
           </button>
         </a>
-        <a href="/CV.pdf" download className="text-beige">
+        <a
+          href="/CV.pdf"
+          target="_blank"
+          rel="noopener noreferrer"
+          download
+          className="text-beige"
+        >
           <button className="button w-[8em] full-nav-btn flex font-semibold translate-x-[1em] border-beige border-1">
             <h3>Resume</h3>
             <Download className="btn-icon" />

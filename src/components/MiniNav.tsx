@@ -28,7 +28,12 @@ export default function MiniNav({ className }: NavProps) {
             Contact
           </button>
         </a>
-        <a href="/CV.pdf" download className="">
+        <a
+          href="/CV.pdf"
+          className=""
+          target="_blank"
+          rel="noopener noreferrer"
+        >
           <button
             className={` h-full w-full font-bold bg-beige text-navy rounded-[20px] px-3 py-1 hover:opacity-100 opacity-90 transition duration-200 ease-in-out`}
           >
