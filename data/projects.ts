@@ -19,7 +19,7 @@ export const projects = [
       "This app enables its users to manage household chores among their pals by adding each others in groups and creating tasks for one another.",
     techStack: ["Node", "JS", "NEDB Promises", "Express"],
     logo: "/projects_assets/RoomMates/logo.png",
-    url: "https://roommatesapp-production.up.railway.app/",
+    url: "https://roommatesapp.onrender.com/",
     imgs: [
       "/projects_assets/RoomMates/dashboard.png",
       "/projects_assets/RoomMates/login.png",
