@@ -15,7 +15,7 @@ export default function Projects({ className }: ProjectsProps) {
       // id="projects"
       className={`container z-7 flex flex-col justify-center gap-[16px] ${className}`}
     >
-      <div className="relative md:w-[40em] h-[85vh] mt-auto md:mx-auto flex flex-col  justify-center md:items-center gap-[16px]">
+      <div className="relative md:w-[40em] h-[85svh] mt-auto md:mx-auto flex flex-col  justify-center md:items-center gap-[16px]">
         <h1 className={`title ${pierSans.className}`}>Projects</h1>
         <div className="carousel carousel-center rounded-[20px] space-x-4 p-4 h-[20em] w-[100vw] self-center max-w-fit flex snap snap-mandatory gap-[8px] items-center justify-start overflow-x-auto">
           {projects.map((project, index) => (

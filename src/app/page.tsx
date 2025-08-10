@@ -9,7 +9,7 @@ export default function Home() {
   return (
     <>
       <main
-        className={` box-border text-navy bg-beige snap-y snap-mandatory max-h-[100vh] scroll-smooth overflow-y-scroll w-[100vw] overflow-x-hidden`}
+        className={` box-border text-navy bg-beige snap-y snap-mandatory max-h-[100svh] scroll-smooth overflow-y-scroll w-[100vw] overflow-x-hidden`}
       >
         <StackingComp height="5" id="contact">
           <Contact className="!sticky top-0" />

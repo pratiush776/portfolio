@@ -78,7 +78,7 @@ export function FloatingProject({
       >
         <div
           className={`relative 
-            flex gap-[4px] items-center justify-center bg-[#8d99aec2] w-full h-full rounded-[19px] p-[16px] hover:translate-0 -translate-[8px] transition duration-200`}
+            flex gap-[4px] items-center justify-center bg-[#8d99aec2] w-full h-[100svh] rounded-[19px] p-[16px] hover:translate-0 -translate-[8px] transition duration-200`}
         >
           <div
             className={`  w-[3em] md:w-[5em] aspect-square  rounded-full 
@@ -121,7 +121,7 @@ export function FloatingProject({
               animate={{ opacity: 1, height: "99vh" }}
               exit={{ opacity: 1, height: 0, y: "100%" }}
               transition={{ duration: 0.5, ease: "easeIn" }}
-              className="fixed h-[95vh] w-[100vw] md:w-[50em] md:bottom-0 md:py-[4em] bg-[#f5efeb97] md:border-r-[6px] md:rounded-[20px] md:border-navy md:border-1 md:left-1/2 md:-translate-x-1/2 bottom-0 left-0  overflow-x-hidden backdrop-blur-sm p-10 z-10 overflow-y-auto"
+              className="fixed h-[95svh] w-[100vw] md:w-[50em] md:bottom-0 md:py-[4em] bg-[#f5efeb97] md:border-r-[6px] md:rounded-[20px] md:border-navy md:border-1 md:left-1/2 md:-translate-x-1/2 bottom-0 left-0  overflow-x-hidden backdrop-blur-sm p-10 z-10 overflow-y-auto"
             >
               <button
                 onClick={() => isExpanded && setIsExpanded(!isExpanded)}
