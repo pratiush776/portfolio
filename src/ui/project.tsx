@@ -78,7 +78,7 @@ export function FloatingProject({
       >
         <div
           className={`relative 
-            flex gap-[4px] items-center justify-center bg-[#8d99aec2] w-full h-[100svh] rounded-[19px] p-[16px] hover:translate-0 -translate-[8px] transition duration-200`}
+            flex gap-[4px] items-center justify-center bg-[#8d99aec2] w-full h-full rounded-[19px] p-[16px] hover:translate-0 -translate-[8px] transition duration-200`}
         >
           <div
             className={`  w-[3em] md:w-[5em] aspect-square  rounded-full 
