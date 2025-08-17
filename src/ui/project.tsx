@@ -118,7 +118,7 @@ export function FloatingProject({
             <motion.div
               key={"expanded-project"}
               initial={{ opacity: 1, height: 100, y: 20 }}
-              animate={{ opacity: 1, height: "99vh" }}
+              animate={{ opacity: 1, height: "99dvh" }}
               exit={{ opacity: 1, height: 0, y: "100%" }}
               transition={{ duration: 0.5, ease: "easeIn" }}
               className="fixed h-[95svh] w-[100vw] md:w-[50em] md:bottom-0 md:py-[4em] bg-[#f5efeb97] md:border-r-[6px] md:rounded-[20px] md:border-navy md:border-1 md:left-1/2 md:-translate-x-1/2 bottom-0 left-0  overflow-x-hidden backdrop-blur-sm p-10 z-10 overflow-y-auto"
