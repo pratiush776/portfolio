@@ -12,7 +12,7 @@ const FullNav: React.FC<FullNavProps> = ({ className, setIsOpen }) => {
     <div
       className={` flex flex-col h-90svh items-center justify-evenly ${className}`}
     >
-      <div className="h3 font-light flex flex-col items-center justify-evenly h-50svh ">
+      <div className="h3 font-light flex flex-col items-center justify-evenly h-[50dvh] ">
         <a
           onClick={() => {
             if (setIsOpen) setIsOpen(false);
