@@ -19,7 +19,7 @@ const StackingComp: React.FC<StackingCompProps> = ({
   return (
     <div
       ref={divRef}
-      className={`relative w-[100vw] h-[${height}00svh] ${className}`}
+      className={`relative w-[100vw] h-[${height}00dvh] ${className}`}
     >
       {children}
       {Array.from({ length: parseInt(height) - 1 }).map((_, i) =>
