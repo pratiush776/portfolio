@@ -20,7 +20,7 @@ export default function Projects({ className }: ProjectsProps) {
         <div className="carousel carousel-center rounded-[20px] space-x-4 p-4 h-[20em] w-[100vw] self-center max-w-fit flex snap snap-mandatory gap-[8px] items-center justify-start overflow-x-auto">
           {projects.map((project, index) => (
             <FloatingProject
-              key={project.title}
+              key={project.id}
               title={project.title}
               logo={project.logo}
               description={project.description}

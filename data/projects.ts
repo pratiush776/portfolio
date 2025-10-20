@@ -1,6 +1,17 @@
 export const projects = [
   {
     id: 1,
+    title: "Whisk It All",
+    description: "Professional Business Website",
+    fullDescription:
+      "Whisk It All is a professional business website designed to showcase the services and offerings of a local business. The website features a clean and modern design, with easy navigation and a focus on user experience. It includes sections for the business's story, services, testimonials, and contact information, all presented in a visually appealing manner. This project was a collaboration with the business owner, where I took the lead on the design and development aspects. My goal was to create a website that not only looks great but also effectively communicates the brand's message.",
+    techStack: ["Next.js", "Tailwind", "GSAP", "Tina CMS"],
+    logo: "/projects_assets/WhiskItAll/logo.png",
+    url: "https://whisk-it-all-official.onrender.com/",
+    videos: ["/projects_assets/WhiskItAll/demo.mp4"],
+  },
+  {
+    id: 2,
     title: "HomeDoc",
     description: "Diasease Diagnosis App using AI",
     fullDescription:
@@ -12,7 +23,7 @@ export const projects = [
   },
 
   {
-    id: 2,
+    id: 3,
     title: "RoomMates",
     description: "Full stack home management app",
     fullDescription:
@@ -28,7 +39,7 @@ export const projects = [
     ],
   },
   {
-    id: 3,
+    id: 4,
     title: "Whisk It All",
     description: "Digital Business Card",
     fullDescription:
