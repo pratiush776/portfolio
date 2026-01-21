@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import Nav from "@/components/Nav";
 import { notoSans } from "@/lib/fonts";
+import { Analytics } from "@vercel/analytics/next";
 
 export const metadata: Metadata = {
   title: "Pratiush Karki | Software Developer & Portfolio",
@@ -24,6 +25,7 @@ export default function RootLayout({
       >
         <Nav className="z-2" />
         {children}
+        <Analytics />
       </body>
     </html>
   );
