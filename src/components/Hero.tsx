@@ -31,7 +31,7 @@ export default function Hero({ className }: HeroProps) {
       tl.fromTo(
         childrenArray,
         { autoAlpha: 0, y: 25 },
-        { autoAlpha: 1, y: 0, stagger: 0.4, ease: "power1.inOut" }
+        { autoAlpha: 1, y: 0, stagger: 0.4, ease: "power1.inOut" },
       ).to("#scroll", {
         y: -10,
         ease: "power1.inOut",
@@ -59,7 +59,7 @@ export default function Hero({ className }: HeroProps) {
           id="subTitle"
           className="p font-semibold  text-navy  bg-beige rounded-[3px] py-[4px] px-[8px]"
         >
-          Software Developer
+          Software Engineer
         </p>
       </div>
       <div
