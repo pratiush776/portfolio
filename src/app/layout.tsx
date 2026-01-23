@@ -4,6 +4,7 @@ import "./globals.css";
 import Nav from "@/components/Nav";
 import { notoSans } from "@/lib/fonts";
 import { Analytics } from "@vercel/analytics/next";
+import { PortfolioViewNotifier } from "@/components/PortfolioViewNotifier";
 
 export const metadata: Metadata = {
   title: "Pratiush Karki | Software Developer & Portfolio",
@@ -23,6 +24,7 @@ export default function RootLayout({
       <body
         className={` ${notoSans.className} antialiased bg-navy scroll-smooth `}
       >
+        <PortfolioViewNotifier />
         <Nav className="z-2" />
         {children}
         <Analytics />

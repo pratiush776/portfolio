@@ -1,6 +1,6 @@
 "use client";
 import { Check, Github, Linkedin, Plus, Send } from "lucide-react";
-import React from "react";
+import React, { useEffect } from "react";
 import Form from "next/form";
 import Email from "./Email";
 import { motion } from "framer-motion";
@@ -18,12 +18,10 @@ const Contact: React.FC<ContactProps> = ({ className }) => {
     if (status === "loading") return;
     setStatus("loading");
     setTimeout(async () => {
-      formData.append("access_key", "03c13abd-95f8-4f30-ba8d-db8e8c0cb6e4");
-
       const object = Object.fromEntries(formData);
       const json = JSON.stringify(object);
 
-      const response = await fetch("https://api.web3forms.com/submit", {
+      const response = await fetch("/api/send-contact", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -88,8 +86,8 @@ const Contact: React.FC<ContactProps> = ({ className }) => {
                     status === "success"
                       ? " #008000"
                       : status === "error"
-                      ? "#950606"
-                      : "#001f3f",
+                        ? "#950606"
+                        : "#001f3f",
                   transition: "background-color 0.3s ease-out",
                 }}
                 className="button !rounded-[20px] opacity-90 text-beige border border-[#00000047] flex items-center justify-center gap-[8px] px-4 py-2"
