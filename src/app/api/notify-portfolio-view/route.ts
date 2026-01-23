@@ -21,7 +21,7 @@ export async function POST(request: Request) {
         access_key: accessKey,
         subject: "Portfolio View Notification",
         from_name: "Portfolio Viewer",
-        message: `Someone visited your portfolio at ${new Date().toLocaleString()}`,
+        message: `Someone visited your portfolio at EST ${new Date().toLocaleString("en-US", { timeZone: "America/New_York" })}`,
         from_email: "portfolio-view@notification.com",
       }),
     });
