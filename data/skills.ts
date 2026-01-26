@@ -28,6 +28,11 @@ export const skills = [
         link: "https://reactjs.org/",
       },
       {
+        name: "Streamlit",
+        logo: "/tech_logos/streamlit.png",
+        link: "https://streamlit.io/",
+      },
+      {
         name: "Tailwind CSS",
         logo: "/tech_logos/TAILWIND.svg",
         link: "https://tailwindcss.com/",
@@ -139,13 +144,18 @@ export const skills = [
         logo: "/tech_logos/NEDB.svg",
         link: "https://www.npmjs.com/package/nedb-promises",
       },
+      {
+        name: "ChromDB",
+        logo: "/tech_logos/chroma.png",
+        link: "https://www.trychroma.com/",
+      },
     ],
   },
   {
     Animations: [
       {
         name: "Framer Motion",
-        logo: "/tech_logos/FRAMER.svg",
+        logo: "/tech_logos/Framer.svg",
         link: "https://www.framer.com/motion/",
       },
       {
@@ -185,6 +195,20 @@ export const skills = [
         name: "Python",
         logo: "/tech_logos/PYTHON.svg",
         link: "https://www.python.org/",
+      },
+    ],
+  },
+  {
+    "Other Tools": [
+      {
+        name: "Docker",
+        logo: "/tech_logos/docker.png",
+        link: "https://www.docker.com/",
+      },
+      {
+        name: "Kubernetes",
+        logo: "/tech_logos/kubernetes.png",
+        link: "https://kubernetes.io/",
       },
     ],
   },

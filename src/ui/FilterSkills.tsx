@@ -33,7 +33,7 @@ const FilterSkills: React.FC = () => {
     } else {
       // Find the matching category object.
       const categoryObj = skills.find(
-        (cat) => Object.keys(cat)[0] === selectedCategory
+        (cat) => Object.keys(cat)[0] === selectedCategory,
       );
       if (categoryObj) {
         const key = Object.keys(categoryObj)[0] as keyof SkillsCategory;
@@ -92,7 +92,7 @@ const FilterSkills: React.FC = () => {
                 alt={skill.name}
                 width={40}
                 height={40}
-                className="w-[36px] aspect-square drop-shadow-md"
+                className="w-[38px] aspect-square drop-shadow-md rounded-full object-contain"
               />
               <label className="text-[10px] tracking-[.75px] leading-[14px] opacity-75">
                 {skill.name}
