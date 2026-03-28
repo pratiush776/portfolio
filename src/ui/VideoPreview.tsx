@@ -1,13 +1,15 @@
-import { motion, AnimatePresence } from "framer-motion";
+"use client";
+import { AnimatePresence, motion } from "motion/react";
 import React, { useState, useRef } from "react";
-import { ChevronLeft, Play } from "lucide-react"; // adjust import accordingly
+import { ChevronLeft, Play } from "lucide-react";
 import Image from "next/image";
 
 interface VideoPreviewProps {
   className?: string;
-  videoSrc: string; // URL of the video
-  thumbnailSrc?: string; // URL of the thumbnail
+  videoSrc: string;
+  thumbnailSrc?: string;
 }
+
 const VideoPreview: React.FC<VideoPreviewProps> = ({
   className,
   videoSrc,
@@ -30,11 +32,11 @@ const VideoPreview: React.FC<VideoPreviewProps> = ({
         onClick={() => setPlayVideo(true)}
         className={`relative h-[30vh] bg-white rounded-[20px] w-[90%] flex justify-center items-center border-1 border-navy border-r-[4px] border-b-[4px] cursor-pointer ${className}`}
       >
-        <div className="relative h-full w-full aspect-square object-cover text-navy  rounded-[20px] bg-[#8d99aec2] hover:translate-0 -translate-[8px]">
+        <div className="relative h-full w-full aspect-square object-cover text-navy rounded-[20px] bg-[#8d99aec2] hover:translate-0 -translate-[8px]">
           {!playVideo && (
             <>
               <Play
-                className="absolute top-1/2 left-1/2 -translate-1/2 mx-auto opacity-80 z-10 bg-navy text-beige rounded-full p-2 cursor-pointer "
+                className="absolute top-1/2 left-1/2 -translate-1/2 mx-auto opacity-80 z-10 bg-navy text-beige rounded-full p-2 cursor-pointer"
                 size={36}
               />
               {thumbnailSrc && (
@@ -47,7 +49,7 @@ const VideoPreview: React.FC<VideoPreviewProps> = ({
                 />
               )}
               {
-                <div className="h3 h-full flex justify-center items-center ">
+                <div className="h3 h-full flex justify-center items-center">
                   Demo
                 </div>
               }
@@ -66,7 +68,7 @@ const VideoPreview: React.FC<VideoPreviewProps> = ({
             exit={{ opacity: 0 }}
             transition={{ duration: 0.5, ease: "easeInOut" }}
             className="fixed pb-[1em] bottom-0 inset-0 bg-black flex rounded-[20px] justify-center items-center z-50"
-            onClick={handleClose} // clicking the overlay closes it
+            onClick={handleClose}
           >
             {/* Back Button */}
             <button
@@ -85,7 +87,7 @@ const VideoPreview: React.FC<VideoPreviewProps> = ({
               exit={{ scale: 0.8 }}
               transition={{ duration: 0.5, ease: "easeInOut" }}
               className="w-full h-full max-w-5xl max-h-[90vh] overflow-hidden rounded-[20px]"
-              onClick={(e) => e.stopPropagation()} // prevent closing when clicking video container
+              onClick={(e) => e.stopPropagation()}
             >
               <video
                 ref={videoRef}
@@ -94,7 +96,8 @@ const VideoPreview: React.FC<VideoPreviewProps> = ({
                 autoPlay
                 loop
                 muted
-                className="w-full h-full "
+                preload="metadata"
+                className="w-full h-full"
               />
             </motion.div>
           </motion.div>

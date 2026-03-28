@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev & npx next-video sync -w",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
@@ -19,6 +19,7 @@
     "lucide-react": "^0.483.0",
     "motion": "^12.6.2",
     "next": "^16.1.4",
+    "next-video": "^2.7.1",
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
     "react-medium-image-zoom": "^5.2.14",

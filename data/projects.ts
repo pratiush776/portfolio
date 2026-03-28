@@ -1,5 +1,16 @@
 export const projects = [
   {
+    id: 5,
+    title: "Lucid Tone",
+    description: "An intelligent, adaptive soundscape engine designed to engineer focus",
+    fullDescription:
+      "Lucid Tone is a premium focus application that generates endless, personalized audio streams in real-time. Moving beyond static playlists, it actively shapes the listener's audio environment. By structuring music around a scientifically grounded \"Entry → Anchor → Sustain → Re-focus\" (EASR) arc, the system dynamically adapts its generation to align with the brain's natural cognitive processing and fatigue cycles. Built with a custom procedural generative engine (Python/FastAPI) and a highly polished interactive frontend (React/TypeScript), Lucid Tone offers multiple focus modes including Lo-Fi, Meditation, and Neoclassical.",
+    techStack: ["React", "TypeScript", "Python", "FastAPI", "TailwindCSS"],
+    logo: "/projects_assets/LucidTone/logo.svg",
+    url: "",
+    videos: ["/projects_assets/LucidTone/demo.mp4"],
+  },
+  {
     id: 0,
     title: "Private Law RAG Agent",
     description: "Privacy Perserving Retrieval Augmented Generation Agent",

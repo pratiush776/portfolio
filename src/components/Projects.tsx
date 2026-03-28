@@ -15,9 +15,9 @@ export default function Projects({ className }: ProjectsProps) {
       // id="projects"
       className={`container z-7 flex flex-col justify-center gap-[16px] ${className}`}
     >
-      <div className="relative md:w-[40em] h-[85svh] mt-auto md:mx-auto flex flex-col  justify-center md:items-center gap-[16px]">
-        <h1 className={`title ${pierSans.className}`}>Projects</h1>
-        <div className="carousel carousel-center rounded-[20px] space-x-4 p-4 h-[20em] w-[100vw] self-center max-w-fit flex snap snap-mandatory gap-[8px] items-center justify-start overflow-x-auto">
+      <div className="relative w-full max-w-6xl px-4 h-[85svh] mt-auto mx-auto flex flex-col justify-center items-center gap-[16px] lg:gap-[32px]">
+        <h1 className={`title ${pierSans.className} text-center`}>Projects</h1>
+        <div className="carousel carousel-center rounded-[20px] p-4 lg:p-2 h-[20em] lg:h-auto w-[100vw] lg:w-full self-center flex lg:grid lg:grid-cols-3 lg:grid-rows-2 lg:gap-6 lg:space-x-0 space-x-4 snap snap-mandatory gap-[8px] items-center lg:items-stretch lg:justify-items-stretch justify-start overflow-x-auto lg:overflow-visible">
           {projects.map((project, index) => (
             <FloatingProject
               key={project.id}

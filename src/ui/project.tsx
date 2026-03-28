@@ -74,7 +74,7 @@ export function FloatingProject({
         onClick={() => {
           setIsExpanded(!isExpanded);
         }}
-        className={`carousel-item drop-shadow-lg border-navy border-1 border-r-[4px] border-b-[4px] relative rounded-[20px]  box-border shrink-0 h-full md:w-[25em] w-[18em] md::shrink-0 flex items-center z-10 justify-around cursor-pointer ${className}`}
+        className={`carousel-item drop-shadow-lg border-navy border-1 border-r-[4px] border-b-[4px] relative rounded-[20px] box-border shrink-0 h-full md:w-[25em] w-[18em] lg:w-full lg:h-full lg:min-h-[16em] lg:col-span-1 lg:row-span-1 flex items-center z-10 justify-around cursor-pointer transition-all duration-300 ${className}`}
       >
         <div
           className={`relative 
@@ -99,16 +99,28 @@ export function FloatingProject({
             <p className="text-[16px] opacity-75 z-1000">{description}</p>
           </div>
           <Maximize2 className="absolute top-[16px] right-[16px] btn-icon" />
-          <a
-            href={url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className=" absolute bottom-[16px] hover:scale-110 transition duration-200 ease-in-out right-[16px] btn-icon"
-          >
-            <button className="button bg-slate-500 text-beige">
-              <Globe size={16} />
-            </button>
-          </a>
+          {url ? (
+            <a
+              href={url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className=" absolute bottom-[16px] hover:scale-110 transition duration-200 ease-in-out right-[16px] btn-icon z-50"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <button className="button bg-slate-500 text-beige cursor-pointer">
+                <Globe size={16} />
+              </button>
+            </a>
+          ) : (
+            <div 
+              className="absolute bottom-[16px] right-[16px] btn-icon z-50"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <button className="button bg-slate-300 text-slate-500 cursor-not-allowed" disabled>
+                <Globe size={16} />
+              </button>
+            </div>
+          )}
         </div>
       </motion.div>
 
@@ -157,17 +169,28 @@ export function FloatingProject({
                   <CollapsibleText
                     fullDescription={fullDescription ? fullDescription : ""}
                   />
-                  <button className="text-navy max-w-fit hover:scale-104 transition-all  ease-in-out font-semibold button mt-[32px] border-navy border-1 bg-white border-b-[4px] border-r-[4px] justify-self-end">
-                    <a
-                      href={url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center justify-center gap-[8px]"
+                  {url ? (
+                    <button className="text-navy max-w-fit hover:scale-104 transition-all  ease-in-out font-semibold button mt-[32px] border-navy border-1 bg-white border-b-[4px] border-r-[4px] justify-self-end">
+                      <a
+                        href={url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center justify-center gap-[8px]"
+                      >
+                        <p>Live Demo</p>
+                        <Globe size={16} />
+                      </a>
+                    </button>
+                  ) : (
+                    <button 
+                      disabled 
+                      className="text-gray-500 max-w-fit font-semibold button mt-[32px] border-gray-400 border-1 bg-gray-100 border-b-[4px] border-r-[4px] justify-self-end cursor-not-allowed opacity-80"
                     >
-                      <p>Live Demo</p>
-                      <Globe size={16} />
-                    </a>
-                  </button>
+                      <div className="flex items-center justify-center gap-[8px]">
+                        <p>Coming Soon</p>
+                      </div>
+                    </button>
+                  )}
                 </div>
               </div>
             </motion.div>

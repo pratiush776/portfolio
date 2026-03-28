@@ -22,12 +22,11 @@ const Carousel: React.FC<CarouselProps> = ({ videos, imgs }) => {
           key={index}
         >
           <Zoom>
-            <Image
-              alt="demo image"
-              width={230}
-              height={460}
+            <img
+              alt="project screenshot"
               src={img}
-              className="rounded-[20px] -translate-[4px] opacity-80"
+              className="rounded-[20px] h-[min(40vh,400px)] w-auto max-w-[85vw] object-contain opacity-90 cursor-zoom-in"
+              style={{ objectPosition: "top center" }}
             />
           </Zoom>
         </div>
