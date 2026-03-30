@@ -35,45 +35,52 @@ export function FloatingProject({
   imgs,
   i,
 }: ProjectProps) {
-  const [mounted, setMounted] = React.useState(false);
   const [isExpanded, setIsExpanded] = React.useState(false);
+  const dialogTitleId = React.useId();
+  const canRenderPortal = typeof document !== "undefined";
+
+  const toggleExpanded = () => {
+    setIsExpanded((prevIsExpanded) => !prevIsExpanded);
+  };
+
+  const handleCardKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      toggleExpanded();
+    }
+  };
+
   useEffect(() => {
-    setMounted(true);
-  }, []);
-  if (!mounted) {
-    return (
-      <motion.div
-        initial={{ scale: 1 }}
-        whileHover={{ scale: 1.05 }}
-        transition={{
-          scale: { duration: 0.2, ease: "easeInOut" },
-        }}
-        onClick={() => {
-          setIsExpanded(!isExpanded);
-        }}
-        className={`w-full   bg-[#ffffff90] cursor-pointer border-navy  border-r-[4px] border-b-[4px] h-[56px] rounded-[20px] px-[16px] py-[4px] flex items-center justify-between text-navy${className}`}
-      >
-        <motion.div className="flex gap-[8px] items-center animate-fade">
-          <div className="w-[36px] h-[36px] rounded-full bg-[#afa9a9d2] flex items-center justify-center overflow-hidden drop-shadow-sm"></div>
-          <div className="flex flex-col gap-[4px]">
-            <h3 className="p !font-semibold h-[1rem] rounded-[10px] w-[5em] bg-[#afa9a9d2] "></h3>
-            <p className="text-[12px] opacity-50 h-[.8rem] rounded-[10px] w-[10em]  bg-[#afa9a9d2]"></p>
-          </div>
-        </motion.div>
-        <Maximize2 className="btn-icon" />
-      </motion.div>
-    );
-  }
+    if (!isExpanded) {
+      return;
+    }
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setIsExpanded(false);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isExpanded]);
   return (
     <>
       <motion.div
         key={i}
         initial={{ scale: 1 }}
         whileHover={{ scale: 0.98, borderRadius: "20px", zIndex: 999 }}
-        transition={{ duration: 0.2, ease: "easeInOut" }}
-        onClick={() => {
-          setIsExpanded(!isExpanded);
-        }}
+                transition={{ type: "spring", stiffness: 300, damping: 20 }}
+        onClick={toggleExpanded}
+        onKeyDown={handleCardKeyDown}
+        role="button"
+        tabIndex={0}
+        aria-haspopup="dialog"
+        aria-expanded={isExpanded}
+        aria-label={`Open ${title} project details`}
         className={`carousel-item drop-shadow-lg border-navy border-1 border-r-[4px] border-b-[4px] relative rounded-[20px] box-border shrink-0 h-full md:w-[25em] w-[18em] lg:w-full lg:h-full lg:min-h-[16em] lg:col-span-1 lg:row-span-1 flex items-center z-10 justify-around cursor-pointer transition-all duration-300 ${className}`}
       >
         <div
@@ -104,100 +111,101 @@ export function FloatingProject({
               href={url}
               target="_blank"
               rel="noopener noreferrer"
-              className=" absolute bottom-[16px] hover:scale-110 transition duration-200 ease-in-out right-[16px] btn-icon z-50"
+              aria-label={`Open ${title} live demo in a new tab`}
+              className="absolute bottom-[16px] hover:scale-110 transition duration-200 ease-in-out right-[16px] z-50 button bg-slate-500 text-beige"
               onClick={(e) => e.stopPropagation()}
             >
-              <button className="button bg-slate-500 text-beige cursor-pointer">
-                <Globe size={16} />
-              </button>
+              <Globe size={16} />
             </a>
           ) : (
-            <div 
-              className="absolute bottom-[16px] right-[16px] btn-icon z-50"
-              onClick={(e) => e.stopPropagation()}
+            <span
+              aria-disabled="true"
+              className="absolute bottom-[16px] right-[16px] z-50 button bg-slate-300 text-slate-500 cursor-not-allowed"
             >
-              <button className="button bg-slate-300 text-slate-500 cursor-not-allowed" disabled>
-                <Globe size={16} />
-              </button>
-            </div>
+              <Globe size={16} />
+            </span>
           )}
         </div>
       </motion.div>
 
-      {createPortal(
-        <AnimatePresence>
-          {isExpanded && (
-            <motion.div
-              key={"expanded-project"}
-              initial={{ opacity: 1, height: 100, y: 20 }}
-              animate={{ opacity: 1, height: "99dvh" }}
-              exit={{ opacity: 1, height: 0, y: "100%" }}
-              transition={{ duration: 0.5, ease: "easeIn" }}
-              className="fixed h-[95svh] w-[100vw] md:w-[50em] md:bottom-0 md:py-[4em] bg-[#f5efeb97] md:border-r-[6px] md:rounded-[20px] md:border-navy md:border-1 md:left-1/2 md:-translate-x-1/2 bottom-0 left-0  overflow-x-hidden backdrop-blur-sm p-10 z-10 overflow-y-auto"
-            >
-              <button
-                onClick={() => isExpanded && setIsExpanded(!isExpanded)}
-                className="bg-navy cursor-pointer text-beige p-2 rounded-full absolute top-5 right-5"
+      {canRenderPortal &&
+        createPortal(
+          <AnimatePresence>
+            {isExpanded && (
+              <motion.div
+                key={"expanded-project"}
+                initial={{ opacity: 0, y: "100%" }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: "100%" }}
+                transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby={dialogTitleId}
+                className="fixed h-[95svh] w-[100vw] md:w-[50em] md:bottom-0 md:py-[4em] bg-[#f5efeb97] md:border-r-[6px] md:rounded-[20px] md:border-navy md:border-1 md:left-1/2 md:-translate-x-1/2 bottom-0 left-0  overflow-x-hidden backdrop-blur-sm p-10 z-[60] overflow-y-auto"
               >
-                <Plus className=" rotate-45" size={16} />
-              </button>
-              <div className="flex flex-col gap-[24px] justify-start items-center md:w-[40em] mx-auto">
-                <h1
-                  className={`${pierSans.className} !tracking-[1.2px] h3 text-navy`}
+                <button
+                  onClick={() => setIsExpanded(false)}
+                  aria-label={`Close ${title} details`}
+                  className="bg-navy cursor-pointer text-beige p-2 rounded-full absolute top-5 right-5"
                 >
-                  {title}
-                </h1>
-                {/* <VideoPreview /> */}
-                <Carousel videos={videos} imgs={imgs} />
-                <div className="flex flex-col text-navy px-[36px] self-start gap-2">
-                  <p className="p bg-white border-navy border-1 w-fit button">
-                    Tech Stack
-                  </p>
-                  <ul className="flex gap-2 pl-[16px] text-navy text-nowrap overflow-auto">
-                    {(techStack ?? []).map((tech, index) => (
-                      <li key={index}>
-                        {tech}
-                        {index == (techStack?.length ?? 0) - 1 ? " " : " . "}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-                <div className="self-start mx-[36px] text-navy">
-                  <p className="p bg-white border-navy border-1 w-fit button">
-                    Description
-                  </p>
-                  <CollapsibleText
-                    fullDescription={fullDescription ? fullDescription : ""}
-                  />
-                  {url ? (
-                    <button className="text-navy max-w-fit hover:scale-104 transition-all  ease-in-out font-semibold button mt-[32px] border-navy border-1 bg-white border-b-[4px] border-r-[4px] justify-self-end">
+                  <Plus className=" rotate-45" size={16} />
+                </button>
+                <div className="flex flex-col gap-[24px] justify-start items-center md:w-[40em] mx-auto">
+                  <h1
+                    id={dialogTitleId}
+                    className={`${pierSans.className} !tracking-[1.2px] h3 text-navy`}
+                  >
+                    {title}
+                  </h1>
+                  {/* <VideoPreview /> */}
+                  <Carousel videos={videos} imgs={imgs} />
+                  <div className="flex flex-col text-navy px-[36px] self-start gap-2">
+                    <p className="p bg-white border-navy border-1 w-fit button">
+                      Tech Stack
+                    </p>
+                    <ul className="flex gap-2 pl-[16px] text-navy text-nowrap overflow-auto">
+                      {(techStack ?? []).map((tech, index) => (
+                        <li key={index}>
+                          {tech}
+                          {index == (techStack?.length ?? 0) - 1 ? " " : " . "}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                  <div className="self-start mx-[36px] text-navy">
+                    <p className="p bg-white border-navy border-1 w-fit button">
+                      Description
+                    </p>
+                    <CollapsibleText
+                      fullDescription={fullDescription ? fullDescription : ""}
+                    />
+                    {url ? (
                       <a
                         href={url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex items-center justify-center gap-[8px]"
+                        className="text-navy max-w-fit hover:scale-104 transition-all ease-in-out font-semibold button mt-[32px] border-navy border-1 bg-white border-b-[4px] border-r-[4px] justify-self-end flex items-center justify-center gap-[8px]"
                       >
                         <p>Live Demo</p>
                         <Globe size={16} />
                       </a>
-                    </button>
-                  ) : (
-                    <button 
-                      disabled 
-                      className="text-gray-500 max-w-fit font-semibold button mt-[32px] border-gray-400 border-1 bg-gray-100 border-b-[4px] border-r-[4px] justify-self-end cursor-not-allowed opacity-80"
-                    >
-                      <div className="flex items-center justify-center gap-[8px]">
-                        <p>Coming Soon</p>
-                      </div>
-                    </button>
-                  )}
+                    ) : (
+                      <span
+                        aria-disabled="true"
+                        className="text-gray-500 max-w-fit font-semibold button mt-[32px] border-gray-400 border-1 bg-gray-100 border-b-[4px] border-r-[4px] justify-self-end cursor-not-allowed opacity-80"
+                      >
+                        <div className="flex items-center justify-center gap-[8px]">
+                          <p>Coming Soon</p>
+                        </div>
+                      </span>
+                    )}
+                  </div>
                 </div>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>,
-        document.body
-      )}
+              </motion.div>
+            )}
+          </AnimatePresence>,
+          document.body
+        )}
     </>
   );
 }

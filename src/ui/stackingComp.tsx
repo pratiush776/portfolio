@@ -1,5 +1,5 @@
 "use client";
-import React, { useRef } from "react";
+import React from "react";
 
 interface StackingCompProps {
   className?: string;
@@ -14,16 +14,16 @@ const StackingComp: React.FC<StackingCompProps> = ({
   height,
   id,
 }) => {
-  const divRef = useRef<HTMLDivElement>(null);
+  const ghostCount = Math.max(Number.parseInt(height, 10) - 1, 0);
 
   return (
     <div
-      ref={divRef}
-      className={`relative w-[100vw] h-[${height}00dvh] ${className}`}
+      className={`relative w-[100vw] ${className}`}
+      style={{ height: `${height}00dvh` }}
     >
       {children}
-      {Array.from({ length: parseInt(height) - 1 }).map((_, i) =>
-        i === parseInt(height) - 2 ? (
+      {Array.from({ length: ghostCount }).map((_, i) =>
+        i === ghostCount - 1 ? (
           <div
             key={i}
             className="container z-1 opacity-0 snap-center"

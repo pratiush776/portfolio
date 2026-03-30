@@ -19,7 +19,13 @@ body {
   padding: 0;
 }
 
-@import "tailwindcss";
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid #2f4156;
+  outline-offset: 3px;
+}
 
 .h1 {
   @apply text-[40px] leading-[40px] tracking-[0px];

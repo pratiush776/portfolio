@@ -25,7 +25,7 @@ export default function RootLayout({
         className={` ${notoSans.className} antialiased bg-navy scroll-smooth `}
       >
         <PortfolioViewNotifier />
-        <Nav className="z-2" />
+        <Nav />
         {children}
         <Analytics />
       </body>
