@@ -3,6 +3,6 @@
 import { usePortfolioView } from "@/hooks/usePortfolioView";
 
 export function PortfolioViewNotifier() {
-  // usePortfolioView();
+  usePortfolioView();
   return null;
 }
