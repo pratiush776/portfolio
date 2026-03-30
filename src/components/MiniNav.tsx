@@ -7,7 +7,7 @@ interface NavProps {
 
 export default function MiniNav({ className }: NavProps) {
   return (
-    <div className={`w-full flex items-center ${className}`}>
+    <div className={`w-full flex justify-end items-center ${className}`}>
       <div className="text-[14px] text-beige tracking-[.5px] leading-[20px] font-medium flex flex-wrap items-center gap-3 md:gap-4">
         <a href="#about" className="relative group hidden md:block ">
           About
