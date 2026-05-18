@@ -1,5 +1,29 @@
 export const projects = [
   {
+    id: 6,
+    title: "NILINK",
+    description:
+      "A full-stack NIL marketplace connecting college athletes and brands",
+    fullDescription:
+      "NILINK is a two-sided Name, Image, and Likeness marketplace built as a software engineering capstone MVP. Athletes can create verified profiles, showcase social metrics and content, discover brand campaigns, apply to opportunities, review offers, and manage active deals. Brands can build company profiles, launch campaigns, search athletes, review applications, send offers, upload contracts, track deliverables, and manage payouts from a role-aware dashboard.",
+    techStack: [
+      "Next.js 16",
+      "React 19",
+      "TypeScript",
+      "Tailwind CSS 4",
+      "Supabase",
+      "SWR",
+      "Recharts",
+      "Framer Motion",
+      "Lucide React",
+      "Nodemailer",
+      "Vitest",
+      "Vercel",
+    ],
+    logo: "/projects_assets/NILINK/logo.png",
+    url: "https://mvp-inky-eta.vercel.app/",
+  },
+  {
     id: 5,
     title: "Lucid Tone",
     description: "An intelligent, adaptive soundscape engine designed to engineer focus",
