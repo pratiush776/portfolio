@@ -84,15 +84,5 @@ export const projects = [
       "/projects_assets/RoomMates/welcome.png",
     ],
   },
-  {
-    id: 4,
-    title: "Whisk It All",
-    description: "Digital Business Card",
-    fullDescription:
-      "I created a digital business card for an actual local busniess. The was a digital business card which could be scanned as a QR Code then the customers would be directed to this webpage when all the details and links were available to them in a neat and friendly manner.",
-    techStack: ["React", "CSS", "JS"],
-    logo: "/projects_assets/WhiskItAll/logo.png",
-    url: "https://whisk-it-all-business.web.app/",
-    imgs: ["/projects_assets/WhiskItAll/page.png"],
-  },
+  
 ];
