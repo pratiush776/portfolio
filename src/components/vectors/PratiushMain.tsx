@@ -21,32 +21,9 @@ export function PratiushMain({ className, "aria-hidden": ariaHidden }: Props) {
       aria-hidden={ariaHidden}
       preserveAspectRatio="xMidYMid meet"
     >
-      <defs>
-        <pattern
-          id="pratiush-paper"
-          patternUnits="userSpaceOnUse"
-          width="290"
-          height="290"
-          patternTransform="rotate(8)"
-        >
-          <image
-            href="/textures/paper-304L.png"
-            x="0"
-            y="0"
-            width="290"
-            height="290"
-            preserveAspectRatio="xMidYMid slice"
-          />
-        </pattern>
-      </defs>
       <g fill="currentColor">
         {PATHS.map((d, i) => (
           <path key={`fill-${i}`} d={d} />
-        ))}
-      </g>
-      <g fill="url(#pratiush-paper)" style={{ mixBlendMode: "multiply" }} opacity="0.85">
-        {PATHS.map((d, i) => (
-          <path key={`tex-${i}`} d={d} />
         ))}
       </g>
     </svg>
