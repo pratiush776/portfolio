@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import {
+  motion,
   useMotionValue,
   useScroll,
   useSpring,
@@ -47,9 +48,10 @@ function useHasFinePointer() {
 type ProjectCardProps = {
   project: Project;
   canHoverPlay: boolean;
+  withLayoutId?: boolean;
 };
 
-function ProjectCard({ project, canHoverPlay }: ProjectCardProps) {
+function ProjectCard({ project, canHoverPlay, withLayoutId }: ProjectCardProps) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const hero = project.hero;
 
@@ -69,9 +71,22 @@ function ProjectCard({ project, canHoverPlay }: ProjectCardProps) {
     } catch {}
   };
 
+  const handleClick = () => {
+    if (typeof window !== "undefined") {
+      try {
+        window.sessionStorage.setItem(
+          "works-modal-return-scroll",
+          String(window.scrollY)
+        );
+      } catch {}
+    }
+  };
+
   return (
     <Link
       href={`/works/${project.slug}`}
+      scroll={false}
+      onClick={handleClick}
       onMouseEnter={handleEnter}
       onMouseLeave={handleLeave}
       onFocus={handleEnter}
@@ -79,7 +94,10 @@ function ProjectCard({ project, canHoverPlay }: ProjectCardProps) {
       className="group block w-[75vw] shrink-0 sm:w-[300px]"
       aria-label={`${project.title} case study`}
     >
-      <article className="flex h-[420px] flex-col overflow-hidden rounded-xl border border-navy border-r-[4px] border-b-[4px] bg-beige transition-transform duration-300 group-hover:-translate-y-1">
+      <motion.article
+        layoutId={withLayoutId ? `works-card-${project.slug}` : undefined}
+        className="flex h-[420px] flex-col overflow-hidden rounded-xl border border-navy border-r-[4px] border-b-[4px] bg-beige transition-transform duration-300 group-hover:-translate-y-1"
+      >
         <div className="relative h-[70%] w-full overflow-hidden bg-navy/5">
           {hero?.kind === "video" ? (
             <video
@@ -114,7 +132,7 @@ function ProjectCard({ project, canHoverPlay }: ProjectCardProps) {
             <span className="ml-2 shrink-0">{project.year}</span>
           </div>
         </div>
-      </article>
+      </motion.article>
     </Link>
   );
 }
@@ -295,6 +313,7 @@ export function WorksMarquee() {
             key={`card-${project.slug}-${i}`}
             project={project}
             canHoverPlay={finePointer}
+            withLayoutId={i < cards.length}
           />
         ))}
         <TerminatorCard key="terminator-a" />

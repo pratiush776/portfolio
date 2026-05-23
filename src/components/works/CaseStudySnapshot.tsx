@@ -4,6 +4,7 @@ import { ExternalLink, Github } from "lucide-react";
 import { pierSans } from "@/lib/fonts";
 import type { Media, Project } from "../../../data/projects";
 import { SiblingNav, type SiblingLink } from "./SiblingNav";
+import { HeroViewTransition } from "./HeroViewTransition";
 
 type CaseStudySnapshotProps = {
   project: Project;
@@ -117,11 +118,13 @@ export function CaseStudySnapshot({
         ) : null}
 
         {hero ? (
-          <div className="mt-8 overflow-hidden rounded-xl border border-navy border-r-[4px] border-b-[4px] bg-navy/5">
-            <div className="aspect-video w-full">
-              <HeroMedia media={hero} title={title} />
+          <HeroViewTransition name={`hero-${project.slug}`}>
+            <div className="mt-8 overflow-hidden rounded-xl border border-navy border-r-[4px] border-b-[4px] bg-navy/5">
+              <div className="aspect-video w-full">
+                <HeroMedia media={hero} title={title} />
+              </div>
             </div>
-          </div>
+          </HeroViewTransition>
         ) : null}
 
         {(links?.live || links?.repo) ? (
