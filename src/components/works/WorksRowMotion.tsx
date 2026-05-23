@@ -6,6 +6,7 @@ import { ArrowUpRight } from "lucide-react";
 import { pierSans } from "@/lib/fonts";
 import { WorksRowMedia } from "./WorksRowMedia";
 import { HeroViewTransition } from "./HeroViewTransition";
+import { SCROLL_RESTORE_KEY } from "@/lib/constants";
 import type { Media } from "../../../data/projects";
 
 type WorksRowMotionProps = {
@@ -35,7 +36,7 @@ export function WorksRowMotion({
     if (typeof window !== "undefined") {
       try {
         window.sessionStorage.setItem(
-          "works-modal-return-scroll",
+          SCROLL_RESTORE_KEY,
           String(window.scrollY)
         );
       } catch {}

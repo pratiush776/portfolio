@@ -1,48 +1,14 @@
 "use client";
 
-import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import type { Media } from "../../../data/projects";
 import type { SiblingLink } from "./SiblingNav";
+import { ProjectThumb } from "./ProjectThumb";
 
 type ModalSiblingNavProps = {
   prev: SiblingLink;
   next: SiblingLink;
 };
-
-function Thumb({ media, title }: { media?: Media; title: string }) {
-  if (!media) {
-    return (
-      <div className="h-12 w-12 shrink-0 rounded-md bg-navy/10" aria-hidden />
-    );
-  }
-  if (media.kind === "video") {
-    return (
-      <video
-        src={media.src}
-        muted
-        playsInline
-        loop
-        autoPlay
-        poster={media.poster}
-        className="h-12 w-12 shrink-0 rounded-md object-cover bg-navy/10"
-        aria-label={`${title} thumbnail`}
-      />
-    );
-  }
-  return (
-    <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-md bg-navy/10">
-      <Image
-        src={media.src}
-        alt={`${title} thumbnail`}
-        fill
-        sizes="48px"
-        className="object-cover"
-      />
-    </div>
-  );
-}
 
 export function ModalSiblingNav({ prev, next }: ModalSiblingNavProps) {
   const router = useRouter();
@@ -66,7 +32,7 @@ export function ModalSiblingNav({ prev, next }: ModalSiblingNavProps) {
             className="h-5 w-5 shrink-0 text-navy transition-transform group-hover:-translate-x-0.5"
             aria-hidden
           />
-          <Thumb media={prev.hero} title={prev.title} />
+          <ProjectThumb media={prev.hero} title={prev.title} />
           <div className="min-w-0">
             <div className="text-[10px] uppercase tracking-wider text-navy/60">
               Previous
@@ -92,7 +58,7 @@ export function ModalSiblingNav({ prev, next }: ModalSiblingNavProps) {
               {next.title}
             </div>
           </div>
-          <Thumb media={next.hero} title={next.title} />
+          <ProjectThumb media={next.hero} title={next.title} />
           <ChevronRight
             className="h-5 w-5 shrink-0 text-navy transition-transform group-hover:translate-x-0.5"
             aria-hidden

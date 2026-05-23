@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import {
   motion,
   useMotionValue,
@@ -15,35 +15,11 @@ import {
 } from "motion/react";
 import { ArrowUpRight } from "lucide-react";
 import { pierSans } from "@/lib/fonts";
+import { usePrefersReducedMotion, useHasFinePointer } from "@/hooks/useMediaQuery";
+import { SCROLL_RESTORE_KEY } from "@/lib/constants";
 import { projects, type Project } from "../../../data/projects";
 
 const CARD_GAP_PX = 24;
-
-function usePrefersReducedMotion() {
-  const [reduced, setReduced] = useState(false);
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
-    setReduced(mq.matches);
-    const listener = (e: MediaQueryListEvent) => setReduced(e.matches);
-    mq.addEventListener("change", listener);
-    return () => mq.removeEventListener("change", listener);
-  }, []);
-  return reduced;
-}
-
-function useHasFinePointer() {
-  const [fine, setFine] = useState(false);
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    const mq = window.matchMedia("(pointer: fine)");
-    setFine(mq.matches);
-    const listener = (e: MediaQueryListEvent) => setFine(e.matches);
-    mq.addEventListener("change", listener);
-    return () => mq.removeEventListener("change", listener);
-  }, []);
-  return fine;
-}
 
 type ProjectCardProps = {
   project: Project;
@@ -75,7 +51,7 @@ function ProjectCard({ project, canHoverPlay, withLayoutId }: ProjectCardProps) 
     if (typeof window !== "undefined") {
       try {
         window.sessionStorage.setItem(
-          "works-modal-return-scroll",
+          SCROLL_RESTORE_KEY,
           String(window.scrollY)
         );
       } catch {}

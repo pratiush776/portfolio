@@ -3,7 +3,6 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { notoSans, pierSans } from "@/lib/fonts";
 import { Analytics } from "@vercel/analytics/next";
-import { PortfolioViewNotifier } from "@/components/PortfolioViewNotifier";
 import { SiteNav } from "@/components/layout/SiteNav";
 import { ContactModalProvider } from "@/components/contact/ContactModalProvider";
 
@@ -27,7 +26,6 @@ export default function RootLayout({
       <body
         className={`${notoSans.className} ${pierSans.variable} antialiased scroll-smooth`}
       >
-        <PortfolioViewNotifier />
         <ContactModalProvider>
           <SiteNav />
           {children}

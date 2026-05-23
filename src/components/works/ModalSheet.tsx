@@ -10,25 +10,13 @@ import { CaseStudyDeep } from "./CaseStudyDeep";
 import { CaseStudySnapshot } from "./CaseStudySnapshot";
 import { ModalSiblingNav } from "./ModalSiblingNav";
 import type { SiblingLink } from "./SiblingNav";
+import { usePrefersReducedMotion } from "@/hooks/useMediaQuery";
 
 type ModalSheetProps = {
   project: Project;
   prev: SiblingLink;
   next: SiblingLink;
 };
-
-function usePrefersReducedMotion() {
-  const [reduced, setReduced] = useState(false);
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
-    setReduced(mq.matches);
-    const listener = (e: MediaQueryListEvent) => setReduced(e.matches);
-    mq.addEventListener("change", listener);
-    return () => mq.removeEventListener("change", listener);
-  }, []);
-  return reduced;
-}
 
 function useIsDesktop() {
   const [desktop, setDesktop] = useState(false);

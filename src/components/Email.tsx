@@ -1,11 +1,10 @@
 import { Mail } from "lucide-react";
-import React from "react";
 
 interface EmailProps {
   className?: string;
 }
 
-const Email: React.FC<EmailProps> = ({ className }) => {
+export default function Email({ className }: EmailProps) {
   return (
     <a
       href="mailto:pratiush776@gmail.com"
@@ -15,6 +14,4 @@ const Email: React.FC<EmailProps> = ({ className }) => {
       <Mail size={18} />
     </a>
   );
-};
-
-export default Email;
+}

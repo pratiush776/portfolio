@@ -4,16 +4,26 @@ import { Check, Github, Linkedin, Plus, Send } from "lucide-react";
 import React from "react";
 import Form from "next/form";
 import Email from "../Email";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "motion/react";
+
+const FORM_STATUS_RESET_MS = 4000;
 
 interface ContactFormProps {
   onSubmitted?: () => void;
 }
 
-export const ContactForm: React.FC<ContactFormProps> = ({ onSubmitted }) => {
+export default function ContactForm({ onSubmitted }: ContactFormProps) {
   const [status, setStatus] = React.useState<
     "default" | "loading" | "success" | "error"
   >("default");
+
+  const abortRef = React.useRef<AbortController | null>(null);
+
+  React.useEffect(() => {
+    return () => {
+      abortRef.current?.abort();
+    };
+  }, []);
 
   const submitLabel =
     status === "loading"
@@ -31,6 +41,10 @@ export const ContactForm: React.FC<ContactFormProps> = ({ onSubmitted }) => {
     const object = Object.fromEntries(formData);
     const json = JSON.stringify(object);
 
+    abortRef.current?.abort();
+    const controller = new AbortController();
+    abortRef.current = controller;
+
     try {
       const response = await fetch("/api/send-contact", {
         method: "POST",
@@ -39,19 +53,20 @@ export const ContactForm: React.FC<ContactFormProps> = ({ onSubmitted }) => {
           Accept: "application/json",
         },
         body: json,
+        signal: controller.signal,
       });
       const result = await response.json();
       if (result.success) {
         setStatus("success");
         onSubmitted?.();
-        setTimeout(() => setStatus("default"), 4000);
+        setTimeout(() => setStatus("default"), FORM_STATUS_RESET_MS);
       } else {
         setStatus("error");
-        setTimeout(() => setStatus("default"), 4000);
+        setTimeout(() => setStatus("default"), FORM_STATUS_RESET_MS);
       }
     } catch {
       setStatus("error");
-      setTimeout(() => setStatus("default"), 4000);
+      setTimeout(() => setStatus("default"), FORM_STATUS_RESET_MS);
     }
   }
 
@@ -173,6 +188,4 @@ export const ContactForm: React.FC<ContactFormProps> = ({ onSubmitted }) => {
       </div>
     </Form>
   );
-};
-
-export default ContactForm;
+}
