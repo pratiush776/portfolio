@@ -17,7 +17,7 @@ type FluidSmokeProps = {
 const DEFAULTS = {
   SIM_RES: 256,
   DYE_RES: 2048,
-  DENSITY_DISS: 0.97,
+  DENSITY_DISS: 0.4,
   VEL_DISS: 0.5,
   PRESSURE: 0.85,
   PRESSURE_ITER: 20,
