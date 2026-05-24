@@ -4,7 +4,6 @@ import "./globals.css";
 import { notoSans, pierSans } from "@/lib/fonts";
 import { Analytics } from "@vercel/analytics/next";
 import { SiteNav } from "@/components/layout/SiteNav";
-import { ContactModalProvider } from "@/components/contact/ContactModalProvider";
 
 export const metadata: Metadata = {
   title: "Pratiush Karki",
@@ -16,21 +15,16 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
-  modal,
 }: Readonly<{
   children: React.ReactNode;
-  modal: React.ReactNode;
 }>) {
   return (
     <html lang="en">
       <body
         className={`${notoSans.className} ${pierSans.variable} antialiased scroll-smooth`}
       >
-        <ContactModalProvider>
-          <SiteNav />
-          {children}
-          {modal}
-        </ContactModalProvider>
+        <SiteNav />
+        {children}
         <Analytics />
       </body>
     </html>

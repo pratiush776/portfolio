@@ -1,11 +1,6 @@
-"use client";
-
 import Link from "next/link";
-import { useContactModal } from "@/components/contact/ContactModalProvider";
 
 export function SiteNav() {
-  const { open } = useContactModal();
-
   return (
     <nav className="site-nav-v3" aria-label="Primary">
       <Link href="/" className="site-nav-v3__logo">
@@ -23,11 +18,7 @@ export function SiteNav() {
         >
           Resume
         </Link>
-        <button
-          type="button"
-          onClick={open}
-          className="site-nav-v3__contact"
-        >
+        <button type="button" className="site-nav-v3__contact">
           Connect
         </button>
       </div>

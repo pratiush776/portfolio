@@ -251,6 +251,14 @@ button {
   height: 100svh;
 }
 
+.neon-bg-v3 {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 1;
+}
+
 .radial-glow-v3 {
   position: absolute;
   left: -12rem;
@@ -263,6 +271,12 @@ button {
       rgba(217, 227, 145, 0) 100%);
   pointer-events: none;
   z-index: 0;
+}
+
+.fluid-smoke-v3 {
+  position: absolute;
+  inset: 0;
+  mix-blend-mode: multiply;
 }
 
 .paper-texture-v3 {
@@ -677,7 +691,8 @@ button {
     height: 1rem;
   }
 
-  .radial-glow-v3 {
+  .radial-glow-v3,
+  .neon-bg-v3 {
     display: none;
   }
 }
