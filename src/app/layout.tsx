@@ -4,6 +4,7 @@ import "./globals.css";
 import { notoSans, pierSans } from "@/lib/fonts";
 import { Analytics } from "@vercel/analytics/next";
 import { SiteNav } from "@/components/layout/SiteNav";
+import { LenisProvider } from "@/lib/lenis-provider";
 
 export const metadata: Metadata = {
   title: "Pratiush Karki",
@@ -23,8 +24,10 @@ export default function RootLayout({
       <body
         className={`${notoSans.className} ${pierSans.variable} antialiased scroll-smooth`}
       >
-        <SiteNav />
-        {children}
+        <LenisProvider>
+          <SiteNav />
+          {children}
+        </LenisProvider>
         <Analytics />
       </body>
     </html>

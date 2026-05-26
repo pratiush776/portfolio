@@ -4,15 +4,27 @@ import { HeroPhoto } from "@/components/hero/HeroPhoto";
 import { HeroPratiushText } from "@/components/hero/HeroPratiushText";
 import { WorksBadge } from "@/components/hero/WorksBadge";
 import { LocationPin } from "@/components/icons";
+import { RecentWorks } from "@/components/landing/RecentWorks";
 
 export default function Home() {
   return (
-    <main className="text-navy bg-beige w-[100vw] overflow-x-hidden">
-      <section className="hero-root-v3">
-        <RadialGlow />
-        <div className="neon-bg-v3">
-          <FluidSmoke color="#3D3A36" className="fluid-smoke-v3" />
+    <main className="landing-root-v3 text-navy w-[100vw] overflow-x-hidden">
+      <div className="landing-stage-v3">
+        <div className="landing-bg-v3" aria-hidden>
+          <RadialGlow />
+          <div className="neon-bg-v3">
+            <FluidSmoke
+              color="#3D3A36"
+              className="fluid-smoke-v3"
+              dyeRadius={0.003}
+              splatForce={950}
+              densityDissipation={0.85}
+              velocityDissipation={1.3}
+              curl={5}
+            />
+          </div>
         </div>
+        <section className="hero-root-v3">
         <div className="canvas-v3 canvas-v3--hero">
           <div className="hero-stage-v3">
             <div className="hero-composition-v3">
@@ -33,7 +45,9 @@ export default function Home() {
             </div>
           </div>
         </div>
-      </section>
+        </section>
+        <RecentWorks />
+      </div>
     </main>
   );
 }
