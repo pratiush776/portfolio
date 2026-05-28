@@ -54,6 +54,11 @@ export type Project = {
   outcome?: Outcome;
   reflection?: string;
   links?: ProjectLinks;
+
+  // marginalia note shown next to the row on the landing list (1–2 sentences, first person)
+  note?: string;
+  // optional richer cursor-preview image (falls back to logo)
+  previewImage?: string;
 };
 
 export const projects: Project[] = [
@@ -83,7 +88,8 @@ export const projects: Project[] = [
 
     slug: "nilink",
     year: 2025,
-    role: "Solo developer",
+    role: "Software Engineer",
+    note: "TODO — what was hard, what shipped, what you'd redo. Replace before public.",
     caseStudyType: "deep",
     // TODO(user): "14 weeks" / "Hackathon weekend + 2 weeks solo" etc
     timeline: undefined,
@@ -123,7 +129,8 @@ export const projects: Project[] = [
 
     slug: "lucid-tone",
     year: 2025,
-    role: "Solo developer",
+    role: "Founder",
+    note: "TODO — what was hard, what shipped, what you'd redo. Replace before public.",
     caseStudyType: "deep",
     // TODO(user): "14 weeks" / "Hackathon weekend + 2 weeks solo" etc
     timeline: undefined,
@@ -199,7 +206,8 @@ export const projects: Project[] = [
 
     slug: "whisk-it-all",
     year: 2024,
-    role: "Design + frontend, solo",
+    role: "Full-Stack Developer",
+    note: "TODO — what was hard, what shipped, what you'd redo. Replace before public.",
     caseStudyType: "deep",
     // TODO(user): "14 weeks" / "Hackathon weekend + 2 weeks solo" etc
     timeline: undefined,
