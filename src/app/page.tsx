@@ -4,7 +4,9 @@ import { HeroPhoto } from "@/components/hero/HeroPhoto";
 import { HeroPratiushText } from "@/components/hero/HeroPratiushText";
 import { WorksBadge } from "@/components/hero/WorksBadge";
 import { LocationPin } from "@/components/icons";
+import { PortraitScrollChoreography } from "@/components/landing/PortraitScrollChoreography";
 import { RecentWorks } from "@/components/landing/RecentWorks";
+import { SkillsSection } from "@/components/landing/SkillsSection";
 
 export default function Home() {
   return (
@@ -46,7 +48,9 @@ export default function Home() {
           </div>
         </div>
         </section>
+        <SkillsSection />
         <RecentWorks />
+        <PortraitScrollChoreography />
       </div>
     </main>
   );
