@@ -9,7 +9,7 @@ export function HeroPhoto() {
         alt=""
         fill
         priority
-        sizes="(max-width: 1100px) 52vw, 408px"
+        sizes="(max-width: 1100px) 52vw, 560px"
       />
     </div>
   );

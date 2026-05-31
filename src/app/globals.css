@@ -184,6 +184,13 @@ button {
   --v3-accent-dark: #4d5c60;
   --v3-white: #ffffff;
 
+  /* Skills section — dark editorial break. Lime inverts from page
+     background to the single accent against a warm near-black surface. */
+  --v3-skills-surface: #15170f;
+  --v3-skills-text: #edebe0;
+  --v3-accent-lime: #cdd866;
+  --v3-skills-hairline: rgba(237, 235, 224, 0.08);
+
   --v3-space-1: 0.25rem;
   --v3-space-2: 0.5rem;
   --v3-space-3: 0.75rem;
@@ -323,7 +330,9 @@ button {
 .fluid-smoke-v3 {
   position: absolute;
   inset: 0;
+  mix-blend-mode: multiply;
   transform: translateZ(0);
+  will-change: transform;
 }
 
 .paper-texture-v3 {
@@ -438,12 +447,12 @@ button {
   z-index: 2;
   pointer-events: none;
   -webkit-mask-image:
-    linear-gradient(to bottom, transparent 0%, black 8%, black 88%, transparent 100%),
-    radial-gradient(ellipse 75% 100% at 50% 50%, black 70%, transparent 100%);
+    linear-gradient(to bottom, transparent 0%, black 12%, black 74%, transparent 99%),
+    radial-gradient(ellipse 82% 94% at 50% 47%, black 56%, transparent 100%);
   -webkit-mask-composite: source-in;
   mask-image:
-    linear-gradient(to bottom, transparent 0%, black 8%, black 88%, transparent 100%),
-    radial-gradient(ellipse 75% 100% at 50% 50%, black 70%, transparent 100%);
+    linear-gradient(to bottom, transparent 0%, black 12%, black 74%, transparent 99%),
+    radial-gradient(ellipse 82% 94% at 50% 47%, black 56%, transparent 100%);
   mask-composite: intersect;
 }
 
@@ -600,7 +609,12 @@ button {
   font-size: clamp(0.88rem, 0.92vw, 0.98rem);
   letter-spacing: 0.01em;
   line-height: 1;
-  transition: background-color 0.25s ease, transform 0.25s ease;
+  /* Match the magnetic gravity easing (expo-out, fast→slow) so the colour /
+     glow change feels like one motion with the pull. */
+  transition: background-color 0.5s cubic-bezier(0.16, 1, 0.3, 1),
+    color 0.5s cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 0.5s cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 0.5s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .site-nav-v3__contact:hover {
@@ -1558,12 +1572,22 @@ body:has(.works-root-v3) .site-nav-v3__contact:hover {
 
 /* =========================================================
    V3 SKILLS SECTION — "What I bring."
-   Portrait travels from the hero sandwich into the centred
-   slot of this section; see PortraitScrollChoreography.tsx.
+   Dark editorial chapter break: warm near-black surface,
+   off-white text, lime as the single accent. The portrait
+   still travels from the hero into the centred slot
+   (see PortraitScrollChoreography.tsx) — it descends across
+   the lime→dark edge and lands here.
    ========================================================= */
 .skills-section-v3 {
   --portrait-w: calc(0.26 * min(100vw, 154.449svh, 2048px));
+  --portrait-h: calc(var(--portrait-w) * 38 / 26);
   --skills-side-gutter: clamp(2rem, 8.36cqi, 10rem);
+
+  /* Local var override: every descendant rule already reads
+     --v3-text-dark / --v3-accent-red, so redefining them here flips
+     the whole subtree to off-white + lime with no per-rule churn. */
+  --v3-text-dark: var(--v3-skills-text);
+  --v3-accent-red: var(--v3-accent-lime);
 
   position: relative;
   z-index: 2;
@@ -1572,8 +1596,10 @@ body:has(.works-root-v3) .site-nav-v3__contact:hover {
   padding-top: var(--v3-nav-clearance);
   display: grid;
   place-items: center;
-  background: var(--v3-bg-primary);
-  color: var(--v3-text-dark);
+  background: var(--v3-skills-surface);
+  color: var(--v3-skills-text);
+  border-top: 1px solid
+    color-mix(in srgb, var(--v3-accent-lime) 70%, transparent);
   overflow: hidden;
 }
 
@@ -1584,33 +1610,73 @@ body:has(.works-root-v3) .site-nav-v3__contact:hover {
   height: calc(100svh - var(--v3-nav-clearance));
   margin: 0 auto;
   display: grid;
-  place-items: center;
+  /* Stretch (not centre) the row to the inner's FIXED height. The row no
+     longer sizes to its tallest column, so a right-column hover expansion
+     can't change the row height and recentre the left column / portrait. */
+  align-items: stretch;
+  justify-items: center;
   padding: 0 var(--skills-side-gutter);
 }
 
+.skills-head-v3 {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.55rem;
+}
+
+.skills-eyebrow-v3 {
+  margin: 0;
+  font-size: clamp(0.7rem, 0.8vw, 0.8rem);
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--v3-skills-text) 55%, transparent);
+}
+
 .skills-title-v3 {
-  position: absolute;
-  top: clamp(4rem, 14svh, 9rem);
-  left: var(--skills-side-gutter);
   margin: 0;
   font-family: var(--font-pier, var(--font-noto, system-ui), serif);
   font-size: clamp(2.25rem, 4.6vw, 4.5rem);
   line-height: 1;
   letter-spacing: -0.02em;
   font-weight: 500;
-  color: var(--v3-text-dark);
+  color: var(--v3-skills-text);
+}
+
+.skills-keyline-v3 {
+  display: block;
+  width: 2.5rem;
+  height: 2px;
+  margin-top: 0.4rem;
+  background: var(--v3-accent-lime);
 }
 
 .skills-row-v3 {
   width: 100%;
+  height: 100%;
   display: grid;
-  grid-template-columns: 1fr var(--portrait-w) 1fr;
-  gap: clamp(1.5rem, 3.5vw, 4rem);
+  /* Centred cluster: the three blocks read as ONE group with intentional air
+     around the whole cluster, rather than text hugging the outer edges with
+     two wide mid-voids. */
+  grid-template-columns:
+    minmax(auto, 26rem) var(--portrait-w) minmax(auto, 24rem);
+  /* Single row track LOCKED to the row's own (fixed) height. Items that
+     overflow it — e.g. an expanded right-column row — render past the track
+     without resizing it, so the left column and portrait never move. */
+  grid-template-rows: 100%;
+  align-items: stretch;
+  justify-content: center;
+  gap: clamp(2.5rem, 5vw, 6rem);
 }
 
 .skills-portrait-slot-v3 {
   width: var(--portrait-w);
   aspect-ratio: 26 / 38;
+  /* Centred in the fixed-height row so the slot's centre = the inner's centre
+     = the portrait's JS landing target ((vh + navClearance) / 2). */
+  align-self: center;
   visibility: hidden;
 }
 
@@ -1620,132 +1686,287 @@ body:has(.works-root-v3) .site-nav-v3__contact:hover {
   padding: 0;
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  gap: clamp(0.85rem, 1.8svh, 1.5rem);
+  /* Each column box is the full fixed row height; content is top-anchored to a
+     STABLE line (computed from viewport + portrait height, never from sibling
+     content) that sits level with the portrait's top. The right column then
+     grows downward into the air below on hover, pushing only its own rows. */
+  justify-content: flex-start;
+  padding-top: calc(
+    (100svh - var(--v3-nav-clearance) - var(--portrait-h)) / 2 +
+      clamp(0.5rem, 2svh, 1.5rem)
+  );
   align-self: stretch;
 }
 
+/* Left flank — "Approach" voice block: a focal lead line, then a
+   tighter, demoted set of traits. Intentionally top-weighted. */
 .skills-column-v3--soft {
-  text-align: left;
+  gap: clamp(1.75rem, 4vh, 3rem);
   align-items: flex-start;
+  text-align: left;
   justify-self: start;
+  max-width: 26rem;
 }
 
-.skills-column-v3--tech {
-  text-align: right;
-  align-items: flex-end;
-  justify-self: end;
-}
-
-.skills-item-v3 {
-  display: flex;
-  flex-direction: column;
-  gap: 0.3rem;
-  max-width: 22rem;
-  min-height: clamp(4.5rem, 7svh, 6rem);
-}
-
-.skills-column-v3--tech .skills-item-v3 {
-  align-items: flex-end;
-}
-
-.skills-item__title-v3 {
-  margin: 0;
-  font-size: clamp(1.125rem, 1.4vw, 1.5rem);
-  font-weight: 600;
-  letter-spacing: -0.005em;
-  line-height: 1.15;
-}
-
-.skills-item__note-v3 {
-  margin: 0;
-  font-size: clamp(0.875rem, 1.05vw, 1rem);
-  line-height: 1.45;
-  color: color-mix(in srgb, var(--v3-text-dark) 65%, transparent);
-}
-
-.tools-toggle-v3 {
-  margin-top: 0.4rem;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.55rem;
-  background: transparent;
-  border: 0;
-  padding: 0;
-  font-size: clamp(0.7rem, 0.8vw, 0.8rem);
+.skills-approach-lead-v3 {
+  margin: 0.3rem 0 0;
+  max-width: 30ch;
+  font-size: clamp(1.3rem, 1.7vw, 1.9rem);
   font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.16em;
-  color: color-mix(in srgb, var(--v3-text-dark) 50%, transparent);
-  cursor: pointer;
-  transition: color 180ms ease-out;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+  color: var(--v3-skills-text);
+  text-wrap: balance;
 }
 
-.tools-toggle-v3:hover,
-.tools-toggle-v3:focus-visible {
-  color: var(--v3-accent-red);
-}
-
-.tools-toggle-v3__icon {
-  width: 0.7em;
-  height: 0.7em;
-  position: relative;
-  display: inline-block;
-}
-
-.tools-toggle-v3__icon::before,
-.tools-toggle-v3__icon::after {
-  content: "";
-  position: absolute;
-  background: currentColor;
-  border-radius: 1px;
-}
-
-.tools-toggle-v3__icon::before {
-  left: 0;
-  right: 0;
-  top: 50%;
-  height: 1.2px;
-  margin-top: -0.6px;
-}
-
-.tools-toggle-v3__icon::after {
-  top: 0;
-  bottom: 0;
-  left: 50%;
-  width: 1.2px;
-  margin-left: -0.6px;
-  transform-origin: center;
-  transition: transform 220ms cubic-bezier(0.33, 1, 0.68, 1);
-}
-
-.tools-toggle-v3__icon[data-open="true"]::after {
-  transform: scaleY(0);
-}
-
-.tools-list-v3 {
+.skills-traits-v3 {
   list-style: none;
   margin: 0;
   padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(0.65rem, 1.4svh, 1rem);
+}
+
+.skills-trait-v3 {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+}
+
+.skills-trait-v3__title {
+  flex: 0 0 6.25rem;
+  font-size: clamp(0.95rem, 1.05vw, 1.0625rem);
+  font-weight: 600;
+  letter-spacing: -0.005em;
+  color: var(--v3-skills-text);
+}
+
+.skills-trait-v3__note {
+  font-size: clamp(0.8125rem, 0.95vw, 0.9375rem);
+  line-height: 1.4;
+  color: color-mix(in srgb, var(--v3-skills-text) 60%, transparent);
+}
+
+/* Right flank — numbered "Stack" spec register. */
+.skills-column-v3--tech {
+  gap: 0;
+  justify-self: end;
+  max-width: 24rem;
+}
+
+.skills-spec-v3 {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.85rem;
+  padding: clamp(0.85rem, 1.7svh, 1.25rem) 0 clamp(0.85rem, 1.7svh, 1.25rem) 0.85rem;
+  border-top: 1px solid var(--v3-skills-hairline);
+  /* `filter: opacity()` for dimming so it never collides with the inline
+     `opacity` GSAP writes during the scroll reveal. */
+  filter: opacity(1);
+  transition: filter 180ms cubic-bezier(0.33, 1, 0.68, 1);
+}
+
+.skills-spec-v3:last-child {
+  border-bottom: 1px solid var(--v3-skills-hairline);
+}
+
+.skills-spec-v3:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--v3-accent-lime) 55%, transparent);
+  outline-offset: 4px;
+  border-radius: 2px;
+}
+
+/* Lime keyline that draws in on hover — mirrors the recent-works rows. */
+
+.skills-spec-v3__index {
+  align-self: start;
+  padding-top: 0.12em;
+  font-size: clamp(0.7rem, 0.8vw, 0.8rem);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.12em;
+  line-height: 1.15;
+  color: color-mix(in srgb, var(--v3-skills-text) 62%, transparent);
+  transition: color 180ms ease-out, text-shadow 180ms ease-out;
+}
+
+.skills-spec-v3__body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  min-width: 0;
+}
+
+.skills-spec-v3__title {
+  margin: 0;
+  font-size: clamp(1.0625rem, 1.3vw, 1.375rem);
+  font-weight: 600;
+  letter-spacing: -0.005em;
+  line-height: 1.15;
+  color: var(--v3-skills-text);
+  transition: color 180ms ease-out, text-shadow 180ms ease-out;
+}
+
+.skills-spec-v3__note {
+  margin: 0;
+  font-size: clamp(0.8125rem, 0.95vw, 0.9375rem);
+  line-height: 1.4;
+  color: color-mix(in srgb, var(--v3-skills-text) 72%, transparent);
+}
+
+/* Detail register — proof line + tools. Collapsed to zero height at rest so
+   every row reads as just title + main line (premium first). Only the active
+   row (hover / keyboard focus) expands it, via an animated grid-row height so
+   siblings ease apart instead of snapping. No paragraph wall at rest. */
+.skills-spec-v3__detail {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 360ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.skills-spec-v3__detail-inner {
+  min-height: 0;
   overflow: hidden;
+  opacity: 0;
+  transform: translateY(-4px);
+  transition: opacity 240ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 300ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.skills-spec-v3:hover .skills-spec-v3__detail,
+.skills-spec-v3:focus-within .skills-spec-v3__detail {
+  grid-template-rows: 1fr;
+}
+
+.skills-spec-v3:hover .skills-spec-v3__detail-inner,
+.skills-spec-v3:focus-within .skills-spec-v3__detail-inner {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Quiet proof line — one concise, concrete evidence line. Dimmer + smaller
+   than the note so it reads as supporting detail, not a second headline. */
+.skills-spec-v3__proof {
+  margin: 0.45rem 0 0;
+  font-size: clamp(0.75rem, 0.86vw, 0.84375rem);
+  line-height: 1.4;
+  letter-spacing: 0.005em;
+  color: color-mix(in srgb, var(--v3-skills-text) 50%, transparent);
+}
+
+.skills-spec-v3__tools {
+  list-style: none;
+  margin: 0.55rem 0 0;
+  padding: 0;
   display: flex;
   flex-wrap: wrap;
-  gap: 0.35rem 0.6rem;
-  font-size: clamp(0.75rem, 0.9vw, 0.875rem);
-  color: color-mix(in srgb, var(--v3-text-dark) 70%, transparent);
+  align-items: center;
+  gap: 0.12rem 0;
+  /* Visibility is owned by the parent `.skills-spec-v3__detail` collapse. The
+     tools read as quiet inline text — `Node · Express · SQL` — not pills, so
+     the technical detail stays useful but never busy. */
 }
 
-.skills-column-v3--tech .tools-list-v3 {
-  justify-content: flex-end;
-}
-
-.tools-list-v3__item {
+.skills-spec-v3__tool {
   display: inline-flex;
   align-items: center;
-  padding: 0.15rem 0.55rem;
-  border: 1px solid color-mix(in srgb, var(--v3-text-dark) 18%, transparent);
-  border-radius: 999px;
+  font-size: clamp(0.6875rem, 0.78vw, 0.78rem);
+  letter-spacing: 0.01em;
+  line-height: 1.55;
   white-space: nowrap;
+  color: color-mix(in srgb, var(--v3-skills-text) 55%, transparent);
+  opacity: 0;
+  transition: color 180ms ease-out, opacity 220ms ease-out;
+}
+
+.skills-spec-v3__tool::after {
+  content: "·";
+  margin: 0 0.45rem;
+  color: color-mix(in srgb, var(--v3-skills-text) 30%, transparent);
+}
+
+.skills-spec-v3__tool:last-child::after {
+  content: none;
+}
+
+/* Subtle left-to-right stagger as the active row's tools fade in. Delay lives
+   only in the active rule, so leaving the row fades them out immediately. */
+.skills-spec-v3:hover .skills-spec-v3__tool,
+.skills-spec-v3:focus-within .skills-spec-v3__tool {
+  opacity: 1;
+}
+
+.skills-spec-v3:hover .skills-spec-v3__tool:nth-child(2),
+.skills-spec-v3:focus-within .skills-spec-v3__tool:nth-child(2) {
+  transition-delay: 40ms;
+}
+
+.skills-spec-v3:hover .skills-spec-v3__tool:nth-child(3),
+.skills-spec-v3:focus-within .skills-spec-v3__tool:nth-child(3) {
+  transition-delay: 80ms;
+}
+
+.skills-spec-v3:hover .skills-spec-v3__tool:nth-child(4),
+.skills-spec-v3:focus-within .skills-spec-v3__tool:nth-child(4) {
+  transition-delay: 120ms;
+}
+
+.skills-spec-v3:hover .skills-spec-v3__tool:nth-child(n + 5),
+.skills-spec-v3:focus-within .skills-spec-v3__tool:nth-child(n + 5) {
+  transition-delay: 160ms;
+}
+
+/* Active-row treatment. The other rows recede but stay clearly READABLE
+   (not disabled); the active row promotes quietly — lime lands on the TITLE
+   only, while the index and tools just brighten in the neutral off-white.
+   Keeps the accent from shouting across number + title + tools at once. */
+.skills-column-v3--tech:hover .skills-spec-v3,
+.skills-column-v3--tech:focus-within .skills-spec-v3 {
+  filter: opacity(0.66);
+  transition: filter 200ms cubic-bezier(0.33, 1, 0.68, 1);
+}
+
+.skills-column-v3--tech .skills-spec-v3:hover,
+.skills-column-v3--tech .skills-spec-v3:focus-within {
+  filter: opacity(1);
+}
+
+.skills-spec-v3:hover .skills-spec-v3__title,
+.skills-spec-v3:focus-within .skills-spec-v3__title {
+  color: var(--v3-accent-lime);
+  text-shadow: 0 0 14px color-mix(in srgb, var(--v3-accent-lime) 20%, transparent);
+}
+
+.skills-spec-v3:hover .skills-spec-v3__index,
+.skills-spec-v3:focus-within .skills-spec-v3__index {
+  color: color-mix(in srgb, var(--v3-skills-text) 90%, transparent);
+}
+
+.skills-spec-v3:hover .skills-spec-v3__tool,
+.skills-spec-v3:focus-within .skills-spec-v3__tool {
+  color: color-mix(in srgb, var(--v3-skills-text) 82%, transparent);
+}
+
+@media (hover: none) {
+  .skills-column-v3--tech:hover .skills-spec-v3 {
+    filter: opacity(1);
+  }
+
+  /* Touch: no hover affordance, so keep every row's detail open and visible. */
+  .skills-spec-v3__detail {
+    grid-template-rows: 1fr;
+  }
+
+  .skills-spec-v3__detail-inner {
+    opacity: 1;
+    transform: none;
+  }
+
+  .skills-spec-v3__tool {
+    opacity: 1;
+  }
 }
 
 @media (max-width: 1099px) {
@@ -1760,12 +1981,10 @@ body:has(.works-root-v3) .site-nav-v3__contact:hover {
     gap: clamp(2rem, 5vh, 3.5rem);
   }
 
-  .skills-title-v3 {
-    position: static;
-  }
-
   .skills-row-v3 {
+    height: auto;
     grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto;
     gap: clamp(2rem, 5vw, 3rem);
   }
 
@@ -1773,10 +1992,18 @@ body:has(.works-root-v3) .site-nav-v3__contact:hover {
     display: none;
   }
 
+  .skills-column-v3 {
+    padding-top: 0;
+  }
+
   .skills-column-v3--soft,
   .skills-column-v3--tech {
-    transform: none;
     justify-self: stretch;
+    max-width: none;
+  }
+
+  .skills-spotlight-v3 {
+    display: none;
   }
 }
 
@@ -1784,23 +2011,149 @@ body:has(.works-root-v3) .site-nav-v3__contact:hover {
   .skills-row-v3 {
     grid-template-columns: 1fr;
   }
-
-  .skills-column-v3--soft {
-    text-align: left;
-  }
-
-  .skills-column-v3--soft .skills-item-v3 {
-    align-items: flex-start;
-  }
-
-  .skills-column-v3--soft .tools-list-v3 {
-    justify-content: flex-start;
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .skills-column-v3--soft,
-  .skills-column-v3--tech {
+  .skills-spec-v3,
+  .skills-spec-v3__index,
+  .skills-spec-v3__title,
+  .skills-spec-v3__tool,
+  .skills-spec-v3__tools,
+  .skills-spec-v3__detail,
+  .skills-spec-v3__detail-inner {
+    transition: opacity 160ms linear;
+  }
+
+  /* Minimal movement: reveal is a plain crossfade, no translate. */
+  .skills-spec-v3__detail-inner {
     transform: none;
   }
+
+  .skills-spec-v3:hover .skills-spec-v3__detail-inner,
+  .skills-spec-v3:focus-within .skills-spec-v3__detail-inner {
+    transform: none;
+  }
+}
+
+/* Nav contrast flip while the dark skills section sits behind the fixed nav.
+   Toggled by NavThemeObserver; mirrors the body:has(.works-root-v3) block. */
+body[data-nav-theme="dark"] .site-nav-v3__logo,
+body[data-nav-theme="dark"] .site-nav-v3__link {
+  color: color-mix(in srgb, var(--v3-skills-text) 92%, transparent);
+}
+
+body[data-nav-theme="dark"] .site-nav-v3__link::after {
+  background: var(--v3-skills-text);
+}
+
+body[data-nav-theme="dark"] .site-nav-v3__contact {
+  background: rgba(237, 235, 224, 0.1);
+  color: var(--v3-skills-text);
+  border: 1px solid rgba(237, 235, 224, 0.2);
+  backdrop-filter: blur(10px);
+}
+
+body[data-nav-theme="dark"] .site-nav-v3__contact:hover {
+  background: var(--v3-accent-lime);
+  color: var(--v3-skills-surface);
+  border-color: var(--v3-accent-lime);
+}
+
+/* =========================================================
+   V3 SKILLS — cinematic depth: spotlight behind the portrait,
+   film grain over the surface, and a dusk colour-grade applied
+   to the (hero-shared) portrait only while it sits in the dark
+   section — gated by data-nav-theme so the hero stays untouched.
+   ========================================================= */
+.skills-inner-v3 {
+  z-index: 1;
+}
+
+/* Soft radial halo behind the portrait — a low, diffuse lift of the surface so
+   the figure separates from flat black and reads as standing IN a space, not
+   pasted on it. Radial + feathered (never a rectangle or hard spotlight), and
+   centred on the slot the portrait lands in. Desktop-only; hidden < 1100px. */
+.skills-spotlight-v3 {
+  display: none;
+}
+
+@media (min-width: 1100px) {
+  .skills-spotlight-v3 {
+    display: block;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: min(44vw, 38rem);
+    height: min(72vh, 52rem);
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    z-index: 0;
+    background: radial-gradient(
+      ellipse 50% 50% at 50% 50%,
+      color-mix(in srgb, var(--v3-skills-text) 8%, transparent) 0%,
+      color-mix(in srgb, var(--v3-skills-text) 3%, transparent) 42%,
+      transparent 72%
+    );
+  }
+}
+
+.skills-grain-v3 {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.07;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+}
+
+/* Dusk colour-grade on the shared portrait, only inside the dark section. */
+/* Dusk grade scrubbed by --pg (0 in hero → 1 settled in dark section). No CSS
+   transition: PortraitScrollChoreography sets --pg per frame, so the grade
+   tracks scroll and reverses symmetrically (no pop at the seam). The mask
+   vignette (see base rule) is driven by the same --pg. */
+.hero-pratiush-photo-v3 {
+  /* Clean low-key grade. Source is a transparent cutout, so there is no
+     backdrop to hide — the figure already sits directly on the dark section.
+     The grade only refines it: gently desaturate to a near-monochrome
+     cinematic figure and lift mids a touch so the shirt + body stay readable
+     against the near-black, rather than crushing into the surface. */
+  filter: contrast(calc(1 + 0.16 * var(--pg, 0)))
+    brightness(calc(1 + 0.06 * var(--pg, 0)))
+    saturate(calc(1 - 0.5 * var(--pg, 0)));
+}
+
+/* NO opaque overlay. The cutout's transparent background already reveals the
+   dark section (grain and all) seamlessly; the previous `::after` painted a
+   flat surface-colour vignette ON TOP, whose ungrained, hard-edged box read as
+   a rectangular container. The figure now emerges purely via the feathered
+   mask on `.hero-pratiush-photo-v3` (see base rule) — no box, no rim. */
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-pratiush-photo-v3 {
+    transition: none;
+  }
+}
+
+/* Connect button — elevated: brighter keyline + soft depth, with a softer
+   lime ring + glow on hover for pull. */
+.site-nav-v3__contact {
+  border-color: color-mix(in srgb, currentColor 32%, transparent);
+  box-shadow: 0 8px 22px -10px rgba(0, 0, 0, 0.45);
+}
+
+.site-nav-v3__contact:hover {
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--v3-accent-lime) 35%, transparent),
+    0 12px 32px -8px color-mix(in srgb, var(--v3-accent-lime) 40%, transparent);
+}
+
+body[data-nav-theme="dark"] .site-nav-v3__contact {
+  border-color: rgba(237, 235, 224, 0.32);
+  box-shadow: 0 8px 22px -10px rgba(0, 0, 0, 0.6);
+}
+
+body[data-nav-theme="dark"] .site-nav-v3__contact:hover {
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--v3-accent-lime) 40%, transparent),
+    0 12px 32px -8px color-mix(in srgb, var(--v3-accent-lime) 45%, transparent);
 }

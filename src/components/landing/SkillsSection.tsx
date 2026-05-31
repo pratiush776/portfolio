@@ -1,15 +1,13 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { AnimatePresence, motion } from "motion/react";
+import { useEffect, useRef } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { softSkills, technicalSpecs } from "./skills-data";
+import { approach, technicalSpecs } from "./skills-data";
 import { SKILLS_PIN_FRACTION } from "./skills-config";
 
 const REVEAL_EASE = "power3.out";
 const ITEM_STAGGER = 0.06;
-const TOOLS_EASE: [number, number, number, number] = [0.33, 1, 0.68, 1];
 
 export function SkillsSection() {
   const sectionRef = useRef<HTMLElement | null>(null);
@@ -52,41 +50,47 @@ export function SkillsSection() {
         },
       });
 
-      // Beat 1 — title (~5–28% of pin)
+      // Beats are spaced across the full 80vh pin band so they resolve in
+      // sequence — title, then the portrait finishes its descent into the
+      // slot, then the columns stagger in, leaving a real settled-arrival
+      // band at the end (no longer all collapsing onto one frame).
+
+      // Beat 1 — title (~5–22% of pin).
       tl.to(
         title,
-        { opacity: 1, y: 0, duration: 0.23, ease: REVEAL_EASE },
+        { opacity: 1, y: 0, duration: 0.17, ease: REVEAL_EASE },
         0.05,
       );
 
-      // Beat 2 — columns reveal together (~30–88% of pin)
+      // Beat 2 — columns stagger in after the portrait has substantially
+      // landed (~42–82% of pin). Left flank leads the right register slightly.
       tl.to(
         leftItems,
         {
           opacity: 1,
           y: 0,
-          duration: 0.4,
+          duration: 0.3,
           ease: REVEAL_EASE,
           stagger: { each: ITEM_STAGGER, from: "start" },
         },
-        0.3,
+        0.42,
       );
       tl.to(
         rightItems,
         {
           opacity: 1,
           y: 0,
-          duration: 0.4,
+          duration: 0.3,
           ease: REVEAL_EASE,
           stagger: { each: ITEM_STAGGER, from: "start" },
         },
-        0.3,
+        0.48,
       );
 
-      // Settle period — keeps the section pinned for ~12% of pin after the
-      // last item lands, so the reveal has a moment to breathe before the
-      // user scrolls past.
-      tl.to({}, { duration: 0.15 });
+      // Settle period — the final ~14% of the pin holds everything in place
+      // (portrait fully landed, all rows revealed) so the arrival reads as a
+      // deliberate, settled moment before the user scrolls past.
+      tl.to({}, { duration: 0.14 });
     }, section);
 
     return () => ctx.revert();
@@ -94,79 +98,67 @@ export function SkillsSection() {
 
   return (
     <section ref={sectionRef} className="skills-section-v3" aria-label="What I bring">
+      <div className="skills-spotlight-v3" aria-hidden />
+      <div className="skills-grain-v3" aria-hidden />
       <div className="skills-inner-v3">
-        <h2 className="skills-title-v3" data-skills-title data-skills-reveal>
-          What I bring.
-        </h2>
-
         <div className="skills-row-v3">
-          <ul className="skills-column-v3 skills-column-v3--soft" aria-label="Approach">
-            {softSkills.map((item) => (
-              <li
-                key={item.title}
-                className="skills-item-v3"
-                data-skills-soft
-                data-skills-reveal
-              >
-                <p className="skills-item__title-v3">{item.title}</p>
-                <p className="skills-item__note-v3">{item.note}</p>
-              </li>
-            ))}
-          </ul>
+          <div className="skills-column-v3 skills-column-v3--soft" aria-label="Approach">
+            <header className="skills-head-v3" data-skills-title data-skills-reveal>
+              <h2 className="skills-title-v3">What I bring.</h2>
+              <span className="skills-keyline-v3" aria-hidden />
+              <p className="skills-approach-lead-v3">{approach.lead}</p>
+            </header>
+            <ul className="skills-traits-v3">
+              {approach.traits.map((trait) => (
+                <li
+                  key={trait.title}
+                  className="skills-trait-v3"
+                  data-skills-soft
+                  data-skills-reveal
+                >
+                  <span className="skills-trait-v3__title">{trait.title}</span>
+                  <span className="skills-trait-v3__note">{trait.note}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
 
           <div className="skills-portrait-slot-v3" aria-hidden />
 
-          <ul className="skills-column-v3 skills-column-v3--tech" aria-label="Stack">
-            {technicalSpecs.map((item) => (
+          <ol className="skills-column-v3 skills-column-v3--tech" aria-label="Stack">
+            {technicalSpecs.map((item, index) => (
               <li
                 key={item.key}
-                className="skills-item-v3"
+                className="skills-spec-v3"
                 data-skills-tech
                 data-skills-reveal
+                tabIndex={0}
+                aria-label={`${item.title}. ${item.note} ${item.proof} Stack: ${item.tools.join(", ")}.`}
               >
-                <TechSpecRow item={item} />
+                <span className="skills-spec-v3__index" aria-hidden>
+                  {String(index + 1).padStart(2, "0")}
+                </span>
+                <div className="skills-spec-v3__body">
+                  <p className="skills-spec-v3__title">{item.title}</p>
+                  <p className="skills-spec-v3__note">{item.note}</p>
+                  <div className="skills-spec-v3__detail">
+                    <div className="skills-spec-v3__detail-inner">
+                      <p className="skills-spec-v3__proof">{item.proof}</p>
+                      <ul className="skills-spec-v3__tools">
+                        {item.tools.map((tool) => (
+                          <li key={tool} className="skills-spec-v3__tool">
+                            {tool}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+                </div>
               </li>
             ))}
-          </ul>
+          </ol>
         </div>
       </div>
     </section>
-  );
-}
-
-function TechSpecRow({ item }: { item: (typeof technicalSpecs)[number] }) {
-  const [open, setOpen] = useState(false);
-
-  return (
-    <>
-      <p className="skills-item__title-v3">{item.title}</p>
-      <p className="skills-item__note-v3">{item.note}</p>
-      <button
-        type="button"
-        className="tools-toggle-v3"
-        aria-expanded={open}
-        onClick={() => setOpen((v) => !v)}
-      >
-        <span className="tools-toggle-v3__label">Tools</span>
-        <span className="tools-toggle-v3__icon" data-open={open} aria-hidden />
-      </button>
-      <AnimatePresence initial={false}>
-        {open && (
-          <motion.ul
-            className="tools-list-v3"
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.22, ease: TOOLS_EASE }}
-          >
-            {item.tools.map((tool) => (
-              <li key={tool} className="tools-list-v3__item">
-                {tool}
-              </li>
-            ))}
-          </motion.ul>
-        )}
-      </AnimatePresence>
-    </>
   );
 }

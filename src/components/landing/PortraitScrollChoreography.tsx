@@ -56,7 +56,14 @@ export function PortraitScrollChoreography() {
     if (!portrait || !section || !slot) return;
 
     gsap.registerPlugin(ScrollTrigger);
-    gsap.set(portrait, { xPercent: -50, x: 0, y: 0, force3D: true });
+    gsap.set(portrait, {
+      xPercent: -50,
+      x: 0,
+      y: 0,
+      scale: 1,
+      transformOrigin: "50% 50%",
+      force3D: true,
+    });
 
     const state = {
       scrollA: 0,
@@ -100,45 +107,76 @@ export function PortraitScrollChoreography() {
     const apply = (scroll: number) => {
       const { scrollA, scrollB, pinDistance, finalY } = state;
       const motionEnd = scrollB + pinDistance;
-      const yEnd = finalY + pinDistance;
+      // Land partway into the pin, then DWELL at centre for the rest of it.
+      // The descent used to span the whole pin, so the portrait only touched
+      // centre on the last frame and then immediately scrolled back up — a
+      // V-shaped bounce. Landing early + holding removes the up-bounce: it
+      // arrives, rests through the reveal, then leaves with the section.
+      const DESCENT_PIN_FRACTION = 0.35;
+      const landScroll = scrollB + DESCENT_PIN_FRACTION * pinDistance;
+      // y offset that keeps the portrait visually centred (so during the
+      // dwell, y must track scroll 1:1 while the section is pinned).
+      const holdConst = finalY - scrollB;
+      // Cinematic scale ramp: 1.0 through the hero hold, grows to ~1.15 across
+      // the descent, then holds. Independent of the px `y` translate.
+      const SCALE_SETTLED = 1.15;
       let y: number;
+      let scale: number;
+      // Grade progress 0→1, scrubbed in lockstep with the descent (drives the
+      // dusk grade + vignette via `--pg`; see globals.css). Reaches 1 on
+      // landing and holds, so it reverses symmetrically with the descent.
+      let pg: number;
       if (scroll <= scrollA) {
-        // Hero hold — counter-translate so the portrait is still in viewport.
+        // Hero hold — counter-translate so the portrait stays put in view.
         y = scroll;
+        scale = 1;
+        pg = 0;
+      } else if (scroll < landScroll) {
+        // Descent — linear from the hero hold down to the centred slot.
+        const t = (scroll - scrollA) / (landScroll - scrollA);
+        const yLand = holdConst + landScroll;
+        y = scrollA + t * (yLand - scrollA);
+        scale = 1 + t * (SCALE_SETTLED - 1);
+        pg = t;
       } else if (scroll < motionEnd) {
-        // One continuous linear descent from the hero hold to the settled
-        // slot position, spanning the entire travel window AND the pinned
-        // reveal range. Linear so it tracks scroll 1:1 (~0.26× viewport
-        // velocity given the visible delta over the scroll range), and so
-        // the descent blends with the title + columns reveal — the whole
-        // skills moment resolves on the same frame.
-        const t = (scroll - scrollA) / (motionEnd - scrollA);
-        y = scrollA + t * (yEnd - scrollA);
+        // Dwell — landed at centre; track scroll 1:1 so it stays fixed at
+        // centre for the rest of the pin (no movement while the reveal plays).
+        y = holdConst + scroll;
+        scale = SCALE_SETTLED;
+        pg = 1;
       } else {
-        // Settled — portrait sits at slot docY and scrolls with the section.
-        y = yEnd;
+        // Pin over — freeze y so the portrait scrolls away with the section
+        // exactly once (no re-centering on refresh past the section).
+        y = holdConst + motionEnd;
+        scale = SCALE_SETTLED;
+        pg = 1;
       }
-      gsap.set(portrait, { y });
+      gsap.set(portrait, { y, scale });
+      portrait.style.setProperty("--pg", String(pg));
     };
 
     const ctx = gsap.context(() => {
       ScrollTrigger.create({
-        trigger: section,
+        trigger: document.documentElement,
         start: 0,
         end: () => {
           measure();
           return state.scrollB + state.pinDistance;
         },
         invalidateOnRefresh: true,
-        fastScrollEnd: true,
         onUpdate: (self) => apply(self.scroll()),
         onRefresh: () => apply(window.scrollY),
       });
+
+      if (document.fonts && document.fonts.ready) {
+        document.fonts.ready.then(() => ScrollTrigger.refresh());
+      }
     });
 
     return () => {
       ctx.revert();
       gsap.set(portrait, { clearProps: "all" });
+      portrait.style.removeProperty("--pg");
     };
   }, []);
 

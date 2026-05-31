@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { NavConnect } from "./NavConnect";
 
 export function SiteNav() {
   return (
@@ -18,9 +19,7 @@ export function SiteNav() {
         >
           Resume
         </Link>
-        <button type="button" className="site-nav-v3__contact">
-          Connect
-        </button>
+        <NavConnect />
       </div>
     </nav>
   );

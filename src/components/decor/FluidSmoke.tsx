@@ -20,7 +20,7 @@ const DEFAULTS = {
   DENSITY_DISS: 0.4,
   VEL_DISS: 0.5,
   PRESSURE: 0.85,
-  PRESSURE_ITER: 8,
+  PRESSURE_ITER: 12,
   CURL: 8,
   SPLAT_FORCE: 1500,
   DYE_RADIUS: 0.005,
@@ -543,7 +543,7 @@ void main(){
       );
     }
     function onMove(e: MouseEvent) {
-      markActive();
+      if (paused) return;
       [lmx, lmy] = [mx, my];
       [mx, my] = toUV(e.clientX, e.clientY);
       if (lmx < 0) {
@@ -554,25 +554,16 @@ void main(){
       const dx = mx - lmx;
       const dy = my - lmy;
       if (Math.abs(dx) < 1e-4 && Math.abs(dy) < 1e-4) return;
-      if (paused) return;
       interact(mx, my, dx * 4, dy * 4);
     }
     window.addEventListener('mousemove', onMove, { passive: true });
 
-    // Pause when tab hidden, canvas scrolled out of view, or when the pointer
-    // has been idle for a beat. Sim keeps running through scroll so the
-    // dye dissipates continuously instead of freezing mid-frame.
-    const IDLE_MS = 1200;
+    // Pause when tab hidden or canvas scrolled out of view.
     let hidden = document.hidden;
     let offscreen = false;
-    let idle = true;
-    let idleTimer: ReturnType<typeof setTimeout> | null = null;
-    let paused = true;
-    function shouldPause() {
-      return hidden || offscreen || idle;
-    }
+    let paused = hidden || offscreen;
     function resume() {
-      const next = shouldPause();
+      const next = hidden || offscreen;
       if (paused && !next) {
         paused = false;
         last = performance.now();
@@ -580,15 +571,6 @@ void main(){
       } else {
         paused = next;
       }
-    }
-    function markActive() {
-      idle = false;
-      if (idleTimer) clearTimeout(idleTimer);
-      idleTimer = setTimeout(() => {
-        idle = true;
-        resume();
-      }, IDLE_MS);
-      resume();
     }
     function onVis() {
       hidden = document.hidden;
@@ -696,7 +678,6 @@ void main(){
 
     return () => {
       cancelAnimationFrame(raf);
-      if (idleTimer) clearTimeout(idleTimer);
       window.removeEventListener('mousemove', onMove);
       document.removeEventListener('visibilitychange', onVis);
       io.disconnect();

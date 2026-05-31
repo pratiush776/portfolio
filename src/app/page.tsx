@@ -7,6 +7,7 @@ import { LocationPin } from "@/components/icons";
 import { PortraitScrollChoreography } from "@/components/landing/PortraitScrollChoreography";
 import { RecentWorks } from "@/components/landing/RecentWorks";
 import { SkillsSection } from "@/components/landing/SkillsSection";
+import { NavThemeObserver } from "@/components/layout/NavThemeObserver";
 
 export default function Home() {
   return (
@@ -18,11 +19,11 @@ export default function Home() {
             <FluidSmoke
               color="#3D3A36"
               className="fluid-smoke-v3"
-              dyeRadius={0.0012}
-              splatForce={1100}
-              densityDissipation={0.55}
-              velocityDissipation={1.0}
-              curl={9}
+              dyeRadius={0.003}
+              splatForce={950}
+              densityDissipation={0.85}
+              velocityDissipation={1.3}
+              curl={5}
             />
           </div>
         </div>
@@ -51,6 +52,7 @@ export default function Home() {
         <SkillsSection />
         <RecentWorks />
         <PortraitScrollChoreography />
+        <NavThemeObserver />
       </div>
     </main>
   );
