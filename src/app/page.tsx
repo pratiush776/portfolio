@@ -18,11 +18,11 @@ export default function Home() {
             <FluidSmoke
               color="#3D3A36"
               className="fluid-smoke-v3"
-              dyeRadius={0.003}
-              splatForce={950}
-              densityDissipation={0.85}
-              velocityDissipation={1.3}
-              curl={5}
+              dyeRadius={0.0012}
+              splatForce={1100}
+              densityDissipation={0.55}
+              velocityDissipation={1.0}
+              curl={9}
             />
           </div>
         </div>

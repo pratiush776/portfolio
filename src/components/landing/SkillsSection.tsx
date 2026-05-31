@@ -5,6 +5,7 @@ import { AnimatePresence, motion } from "motion/react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { softSkills, technicalSpecs } from "./skills-data";
+import { SKILLS_PIN_FRACTION } from "./skills-config";
 
 const REVEAL_EASE = "power3.out";
 const ITEM_STAGGER = 0.06;
@@ -21,7 +22,6 @@ export function SkillsSection() {
     const desktop = window.matchMedia("(min-width: 1100px)").matches;
 
     if (reduced || !desktop) {
-      // Static fallback — set everything to its final state.
       const elements = section.querySelectorAll<HTMLElement>("[data-skills-reveal]");
       elements.forEach((el) => {
         el.style.opacity = "1";
@@ -37,41 +37,56 @@ export function SkillsSection() {
       const leftItems = section.querySelectorAll<HTMLElement>("[data-skills-soft]");
       const rightItems = section.querySelectorAll<HTMLElement>("[data-skills-tech]");
 
-      gsap.set([title, ...leftItems, ...rightItems], { opacity: 0, y: 24 });
+      gsap.set([title, ...leftItems, ...rightItems], { opacity: 0, y: 32 });
 
       const tl = gsap.timeline({
         scrollTrigger: {
           trigger: section,
-          start: "top 35%",
-          toggleActions: "play none none reverse",
+          start: "top top",
+          end: () => `+=${SKILLS_PIN_FRACTION * window.innerHeight}`,
+          pin: true,
+          pinType: "transform",
+          pinSpacing: true,
+          scrub: 1,
           invalidateOnRefresh: true,
         },
       });
 
-      tl.to(title, { opacity: 1, y: 0, duration: 0.9, ease: REVEAL_EASE });
-      tl.addLabel("columns", "+=0.15");
+      // Beat 1 — title (~5–28% of pin)
+      tl.to(
+        title,
+        { opacity: 1, y: 0, duration: 0.23, ease: REVEAL_EASE },
+        0.05,
+      );
+
+      // Beat 2 — columns reveal together (~30–88% of pin)
       tl.to(
         leftItems,
         {
           opacity: 1,
           y: 0,
-          duration: 0.7,
+          duration: 0.4,
           ease: REVEAL_EASE,
           stagger: { each: ITEM_STAGGER, from: "start" },
         },
-        "columns",
+        0.3,
       );
       tl.to(
         rightItems,
         {
           opacity: 1,
           y: 0,
-          duration: 0.7,
+          duration: 0.4,
           ease: REVEAL_EASE,
           stagger: { each: ITEM_STAGGER, from: "start" },
         },
-        "columns",
+        0.3,
       );
+
+      // Settle period — keeps the section pinned for ~12% of pin after the
+      // last item lands, so the reveal has a moment to breathe before the
+      // user scrolls past.
+      tl.to({}, { duration: 0.15 });
     }, section);
 
     return () => ctx.revert();
@@ -132,15 +147,8 @@ function TechSpecRow({ item }: { item: (typeof technicalSpecs)[number] }) {
         aria-expanded={open}
         onClick={() => setOpen((v) => !v)}
       >
-        <span>Tools</span>
-        <motion.span
-          className="tools-toggle-v3__chevron"
-          animate={{ rotate: open ? 90 : 0 }}
-          transition={{ duration: 0.18, ease: TOOLS_EASE }}
-          aria-hidden
-        >
-          →
-        </motion.span>
+        <span className="tools-toggle-v3__label">Tools</span>
+        <span className="tools-toggle-v3__icon" data-open={open} aria-hidden />
       </button>
       <AnimatePresence initial={false}>
         {open && (
