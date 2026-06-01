@@ -23,6 +23,9 @@ main::-webkit-scrollbar {
 body {
   margin: 0;
   padding: 0;
+  /* Stop the macOS/Chrome two-finger horizontal swipe from triggering browser
+     back/forward navigation while scrolling the page. */
+  overscroll-behavior-x: none;
 }
 
 button:focus-visible,
@@ -1750,6 +1753,7 @@ body:has(.works-root-v3) .site-nav-v3__contact:hover {
 
 /* Right flank — numbered "Stack" spec register. */
 .skills-column-v3--tech {
+  position: relative;
   gap: 0;
   justify-self: end;
   max-width: 24rem;
@@ -1760,7 +1764,8 @@ body:has(.works-root-v3) .site-nav-v3__contact:hover {
   display: grid;
   grid-template-columns: auto 1fr;
   gap: 0.85rem;
-  padding: clamp(0.85rem, 1.7svh, 1.25rem) 0 clamp(0.85rem, 1.7svh, 1.25rem) 0.85rem;
+  /* Wider left gutter seats the signal rail + node to the left of the index. */
+  padding: clamp(0.85rem, 1.7svh, 1.25rem) 0 clamp(0.85rem, 1.7svh, 1.25rem) 1.9rem;
   border-top: 1px solid var(--v3-skills-hairline);
   /* `filter: opacity()` for dimming so it never collides with the inline
      `opacity` GSAP writes during the scroll reveal. */
@@ -1778,9 +1783,69 @@ body:has(.works-root-v3) .site-nav-v3__contact:hover {
   border-radius: 2px;
 }
 
-/* Lime keyline that draws in on hover — mirrors the recent-works rows. */
+/* Signal rail — a faint vertical rail threads the numbered rows, softened by a
+   vertical mask so it reads as quiet ticks behind each number rather than a
+   continuous timeline bar. A small node sits on it at each number; the active
+   row brightens its rail tick and lights its node in lime. Low visual weight by
+   design — it supports the capability stack, it isn't the headline. Built from
+   pseudo-elements only — no extra DOM. */
+.skills-spec-v3::before {
+  content: "";
+  position: absolute;
+  left: 0.7rem;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  transform: translateX(-50%);
+  background: color-mix(in srgb, var(--v3-skills-text) 10%, transparent);
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    transparent,
+    #000 20%,
+    #000 80%,
+    transparent
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    transparent,
+    #000 20%,
+    #000 80%,
+    transparent
+  );
+  transition: background 200ms cubic-bezier(0.33, 1, 0.68, 1);
+}
+
+/* Node — a small quiet dot seated on the rail, vertically centred on the number
+   (anchored to the index box, so it tracks the number regardless of the row's
+   clamp padding). */
+.skills-spec-v3__index::before {
+  content: "";
+  position: absolute;
+  left: -1.37rem;
+  top: 50%;
+  width: 0.34rem;
+  height: 0.34rem;
+  transform: translateY(-50%);
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--v3-skills-text) 26%, transparent);
+  transition: background 200ms cubic-bezier(0.33, 1, 0.68, 1),
+    box-shadow 200ms cubic-bezier(0.33, 1, 0.68, 1);
+}
+
+/* Active row — rail tick brightens to lime, node fills lime + gently glows. */
+.skills-spec-v3:hover::before,
+.skills-spec-v3:focus-within::before {
+  background: color-mix(in srgb, var(--v3-accent-lime) 55%, transparent);
+}
+
+.skills-spec-v3:hover .skills-spec-v3__index::before,
+.skills-spec-v3:focus-within .skills-spec-v3__index::before {
+  background: var(--v3-accent-lime);
+  box-shadow: 0 0 9px color-mix(in srgb, var(--v3-accent-lime) 55%, transparent);
+}
 
 .skills-spec-v3__index {
+  position: relative;
   align-self: start;
   padding-top: 0.12em;
   font-size: clamp(0.7rem, 0.8vw, 0.8rem);
@@ -1924,7 +1989,7 @@ body:has(.works-root-v3) .site-nav-v3__contact:hover {
    Keeps the accent from shouting across number + title + tools at once. */
 .skills-column-v3--tech:hover .skills-spec-v3,
 .skills-column-v3--tech:focus-within .skills-spec-v3 {
-  filter: opacity(0.66);
+  filter: opacity(0.72);
   transition: filter 200ms cubic-bezier(0.33, 1, 0.68, 1);
 }
 
@@ -2060,19 +2125,88 @@ body[data-nav-theme="dark"] .site-nav-v3__contact:hover {
 }
 
 /* =========================================================
-   V3 SKILLS — cinematic depth: spotlight behind the portrait,
-   film grain over the surface, and a dusk colour-grade applied
-   to the (hero-shared) portrait only while it sits in the dark
-   section — gated by data-nav-theme so the hero stays untouched.
+   V3 SKILLS — cinematic depth. Layered background stack (bottom → top):
+     surface colour  →  ::before halo  →  spotlight key light  →
+     ::after vignette  →  grain  →  content (.skills-inner-v3).
+   A dusk colour-grade is applied to the (hero-shared) portrait only while
+   it sits in the dark section — gated by --pg so the hero stays untouched.
+   The portrait itself lives in the hero stacking context (z-index 5 > the
+   section's 2), so it floats above every layer here — the halo stages it.
    ========================================================= */
 .skills-inner-v3 {
-  z-index: 1;
+  z-index: 3;
 }
 
-/* Soft radial halo behind the portrait — a low, diffuse lift of the surface so
-   the figure separates from flat black and reads as standing IN a space, not
-   pasted on it. Radial + feathered (never a rectangle or hard spotlight), and
-   centred on the slot the portrait lands in. Desktop-only; hidden < 1100px. */
+/* Cinematic halo — a layered radial atmosphere staged behind the portrait and
+   bleeding toward the right skills column. A smoky steel-blue key light sits at
+   the figure, a quiet olive bleed leans into the right column, and a barely-
+   there warm rust undertone answers the hero wordmark. A near-transparent conic
+   adds organic, non-uniform drift (closed loop blue→olive→rust→blue, so no seam
+   and no rainbow). Static — the depth is in the composition, not motion, so it
+   costs nothing on the GPU and is unaffected by reduced-motion. Covers the full
+   section and fades into the surface; never a visible rectangle. */
+.skills-section-v3::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    /* organic drift — closed loop, very low alpha, mostly blue (no rainbow) */
+    conic-gradient(
+      from 210deg at 54% 42%,
+      rgba(96, 128, 178, 0.1),
+      rgba(140, 168, 120, 0.05),
+      rgba(184, 92, 60, 0.04),
+      rgba(96, 128, 178, 0.1)
+    ),
+    /* warm rust undertone — sparing, lower-left, answers the hero wordmark */
+    radial-gradient(
+      44% 42% at 39% 67%,
+      rgba(184, 92, 60, 0.09),
+      transparent 72%
+    ),
+    /* sage/olive secondary glow — bled into the right skills column */
+    radial-gradient(
+      46% 46% at 73% 52%,
+      rgba(150, 180, 120, 0.2),
+      transparent 72%
+    ),
+    /* broad smoky-blue bloom — fills the centre stage generously */
+    radial-gradient(
+      60% 68% at 50% 43%,
+      rgba(64, 100, 156, 0.3),
+      transparent 75%
+    ),
+    /* steel-blue key light — bright core crowning the figure's head */
+    radial-gradient(
+      38% 44% at 51% 40%,
+      rgba(116, 152, 206, 0.48),
+      transparent 66%
+    );
+}
+
+/* Vignette — pulls every edge back toward near-black so the section stays
+   black-dominant and the halo reads as contained light, never a lit panel. */
+.skills-section-v3::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: radial-gradient(
+    108% 95% at 51% 44%,
+    transparent 50%,
+    rgba(5, 8, 5, 0.5) 84%,
+    rgba(3, 5, 3, 0.84) 100%
+  );
+}
+
+/* Focused key light — a tighter, brighter steel-blue core seated right at the
+   figure, layered over the broad ::before halo so the portrait gets a distinct
+   backlight and reads as STAGED, not pasted on. Radial + feathered (never a
+   rectangle or hard spotlight), centred on the slot the portrait lands in.
+   Desktop-only; hidden < 1100px. */
 .skills-spotlight-v3 {
   display: none;
 }
@@ -2081,17 +2215,17 @@ body[data-nav-theme="dark"] .site-nav-v3__contact:hover {
   .skills-spotlight-v3 {
     display: block;
     position: absolute;
-    left: 50%;
-    top: 50%;
-    width: min(44vw, 38rem);
-    height: min(72vh, 52rem);
+    left: 51%;
+    top: 44%;
+    width: min(40vw, 34rem);
+    height: min(68vh, 48rem);
     transform: translate(-50%, -50%);
     pointer-events: none;
     z-index: 0;
     background: radial-gradient(
       ellipse 50% 50% at 50% 50%,
-      color-mix(in srgb, var(--v3-skills-text) 8%, transparent) 0%,
-      color-mix(in srgb, var(--v3-skills-text) 3%, transparent) 42%,
+      rgba(150, 176, 214, 0.2) 0%,
+      rgba(120, 146, 184, 0.08) 44%,
       transparent 72%
     );
   }
@@ -2100,11 +2234,11 @@ body[data-nav-theme="dark"] .site-nav-v3__contact:hover {
 .skills-grain-v3 {
   position: absolute;
   inset: 0;
-  z-index: 0;
+  z-index: 2;
   pointer-events: none;
-  opacity: 0.07;
+  opacity: 0.2;
   mix-blend-mode: overlay;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.62' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncA type='discrete' tableValues='1'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   background-repeat: repeat;
 }
 
