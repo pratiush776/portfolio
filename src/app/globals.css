@@ -167,6 +167,7 @@ button {
   /* Font families */
   --font-pier: var(--font-pier-sans), sans-serif;
   --font-noto: var(--font-noto-sans), sans-serif;
+  --font-display: var(--font-bricolage), var(--font-pier-sans), sans-serif;
 
   /* Color palette */
   --color-navy: #2f4156;
@@ -187,12 +188,10 @@ button {
   --v3-accent-dark: #4d5c60;
   --v3-white: #ffffff;
 
-  /* Skills section — dark editorial break. Lime inverts from page
-     background to the single accent against a warm near-black surface. */
-  --v3-skills-surface: #15170f;
-  --v3-skills-text: #edebe0;
+  /* Lime accent — retained for the hero / uncovered nav-contact hover glow.
+     (The skills section migrated off lime to the twilight-pastel set below;
+     --v3-skills-surface/-text/-hairline were removed as unused.) */
   --v3-accent-lime: #cdd866;
-  --v3-skills-hairline: rgba(237, 235, 224, 0.08);
 
   --v3-space-1: 0.25rem;
   --v3-space-2: 0.5rem;
@@ -222,7 +221,53 @@ button {
   --v3-radius-pill: 999px;
   --v3-shadow-soft: 0 16px 32px rgba(56, 56, 56, 0.08);
   --v3-hairline: 1px solid rgba(56, 56, 56, 0.64);
+
+  /* --- Pastel-Pop palette (synced to kept hero anchors) --- */
+  --v3-blush:  #F4DAD2;
+  --v3-lilac:  #DCD9F2;
+  --v3-mint:   #D2E8D6;
+  --v3-butter: #F6EECB;
+  --v3-cherry: #E5404B;
+  --v3-citron: #C7D24E;
+  /* Twilight key — replaces the cold near-black skills surface */
+  --v3-twilight:        #9D9AD6;
+  --v3-twilight-deep:   #6F6CB0;
+  --v3-twilight-text:   #221F33;
+  --v3-twilight-accent: #E5404B;
+  /* Soft warm ink for text on pastels */
+  --v3-ink: #2A2730;
+  /* Mesh-gradient presets (component-switchable). Each is a full
+     `background-image` value. */
+  --mesh-lilac: radial-gradient(60% 70% at 22% 28%, var(--v3-lilac) 0%, transparent 60%),
+                radial-gradient(55% 65% at 80% 22%, var(--v3-blush) 0%, transparent 58%),
+                radial-gradient(70% 75% at 72% 82%, var(--v3-mint) 0%, transparent 62%),
+                radial-gradient(60% 60% at 30% 85%, var(--v3-butter) 0%, transparent 60%),
+                var(--v3-bg-primary);
+  --mesh-twilight: radial-gradient(65% 75% at 28% 24%, color-mix(in srgb, var(--v3-lilac) 70%, var(--v3-twilight)) 0%, transparent 62%),
+                   radial-gradient(60% 70% at 82% 30%, color-mix(in srgb, var(--v3-blush) 55%, var(--v3-twilight)) 0%, transparent 60%),
+                   radial-gradient(75% 80% at 68% 86%, color-mix(in srgb, var(--v3-twilight-deep) 80%, transparent) 0%, transparent 64%),
+                   var(--v3-twilight);
+  /* Grain tuning */
+  --grain-opacity: 0.18;
+  --grain-url: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E");
 }
+
+/* =========================================================
+   TEXTURE PRIMITIVES — grain overlay + mesh gradient helpers
+   (shared by MeshGrain decor + section surfaces)
+   ========================================================= */
+.grain-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: var(--grain-opacity, 0.18);
+  mix-blend-mode: soft-light;
+  background-image: var(--grain-url);
+  background-size: 180px 180px;
+  background-repeat: repeat;
+}
+.mesh-grad { background-image: var(--mesh-lilac); }
+.mesh-grad--twilight { background-image: var(--mesh-twilight); }
 
 /* =========================================================
    V3 HOMEPAGE HERO
@@ -801,8 +846,8 @@ button {
    ========================================================= */
 
 .works-root-v3 {
-  background: #0e1620;
-  color: var(--color-beige);
+  background: var(--v3-twilight);
+  color: var(--v3-twilight-text);
   min-height: 100svh;
   height: 100svh;
   width: 100vw;
@@ -818,7 +863,7 @@ button {
   background: radial-gradient(
     ellipse 80% 65% at center,
     transparent 40%,
-    rgba(0, 0, 0, 0.55) 100%
+    color-mix(in srgb, var(--v3-twilight-deep) 80%, transparent) 100%
   );
   pointer-events: none;
   z-index: 1;
@@ -835,7 +880,7 @@ button {
   /* Per-card accent backdrop tint. */
   background: radial-gradient(
     ellipse 60% 50% at 50% 50%,
-    color-mix(in srgb, var(--accent, #D4B074) 20%, transparent) 0%,
+    color-mix(in srgb, var(--accent, var(--v3-accent-red)) 20%, transparent) 0%,
     transparent 72%
   );
 }
@@ -1057,7 +1102,7 @@ button {
   width: 100%;
   height: 100%;
   padding: clamp(0.6rem, 1vw, 1rem);
-  background: color-mix(in srgb, var(--accent, #D4B074) 18%, var(--color-beige));
+  background: color-mix(in srgb, var(--accent, var(--v3-cherry)) 18%, var(--color-beige));
   border-radius: 0.9rem;
   box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.06);
 }
@@ -1575,11 +1620,13 @@ body:has(.works-root-v3) .site-nav-v3__contact:hover {
 
 /* =========================================================
    V3 SKILLS SECTION — "What I bring."
-   Dark editorial chapter break: warm near-black surface,
-   off-white text, lime as the single accent. The portrait
-   still travels from the hero into the centred slot
-   (see PortraitScrollChoreography.tsx) — it descends across
-   the lime→dark edge and lands here.
+   Twilight-pastel chapter break: a periwinkle surface lit by a
+   mesh-gradient + grain + soft vignette (MeshGrain, mounted as the
+   background layer), ink-on-twilight text, cherry as the single pop
+   accent. Playful sticker-cards flank a centred portrait slot. The
+   portrait still travels from the hero into that slot
+   (see PortraitScrollChoreography.tsx) — it descends across the
+   lime→twilight edge and lands here, now luminous on pastel.
    ========================================================= */
 .skills-section-v3 {
   --portrait-w: calc(0.26 * min(100vw, 154.449svh, 2048px));
@@ -1588,21 +1635,29 @@ body:has(.works-root-v3) .site-nav-v3__contact:hover {
 
   /* Local var override: every descendant rule already reads
      --v3-text-dark / --v3-accent-red, so redefining them here flips
-     the whole subtree to off-white + lime with no per-rule churn. */
-  --v3-text-dark: var(--v3-skills-text);
-  --v3-accent-red: var(--v3-accent-lime);
+     the whole subtree to ink-on-twilight + cherry with no per-rule
+     churn. (Was off-white + lime for the old near-black surface.) */
+  --v3-text-dark: var(--v3-twilight-text);
+  --v3-accent-red: var(--v3-twilight-accent);
 
   position: relative;
   z-index: 2;
   min-height: 100svh;
   width: 100vw;
-  padding-top: var(--v3-nav-clearance);
+  /* Symmetric nav padding (was padding-top: full nav-clearance, which centred
+     the cluster in the BELOW-nav band and so sat it ~half-a-nav low). Splitting
+     the clearance top/bottom centres the inner — and therefore the slot, the
+     slot-anchored portrait, and the portrait-tracked bloom — on the TRUE
+     viewport centre, lifting the whole composition up a touch. */
+  padding-top: calc(var(--v3-nav-clearance) / 2);
+  padding-bottom: calc(var(--v3-nav-clearance) / 2);
   display: grid;
   place-items: center;
-  background: var(--v3-skills-surface);
-  color: var(--v3-skills-text);
+  /* Base periwinkle; MeshGrain paints the mesh + grain + vignette on top. */
+  background: var(--v3-twilight);
+  color: var(--v3-twilight-text);
   border-top: 1px solid
-    color-mix(in srgb, var(--v3-accent-lime) 70%, transparent);
+    color-mix(in srgb, var(--v3-twilight-accent) 60%, transparent);
   overflow: hidden;
 }
 
@@ -1629,31 +1684,14 @@ body:has(.works-root-v3) .site-nav-v3__contact:hover {
   gap: 0.55rem;
 }
 
-.skills-eyebrow-v3 {
-  margin: 0;
-  font-size: clamp(0.7rem, 0.8vw, 0.8rem);
-  font-weight: 500;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-  color: color-mix(in srgb, var(--v3-skills-text) 55%, transparent);
-}
-
+/* KineticHeading owns font-family (var(--font-display)) + its own variation
+   axis, so we only set size/colour/rhythm here — no font-family override. */
 .skills-title-v3 {
   margin: 0;
-  font-family: var(--font-pier, var(--font-noto, system-ui), serif);
-  font-size: clamp(2.25rem, 4.6vw, 4.5rem);
-  line-height: 1;
-  letter-spacing: -0.02em;
-  font-weight: 500;
-  color: var(--v3-skills-text);
-}
-
-.skills-keyline-v3 {
-  display: block;
-  width: 2.5rem;
-  height: 2px;
-  margin-top: 0.4rem;
-  background: var(--v3-accent-lime);
+  font-size: clamp(2.4rem, 5vw, 4.75rem);
+  line-height: 0.98;
+  letter-spacing: -0.03em;
+  color: var(--v3-twilight-text);
 }
 
 .skills-row-v3 {
@@ -1664,14 +1702,17 @@ body:has(.works-root-v3) .site-nav-v3__contact:hover {
      around the whole cluster, rather than text hugging the outer edges with
      two wide mid-voids. */
   grid-template-columns:
-    minmax(auto, 26rem) var(--portrait-w) minmax(auto, 24rem);
+    minmax(auto, 25rem) var(--portrait-w) minmax(auto, 24rem);
   /* Single row track LOCKED to the row's own (fixed) height. Items that
      overflow it — e.g. an expanded right-column row — render past the track
      without resizing it, so the left column and portrait never move. */
   grid-template-rows: 100%;
   align-items: stretch;
   justify-content: center;
-  gap: clamp(2.5rem, 5vw, 6rem);
+  /* Tighter than before: the flanks pull in toward the portrait so the whole
+     thing reads as ONE cluster orbiting the figure, not a centre + two far
+     sidebars (which left a dead mid-void on ultrawide). */
+  gap: clamp(1.25rem, 2.6vw, 3rem);
 }
 
 .skills-portrait-slot-v3 {
@@ -1704,314 +1745,313 @@ body:has(.works-root-v3) .site-nav-v3__contact:hover {
 /* Left flank — "Approach" voice block: a focal lead line, then a
    tighter, demoted set of traits. Intentionally top-weighted. */
 .skills-column-v3--soft {
-  gap: clamp(1.75rem, 4vh, 3rem);
+  /* Vertically CENTRED (override the base top-anchor): the headline is the
+     primary moment and should sit level with the portrait's centre, with the
+     demoted traits balanced below — no inherited top offset, and nothing falls
+     off the bottom of the viewport. The left column has no hover-expand, so
+     centring it can't cause reflow. */
+  justify-content: center;
+  padding-top: 0;
+  gap: clamp(1.4rem, 3.2vh, 2.4rem);
   align-items: flex-start;
   text-align: left;
   justify-self: start;
-  max-width: 26rem;
+  max-width: 25rem;
 }
 
 .skills-approach-lead-v3 {
   margin: 0.3rem 0 0;
   max-width: 30ch;
   font-size: clamp(1.3rem, 1.7vw, 1.9rem);
-  font-weight: 500;
-  line-height: 1.3;
-  letter-spacing: -0.01em;
-  color: var(--v3-skills-text);
+  font-weight: 600;
+  line-height: 1.25;
+  letter-spacing: -0.015em;
+  color: var(--v3-twilight-text);
   text-wrap: balance;
+}
+
+/* ── Sticker-card base ───────────────────────────────────────────────────
+   Shared by trait stickers (left) and spec cards (right): rounded pastel
+   panels with a soft shadow, a hairline keyline, and a playful resting tilt.
+   Pastel fill + tilt are set per nth-variant below. Hover lifts + levels. */
+.skills-sticker-v3 {
+  border-radius: var(--v3-radius-lg);
+  border: 1px solid color-mix(in srgb, var(--v3-twilight-text) 16%, transparent);
+  /* Physical-paper depth: a soft top highlight (inset) + a tight contact shadow
+     + a long ambient drop, so the cards separate clearly from the pastel
+     backdrop instead of reading as flat tinted rectangles. */
+  box-shadow: inset 0 1px 0 color-mix(in srgb, #fff 55%, transparent),
+    0 2px 4px color-mix(in srgb, var(--v3-twilight-deep) 30%, transparent),
+    0 20px 40px -22px color-mix(in srgb, var(--v3-twilight-deep) 90%, transparent);
+  /* NOTE: the playful tilt + hover lift use the INDEPENDENT `rotate:` /
+     `translate:` longhand properties, NOT `transform`. The scroll-reveal
+     timeline writes an inline `transform: translate()` on these cards (GSAP
+     `y`), which would clobber a `transform: rotate()`. Keeping tilt/lift on
+     `rotate`/`translate` lets the reveal's transform and the sticker's tilt
+     coexist, so the cards stay tilted after the reveal settles. */
+  transition: rotate 260ms cubic-bezier(0.22, 1, 0.36, 1),
+    scale 260ms cubic-bezier(0.22, 1, 0.36, 1),
+    translate 260ms cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 260ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Hover/focus = straighten + scale up a touch (NOT a translate lift). `scale`
+   is an independent transform property, so it composes with the GSAP reveal's
+   inline `transform: translate()` rather than clobbering it. */
+.skills-sticker-v3:hover,
+.skills-sticker-v3:focus-within {
+  rotate: 0deg;
+  scale: 1.05;
+  box-shadow: inset 0 1px 0 color-mix(in srgb, #fff 65%, transparent),
+    0 3px 6px color-mix(in srgb, var(--v3-twilight-deep) 35%, transparent),
+    0 30px 56px -20px color-mix(in srgb, var(--v3-twilight-deep) 95%, transparent);
+}
+
+/* Pastel fills + resting tilt for the right-flank spec cards, rotated across
+   the butter/mint/lilac/blush set so the stack reads as a playful scatter. */
+.skills-sticker-v3--s0 {
+  background: var(--v3-butter);
+  rotate: 1.8deg;
+}
+.skills-sticker-v3--s1 {
+  background: var(--v3-mint);
+  rotate: -1.6deg;
+}
+.skills-sticker-v3--s2 {
+  background: var(--v3-lilac);
+  rotate: 1.4deg;
+}
+.skills-sticker-v3--s3 {
+  background: var(--v3-blush);
+  rotate: -2deg;
 }
 
 .skills-traits-v3 {
   list-style: none;
-  margin: 0;
+  margin: 0.4rem 0 0;
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: clamp(0.65rem, 1.4svh, 1rem);
+  gap: clamp(0.45rem, 1.1svh, 0.75rem);
 }
 
+/* Trait — a SMALL pastel chip (same container family as the right-flank cards,
+   but deliberately smaller, flatter and UN-tilted so it stays clearly
+   subordinate to the technical capability cards). No dot. */
 .skills-trait-v3 {
-  display: flex;
-  align-items: baseline;
-  gap: 0.75rem;
+  display: grid;
+  gap: 0.05rem;
+  max-width: 17rem;
+  padding: clamp(0.45rem, 0.95svh, 0.65rem) clamp(0.7rem, 1.1vw, 0.95rem);
+  border-radius: 1rem;
+  border: 1px solid color-mix(in srgb, var(--v3-twilight-text) 11%, transparent);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, #fff 50%, transparent),
+    0 8px 18px -15px color-mix(in srgb, var(--v3-twilight-deep) 85%, transparent);
+  cursor: default;
+  transition: translate 220ms cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 220ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Softened pastels (mixed toward white so the left chips read quieter than the
+   saturated right cards), cycled across the set — with NO resting tilt. */
+.skills-trait-v3:nth-child(1) {
+  background: color-mix(in srgb, #fff 34%, var(--v3-blush));
+}
+.skills-trait-v3:nth-child(2) {
+  background: color-mix(in srgb, #fff 34%, var(--v3-lilac));
+}
+.skills-trait-v3:nth-child(3) {
+  background: color-mix(in srgb, #fff 34%, var(--v3-mint));
+}
+.skills-trait-v3:nth-child(4) {
+  background: color-mix(in srgb, #fff 34%, var(--v3-butter));
+}
+
+.skills-trait-v3:hover {
+  translate: 0 -2px;
+  box-shadow: inset 0 1px 0 color-mix(in srgb, #fff 60%, transparent),
+    0 12px 24px -16px color-mix(in srgb, var(--v3-twilight-deep) 90%, transparent);
 }
 
 .skills-trait-v3__title {
-  flex: 0 0 6.25rem;
-  font-size: clamp(0.95rem, 1.05vw, 1.0625rem);
-  font-weight: 600;
+  font-size: clamp(0.8rem, 0.9vw, 0.92rem);
+  font-weight: 700;
   letter-spacing: -0.005em;
-  color: var(--v3-skills-text);
+  color: var(--v3-twilight-text);
 }
 
 .skills-trait-v3__note {
-  font-size: clamp(0.8125rem, 0.95vw, 0.9375rem);
-  line-height: 1.4;
-  color: color-mix(in srgb, var(--v3-skills-text) 60%, transparent);
+  font-size: clamp(0.75rem, 0.85vw, 0.86rem);
+  line-height: 1.35;
+  color: color-mix(in srgb, var(--v3-twilight-text) 64%, transparent);
 }
 
-/* Right flank — numbered "Stack" spec register. */
+/* Right flank — "Stack" capability stickers, a looser modular column of
+   numbered pastel cards that slightly overlap and tilt. */
 .skills-column-v3--tech {
   position: relative;
-  gap: 0;
-  justify-self: end;
-  max-width: 24rem;
+  gap: clamp(0.55rem, 1.3svh, 0.95rem);
+  /* START, not end: the stack hugs the portrait's right edge so the cards read
+     as EMERGING from behind the figure rather than parked against the screen
+     edge as a detached sidebar. */
+  justify-self: start;
+  max-width: 23rem;
 }
 
 .skills-spec-v3 {
   position: relative;
+  z-index: 1;
   display: grid;
   grid-template-columns: auto 1fr;
-  gap: 0.85rem;
-  /* Wider left gutter seats the signal rail + node to the left of the index. */
-  padding: clamp(0.85rem, 1.7svh, 1.25rem) 0 clamp(0.85rem, 1.7svh, 1.25rem) 1.9rem;
-  border-top: 1px solid var(--v3-skills-hairline);
-  /* `filter: opacity()` for dimming so it never collides with the inline
-     `opacity` GSAP writes during the scroll reveal. */
-  filter: opacity(1);
-  transition: filter 180ms cubic-bezier(0.33, 1, 0.68, 1);
+  gap: 0.2rem 0.85rem;
+  padding: clamp(0.8rem, 1.5svh, 1.15rem) clamp(1rem, 1.5vw, 1.35rem);
+  cursor: default;
 }
 
-.skills-spec-v3:last-child {
-  border-bottom: 1px solid var(--v3-skills-hairline);
+/* Tighten the stack into a slightly-overlapping fan. The overlap (≈ the body's
+   reserved bottom strip) tucks each card's hover-only glyph row under the next
+   card at rest, so the resting cards read as a snug stack of title + note. */
+.skills-spec-v3 + .skills-spec-v3 {
+  margin-top: -2.2rem;
+}
+
+/* Progressive rightward offset down the stack — a deliberate DIAGONAL rhythm
+   (top card nearest the portrait, each lower card stepped further out) so the
+   four cards cascade as one choreographed move instead of a loose scatter. */
+.skills-spec-v3:nth-child(1) {
+  margin-left: 0;
+}
+.skills-spec-v3:nth-child(2) {
+  margin-left: clamp(0.5rem, 1.4vw, 1.3rem);
+}
+.skills-spec-v3:nth-child(3) {
+  margin-left: clamp(1rem, 2.6vw, 2.4rem);
+}
+.skills-spec-v3:nth-child(4) {
+  margin-left: clamp(1.4rem, 3.6vw, 3.2rem);
 }
 
 .skills-spec-v3:focus-visible {
-  outline: 2px solid color-mix(in srgb, var(--v3-accent-lime) 55%, transparent);
+  outline: 2px solid color-mix(in srgb, var(--v3-cherry) 60%, transparent);
   outline-offset: 4px;
-  border-radius: 2px;
 }
 
-/* Signal rail — a faint vertical rail threads the numbered rows, softened by a
-   vertical mask so it reads as quiet ticks behind each number rather than a
-   continuous timeline bar. A small node sits on it at each number; the active
-   row brightens its rail tick and lights its node in lime. Low visual weight by
-   design — it supports the capability stack, it isn't the headline. Built from
-   pseudo-elements only — no extra DOM. */
-.skills-spec-v3::before {
-  content: "";
-  position: absolute;
-  left: 0.7rem;
-  top: 0;
-  bottom: 0;
-  width: 1px;
-  transform: translateX(-50%);
-  background: color-mix(in srgb, var(--v3-skills-text) 10%, transparent);
-  -webkit-mask-image: linear-gradient(
-    to bottom,
-    transparent,
-    #000 20%,
-    #000 80%,
-    transparent
-  );
-  mask-image: linear-gradient(
-    to bottom,
-    transparent,
-    #000 20%,
-    #000 80%,
-    transparent
-  );
-  transition: background 200ms cubic-bezier(0.33, 1, 0.68, 1);
-}
-
-/* Node — a small quiet dot seated on the rail, vertically centred on the number
-   (anchored to the index box, so it tracks the number regardless of the row's
-   clamp padding). */
-.skills-spec-v3__index::before {
-  content: "";
-  position: absolute;
-  left: -1.37rem;
-  top: 50%;
-  width: 0.34rem;
-  height: 0.34rem;
-  transform: translateY(-50%);
-  border-radius: 50%;
-  background: color-mix(in srgb, var(--v3-skills-text) 26%, transparent);
-  transition: background 200ms cubic-bezier(0.33, 1, 0.68, 1),
-    box-shadow 200ms cubic-bezier(0.33, 1, 0.68, 1);
-}
-
-/* Active row — rail tick brightens to lime, node fills lime + gently glows. */
-.skills-spec-v3:hover::before,
-.skills-spec-v3:focus-within::before {
-  background: color-mix(in srgb, var(--v3-accent-lime) 55%, transparent);
-}
-
-.skills-spec-v3:hover .skills-spec-v3__index::before,
-.skills-spec-v3:focus-within .skills-spec-v3__index::before {
-  background: var(--v3-accent-lime);
-  box-shadow: 0 0 9px color-mix(in srgb, var(--v3-accent-lime) 55%, transparent);
-}
-
+/* Numbered chip — a small cherry-tinted counter pinned to the card. */
 .skills-spec-v3__index {
-  position: relative;
+  grid-row: span 2;
   align-self: start;
-  padding-top: 0.12em;
-  font-size: clamp(0.7rem, 0.8vw, 0.8rem);
-  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.85rem;
+  height: 1.85rem;
+  padding: 0 0.4rem;
+  border-radius: var(--v3-radius-pill);
+  background: color-mix(in srgb, var(--v3-cherry) 16%, transparent);
+  font-size: clamp(0.72rem, 0.82vw, 0.82rem);
+  font-weight: 700;
   font-variant-numeric: tabular-nums;
-  letter-spacing: 0.12em;
-  line-height: 1.15;
-  color: color-mix(in srgb, var(--v3-skills-text) 62%, transparent);
-  transition: color 180ms ease-out, text-shadow 180ms ease-out;
+  letter-spacing: 0.06em;
+  line-height: 1;
+  color: var(--v3-twilight-accent);
+  transition: background 180ms ease-out, color 180ms ease-out;
+}
+
+.skills-spec-v3:hover .skills-spec-v3__index,
+.skills-spec-v3:focus-within .skills-spec-v3__index {
+  background: var(--v3-twilight-accent);
+  color: var(--v3-butter);
 }
 
 .skills-spec-v3__body {
+  position: relative;
   display: flex;
   flex-direction: column;
   gap: 0.3rem;
   min-width: 0;
+  /* Reserve room for the hover-only glyph row (absolutely positioned in this
+     strip), so revealing it is pure opacity — it never grows the card or shifts
+     anything. The overlapping stack tucks this strip under the next card at
+     rest, so it doesn't read as empty padding. */
+  padding-bottom: 1.4rem;
 }
 
 .skills-spec-v3__title {
   margin: 0;
   font-size: clamp(1.0625rem, 1.3vw, 1.375rem);
-  font-weight: 600;
-  letter-spacing: -0.005em;
+  font-weight: 700;
+  letter-spacing: -0.01em;
   line-height: 1.15;
-  color: var(--v3-skills-text);
-  transition: color 180ms ease-out, text-shadow 180ms ease-out;
+  color: var(--v3-twilight-text);
+  transition: color 180ms ease-out;
 }
 
 .skills-spec-v3__note {
   margin: 0;
   font-size: clamp(0.8125rem, 0.95vw, 0.9375rem);
   line-height: 1.4;
-  color: color-mix(in srgb, var(--v3-skills-text) 72%, transparent);
+  color: color-mix(in srgb, var(--v3-twilight-text) 75%, transparent);
 }
 
-/* Detail register — proof line + tools. Collapsed to zero height at rest so
-   every row reads as just title + main line (premium first). Only the active
-   row (hover / keyboard focus) expands it, via an animated grid-row height so
-   siblings ease apart instead of snapping. No paragraph wall at rest. */
-.skills-spec-v3__detail {
-  display: grid;
-  grid-template-rows: 0fr;
-  transition: grid-template-rows 360ms cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-.skills-spec-v3__detail-inner {
-  min-height: 0;
-  overflow: hidden;
-  opacity: 0;
-  transform: translateY(-4px);
-  transition: opacity 240ms cubic-bezier(0.22, 1, 0.36, 1),
-    transform 300ms cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-.skills-spec-v3:hover .skills-spec-v3__detail,
-.skills-spec-v3:focus-within .skills-spec-v3__detail {
-  grid-template-rows: 1fr;
-}
-
-.skills-spec-v3:hover .skills-spec-v3__detail-inner,
-.skills-spec-v3:focus-within .skills-spec-v3__detail-inner {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-/* Quiet proof line — one concise, concrete evidence line. Dimmer + smaller
-   than the note so it reads as supporting detail, not a second headline. */
-.skills-spec-v3__proof {
-  margin: 0.45rem 0 0;
-  font-size: clamp(0.75rem, 0.86vw, 0.84375rem);
-  line-height: 1.4;
-  letter-spacing: 0.005em;
-  color: color-mix(in srgb, var(--v3-skills-text) 50%, transparent);
-}
-
+/* Tech glyph row — small monochrome brand icons. HIDDEN at rest; revealed only
+   when the card is hovered/focused. Absolutely positioned in the body's
+   reserved bottom strip, so the reveal is a pure fade that affects NO layout
+   (no card grows, nothing below moves). */
 .skills-spec-v3__tools {
-  list-style: none;
-  margin: 0.55rem 0 0;
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  margin: 0;
   padding: 0;
+  list-style: none;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0.12rem 0;
-  /* Visibility is owned by the parent `.skills-spec-v3__detail` collapse. The
-     tools read as quiet inline text — `Node · Express · SQL` — not pills, so
-     the technical detail stays useful but never busy. */
+  gap: 0.4rem 0.6rem;
+  opacity: 0;
+  transform: translateY(5px);
+  transition: opacity 200ms ease-out,
+    transform 260ms cubic-bezier(0.22, 1, 0.36, 1);
+  pointer-events: none;
+}
+
+.skills-spec-v3:hover .skills-spec-v3__tools,
+.skills-spec-v3:focus-within .skills-spec-v3__tools {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 .skills-spec-v3__tool {
   display: inline-flex;
   align-items: center;
-  font-size: clamp(0.6875rem, 0.78vw, 0.78rem);
-  letter-spacing: 0.01em;
-  line-height: 1.55;
-  white-space: nowrap;
-  color: color-mix(in srgb, var(--v3-skills-text) 55%, transparent);
-  opacity: 0;
-  transition: color 180ms ease-out, opacity 220ms ease-out;
+  color: color-mix(in srgb, var(--v3-twilight-text) 62%, transparent);
 }
 
-.skills-spec-v3__tool::after {
-  content: "·";
-  margin: 0 0.45rem;
-  color: color-mix(in srgb, var(--v3-skills-text) 30%, transparent);
+.skills-spec-v3__tool-icon {
+  width: clamp(0.95rem, 1.05vw, 1.15rem);
+  height: clamp(0.95rem, 1.05vw, 1.15rem);
+  display: block;
 }
 
-.skills-spec-v3__tool:last-child::after {
-  content: none;
-}
-
-/* Subtle left-to-right stagger as the active row's tools fade in. Delay lives
-   only in the active rule, so leaving the row fades them out immediately. */
-.skills-spec-v3:hover .skills-spec-v3__tool,
-.skills-spec-v3:focus-within .skills-spec-v3__tool {
-  opacity: 1;
-}
-
-.skills-spec-v3:hover .skills-spec-v3__tool:nth-child(2),
-.skills-spec-v3:focus-within .skills-spec-v3__tool:nth-child(2) {
-  transition-delay: 40ms;
-}
-
-.skills-spec-v3:hover .skills-spec-v3__tool:nth-child(3),
-.skills-spec-v3:focus-within .skills-spec-v3__tool:nth-child(3) {
-  transition-delay: 80ms;
-}
-
-.skills-spec-v3:hover .skills-spec-v3__tool:nth-child(4),
-.skills-spec-v3:focus-within .skills-spec-v3__tool:nth-child(4) {
-  transition-delay: 120ms;
-}
-
-.skills-spec-v3:hover .skills-spec-v3__tool:nth-child(n + 5),
-.skills-spec-v3:focus-within .skills-spec-v3__tool:nth-child(n + 5) {
-  transition-delay: 160ms;
-}
-
-/* Active-row treatment. The other rows recede but stay clearly READABLE
-   (not disabled); the active row promotes quietly — lime lands on the TITLE
-   only, while the index and tools just brighten in the neutral off-white.
-   Keeps the accent from shouting across number + title + tools at once. */
+/* The other cards recede a touch on column-hover; the active card stays full
+   strength and rises to the TOP of the overlapping stack (z-index), its title
+   going cherry. (The scale + straighten lift lives on .skills-sticker-v3:hover.) */
 .skills-column-v3--tech:hover .skills-spec-v3,
 .skills-column-v3--tech:focus-within .skills-spec-v3 {
-  filter: opacity(0.72);
+  filter: opacity(0.8);
   transition: filter 200ms cubic-bezier(0.33, 1, 0.68, 1);
 }
 
 .skills-column-v3--tech .skills-spec-v3:hover,
 .skills-column-v3--tech .skills-spec-v3:focus-within {
   filter: opacity(1);
+  z-index: 10;
 }
 
 .skills-spec-v3:hover .skills-spec-v3__title,
 .skills-spec-v3:focus-within .skills-spec-v3__title {
-  color: var(--v3-accent-lime);
-  text-shadow: 0 0 14px color-mix(in srgb, var(--v3-accent-lime) 20%, transparent);
-}
-
-.skills-spec-v3:hover .skills-spec-v3__index,
-.skills-spec-v3:focus-within .skills-spec-v3__index {
-  color: color-mix(in srgb, var(--v3-skills-text) 90%, transparent);
-}
-
-.skills-spec-v3:hover .skills-spec-v3__tool,
-.skills-spec-v3:focus-within .skills-spec-v3__tool {
-  color: color-mix(in srgb, var(--v3-skills-text) 82%, transparent);
+  color: var(--v3-twilight-accent);
 }
 
 @media (hover: none) {
@@ -2019,18 +2059,16 @@ body:has(.works-root-v3) .site-nav-v3__contact:hover {
     filter: opacity(1);
   }
 
-  /* Touch: no hover affordance, so keep every row's detail open and visible. */
-  .skills-spec-v3__detail {
-    grid-template-rows: 1fr;
+  /* Touch: no hover, so render the glyph row inline + always on. */
+  .skills-spec-v3__body {
+    padding-bottom: 0;
   }
 
-  .skills-spec-v3__detail-inner {
+  .skills-spec-v3__tools {
+    position: static;
     opacity: 1;
     transform: none;
-  }
-
-  .skills-spec-v3__tool {
-    opacity: 1;
+    margin-top: 0.55rem;
   }
 }
 
@@ -2067,6 +2105,30 @@ body:has(.works-root-v3) .site-nav-v3__contact:hover {
     max-width: none;
   }
 
+  /* Neutralise the desktop diagonal offsets + overlap so the cards stack
+     cleanly in the mobile grid. */
+  .skills-spec-v3 + .skills-spec-v3 {
+    margin-top: 0;
+  }
+
+  .skills-spec-v3:nth-child(even),
+  .skills-spec-v3:nth-child(odd) {
+    margin-left: 0;
+    margin-right: 0;
+  }
+
+  /* Glyph row inline + always visible on stacked layouts (no hover dance). */
+  .skills-spec-v3__body {
+    padding-bottom: 0;
+  }
+
+  .skills-spec-v3__tools {
+    position: static;
+    opacity: 1;
+    transform: none;
+    margin-top: 0.55rem;
+  }
+
   .skills-spotlight-v3 {
     display: none;
   }
@@ -2083,130 +2145,70 @@ body:has(.works-root-v3) .site-nav-v3__contact:hover {
   .skills-spec-v3__index,
   .skills-spec-v3__title,
   .skills-spec-v3__tool,
-  .skills-spec-v3__tools,
-  .skills-spec-v3__detail,
-  .skills-spec-v3__detail-inner {
+  .skills-spec-v3__tools {
     transition: opacity 160ms linear;
   }
 
-  /* Minimal movement: reveal is a plain crossfade, no translate. */
-  .skills-spec-v3__detail-inner {
-    transform: none;
+  /* No scale/translate on the hover lift under reduced motion. */
+  .skills-sticker-v3:hover,
+  .skills-sticker-v3:focus-within {
+    scale: 1;
+    translate: 0 0;
   }
 
-  .skills-spec-v3:hover .skills-spec-v3__detail-inner,
-  .skills-spec-v3:focus-within .skills-spec-v3__detail-inner {
+  .skills-spec-v3:hover .skills-spec-v3__tools,
+  .skills-spec-v3:focus-within .skills-spec-v3__tools {
     transform: none;
   }
 }
 
-/* Nav contrast flip while the dark skills section sits behind the fixed nav.
-   Toggled by NavThemeObserver; mirrors the body:has(.works-root-v3) block. */
+/* Nav contrast flip while the skills section sits behind the fixed nav.
+   Toggled by NavThemeObserver. The covered surface is now mid-tone twilight
+   (#9D9AD6, a LIGHT periwinkle), so the nav switches to DARK ink (not the old
+   off-white) to keep AA contrast against twilight. Cherry is the hover pop. */
 body[data-nav-theme="dark"] .site-nav-v3__logo,
 body[data-nav-theme="dark"] .site-nav-v3__link {
-  color: color-mix(in srgb, var(--v3-skills-text) 92%, transparent);
+  color: var(--v3-twilight-text);
 }
 
 body[data-nav-theme="dark"] .site-nav-v3__link::after {
-  background: var(--v3-skills-text);
+  background: var(--v3-twilight-text);
 }
 
 body[data-nav-theme="dark"] .site-nav-v3__contact {
-  background: rgba(237, 235, 224, 0.1);
-  color: var(--v3-skills-text);
-  border: 1px solid rgba(237, 235, 224, 0.2);
+  /* Filled ink, not a faint translucent outline — a confident button against
+     the light twilight surface (was washed out before). Cherry on hover. */
+  background: var(--v3-twilight-text);
+  color: var(--v3-butter);
+  border: 1px solid var(--v3-twilight-text);
   backdrop-filter: blur(10px);
 }
 
 body[data-nav-theme="dark"] .site-nav-v3__contact:hover {
-  background: var(--v3-accent-lime);
-  color: var(--v3-skills-surface);
-  border-color: var(--v3-accent-lime);
+  background: var(--v3-twilight-accent);
+  color: var(--v3-butter);
+  border-color: var(--v3-twilight-accent);
 }
 
 /* =========================================================
-   V3 SKILLS — cinematic depth. Layered background stack (bottom → top):
-     surface colour  →  ::before halo  →  spotlight key light  →
-     ::after vignette  →  grain  →  content (.skills-inner-v3).
-   A dusk colour-grade is applied to the (hero-shared) portrait only while
-   it sits in the dark section — gated by --pg so the hero stays untouched.
-   The portrait itself lives in the hero stacking context (z-index 5 > the
-   section's 2), so it floats above every layer here — the halo stages it.
+   V3 SKILLS — cinematic depth, twilight-pastel edition. The cinematic feel now
+   comes from <MeshGrain variant="twilight" /> (mesh-gradient + film grain + a
+   soft periwinkle vignette), mounted as the section's z-0 background layer —
+   NOT from darkness. The old near-black ::before halo / ::after vignette /
+   grain div are gone; only a soft pastel portrait keylight remains.
+   A twilight colour-grade is applied to the (hero-shared) portrait while it
+   sits in this section — gated by --pg so the hero stays untouched. The
+   portrait lives in the hero stacking context (z-index 5 > the section's 2),
+   so it floats above every layer here — the keylight stages it.
    ========================================================= */
 .skills-inner-v3 {
   z-index: 3;
 }
 
-/* Cinematic halo — a layered radial atmosphere staged behind the portrait and
-   bleeding toward the right skills column. A smoky steel-blue key light sits at
-   the figure, a quiet olive bleed leans into the right column, and a barely-
-   there warm rust undertone answers the hero wordmark. A near-transparent conic
-   adds organic, non-uniform drift (closed loop blue→olive→rust→blue, so no seam
-   and no rainbow). Static — the depth is in the composition, not motion, so it
-   costs nothing on the GPU and is unaffected by reduced-motion. Covers the full
-   section and fades into the surface; never a visible rectangle. */
-.skills-section-v3::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  background:
-    /* organic drift — closed loop, very low alpha, mostly blue (no rainbow) */
-    conic-gradient(
-      from 210deg at 54% 42%,
-      rgba(96, 128, 178, 0.1),
-      rgba(140, 168, 120, 0.05),
-      rgba(184, 92, 60, 0.04),
-      rgba(96, 128, 178, 0.1)
-    ),
-    /* warm rust undertone — sparing, lower-left, answers the hero wordmark */
-    radial-gradient(
-      44% 42% at 39% 67%,
-      rgba(184, 92, 60, 0.09),
-      transparent 72%
-    ),
-    /* sage/olive secondary glow — bled into the right skills column */
-    radial-gradient(
-      46% 46% at 73% 52%,
-      rgba(150, 180, 120, 0.2),
-      transparent 72%
-    ),
-    /* broad smoky-blue bloom — fills the centre stage generously */
-    radial-gradient(
-      60% 68% at 50% 43%,
-      rgba(64, 100, 156, 0.3),
-      transparent 75%
-    ),
-    /* steel-blue key light — bright core crowning the figure's head */
-    radial-gradient(
-      38% 44% at 51% 40%,
-      rgba(116, 152, 206, 0.48),
-      transparent 66%
-    );
-}
-
-/* Vignette — pulls every edge back toward near-black so the section stays
-   black-dominant and the halo reads as contained light, never a lit panel. */
-.skills-section-v3::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  pointer-events: none;
-  background: radial-gradient(
-    108% 95% at 51% 44%,
-    transparent 50%,
-    rgba(5, 8, 5, 0.5) 84%,
-    rgba(3, 5, 3, 0.84) 100%
-  );
-}
-
-/* Focused key light — a tighter, brighter steel-blue core seated right at the
-   figure, layered over the broad ::before halo so the portrait gets a distinct
-   backlight and reads as STAGED, not pasted on. Radial + feathered (never a
-   rectangle or hard spotlight), centred on the slot the portrait lands in.
-   Desktop-only; hidden < 1100px. */
+/* Soft pastel portrait keylight — a gentle, warm-white bloom seated where the
+   portrait lands, so the figure reads as STAGED against the periwinkle mesh
+   without any darkness. Radial + feathered (never a rectangle), behind the
+   content (z-1, above the MeshGrain at z-0). Desktop-only; hidden < 1100px. */
 .skills-spotlight-v3 {
   display: none;
 }
@@ -2215,47 +2217,92 @@ body[data-nav-theme="dark"] .site-nav-v3__contact:hover {
   .skills-spotlight-v3 {
     display: block;
     position: absolute;
-    left: 51%;
-    top: 44%;
-    width: min(40vw, 34rem);
-    height: min(68vh, 48rem);
+    left: 50%;
+    top: 47%;
+    width: min(82vw, 74rem);
+    height: min(96vh, 60rem);
     transform: translate(-50%, -50%);
     pointer-events: none;
-    z-index: 0;
+    z-index: 1;
+    /* The "sun" of the section: a large warm core (cream → peach) bleeding
+       through blush → lilac into the periwinkle field — wide enough to touch
+       the headline on the left and the capability cards on the right, so the
+       whole composition reads as ORBITING the portrait. Screen blend lifts the
+       surface into a glow rather than painting a flat disc on it. */
     background: radial-gradient(
-      ellipse 50% 50% at 50% 50%,
-      rgba(150, 176, 214, 0.2) 0%,
-      rgba(120, 146, 184, 0.08) 44%,
-      transparent 72%
+      ellipse 42% 46% at 50% 47%,
+      color-mix(in srgb, var(--v3-butter) 90%, #fff 10%) 0%,
+      color-mix(in srgb, var(--color-orange) 60%, transparent) 20%,
+      color-mix(in srgb, var(--v3-blush) 42%, transparent) 40%,
+      color-mix(in srgb, var(--v3-lilac) 30%, transparent) 60%,
+      transparent 80%
     );
+    mix-blend-mode: screen;
+    filter: saturate(1.05);
+  }
+
+  /* Grain confined to the halo so the aura reads as TEXTURED light (film/print
+     grain), not a clean CSS gradient. Masked to the core so it fades with the
+     glow. */
+  .skills-spotlight-v3::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: var(--grain-url);
+    background-size: 200px 200px;
+    mix-blend-mode: overlay;
+    opacity: 0.5;
+    -webkit-mask-image: radial-gradient(
+      ellipse 46% 50% at 50% 47%,
+      #000 0%,
+      #000 38%,
+      transparent 78%
+    );
+    mask-image: radial-gradient(
+      ellipse 46% 50% at 50% 47%,
+      #000 0%,
+      #000 38%,
+      transparent 78%
+    );
+  }
+
+  /* Corner vignette — pulls the frame edges down into a deeper dusty-purple so
+     the warm centre reads brighter and the section feels cinematically staged
+     instead of an even pastel field. Above the halo (DOM order), below content
+     (z-3). */
+  .skills-section-v3::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 1;
+    background: radial-gradient(
+      ellipse 80% 82% at 50% 46%,
+      transparent 50%,
+      color-mix(in srgb, var(--v3-twilight-deep) 50%, transparent) 100%
+    );
+    mix-blend-mode: multiply;
   }
 }
 
-.skills-grain-v3 {
-  position: absolute;
-  inset: 0;
-  z-index: 2;
-  pointer-events: none;
-  opacity: 0.2;
-  mix-blend-mode: overlay;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.62' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncA type='discrete' tableValues='1'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  background-repeat: repeat;
-}
-
-/* Dusk colour-grade on the shared portrait, only inside the dark section. */
-/* Dusk grade scrubbed by --pg (0 in hero → 1 settled in dark section). No CSS
+/* Twilight colour-grade on the shared portrait, only inside this section. */
+/* Grade scrubbed by --pg (0 in hero → 1 settled in skills section). No CSS
    transition: PortraitScrollChoreography sets --pg per frame, so the grade
-   tracks scroll and reverses symmetrically (no pop at the seam). The mask
-   vignette (see base rule) is driven by the same --pg. */
+   tracks scroll and reverses symmetrically (no pop at the seam). */
 .hero-pratiush-photo-v3 {
-  /* Clean low-key grade. Source is a transparent cutout, so there is no
-     backdrop to hide — the figure already sits directly on the dark section.
-     The grade only refines it: gently desaturate to a near-monochrome
-     cinematic figure and lift mids a touch so the shirt + body stay readable
-     against the near-black, rather than crushing into the surface. */
-  filter: contrast(calc(1 + 0.16 * var(--pg, 0)))
-    brightness(calc(1 + 0.06 * var(--pg, 0)))
-    saturate(calc(1 - 0.5 * var(--pg, 0)));
+  /* Luminous pastel grade. The source is a transparent cutout, so the figure
+     sits directly on the periwinkle mesh. Unlike the old near-black room (which
+     desaturated to a low-key monochrome figure), twilight is LIGHT — so we keep
+     the portrait natural: a hair more warmth + brightness so it glows on the
+     pastel, with only the faintest desaturation so it harmonises without going
+     grey or crushing dark. */
+  filter: contrast(calc(1 + 0.09 * var(--pg, 0)))
+    brightness(calc(1 + 0.04 * var(--pg, 0)))
+    saturate(calc(1 - 0.06 * var(--pg, 0)))
+    drop-shadow(
+      0 calc(22px * var(--pg, 0)) calc(34px * var(--pg, 0))
+        color-mix(in srgb, var(--v3-twilight-deep) 45%, transparent)
+    );
 }
 
 /* NO opaque overlay. The cutout's transparent background already reveals the
@@ -2283,11 +2330,11 @@ body[data-nav-theme="dark"] .site-nav-v3__contact:hover {
 }
 
 body[data-nav-theme="dark"] .site-nav-v3__contact {
-  border-color: rgba(237, 235, 224, 0.32);
-  box-shadow: 0 8px 22px -10px rgba(0, 0, 0, 0.6);
+  border-color: color-mix(in srgb, var(--v3-twilight-text) 24%, transparent);
+  box-shadow: 0 8px 22px -10px color-mix(in srgb, var(--v3-twilight-deep) 70%, transparent);
 }
 
 body[data-nav-theme="dark"] .site-nav-v3__contact:hover {
-  box-shadow: 0 0 0 1px color-mix(in srgb, var(--v3-accent-lime) 40%, transparent),
-    0 12px 32px -8px color-mix(in srgb, var(--v3-accent-lime) 45%, transparent);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--v3-twilight-accent) 45%, transparent),
+    0 12px 32px -8px color-mix(in srgb, var(--v3-twilight-accent) 45%, transparent);
 }

@@ -2,12 +2,14 @@
 
 import { useEffect } from "react";
 
+import { NAV_LINE_PX, resetNavTheme, setSectionAtNav } from "./nav-theme";
+
 // The global fixed nav uses dark ink, which vanishes over the dark skills
 // section. This watches a 1px detection line at the nav's vertical band and
-// flips `data-nav-theme="dark"` on <body> while the dark section sits behind
-// the nav, so CSS can swap the nav to off-white (see globals.css).
-const NAV_LINE_PX = 56;
-
+// reports whether the dark section's box is crossing it. The actual flip to
+// off-white is gated in nav-theme.ts so it only happens once the dark visually
+// covers the nav (during the desktop bloom the section is at the nav line while
+// still masked — see SkillsSection / nav-theme.ts).
 export function NavThemeObserver() {
   useEffect(() => {
     const target = document.querySelector<HTMLElement>(".skills-section-v3");
@@ -15,18 +17,13 @@ export function NavThemeObserver() {
 
     let observer: IntersectionObserver | null = null;
 
-    const setTheme = (dark: boolean) => {
-      if (dark) document.body.dataset.navTheme = "dark";
-      else delete document.body.dataset.navTheme;
-    };
-
     const build = () => {
       observer?.disconnect();
       // Isolate a 1px observation band at y = NAV_LINE_PX so the flip fires
       // only while the section actually crosses the nav, not on mere entry.
       const bottom = -(window.innerHeight - NAV_LINE_PX - 1);
       observer = new IntersectionObserver(
-        ([entry]) => setTheme(entry.isIntersecting),
+        ([entry]) => setSectionAtNav(entry.isIntersecting),
         { rootMargin: `${-NAV_LINE_PX}px 0px ${bottom}px 0px`, threshold: 0 },
       );
       observer.observe(target);
@@ -38,7 +35,7 @@ export function NavThemeObserver() {
     return () => {
       window.removeEventListener("resize", build);
       observer?.disconnect();
-      setTheme(false);
+      resetNavTheme();
     };
   }, []);
 
