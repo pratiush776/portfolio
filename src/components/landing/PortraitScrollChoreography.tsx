@@ -94,8 +94,8 @@ const SKILL_REVEAL_DUR = 0.26; // each item's fly-in window (bigger = slower, he
 // hold the depth + tilt magnitudes of the dive. No per-side rotationY (that
 // asymmetry is what made left vs right look different). They share one vanishing
 // point via the CSS `perspective` on .skills-inner-v3.
-const SKILL_DIVE_Z = 1800; // how deep in Z each item starts (px, pre-perspective)
-const SKILL_DIVE_TILT = 12; // gentle top-back tilt as it flies forward (deg)
+const SKILL_DIVE_Z = 1100; // how deep in Z each item starts (px, pre-perspective)
+const SKILL_DIVE_TILT = 7; // gentle top-back tilt as it flies forward (deg)
 // Once the parting front passes this, the dark twilight has filled behind the
 // nav, so the off-white nav is allowed (see nav-theme bloomCovers signal).
 const NAV_CLEAR_PROGRESS = 0.82;
@@ -128,7 +128,11 @@ const HERO_LAYER_SPECS: { selector: string; depth: number; order: number }[] = [
   { selector: ".hero-pratiush-v3--main", depth: WORDMARK_DEPTH, order: WORDMARK_ORDER },
   { selector: ".hero-domains-v3", depth: 0.62, order: 2 },
   { selector: ".hero-locator-v3", depth: 0.55, order: 2 },
-  { selector: ".works-cta-v3", depth: 0.5, order: 3 },
+  // order 0 (peels with the greeting): the badge sits low in the hero and would
+  // otherwise still be partially opaque when page-scroll carries it to the
+  // viewport top — a half-clipped artifact. Fading it out first means it's gone
+  // before it reaches the top edge.
+  { selector: ".works-cta-v3", depth: 0.5, order: 0 },
 ];
 
 // offsetTop chain — gives docY without including any current transforms
@@ -403,7 +407,7 @@ export function PortraitScrollChoreography() {
       const holdConst = finalY - scrollB;
       // Cinematic scale ramp: 1.0 through the hero hold, grows to ~1.15 across
       // the descent, then holds. Independent of the px `y` translate.
-      const SCALE_SETTLED = 1.26;
+      const SCALE_SETTLED = 1.3;
       let y: number;
       let scale: number;
       // Grade progress 0→1, scrubbed in lockstep with the descent (drives the
@@ -520,6 +524,15 @@ export function PortraitScrollChoreography() {
         String(skyForm * (1 - exitP)),
       );
 
+      // ── Duotone lead — warm the figure into its graphic silhouette a touch
+      // AHEAD of the landing grade (--pg), riding the sky/cloud envelope so it
+      // recolours as it enters the bank rather than popping at the end. Takes the
+      // stronger of the two so it never lags --pg on the way out.
+      document.documentElement.style.setProperty(
+        "--duo",
+        String(Math.max(pg, skyForm * (1 - exitP))),
+      );
+
       // ── Item reveals — one at a time, each flying OUT from the shared centre
       // (the vanishing point) to its scattered rest: start at (centre, deep Z,
       // tilted), settle to (rest, z 0, flat). Pure functions of pinProgress (no
@@ -600,6 +613,7 @@ export function PortraitScrollChoreography() {
       document.documentElement.style.removeProperty("--sky");
       document.documentElement.style.removeProperty("--bloom");
       document.documentElement.style.removeProperty("--ghost");
+      document.documentElement.style.removeProperty("--duo");
       gsap.set(portrait, { clearProps: "all" });
       portrait.style.removeProperty("--pg");
       const heroEls = heroLayers.map((l) => l.el);

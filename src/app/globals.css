@@ -601,7 +601,10 @@ button {
    animation (the filter never rebuilds), so this stays compositor-safe — the
    figure becomes a deliberate graphic silhouette, not a candid grey photo. */
 .hero-photo-v3__image--duo {
-  opacity: var(--pg, 0);
+  /* --duo leads a touch ahead of --pg (set by the choreography off the cloud/sky
+     envelope) so the figure starts warming as it enters the bank, not only on
+     landing. Falls back to --pg if --duo is unset. */
+  opacity: var(--duo, var(--pg, 0));
   filter: url(#v3-duotone);
   will-change: opacity;
 }
@@ -1787,16 +1790,19 @@ body:has(.works-root-v3) .site-nav-v3__contact:hover {
 .skills-ghost-v3 {
   position: absolute;
   left: 50%;
-  top: 50%;
+  /* Seated low-centre, behind the figure's lower body, on a clear baseline. */
+  top: 60%;
   z-index: 0;
   font-family: var(--font-display);
   font-weight: 800;
-  font-size: clamp(9rem, 26vw, 30rem);
+  /* Oversized so the word bleeds off BOTH side edges — an intentional cropped
+     slab, not a contained watermark. */
+  font-size: clamp(14rem, 38vw, 46rem);
   line-height: 0.8;
   letter-spacing: -0.05em;
   white-space: nowrap;
   text-transform: uppercase;
-  color: color-mix(in srgb, var(--v3-twilight-text) 7%, transparent);
+  color: color-mix(in srgb, var(--v3-twilight-text) 11%, transparent);
   opacity: var(--ghost, 0);
   /* Centre + a small upward settle and scale-up as it fades in. var(--ghost) is a
      unitless 0→1; both terms are compositor-only transforms. */
@@ -1859,34 +1865,35 @@ body:has(.works-root-v3) .site-nav-v3__contact:hover {
   visibility: hidden;
 }
 
-/* ── Spatial scatter positions ─────────────────────────────────────────────
-   A deliberate constellation around the centred portrait — balanced left/right
-   with varied verticals. Anchored by EDGE (left/right + top), never transform,
-   so the GSAP reveal (which writes `transform`) and the sticker resting tilt
-   (independent `rotate:`) stay free. These coordinates are the primary
-   eyeball-tune for the layout. Pulled in toward the centre (off the rim) vs.
-   the first pass, so the cluster orbits the portrait, not the edges. */
+/* ── Organized-chaos scatter positions ─────────────────────────────────────
+   A deliberate, BALANCED constellation around the centred figure — NOT a grid.
+   Heading anchors the upper-left; trait chips tumble down the lower-left at varied
+   insets + tilts; capability cards cascade the right flank at varied insets, sizes
+   and tilts, a couple pulled IN so they tuck behind the figure (z1 vs z5). The
+   chaos is composed: weight is spread top↔bottom and left↔right, nothing collides,
+   and every tilt reads intentional. Anchored by EDGE (never transform) so the GSAP
+   reveal owns `transform`; tilt lives on the independent `rotate:`. Primary
+   eyeball-tune for the look. */
 .skills-pos-head {
   left: 3%;
   top: 9%;
   max-width: min(25rem, 28vw);
 }
 
-/* Capability cards cascade down the right flank with varied insets — a couple
-   pulled IN toward the portrait so they tuck behind the figure (z1 vs the z5
-   portrait) and read as emerging from behind it, the rest stepping out. */
-.skills-pos-c1 { right: 7%; top: 10%; }
-.skills-pos-c2 { right: 18%; top: 34%; }
-.skills-pos-c3 { right: 6%; top: 59%; }
-.skills-pos-c4 { right: 15%; top: 83%; }
+/* Capability cards cascade the right flank — varied insets + sizes + tilts; c2 is
+   pulled in toward the portrait so it tucks behind the figure. */
+.skills-pos-c1 { right: 7%; top: 11%; }
+.skills-pos-c2 { right: 17%; top: 35%; }
+.skills-pos-c3 { right: 5%; top: 59%; }
+.skills-pos-c4 { right: 14%; top: 82%; }
 
-/* Trait chips zig-zag down the left flank (varied insets = scatter, not a
+/* Trait chips tumble down the lower-left at varied insets + tilts (scatter, not a
    stack), starting BELOW the heading block so they never collide with the lead.
    Order in DOM: Clarity, Ownership, Cadence, Empathy. */
-.skills-pos-t1 { left: 11%; top: 44%; rotate: -2.2deg; }
-.skills-pos-t2 { left: 19%; top: 61%; rotate: 1.8deg; }
-.skills-pos-t3 { left: 6%; top: 77%; rotate: 2.4deg; }
-.skills-pos-t4 { left: 15%; top: 91%; rotate: -1.6deg; }
+.skills-pos-t1 { left: 10%; top: 45%; rotate: -2.4deg; }
+.skills-pos-t2 { left: 18%; top: 61%; rotate: 1.8deg; }
+.skills-pos-t3 { left: 6%; top: 77%; rotate: 2.6deg; }
+.skills-pos-t4 { left: 15%; top: 91%; rotate: -1.8deg; }
 
 .skills-approach-lead-v3 {
   margin: 0.3rem 0 0;
@@ -1905,7 +1912,7 @@ body:has(.works-root-v3) .site-nav-v3__contact:hover {
    Pastel fill + tilt are set per nth-variant below. Hover lifts + levels. */
 .skills-sticker-v3 {
   border-radius: var(--v3-radius-lg);
-  border: 1px solid color-mix(in srgb, var(--v3-twilight-text) 16%, transparent);
+  border: 1px solid color-mix(in srgb, var(--v3-twilight-text) 22%, transparent);
   /* Per-card resting scale (set per --s* below) gives the stack a size hierarchy
      instead of four uniform cards. `scale:` is an independent longhand, so it
      composes with the reveal's inline `transform: translate()` and the resting
@@ -1943,33 +1950,18 @@ body:has(.works-root-v3) .site-nav-v3__contact:hover {
     0 34px 62px -20px color-mix(in srgb, var(--v3-twilight-deep) 96%, transparent);
 }
 
-/* Pastel fills + resting tilt + per-card scale for the right-flank spec cards.
-   Livelier ±2–4° tilts and a deliberate size hierarchy (card 1 leads big, the
-   rest step down) so the stack reads as a depth-staggered scatter, not a column
-   of equals. The biggest card also gets a deeper ambient shadow so it sits
-   nearer in z. */
-.skills-sticker-v3--s0 {
-  background: var(--v3-card-1);
-  rotate: -2.6deg;
-  --card-scale: 1.09;
-  box-shadow: inset 0 1px 0 color-mix(in srgb, #fff 55%, transparent),
-    0 3px 6px color-mix(in srgb, var(--v3-twilight-deep) 32%, transparent),
-    0 30px 60px -22px color-mix(in srgb, var(--v3-twilight-deep) 95%, transparent);
-}
-.skills-sticker-v3--s1 {
-  background: var(--v3-card-2);
-  rotate: 3.4deg;
-  --card-scale: 0.97;
-}
-.skills-sticker-v3--s2 {
-  background: var(--v3-card-3);
-  rotate: -3.6deg;
-  --card-scale: 1.03;
-}
+/* Gallery cards — UNIFORM, aligned, untilted (the scatter/size-hierarchy from the
+   prior pass is dropped). One refined near-white lavender fill that reads as
+   floating paper with clear separation from the mid-lavender sky; a crisp keyline
+   + the layered shadow (base rule) give the lift. Consistent across all four so
+   the right column reads as one composed stack. */
+.skills-sticker-v3--s0,
+.skills-sticker-v3--s1,
+.skills-sticker-v3--s2,
 .skills-sticker-v3--s3 {
-  background: var(--v3-card-4);
-  rotate: 2.4deg;
-  --card-scale: 0.93;
+  background: color-mix(in srgb, #fff 70%, var(--v3-card-3));
+  rotate: 0deg;
+  --card-scale: 1;
 }
 
 .skills-traits-v3 {
@@ -1981,41 +1973,24 @@ body:has(.works-root-v3) .site-nav-v3__contact:hover {
   gap: clamp(0.45rem, 1.1svh, 0.75rem);
 }
 
-/* Trait — a SMALL pastel chip (same container family as the right-flank cards,
-   but deliberately smaller, flatter and UN-tilted so it stays clearly
-   subordinate to the technical capability cards). No dot. */
+/* Trait — a quiet gallery LABEL: no chip, just a typographic row with a thin
+   accent rule on the left margin so the four read as one clean aligned column
+   subordinate to the capability cards. No background, border-box, tilt or shadow
+   (the gallery reads composed, not playful). */
 .skills-trait-v3 {
   position: absolute;
   display: grid;
-  gap: 0.05rem;
+  gap: 0.14rem;
   width: max-content;
-  max-width: 17rem;
-  padding: clamp(0.45rem, 0.95svh, 0.65rem) clamp(0.7rem, 1.1vw, 0.95rem);
-  border-radius: 1rem;
-  border: 1px solid color-mix(in srgb, var(--v3-twilight-text) 11%, transparent);
-  box-shadow: inset 0 1px 0 color-mix(in srgb, #fff 50%, transparent),
-    0 8px 18px -15px color-mix(in srgb, var(--v3-twilight-deep) 85%, transparent);
+  max-width: 18rem;
+  padding: 0.1rem 0 0.12rem 0.9rem;
+  border-left: 2px solid color-mix(in srgb, var(--v3-cherry) 55%, transparent);
   cursor: default;
-  transition: translate 220ms cubic-bezier(0.22, 1, 0.36, 1),
-    rotate 220ms cubic-bezier(0.22, 1, 0.36, 1),
-    box-shadow 220ms cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-/* Quiet light-lavender chips (same single hue family as the right-flank cards
-   but lifted toward white so they read clearly subordinate), gently alternating
-   in value — NOT four different pastels. NO resting tilt. */
-.skills-trait-v3:nth-child(odd) {
-  background: color-mix(in srgb, #fff 42%, var(--v3-card-1));
-}
-.skills-trait-v3:nth-child(even) {
-  background: color-mix(in srgb, #fff 28%, var(--v3-card-2));
+  transition: border-color 220ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .skills-trait-v3:hover {
-  translate: 0 -2px;
-  rotate: 0deg;
-  box-shadow: inset 0 1px 0 color-mix(in srgb, #fff 60%, transparent),
-    0 12px 24px -16px color-mix(in srgb, var(--v3-twilight-deep) 90%, transparent);
+  border-left-color: var(--v3-cherry);
 }
 
 .skills-trait-v3__title {
