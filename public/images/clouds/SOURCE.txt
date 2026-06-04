@@ -1,0 +1,6 @@
+Cloud sprites — "Clouds with Transparency" by qubodup / OpenGameArt.
+Source: https://opengameart.org/content/clouds-with-transparency
+License: CC0 1.0 (public domain). Free for commercial use, no attribution required.
+
+cloud-1..5.png are 5 of the pack's 10 transparent PNGs, downscaled from 2048² to 1280²
+for web. White/gray cloud on transparent alpha. Used as parallax layers in CloudDeck.

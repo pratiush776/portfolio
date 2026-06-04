@@ -181,9 +181,9 @@ button {
    V3-INSPIRED TOKENS + SURFACES
    ========================================================= */
 :root {
-  --v3-bg-primary: #eef4c3;
-  --v3-text-dark: #2b2b2b;
-  --v3-accent-red: #c84a35;
+  --v3-bg-primary: #F4E3CE;   /* Dusk: warm peach-cream hero (was acid chartreuse) */
+  --v3-text-dark: #221E2E;    /* one consistent near-black-plum neutral across all stages */
+  --v3-accent-red: #C9542E;   /* THE accent — terracotta, carried through every stage */
   --v3-accent-green: #4c8577;
   --v3-accent-dark: #4d5c60;
   --v3-white: #ffffff;
@@ -191,7 +191,7 @@ button {
   /* Lime accent — retained for the hero / uncovered nav-contact hover glow.
      (The skills section migrated off lime to the twilight-pastel set below;
      --v3-skills-surface/-text/-hairline were removed as unused.) */
-  --v3-accent-lime: #cdd866;
+  --v3-accent-lime: #E3B98A;  /* Dusk: warm gold hover glow (was acid lime) */
 
   --v3-space-1: 0.25rem;
   --v3-space-2: 0.5rem;
@@ -227,13 +227,25 @@ button {
   --v3-lilac:  #DCD9F2;
   --v3-mint:   #D2E8D6;
   --v3-butter: #F6EECB;
-  --v3-cherry: #E5404B;
+  --v3-cherry: #C9542E;   /* unified to the terracotta accent (was a 2nd red, #E5404B) */
   --v3-citron: #C7D24E;
+  /* Mono-lavender skill-card tints — ONE hue stepped by value, so the skills
+     cards read as a single designed family instead of multicolour candy stickers.
+     The accent (terracotta) is then the only non-violet thing on that screen. */
+  --v3-card-1: #E6E2F5;
+  --v3-card-2: #D7D2EE;
+  --v3-card-3: #C7C0E6;
+  --v3-card-4: #B7AEDD;
   /* Twilight key — replaces the cold near-black skills surface */
   --v3-twilight:        #9D9AD6;
   --v3-twilight-deep:   #6F6CB0;
-  --v3-twilight-text:   #221F33;
-  --v3-twilight-accent: #E5404B;
+  --v3-twilight-text:   #221E2E;   /* same consistent neutral as --v3-text-dark */
+  --v3-twilight-accent: #C9542E;   /* = the carried terracotta accent */
+  /* Settled "sky" — a LIGHTER lavender than twilight, with a soft vignette edge.
+     This is the colour the clouds condense into and the body fades to (no deep
+     purple at the end). Tunable by eye. */
+  --v3-sky-field:       #CBC6EC;
+  --v3-sky-edge:        #A9A3D6;
   /* Soft warm ink for text on pastels */
   --v3-ink: #2A2730;
   /* Mesh-gradient presets (component-switchable). Each is a full
@@ -243,10 +255,12 @@ button {
                 radial-gradient(70% 75% at 72% 82%, var(--v3-mint) 0%, transparent 62%),
                 radial-gradient(60% 60% at 30% 85%, var(--v3-butter) 0%, transparent 60%),
                 var(--v3-bg-primary);
-  --mesh-twilight: radial-gradient(65% 75% at 28% 24%, color-mix(in srgb, var(--v3-lilac) 70%, var(--v3-twilight)) 0%, transparent 62%),
-                   radial-gradient(60% 70% at 82% 30%, color-mix(in srgb, var(--v3-blush) 55%, var(--v3-twilight)) 0%, transparent 60%),
-                   radial-gradient(75% 80% at 68% 86%, color-mix(in srgb, var(--v3-twilight-deep) 80%, transparent) 0%, transparent 64%),
-                   var(--v3-twilight);
+  /* Lighter lavender sky mesh (the settled look). Soft lilac/blush lifts on a
+     light field, edge cooled by --v3-sky-edge — no deep purple. */
+  --mesh-twilight: radial-gradient(65% 75% at 28% 24%, color-mix(in srgb, var(--v3-lilac) 78%, var(--v3-sky-field)) 0%, transparent 62%),
+                   radial-gradient(60% 70% at 82% 30%, color-mix(in srgb, var(--v3-blush) 60%, var(--v3-sky-field)) 0%, transparent 60%),
+                   radial-gradient(75% 80% at 68% 86%, color-mix(in srgb, var(--v3-sky-edge) 70%, transparent) 0%, transparent 64%),
+                   var(--v3-sky-field);
   /* Grain tuning */
   --grain-opacity: 0.18;
   --grain-url: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E");
@@ -368,9 +382,10 @@ button {
   width: 72rem;
   height: 72rem;
   border-radius: 50%;
+  /* Dusk: a warm low-sun glow lifting off the peach-cream hero (was chartreuse). */
   background: radial-gradient(50% 50% at 50% 50%,
-      rgba(238, 244, 195, 1) 40%,
-      rgba(217, 227, 145, 0) 100%);
+      rgba(252, 234, 207, 1) 40%,
+      rgba(244, 215, 184, 0) 100%);
   pointer-events: none;
   z-index: 0;
 }
@@ -381,6 +396,53 @@ button {
   mix-blend-mode: multiply;
   transform: translateZ(0);
   will-change: transform;
+}
+
+/* ── The "sky" — viewport-FIXED layers (mounted at the stage level in page.tsx),
+   so they NEVER scroll with a box. This is what finally kills the purple slide:
+   the twilight is no longer a property of the scrolling section. Driven by
+   PortraitScrollChoreography via --sky (:root) + the cloud bridge.
+
+   z model: sky-surface (1) < clouds (2) < skills content (section z3) < hero +
+   portrait (5). Desktop only — hidden < 1100px, where the section paints its own
+   static twilight (the no-JS / mobile path). */
+.skills-sky-surface-v3 {
+  display: none;
+}
+
+@media (min-width: 1100px) {
+  .skills-sky-surface-v3 {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    /* The settled SKY: a lighter lavender field. MeshGrain (which carries the
+       textured mesh + its own corner vignette, now lavender not deep purple) and
+       the keylight paint on top — all on this ONE fixed layer, so nothing is
+       bound to the scrolling section (no slide, no seam). The whole surface fades
+       in on --sky (condenses out of the clouds), holds, then dissolves on exit,
+       so the body appears to slowly shift colour. Default 0 so it's invisible
+       until the director drives it. */
+    background: var(--v3-sky-field);
+    opacity: var(--sky, 0);
+  }
+}
+
+/* Cloud deck — viewport-fixed, full-screen, above the sky surface and below the
+   content. A SINGLE 2D <canvas> the choreography draws the parallax cloud sprites
+   into (see CloudDeck.tsx): coverage → master alpha, the parting front → per-sprite
+   radial dispersal, scroll flow → per-sprite fly-through. One compositor layer
+   (no oversized DOM layers being scaled past the GPU texture/tiling budget, which
+   was the rectangular-band flicker source). The warm dusk tint is baked into the
+   PNG assets, so there is no runtime filter/blend here. */
+.cloud-deck-v3 {
+  position: fixed;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  /* Sized in JS (width/height set to viewport × capped DPR). display is toggled
+     off when coverage hits ~0 so an idle/settled section costs nothing. */
 }
 
 .paper-texture-v3 {
@@ -401,6 +463,15 @@ button {
   transform: translate(-50%, -50%);
   container-type: inline-size;
   z-index: 5;
+  /* Shared 3D camera for the hero recede. Bold/cinematic depth, origin pulled
+     toward the portrait so the text recedes TOWARD where we "fly". Children get
+     their own 3D transforms (rotateX/translateZ) under this perspective.
+     NOTE: transform-style stays flat (the default) on purpose — a flat parent
+     still applies this perspective to each child's 3D transform, but paint
+     order stays governed by z-index, so the wordmark/photo sandwich
+     (--main z1 → photo z2 → --outline z3) survives. Do NOT set preserve-3d. */
+  perspective: 800px;
+  perspective-origin: 50% 40%;
 }
 
 .hero-greeting-v3 {
@@ -453,19 +524,15 @@ button {
   transform: translateY(-50%);
 }
 
-.hero-pratiush-stack-v3 {
+/* Both wordmark layers share this positioning so they overlay exactly and stay
+   aligned. Direct children of .hero-composition-v3 (no wrapper) so the shared
+   perspective reaches them — see HeroPratiushText. */
+.hero-pratiush-v3 {
   position: absolute;
   top: 31.5%;
   left: 8.36%;
   width: 81.4815cqi;
   aspect-ratio: 1452 / 265;
-  pointer-events: none;
-  user-select: none;
-}
-
-.hero-pratiush-v3 {
-  position: absolute;
-  inset: 0;
   pointer-events: none;
   user-select: none;
   color: var(--v3-accent-red);
@@ -491,17 +558,16 @@ button {
   width: 26cqi;
   height: 38cqi;
   transform: translateX(-50%);
-  overflow: hidden;
   z-index: 2;
   pointer-events: none;
-  -webkit-mask-image:
-    linear-gradient(to bottom, transparent 0%, black 12%, black 74%, transparent 99%),
-    radial-gradient(ellipse 82% 94% at 50% 47%, black 56%, transparent 100%);
-  -webkit-mask-composite: source-in;
-  mask-image:
-    linear-gradient(to bottom, transparent 0%, black 12%, black 74%, transparent 99%),
-    radial-gradient(ellipse 82% 94% at 50% 47%, black 56%, transparent 100%);
-  mask-composite: intersect;
+  /* NOTE: the feathered mask lives on the INNER .hero-photo-v3, not here, and
+     the skills color-grade `filter` (incl. drop-shadow) lives on THIS element.
+     CSS applies filter BEFORE mask, so if both were on the same element the
+     drop-shadow would be cast from the UNMASKED image — and since the photo is
+     cropped at the waist, that hard bottom edge produced a rectangular shadow
+     below the figure. Splitting them (mask on child → filter on parent) makes
+     the drop-shadow follow the FEATHERED silhouette instead. No overflow:hidden
+     here either, so the shadow isn't clipped to the box. */
 }
 
 .hero-photo-v3 {
@@ -509,11 +575,35 @@ button {
   height: 100%;
   position: relative;
   overflow: hidden;
+  /* Feathered cutout (see .hero-pratiush-photo-v3 note for why it's here). The
+     radial is intentionally TALL (220%) so it only feathers the SIDES; the
+     linear handles top + bottom. Bottom stays solid to 90% so the wordmark
+     behind never shows through the lower torso in the hero. */
+  -webkit-mask-image:
+    linear-gradient(to bottom, transparent 0%, black 12%, black 90%, transparent 100%),
+    radial-gradient(ellipse 82% 220% at 50% 50%, black 56%, transparent 100%);
+  -webkit-mask-composite: source-in;
+  mask-image:
+    linear-gradient(to bottom, transparent 0%, black 12%, black 90%, transparent 100%),
+    radial-gradient(ellipse 82% 220% at 50% 50%, black 56%, transparent 100%);
+  mask-composite: intersect;
 }
 
 .hero-photo-v3__image {
   object-fit: cover;
   object-position: center top;
+}
+
+/* Duotone crossfade layer — same image, recoloured by the static #v3-duotone SVG
+   filter (deep twilight shadows → warm gold highlights), faded in over the
+   natural base as the portrait enters the skills section. Driven by --pg (set
+   per-frame on .hero-pratiush-photo-v3 by the choreography). OPACITY-ONLY
+   animation (the filter never rebuilds), so this stays compositor-safe — the
+   figure becomes a deliberate graphic silhouette, not a candid grey photo. */
+.hero-photo-v3__image--duo {
+  opacity: var(--pg, 0);
+  filter: url(#v3-duotone);
+  will-change: opacity;
 }
 
 .works-cta-v3 {
@@ -534,12 +624,15 @@ button {
   text-transform: uppercase;
   line-height: 1;
   white-space: nowrap;
-  transition: transform 0.25s ease, background-color 0.25s ease;
+  /* Hover lift uses the independent `translate` property (not `transform`) so
+     the scroll choreography can own `transform` for the 3D recede without this
+     transition chasing the scrubbed value. */
+  transition: translate 0.25s ease, background-color 0.25s ease;
   z-index: 6;
 }
 
 .works-cta-v3:hover {
-  transform: translateY(-2px);
+  translate: 0 -2px;
   background: var(--v3-accent-red);
 }
 
@@ -745,7 +838,7 @@ button {
     font-size: clamp(2rem, 4vw, 3rem);
   }
 
-  .hero-pratiush-stack-v3 {
+  .hero-pratiush-v3 {
     top: 50%;
     left: 50%;
     width: 100%;
@@ -792,7 +885,9 @@ button {
   }
 
   .works-cta-v3:hover {
-    transform: translateX(-50%) translateY(-2px);
+    /* base transform: translateX(-50%) handles centering; translate composes
+       independently for the lift. */
+    translate: 0 -2px;
   }
 
   .works-cta-v3__icon {
@@ -826,7 +921,7 @@ button {
     display: none;
   }
 
-  .hero-pratiush-stack-v3 {
+  .hero-pratiush-v3 {
     top: 44%;
   }
 
@@ -1641,24 +1736,30 @@ body:has(.works-root-v3) .site-nav-v3__contact:hover {
   --v3-accent-red: var(--v3-twilight-accent);
 
   position: relative;
-  z-index: 2;
+  /* z-index 3: the section's CONTENT composites above the fixed clouds (z2) and
+     sky-surface (z1), while the hero + descending portrait (z5) stay above it. */
+  z-index: 3;
   min-height: 100svh;
   width: 100vw;
-  /* Symmetric nav padding (was padding-top: full nav-clearance, which centred
-     the cluster in the BELOW-nav band and so sat it ~half-a-nav low). Splitting
-     the clearance top/bottom centres the inner — and therefore the slot, the
-     slot-anchored portrait, and the portrait-tracked bloom — on the TRUE
-     viewport centre, lifting the whole composition up a touch. */
+  /* Symmetric nav padding so the inner — and the slot-anchored portrait landing
+     — centre on the TRUE below-nav viewport centre. */
   padding-top: calc(var(--v3-nav-clearance) / 2);
   padding-bottom: calc(var(--v3-nav-clearance) / 2);
   display: grid;
   place-items: center;
-  /* Base periwinkle; MeshGrain paints the mesh + grain + vignette on top. */
-  background: var(--v3-twilight);
+  /* TRANSPARENT on desktop — the fixed sky-surface (driven by --sky) is the
+     backdrop, so nothing slides (see the min-width override below). The lighter
+     lavender base below is only the MOBILE / no-JS fallback (where
+     .skills-sky-surface-v3 is display:none). */
+  background: var(--v3-sky-field);
   color: var(--v3-twilight-text);
-  border-top: 1px solid
-    color-mix(in srgb, var(--v3-twilight-accent) 60%, transparent);
   overflow: hidden;
+}
+
+@media (min-width: 1100px) {
+  .skills-section-v3 {
+    background: transparent;
+  }
 }
 
 .skills-inner-v3 {
@@ -1667,16 +1768,56 @@ body:has(.works-root-v3) .site-nav-v3__contact:hover {
   max-width: 2048px;
   height: calc(100svh - var(--v3-nav-clearance));
   margin: 0 auto;
-  display: grid;
-  /* Stretch (not centre) the row to the inner's FIXED height. The row no
-     longer sizes to its tallest column, so a right-column hover expansion
-     can't change the row height and recentre the left column / portrait. */
-  align-items: stretch;
-  justify-items: center;
-  padding: 0 var(--skills-side-gutter);
+  /* Shared 3D scene: every scattered item recedes toward ONE vanishing point
+     (cohesive immersive volume), instead of each carrying its own flat
+     transformPerspective. Items animate translateZ within this. */
+  perspective: 900px;
+  perspective-origin: 50% 50%;
+  /* Scatter stage: items are absolutely placed within this box (see the
+     `.skills-pos-*` rules). The structural wrappers below collapse to
+     `display: contents`, so each item resolves its offsets against THIS
+     element rather than a column — a constellation around the centred portrait. */
+}
+
+/* Oversized editorial "ghost" word — a faint, huge backdrop letterform behind the
+   whole constellation for scale + depth (film-title energy). Centred, sits at the
+   very back of the inner (z 0; every card/chip/portrait composites above it).
+   Faded + drifted in by the director via --ghost (0 → 1 across the pin); opacity
+   on a single element is compositor-safe. Non-interactive, unselectable. */
+.skills-ghost-v3 {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: 0;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: clamp(9rem, 26vw, 30rem);
+  line-height: 0.8;
+  letter-spacing: -0.05em;
+  white-space: nowrap;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--v3-twilight-text) 7%, transparent);
+  opacity: var(--ghost, 0);
+  /* Centre + a small upward settle and scale-up as it fades in. var(--ghost) is a
+     unitless 0→1; both terms are compositor-only transforms. */
+  transform: translate(-50%, calc(-50% + (1 - var(--ghost, 0)) * 36px))
+    scale(calc(0.94 + var(--ghost, 0) * 0.06));
+  pointer-events: none;
+  user-select: none;
+  will-change: opacity, transform;
+}
+
+@media (max-width: 1099px) {
+  /* No JS director on mobile → --ghost never set; show it faintly so the static
+     section still gets the editorial backdrop. */
+  .skills-ghost-v3 {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
 }
 
 .skills-head-v3 {
+  position: absolute;
   margin: 0;
   display: flex;
   flex-direction: column;
@@ -1694,70 +1835,58 @@ body:has(.works-root-v3) .site-nav-v3__contact:hover {
   color: var(--v3-twilight-text);
 }
 
-.skills-row-v3 {
-  width: 100%;
-  height: 100%;
-  display: grid;
-  /* Centred cluster: the three blocks read as ONE group with intentional air
-     around the whole cluster, rather than text hugging the outer edges with
-     two wide mid-voids. */
-  grid-template-columns:
-    minmax(auto, 25rem) var(--portrait-w) minmax(auto, 24rem);
-  /* Single row track LOCKED to the row's own (fixed) height. Items that
-     overflow it — e.g. an expanded right-column row — render past the track
-     without resizing it, so the left column and portrait never move. */
-  grid-template-rows: 100%;
-  align-items: stretch;
-  justify-content: center;
-  /* Tighter than before: the flanks pull in toward the portrait so the whole
-     thing reads as ONE cluster orbiting the figure, not a centre + two far
-     sidebars (which left a dead mid-void on ultrawide). */
-  gap: clamp(1.25rem, 2.6vw, 3rem);
+/* Structural wrappers collapse so every scattered item lays out against
+   `.skills-inner-v3`. List semantics + reading order are kept via role="list". */
+.skills-row-v3,
+.skills-column-v3,
+.skills-column-v3--soft,
+.skills-column-v3--tech,
+.skills-traits-v3 {
+  display: contents;
 }
 
 .skills-portrait-slot-v3 {
+  position: absolute;
+  left: 50%;
+  top: 50%;
   width: var(--portrait-w);
-  aspect-ratio: 26 / 38;
-  /* Centred in the fixed-height row so the slot's centre = the inner's centre
-     = the portrait's JS landing target ((vh + navClearance) / 2). */
-  align-self: center;
+  height: var(--portrait-h);
+  /* Centred via negative margins (NOT transform) so offsetTop stays accurate
+     for the choreography's slot measurement. Slot centre = inner centre =
+     the portrait's JS landing target ((vh + navClearance) / 2). */
+  margin-left: calc(var(--portrait-w) / -2);
+  margin-top: calc(var(--portrait-h) / -2);
   visibility: hidden;
 }
 
-.skills-column-v3 {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  /* Each column box is the full fixed row height; content is top-anchored to a
-     STABLE line (computed from viewport + portrait height, never from sibling
-     content) that sits level with the portrait's top. The right column then
-     grows downward into the air below on hover, pushing only its own rows. */
-  justify-content: flex-start;
-  padding-top: calc(
-    (100svh - var(--v3-nav-clearance) - var(--portrait-h)) / 2 +
-      clamp(0.5rem, 2svh, 1.5rem)
-  );
-  align-self: stretch;
+/* ── Spatial scatter positions ─────────────────────────────────────────────
+   A deliberate constellation around the centred portrait — balanced left/right
+   with varied verticals. Anchored by EDGE (left/right + top), never transform,
+   so the GSAP reveal (which writes `transform`) and the sticker resting tilt
+   (independent `rotate:`) stay free. These coordinates are the primary
+   eyeball-tune for the layout. Pulled in toward the centre (off the rim) vs.
+   the first pass, so the cluster orbits the portrait, not the edges. */
+.skills-pos-head {
+  left: 3%;
+  top: 9%;
+  max-width: min(25rem, 28vw);
 }
 
-/* Left flank — "Approach" voice block: a focal lead line, then a
-   tighter, demoted set of traits. Intentionally top-weighted. */
-.skills-column-v3--soft {
-  /* Vertically CENTRED (override the base top-anchor): the headline is the
-     primary moment and should sit level with the portrait's centre, with the
-     demoted traits balanced below — no inherited top offset, and nothing falls
-     off the bottom of the viewport. The left column has no hover-expand, so
-     centring it can't cause reflow. */
-  justify-content: center;
-  padding-top: 0;
-  gap: clamp(1.4rem, 3.2vh, 2.4rem);
-  align-items: flex-start;
-  text-align: left;
-  justify-self: start;
-  max-width: 25rem;
-}
+/* Capability cards cascade down the right flank with varied insets — a couple
+   pulled IN toward the portrait so they tuck behind the figure (z1 vs the z5
+   portrait) and read as emerging from behind it, the rest stepping out. */
+.skills-pos-c1 { right: 7%; top: 10%; }
+.skills-pos-c2 { right: 18%; top: 34%; }
+.skills-pos-c3 { right: 6%; top: 59%; }
+.skills-pos-c4 { right: 15%; top: 83%; }
+
+/* Trait chips zig-zag down the left flank (varied insets = scatter, not a
+   stack), starting BELOW the heading block so they never collide with the lead.
+   Order in DOM: Clarity, Ownership, Cadence, Empathy. */
+.skills-pos-t1 { left: 11%; top: 44%; rotate: -2.2deg; }
+.skills-pos-t2 { left: 19%; top: 61%; rotate: 1.8deg; }
+.skills-pos-t3 { left: 6%; top: 77%; rotate: 2.4deg; }
+.skills-pos-t4 { left: 15%; top: 91%; rotate: -1.6deg; }
 
 .skills-approach-lead-v3 {
   margin: 0.3rem 0 0;
@@ -1777,12 +1906,17 @@ body:has(.works-root-v3) .site-nav-v3__contact:hover {
 .skills-sticker-v3 {
   border-radius: var(--v3-radius-lg);
   border: 1px solid color-mix(in srgb, var(--v3-twilight-text) 16%, transparent);
+  /* Per-card resting scale (set per --s* below) gives the stack a size hierarchy
+     instead of four uniform cards. `scale:` is an independent longhand, so it
+     composes with the reveal's inline `transform: translate()` and the resting
+     `rotate:` — same reason as the tilt (see note below). */
+  scale: var(--card-scale, 1);
   /* Physical-paper depth: a soft top highlight (inset) + a tight contact shadow
      + a long ambient drop, so the cards separate clearly from the pastel
      backdrop instead of reading as flat tinted rectangles. */
   box-shadow: inset 0 1px 0 color-mix(in srgb, #fff 55%, transparent),
     0 2px 4px color-mix(in srgb, var(--v3-twilight-deep) 30%, transparent),
-    0 20px 40px -22px color-mix(in srgb, var(--v3-twilight-deep) 90%, transparent);
+    0 22px 46px -22px color-mix(in srgb, var(--v3-twilight-deep) 92%, transparent);
   /* NOTE: the playful tilt + hover lift use the INDEPENDENT `rotate:` /
      `translate:` longhand properties, NOT `transform`. The scroll-reveal
      timeline writes an inline `transform: translate()` on these cards (GSAP
@@ -1801,29 +1935,41 @@ body:has(.works-root-v3) .site-nav-v3__contact:hover {
 .skills-sticker-v3:hover,
 .skills-sticker-v3:focus-within {
   rotate: 0deg;
-  scale: 1.05;
+  /* Lift relative to the card's own resting scale so a big card doesn't shrink
+     on hover. */
+  scale: calc(var(--card-scale, 1) + 0.05);
   box-shadow: inset 0 1px 0 color-mix(in srgb, #fff 65%, transparent),
     0 3px 6px color-mix(in srgb, var(--v3-twilight-deep) 35%, transparent),
-    0 30px 56px -20px color-mix(in srgb, var(--v3-twilight-deep) 95%, transparent);
+    0 34px 62px -20px color-mix(in srgb, var(--v3-twilight-deep) 96%, transparent);
 }
 
-/* Pastel fills + resting tilt for the right-flank spec cards, rotated across
-   the butter/mint/lilac/blush set so the stack reads as a playful scatter. */
+/* Pastel fills + resting tilt + per-card scale for the right-flank spec cards.
+   Livelier ±2–4° tilts and a deliberate size hierarchy (card 1 leads big, the
+   rest step down) so the stack reads as a depth-staggered scatter, not a column
+   of equals. The biggest card also gets a deeper ambient shadow so it sits
+   nearer in z. */
 .skills-sticker-v3--s0 {
-  background: var(--v3-butter);
-  rotate: 1.8deg;
+  background: var(--v3-card-1);
+  rotate: -2.6deg;
+  --card-scale: 1.09;
+  box-shadow: inset 0 1px 0 color-mix(in srgb, #fff 55%, transparent),
+    0 3px 6px color-mix(in srgb, var(--v3-twilight-deep) 32%, transparent),
+    0 30px 60px -22px color-mix(in srgb, var(--v3-twilight-deep) 95%, transparent);
 }
 .skills-sticker-v3--s1 {
-  background: var(--v3-mint);
-  rotate: -1.6deg;
+  background: var(--v3-card-2);
+  rotate: 3.4deg;
+  --card-scale: 0.97;
 }
 .skills-sticker-v3--s2 {
-  background: var(--v3-lilac);
-  rotate: 1.4deg;
+  background: var(--v3-card-3);
+  rotate: -3.6deg;
+  --card-scale: 1.03;
 }
 .skills-sticker-v3--s3 {
-  background: var(--v3-blush);
-  rotate: -2deg;
+  background: var(--v3-card-4);
+  rotate: 2.4deg;
+  --card-scale: 0.93;
 }
 
 .skills-traits-v3 {
@@ -1839,8 +1985,10 @@ body:has(.works-root-v3) .site-nav-v3__contact:hover {
    but deliberately smaller, flatter and UN-tilted so it stays clearly
    subordinate to the technical capability cards). No dot. */
 .skills-trait-v3 {
+  position: absolute;
   display: grid;
   gap: 0.05rem;
+  width: max-content;
   max-width: 17rem;
   padding: clamp(0.45rem, 0.95svh, 0.65rem) clamp(0.7rem, 1.1vw, 0.95rem);
   border-radius: 1rem;
@@ -1849,26 +1997,23 @@ body:has(.works-root-v3) .site-nav-v3__contact:hover {
     0 8px 18px -15px color-mix(in srgb, var(--v3-twilight-deep) 85%, transparent);
   cursor: default;
   transition: translate 220ms cubic-bezier(0.22, 1, 0.36, 1),
+    rotate 220ms cubic-bezier(0.22, 1, 0.36, 1),
     box-shadow 220ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-/* Softened pastels (mixed toward white so the left chips read quieter than the
-   saturated right cards), cycled across the set — with NO resting tilt. */
-.skills-trait-v3:nth-child(1) {
-  background: color-mix(in srgb, #fff 34%, var(--v3-blush));
+/* Quiet light-lavender chips (same single hue family as the right-flank cards
+   but lifted toward white so they read clearly subordinate), gently alternating
+   in value — NOT four different pastels. NO resting tilt. */
+.skills-trait-v3:nth-child(odd) {
+  background: color-mix(in srgb, #fff 42%, var(--v3-card-1));
 }
-.skills-trait-v3:nth-child(2) {
-  background: color-mix(in srgb, #fff 34%, var(--v3-lilac));
-}
-.skills-trait-v3:nth-child(3) {
-  background: color-mix(in srgb, #fff 34%, var(--v3-mint));
-}
-.skills-trait-v3:nth-child(4) {
-  background: color-mix(in srgb, #fff 34%, var(--v3-butter));
+.skills-trait-v3:nth-child(even) {
+  background: color-mix(in srgb, #fff 28%, var(--v3-card-2));
 }
 
 .skills-trait-v3:hover {
   translate: 0 -2px;
+  rotate: 0deg;
   box-shadow: inset 0 1px 0 color-mix(in srgb, #fff 60%, transparent),
     0 12px 24px -16px color-mix(in srgb, var(--v3-twilight-deep) 90%, transparent);
 }
@@ -1899,36 +2044,15 @@ body:has(.works-root-v3) .site-nav-v3__contact:hover {
 }
 
 .skills-spec-v3 {
-  position: relative;
+  position: absolute;
   z-index: 1;
+  /* Explicit width now the cards are out of the (collapsed) column. */
+  width: clamp(17rem, 22vw, 21rem);
   display: grid;
   grid-template-columns: auto 1fr;
   gap: 0.2rem 0.85rem;
   padding: clamp(0.8rem, 1.5svh, 1.15rem) clamp(1rem, 1.5vw, 1.35rem);
   cursor: default;
-}
-
-/* Tighten the stack into a slightly-overlapping fan. The overlap (≈ the body's
-   reserved bottom strip) tucks each card's hover-only glyph row under the next
-   card at rest, so the resting cards read as a snug stack of title + note. */
-.skills-spec-v3 + .skills-spec-v3 {
-  margin-top: -2.2rem;
-}
-
-/* Progressive rightward offset down the stack — a deliberate DIAGONAL rhythm
-   (top card nearest the portrait, each lower card stepped further out) so the
-   four cards cascade as one choreographed move instead of a loose scatter. */
-.skills-spec-v3:nth-child(1) {
-  margin-left: 0;
-}
-.skills-spec-v3:nth-child(2) {
-  margin-left: clamp(0.5rem, 1.4vw, 1.3rem);
-}
-.skills-spec-v3:nth-child(3) {
-  margin-left: clamp(1rem, 2.6vw, 2.4rem);
-}
-.skills-spec-v3:nth-child(4) {
-  margin-left: clamp(1.4rem, 3.6vw, 3.2rem);
 }
 
 .skills-spec-v3:focus-visible {
@@ -2078,43 +2202,40 @@ body:has(.works-root-v3) .site-nav-v3__contact:hover {
     padding: clamp(4rem, 12vh, 7rem) 0;
   }
 
+  /* Undo the desktop SCATTER: restore normal stacked flow (the absolute
+     positions + `display: contents` only make sense around the centred portrait
+     on wide viewports). Mobile gets a simple, readable single column. */
   .skills-inner-v3 {
     height: auto;
-    place-items: stretch;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
     gap: clamp(2rem, 5vh, 3.5rem);
+    padding: 0 clamp(1.25rem, 6vw, 3rem);
   }
 
-  .skills-row-v3 {
-    height: auto;
-    grid-template-columns: 1fr 1fr;
-    grid-template-rows: auto;
-    gap: clamp(2rem, 5vw, 3rem);
+  .skills-row-v3,
+  .skills-column-v3,
+  .skills-column-v3--soft,
+  .skills-column-v3--tech,
+  .skills-traits-v3 {
+    display: flex;
+    flex-direction: column;
+    gap: clamp(1rem, 3vw, 1.75rem);
+  }
+
+  /* Items back to in-flow; clear every scatter anchor. */
+  .skills-head-v3,
+  .skills-trait-v3,
+  .skills-spec-v3 {
+    position: static;
+    inset: auto;
+    width: auto;
+    max-width: none;
   }
 
   .skills-portrait-slot-v3 {
     display: none;
-  }
-
-  .skills-column-v3 {
-    padding-top: 0;
-  }
-
-  .skills-column-v3--soft,
-  .skills-column-v3--tech {
-    justify-self: stretch;
-    max-width: none;
-  }
-
-  /* Neutralise the desktop diagonal offsets + overlap so the cards stack
-     cleanly in the mobile grid. */
-  .skills-spec-v3 + .skills-spec-v3 {
-    margin-top: 0;
-  }
-
-  .skills-spec-v3:nth-child(even),
-  .skills-spec-v3:nth-child(odd) {
-    margin-left: 0;
-    margin-right: 0;
   }
 
   /* Glyph row inline + always visible on stacked layouts (no hover dance). */
@@ -2131,12 +2252,6 @@ body:has(.works-root-v3) .site-nav-v3__contact:hover {
 
   .skills-spotlight-v3 {
     display: none;
-  }
-}
-
-@media (max-width: 720px) {
-  .skills-row-v3 {
-    grid-template-columns: 1fr;
   }
 }
 
@@ -2181,7 +2296,8 @@ body[data-nav-theme="dark"] .site-nav-v3__contact {
   background: var(--v3-twilight-text);
   color: var(--v3-butter);
   border: 1px solid var(--v3-twilight-text);
-  backdrop-filter: blur(10px);
+  /* No backdrop-filter: the button bg is opaque (the blur showed nothing) and a
+     backdrop-filter over the animated clouds re-samples every frame → flicker. */
 }
 
 body[data-nav-theme="dark"] .site-nav-v3__contact:hover {
@@ -2221,24 +2337,33 @@ body[data-nav-theme="dark"] .site-nav-v3__contact:hover {
     top: 47%;
     width: min(82vw, 74rem);
     height: min(96vh, 60rem);
+    /* --bloom (0→1, driven by the parting `clear`) FADES the warm glow in via
+       OPACITY ONLY — NO per-frame scale. This is the flicker fix: a screen-blended
+       layer that is transform-scaled every frame must be re-rasterised every frame,
+       which flickered right at the bloom. Opacity on a promoted blended layer is a
+       compositor-only op, so it's smooth. Full size + fade-in also keeps the freshly
+       revealed area warm (not a lavender pop), and starts at 0 so it's never sudden. */
     transform: translate(-50%, -50%);
+    opacity: var(--bloom, 0);
+    will-change: opacity;
     pointer-events: none;
     z-index: 1;
-    /* The "sun" of the section: a large warm core (cream → peach) bleeding
-       through blush → lilac into the periwinkle field — wide enough to touch
-       the headline on the left and the capability cards on the right, so the
-       whole composition reads as ORBITING the portrait. Screen blend lifts the
-       surface into a glow rather than painting a flat disc on it. */
+    /* (Opacity is inherited from the fixed sky-surface that now hosts it.) */
+    /* The "sun" of the section: a large WARM core (cream → peach) that fades warm
+       straight to transparent — NO cool lilac/blush ring. A cool ring here sat
+       *inside* the warm cloud field and read as a lavender halo sandwiched in
+       peach (warm → cool → warm); keeping the bloom warm all the way out makes the
+       radial read monotonic (warm centre → cool lavender edge/sky). Wide enough to
+       touch the headline + cards so the composition orbits the portrait. Screen
+       blend lifts the surface into a glow rather than a flat disc. */
     background: radial-gradient(
-      ellipse 42% 46% at 50% 47%,
-      color-mix(in srgb, var(--v3-butter) 90%, #fff 10%) 0%,
-      color-mix(in srgb, var(--color-orange) 60%, transparent) 20%,
-      color-mix(in srgb, var(--v3-blush) 42%, transparent) 40%,
-      color-mix(in srgb, var(--v3-lilac) 30%, transparent) 60%,
-      transparent 80%
+      ellipse 44% 48% at 50% 47%,
+      color-mix(in srgb, var(--v3-butter) 88%, #fff 12%) 0%,
+      color-mix(in srgb, var(--color-orange) 58%, transparent) 26%,
+      color-mix(in srgb, var(--color-orange) 24%, transparent) 50%,
+      transparent 78%
     );
     mix-blend-mode: screen;
-    filter: saturate(1.05);
   }
 
   /* Grain confined to the halo so the aura reads as TEXTURED light (film/print
@@ -2266,23 +2391,8 @@ body[data-nav-theme="dark"] .site-nav-v3__contact:hover {
     );
   }
 
-  /* Corner vignette — pulls the frame edges down into a deeper dusty-purple so
-     the warm centre reads brighter and the section feels cinematically staged
-     instead of an even pastel field. Above the halo (DOM order), below content
-     (z-3). */
-  .skills-section-v3::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    z-index: 1;
-    background: radial-gradient(
-      ellipse 80% 82% at 50% 46%,
-      transparent 50%,
-      color-mix(in srgb, var(--v3-twilight-deep) 50%, transparent) 100%
-    );
-    mix-blend-mode: multiply;
-  }
+  /* (The corner vignette now lives on the FIXED .skills-sky-surface-v3 so it
+     can't slide with the scrolling section — see that rule's background.) */
 }
 
 /* Twilight colour-grade on the shared portrait, only inside this section. */

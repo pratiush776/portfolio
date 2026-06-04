@@ -1,22 +1,26 @@
 import { PratiushMain } from "@/components/vectors/PratiushMain";
 import { PratiushOutline } from "@/components/vectors/PratiushOutline";
 
-// NOTE: this wrapper MUST stay a plain element with no z-index / transform /
-// opacity / filter of its own — i.e. it must not create a stacking context.
-// The two wordmark layers (--main z1, --outline z3) sandwich the portrait
-// (z2), which only works while they share the composition's stacking context.
-// A motion wrapper here (transform/opacity) collapses that sandwich, so the
-// wordmark's kinetic entrance lives at the LAYER level (faded individually by
-// PortraitScrollChoreography), never on this wrapper.
+// NOTE: the two wordmark layers are rendered as DIRECT children of
+// `.hero-composition-v3` (no wrapper) for two reasons:
+//   1. Sandwich — --main (z1) and --outline (z3) must share the composition's
+//      stacking context so the portrait (z2) sits between them. A wrapper with
+//      no stacking context allowed this too, but a wrapper is unnecessary.
+//   2. 3D — the composition owns the `perspective`. CSS perspective only
+//      reaches DIRECT children, so a wrapper would flatten the layers' 3D
+//      transforms (rotateX/translateZ would be ignored, only filter applied).
+// Both layers carry identical positioning (.hero-pratiush-v3) so they overlay
+// exactly and stay aligned; PortraitScrollChoreography animates them in lockstep
+// (the outline only fades earlier).
 export function HeroPratiushText() {
   return (
-    <div className="hero-pratiush-stack-v3">
+    <>
       <div className="hero-pratiush-v3 hero-pratiush-v3--main" aria-hidden>
         <PratiushMain aria-hidden />
       </div>
       <div className="hero-pratiush-v3 hero-pratiush-v3--outline" aria-hidden>
         <PratiushOutline aria-hidden />
       </div>
-    </div>
+    </>
   );
 }

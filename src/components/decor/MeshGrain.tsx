@@ -19,7 +19,8 @@ type MeshGrainProps = {
 // warm edge for lilac. Center is always transparent so sections read through.
 const VIGNETTE = {
   lilac: 'rgba(157, 130, 122, 0.18)', // warm taupe, derived from blush
-  twilight: 'color-mix(in srgb, var(--v3-twilight-deep) 28%, transparent)',
+  // Lighter lavender edge (was the deep #6F6CB0, which read too dark/purple).
+  twilight: 'color-mix(in srgb, var(--v3-sky-edge) 55%, transparent)',
 } as const;
 
 export function MeshGrain({

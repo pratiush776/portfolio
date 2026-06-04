@@ -1,4 +1,7 @@
+import { CloudDeck } from "@/components/decor/CloudDeck";
+import { DuotoneFilter } from "@/components/decor/DuotoneFilter";
 import { FluidSmoke } from "@/components/decor/FluidSmoke";
+import { MeshGrain } from "@/components/decor/MeshGrain";
 import { RadialGlow } from "@/components/decor/RadialGlow";
 import { HeroPhoto } from "@/components/hero/HeroPhoto";
 import { HeroPratiushText } from "@/components/hero/HeroPratiushText";
@@ -12,6 +15,7 @@ import { NavThemeObserver } from "@/components/layout/NavThemeObserver";
 export default function Home() {
   return (
     <main className="landing-root-v3 text-navy w-[100vw] overflow-x-hidden">
+      <DuotoneFilter />
       <div className="landing-stage-v3">
         <div className="landing-bg-v3" aria-hidden>
           <RadialGlow />
@@ -19,14 +23,27 @@ export default function Home() {
             <FluidSmoke
               color="#3D3A36"
               className="fluid-smoke-v3"
-              dyeRadius={0.003}
+              dyeRadius={0.007}
               splatForce={950}
-              densityDissipation={0.85}
-              velocityDissipation={1.3}
+              densityDissipation={0.45}
+              velocityDissipation={0.7}
               curl={5}
             />
           </div>
         </div>
+        {/* The "sky" — viewport-FIXED layers driven by PortraitScrollChoreography
+            so they NEVER scroll with a box (no purple/cloud slide). The twilight
+            surface (base + mesh/grain/vignette + keylight) fades in on --sky as
+            the clouds condense it, holds through the pin, then fades out on exit.
+            The clouds sit just above it. Both desktop-only (mesh/clouds gate
+            themselves; the surface is hidden < 1100px, where the section paints
+            its own static twilight). z: surface (1) < clouds (2) < skills
+            content (3) < hero + portrait (5). */}
+        <div className="skills-sky-surface-v3" aria-hidden>
+          <MeshGrain variant="twilight" className="skills-sky-mesh-v3" />
+          <div className="skills-spotlight-v3" />
+        </div>
+        <CloudDeck className="cloud-deck-v3" />
         <section className="hero-root-v3">
         <div className="canvas-v3 canvas-v3--hero">
           <div className="hero-stage-v3">

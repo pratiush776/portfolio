@@ -21,7 +21,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      {/* suppressHydrationWarning: browser extensions (e.g. Grammarly) inject
+          data-* attributes onto <body> before React hydrates, which otherwise
+          trips a hydration attribute-mismatch warning. */}
       <body
+        suppressHydrationWarning
         className={`${notoSans.className} ${pierSans.variable} ${bricolageGrotesque.variable} antialiased scroll-smooth`}
       >
         <LenisProvider>
