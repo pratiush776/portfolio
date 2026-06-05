@@ -1875,25 +1875,31 @@ body:has(.works-root-v3) .site-nav-v3__contact:hover {
    reveal owns `transform`; tilt lives on the independent `rotate:`. Primary
    eyeball-tune for the look. */
 .skills-pos-head {
-  left: 3%;
+  left: 5%;
   top: 9%;
   max-width: min(25rem, 28vw);
 }
 
-/* Capability cards cascade the right flank — varied insets + sizes + tilts; c2 is
-   pulled in toward the portrait so it tucks behind the figure. */
-.skills-pos-c1 { right: 7%; top: 11%; }
-.skills-pos-c2 { right: 17%; top: 35%; }
-.skills-pos-c3 { right: 5%; top: 59%; }
-.skills-pos-c4 { right: 14%; top: 82%; }
+/* Capability cards — a rhythmic DIAGONAL STAIRCASE down the right (not random
+   scatter). PERIODIC inset zigzag (oscillates around one axis) + even vertical
+   rhythm + per-card z-index: the order comes from the repeating pattern, the
+   energy from the diagonal + overlap + tilt. The lead (c1 Interfaces) rides on
+   top and forward; cards step down nearly touching so they read as one connected
+   stack that tucks behind the offset figure (z5 occludes the overlaps). */
+.skills-pos-c1 { right: 6%; top: 14%; z-index: 4; }
+.skills-pos-c2 { right: 12%; top: 35%; z-index: 3; }
+.skills-pos-c3 { right: 6%; top: 56%; z-index: 2; }
+.skills-pos-c4 { right: 12%; top: 77%; z-index: 1; }
 
-/* Trait chips tumble down the lower-left at varied insets + tilts (scatter, not a
-   stack), starting BELOW the heading block so they never collide with the lead.
-   Order in DOM: Clarity, Ownership, Cadence, Empathy. */
-.skills-pos-t1 { left: 10%; top: 45%; rotate: -2.4deg; }
-.skills-pos-t2 { left: 18%; top: 61%; rotate: 1.8deg; }
-.skills-pos-t3 { left: 6%; top: 77%; rotate: 2.6deg; }
-.skills-pos-t4 { left: 15%; top: 91%; rotate: -1.8deg; }
+/* Trait labels — a CALM, aligned left column sharing the heading's left margin
+   (one grid line), even vertical rhythm, NO tilt. The calm order here is what the
+   card staircase plays against ("organized" vs "chaos"). Quiet/subordinate (flat
+   labels, not boxes — see .skills-trait-v3). Order: Clarity, Ownership, Cadence,
+   Empathy. */
+.skills-pos-t1 { left: 5%; top: 50%; }
+.skills-pos-t2 { left: 5%; top: 63%; }
+.skills-pos-t3 { left: 5%; top: 76%; }
+.skills-pos-t4 { left: 5%; top: 89%; }
 
 .skills-approach-lead-v3 {
   margin: 0.3rem 0 0;
@@ -1950,18 +1956,40 @@ body:has(.works-root-v3) .site-nav-v3__contact:hover {
     0 34px 62px -20px color-mix(in srgb, var(--v3-twilight-deep) 96%, transparent);
 }
 
-/* Gallery cards — UNIFORM, aligned, untilted (the scatter/size-hierarchy from the
-   prior pass is dropped). One refined near-white lavender fill that reads as
-   floating paper with clear separation from the mid-lavender sky; a crisp keyline
-   + the layered shadow (base rule) give the lift. Consistent across all four so
-   the right column reads as one composed stack. */
+/* Layered-cluster cards — one refined near-white lavender fill (floating paper,
+   clear separation from the mid-lavender sky) shared by all four, with a per-card
+   resting tilt + scale that builds the depth hierarchy. The LEAD (s0 = Interfaces)
+   is largest with a deeper shadow so it reads forward; the rest step down in scale
+   and tuck back. Tilt/scale are independent longhands so they compose with the
+   reveal's `transform` (see the base-rule note). */
 .skills-sticker-v3--s0,
 .skills-sticker-v3--s1,
 .skills-sticker-v3--s2,
 .skills-sticker-v3--s3 {
   background: color-mix(in srgb, #fff 70%, var(--v3-card-3));
-  rotate: 0deg;
-  --card-scale: 1;
+}
+/* Two clean tiers — ONE lead + a uniform supporting set (clear hierarchy, not four
+   random sizes). Tilt is PERIODIC, correlated with the inset zigzag (the cards
+   nearer the edge tilt one way, the inset ones the other) so the rhythm reads
+   deliberate. Lead (s0 = Interfaces) is biggest with a deeper shadow → forward. */
+.skills-sticker-v3--s0 {
+  rotate: -2.5deg;
+  --card-scale: 1.12;
+  box-shadow: inset 0 1px 0 color-mix(in srgb, #fff 60%, transparent),
+    0 4px 8px color-mix(in srgb, var(--v3-twilight-deep) 32%, transparent),
+    0 34px 64px -20px color-mix(in srgb, var(--v3-twilight-deep) 96%, transparent);
+}
+.skills-sticker-v3--s1 {
+  rotate: 2.5deg;
+  --card-scale: 0.95;
+}
+.skills-sticker-v3--s2 {
+  rotate: -2.5deg;
+  --card-scale: 0.95;
+}
+.skills-sticker-v3--s3 {
+  rotate: 2.5deg;
+  --card-scale: 0.95;
 }
 
 .skills-traits-v3 {
@@ -1973,20 +2001,20 @@ body:has(.works-root-v3) .site-nav-v3__contact:hover {
   gap: clamp(0.45rem, 1.1svh, 0.75rem);
 }
 
-/* Trait — a quiet gallery LABEL: no chip, just a typographic row with a thin
-   accent rule on the left margin so the four read as one clean aligned column
-   subordinate to the capability cards. No background, border-box, tilt or shadow
-   (the gallery reads composed, not playful). */
+/* Trait — a QUIET flat label (NOT a box), so the four read as subordinate support
+   to the prominent cards rather than competing rounded rectangles. A thin cherry
+   rule on the shared left margin ties them into one aligned column. This calm,
+   ordered left column is the "organized" pole the card staircase plays against. */
 .skills-trait-v3 {
   position: absolute;
   display: grid;
-  gap: 0.14rem;
+  gap: 0.12rem;
   width: max-content;
-  max-width: 18rem;
-  padding: 0.1rem 0 0.12rem 0.9rem;
-  border-left: 2px solid color-mix(in srgb, var(--v3-cherry) 55%, transparent);
+  max-width: 17rem;
+  padding: 0.05rem 0 0.08rem 0.85rem;
+  border-left: 2px solid color-mix(in srgb, var(--v3-cherry) 50%, transparent);
   cursor: default;
-  transition: border-color 220ms cubic-bezier(0.22, 1, 0.36, 1);
+  transition: border-color 200ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .skills-trait-v3:hover {

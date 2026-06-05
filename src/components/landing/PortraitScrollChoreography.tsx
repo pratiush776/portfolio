@@ -58,6 +58,12 @@ const RECEDE_MAX_BLUR = 12;
 // Visible figure sits above the rect's geometric centre, so bias the parting
 // origin up to seat it behind the head/torso.
 const CLOUD_CENTER_BIAS = 0.42;
+// Horizontal landing offset (fraction of vw): the figure settles RIGHT-of-centre
+// as a graphic anchor (the dark duotone mass balances the lighter text on the
+// left), rather than dead-centre where its passive head-down pose owned the focal
+// point. Ramps in across the descent (with the y/scale), so the settle drifts
+// gently down-AND-right. The cloud parting + keylight track it (see apply).
+const LAND_OFFSET_X = 0.07;
 // Gentle base coverage at the very top of the page, so clouds already PEEK into
 // the hero's lower region at rest (the canvas extends up there) — without any
 // purple (the section no longer overlaps the hero). Thickens to full as you fly
@@ -94,8 +100,8 @@ const SKILL_REVEAL_DUR = 0.26; // each item's fly-in window (bigger = slower, he
 // hold the depth + tilt magnitudes of the dive. No per-side rotationY (that
 // asymmetry is what made left vs right look different). They share one vanishing
 // point via the CSS `perspective` on .skills-inner-v3.
-const SKILL_DIVE_Z = 1100; // how deep in Z each item starts (px, pre-perspective)
-const SKILL_DIVE_TILT = 7; // gentle top-back tilt as it flies forward (deg)
+const SKILL_DIVE_Z = 1500; // how deep in Z each item starts (px, pre-perspective)
+const SKILL_DIVE_TILT = 10; // gentle top-back tilt as it flies forward (deg)
 // Once the parting front passes this, the dark twilight has filled behind the
 // nav, so the off-white nav is allowed (see nav-theme bloomCovers signal).
 const NAV_CLEAR_PROGRESS = 0.82;
@@ -408,6 +414,9 @@ export function PortraitScrollChoreography() {
       // Cinematic scale ramp: 1.0 through the hero hold, grows to ~1.15 across
       // the descent, then holds. Independent of the px `y` translate.
       const SCALE_SETTLED = 1.3;
+      // Horizontal anchor target (px), ramped in lockstep with the descent below.
+      const xLand = LAND_OFFSET_X * window.innerWidth;
+      let x: number;
       let y: number;
       let scale: number;
       // Grade progress 0→1, scrubbed in lockstep with the descent (drives the
@@ -416,6 +425,7 @@ export function PortraitScrollChoreography() {
       let pg: number;
       if (scroll <= scrollA) {
         // Hero hold — counter-translate so the portrait stays put in view.
+        x = 0;
         y = scroll;
         scale = 1;
         pg = 0;
@@ -429,6 +439,8 @@ export function PortraitScrollChoreography() {
         const t = (scroll - scrollA) / (landScroll - scrollA);
         const yLand = holdConst + landScroll;
         y = scrollA + t * (yLand - scrollA);
+        // Horizontal anchor drifts in linearly on the same t (down-and-right).
+        x = t * xLand;
         // Position stays LINEAR (see above — easing it fights the hero-hold
         // counter-translation). Scale alone gets a quad ease-out so the portrait
         // visibly *settles* on landing instead of growing at a constant rate.
@@ -436,19 +448,21 @@ export function PortraitScrollChoreography() {
         scale = 1 + scaleT * (SCALE_SETTLED - 1);
         pg = t;
       } else if (scroll < pinEnd) {
-        // Dwell — landed at centre; track scroll 1:1 so it stays fixed at
-        // centre for the rest of the pin (no movement while the reveal plays).
+        // Dwell — landed; track scroll 1:1 (y) so it stays fixed for the rest of
+        // the pin, holding the horizontal anchor offset.
+        x = xLand;
         y = holdConst + scroll;
         scale = SCALE_SETTLED;
         pg = 1;
       } else {
-        // Pin over — freeze y so the portrait scrolls away with the section
+        // Pin over — freeze so the portrait scrolls away with the section
         // exactly once (no re-centering on refresh past the section).
+        x = xLand;
         y = holdConst + pinEnd;
         scale = SCALE_SETTLED;
         pg = 1;
       }
-      gsap.set(portrait, { y, scale });
+      gsap.set(portrait, { x, y, scale });
       portrait.style.setProperty("--pg", String(pg));
 
       // ── Phase progresses, all keyed to the REAL pin (pinStart) ────────────
@@ -493,7 +507,7 @@ export function PortraitScrollChoreography() {
       // above the geometric centre by that fraction of the portrait's height.
       const portraitScreenY = portraitCenterDocY + y - window.scrollY;
       setCloudCenter(
-        window.innerWidth / 2,
+        window.innerWidth / 2 + x,
         portraitScreenY - (0.5 - CLOUD_CENTER_BIAS) * portraitHeight,
       );
       setCloudCoverage(coverage);
