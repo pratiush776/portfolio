@@ -164,6 +164,9 @@ button {
   /* Font families */
   --font-pier: var(--font-pier-sans), sans-serif;
   --font-noto: var(--font-noto-sans), sans-serif;
+  /* Editorial display serif — Signature Statement + work titles. Swappable for any face
+     that keeps the display-serif traits (v4-handbook/signature-statement/02). */
+  --font-editorial: var(--font-fraunces), serif;
 
   /* Color palette */
   --color-navy: #2f4156;
@@ -245,9 +248,22 @@ button {
                    radial-gradient(60% 70% at 82% 30%, color-mix(in srgb, var(--v3-blush) 60%, var(--v3-sky-field)) 0%, transparent 60%),
                    radial-gradient(75% 80% at 68% 86%, color-mix(in srgb, var(--v3-sky-edge) 70%, transparent) 0%, transparent 64%),
                    var(--v3-sky-field);
-  /* Grain tuning */
+  /* Warm "aurora" mesh — two drifting layers of soft blobs over the cream hero.
+     Kept warm & low-opacity so it adds atmospheric depth without fighting the
+     photo + wordmark. Layer A warms the empty right/lower; B fills the bottom. */
+  --mesh-aurora-a: radial-gradient(46% 56% at 82% 24%, rgba(227, 185, 138, 0.55) 0%, transparent 60%),
+                   radial-gradient(54% 62% at 96% 74%, rgba(201, 84, 46, 0.16) 0%, transparent 62%),
+                   radial-gradient(40% 50% at 66% 54%, rgba(232, 196, 170, 0.30) 0%, transparent 60%);
+  --mesh-aurora-b: radial-gradient(56% 64% at 56% 98%, rgba(246, 238, 203, 0.62) 0%, transparent 60%),
+                   radial-gradient(44% 54% at 16% 88%, rgba(244, 218, 210, 0.50) 0%, transparent 58%),
+                   radial-gradient(40% 48% at 88% 40%, rgba(227, 185, 138, 0.30) 0%, transparent 58%);
+  /* Natural film grain: opaque mid-grey fractal noise (feColorMatrix desaturates to
+     luminance and forces alpha=1). Blended with `overlay` it modulates the image
+     both lighter AND darker around mid-tone — like real grain, not dark speckle.
+     Big seamless tile avoids visible repetition. --grain-opacity is the master dial. */
   --grain-opacity: 0.18;
-  --grain-url: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E");
+  --grain-scale: 300px;
+  --grain-url: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='grain'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0.33 0.33 0.33 0 0 0.33 0.33 0.33 0 0 0.33 0.33 0.33 0 0 0 0 0 0 1'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23grain)'/%3E%3C/svg%3E");
 }
 
 /* =========================================================
@@ -300,24 +316,119 @@ button {
 
 .radial-glow-v3 {
   position: absolute;
-  left: -12rem;
-  top: -20rem;
-  width: 72rem;
-  height: 72rem;
+  left: -14rem;
+  top: -22rem;
+  width: 80rem;
+  height: 80rem;
   border-radius: 50%;
   background: radial-gradient(50% 50% at 50% 50%,
-      rgba(238, 244, 195, 1) 40%,
-      rgba(217, 227, 145, 0) 100%);
+      rgba(250, 226, 172, 1) 32%,
+      rgba(249, 230, 186, 0.55) 60%,
+      rgba(248, 232, 190, 0) 100%);
   pointer-events: none;
   z-index: 0;
+  transform-origin: 38% 36%;
+  will-change: transform, opacity;
+  animation: radial-glow-breathe 11s ease-in-out infinite;
+}
+
+/* Slow, premium "breathing" — barely-there scale + brightness pulse. */
+@keyframes radial-glow-breathe {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.82;
+  }
+  50% {
+    transform: scale(1.09);
+    opacity: 1;
+  }
 }
 
 .fluid-smoke-v3 {
   position: absolute;
   inset: 0;
-  mix-blend-mode: multiply;
+  mix-blend-mode: screen;
+  opacity: 1;
 }
 
+/* ---- Warm gradient "aurora": two slowly-drifting mesh layers ---- */
+.hero-aurora-v3 {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 0;
+}
+
+.hero-aurora-v3__layer {
+  position: absolute;
+  inset: -24%;
+  background-repeat: no-repeat;
+  will-change: transform;
+}
+
+.hero-aurora-v3__layer--a {
+  background-image: var(--mesh-aurora-a);
+  animation: hero-aurora-drift-a 15s ease-in-out infinite;
+}
+
+.hero-aurora-v3__layer--b {
+  background-image: var(--mesh-aurora-b);
+  animation: hero-aurora-drift-b 19s ease-in-out infinite;
+}
+
+/* Looping drift paths (figure-eight-ish) so the colour field flows continuously
+   instead of pulsing back and forth — visibly moving, but slow enough to stay calm. */
+@keyframes hero-aurora-drift-a {
+  0% {
+    transform: translate3d(0%, 0%, 0) scale(1.06);
+  }
+  25% {
+    transform: translate3d(6%, -4%, 0) scale(1.1);
+  }
+  50% {
+    transform: translate3d(9%, 3%, 0) scale(1.08);
+  }
+  75% {
+    transform: translate3d(4%, 7%, 0) scale(1.12);
+  }
+  100% {
+    transform: translate3d(0%, 0%, 0) scale(1.06);
+  }
+}
+
+@keyframes hero-aurora-drift-b {
+  0% {
+    transform: translate3d(0%, 0%, 0) scale(1.1);
+  }
+  25% {
+    transform: translate3d(-7%, 5%, 0) scale(1.05);
+  }
+  50% {
+    transform: translate3d(-9%, -3%, 0) scale(1.08);
+  }
+  75% {
+    transform: translate3d(-3%, -7%, 0) scale(1.04);
+  }
+  100% {
+    transform: translate3d(0%, 0%, 0) scale(1.1);
+  }
+}
+
+/* Actual film grain (SVG fractal-noise tile) — distinct from the paper-PNG texture. */
+.hero-grain-v3 {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: var(--grain-url);
+  background-repeat: repeat;
+  background-size: var(--grain-scale) var(--grain-scale);
+  opacity: var(--grain-opacity);
+  mix-blend-mode: overlay;
+  z-index: 8;
+}
+
+/* Pre-existing paper-PNG texture surface (used by PaperTexture.tsx). */
 .paper-texture-v3 {
   position: absolute;
   inset: 0;
@@ -329,22 +440,47 @@ button {
 
 .hero-composition-v3 {
   position: absolute;
-  top: calc(50% + (var(--v3-nav-height) / 2));
+  /* Top-anchored, NOT vertically centered. The box is intentionally taller than the
+     viewport (see the svh scale lever below) and its content is top-biased — the figure +
+     text live in the top ~60%, the bottom ~40% is empty. Centering an oversized box like
+     this splits the overflow onto the top and clips the head; anchoring it below the nav
+     lets the empty bottom spill off-screen instead. The offset gives headroom for the
+     photo's crown — raise it until the crown clears the nav. (Tunable.)
+     OPTICAL-CENTER lever: on common 16:9/16:10 viewports the box (113svh tall) doesn't
+     spill its empty bottom 40%, so a dead band lingers under the CTA and the cluster sits
+     ~5%h too high. Bumped 5svh → 9svh to push that empty bottom off-screen and balance the
+     top/bottom breathing room. Range: 6svh (higher) … 11svh (lower); over ~11 the CTA risks
+     clipping on short viewports. */
+  top: calc(var(--v3-nav-height) + 9svh);
   left: 50%;
-  width: min(100vw, 154.449svh, 2048px);
+  /* ── Footprint / scale levers (proportional system; see v4-handbook/hero-portrait.md) ──
+     The cluster's elegance comes from INSET CONTENT, not a shrunken box: the box stays ~full
+     viewport width (so it still overflows vertically and the empty bottom spills off-screen,
+     keeping the head un-clipped), while the wordmark/portrait sit inset within it (wordmark
+     66cqi centered → ~17% box margin each side → wordmark spans ≈ the golden-major part of
+     the viewport, leaving generous negative space).
+       • 96vw   — box side gutter. Lower (e.g. 90vw) to pull the WHOLE cluster in from the
+                  screen edges; this is the master "overall scale vs. viewport" knob.
+       • 175svh — vertical fill. Keeps the box taller than short/16:9 viewports so the empty
+                  bottom band spills off-screen. Lower only if the cluster floats too high.
+       • 1920px — cap so the wordmark doesn't balloon on ultrawide. */
+  width: min(96vw, 175svh, 1920px);
   aspect-ratio: 2048 / 1326;
-  transform: translate(-50%, -50%);
+  transform: translateX(-50%);
   container-type: inline-size;
   z-index: 5;
 }
 
 .hero-greeting-v3 {
   position: absolute;
-  top: 30%;
-  left: 9.2593%;
+  /* Eyebrow. Shares the wordmark's left anchor (17.9%) and sits a tight 3.5%h above the
+     wordmark cap so it binds to the name, not orphaned (§9). Type: one step up the 1.25
+     scale from the roles base (0.95 → 1.188cqi). */
+  top: 27.5%;
+  left: 17.9%;
   margin: 0;
   color: var(--v3-text-dark);
-  font-size: 1.3889cqi;
+  font-size: 1.188cqi;
   font-weight: 500;
   line-height: 1;
   letter-spacing: 0.22em;
@@ -355,8 +491,16 @@ button {
 
 .hero-domains-v3 {
   position: absolute;
-  top: 55%;
-  left: 9.2593%;
+  /* Roles row — the sub-label of the name lockup. Pulled up from 53.6% so its gap below the
+     wordmark baseline (49.6%) ≈ the eyebrow's gap above the cap (symmetric framing): the
+     greeting + wordmark + roles now read as ONE tight unit instead of the roles drifting low.
+     NOTE: the wordmark SVG carries ~2.4%vh of empty padding below its last glyph, so the
+     visual baseline sits above the stack's container edge (49.6%) — measured off-screenshot,
+     not the box math. 49.5% lands the roles ~2.3%vh under the *visible* baseline, matching the
+     greeting's 2.2%vh gap above the cap (true symmetric framing).
+     Shares the wordmark left anchor (17.9%). Base step of the 1.25 type scale (0.95cqi). */
+  top: 49.5%;
+  left: 17.9%;
   list-style: none;
   margin: 0;
   padding: 0;
@@ -369,7 +513,7 @@ button {
 .hero-domain-v3 {
   position: relative;
   color: var(--v3-text-dark);
-  font-size: 0.9722cqi;
+  font-size: 0.95cqi;
   font-weight: 500;
   line-height: 1;
   letter-spacing: 0.22em;
@@ -390,9 +534,15 @@ button {
 
 .hero-pratiush-stack-v3 {
   position: absolute;
-  top: 31.5%;
-  left: 8.36%;
-  width: 81.4815cqi;
+  /* PRIMARY focal element (§4): the name. Reduced from the old edge-to-edge 81.48cqi to
+     66cqi and CENTERED (left = (100-66)/2 = 17%) so it spans ≈ the golden-major part of the
+     viewport with generous negative space each side — the headline footprint fix. The
+     portrait scales WITH this (disc = 0.42 × this width) so the woven composition holds.
+     This `width` is the secondary scale knob: nudge it to grow/shrink the name (and re-center
+     `left` to (100-width)/2). Vertical band ≈ 31% → 49.6%h. */
+  top: 31%;
+  left: 17%;
+  width: 66cqi;
   aspect-ratio: 1452 / 265;
   pointer-events: none;
   user-select: none;
@@ -419,42 +569,114 @@ button {
   z-index: 3;
 }
 
+/* Positioning frame for the portrait. Holds two INDEPENDENT parallax layers (disc behind,
+   figure in front) — still ONE image, no second copy. No z-index here so the layers
+   interleave with the wordmark (filled z1 / outline z3) in the composition's stacking
+   context. Bigger than before so the figure has presence and its body reaches past the disc
+   edge. Each layer owns its own transform (Motion x/y), so centre the frame via `left`.
+   overflow:visible lets the head + disc bleed past the frame. */
 .hero-pratiush-photo-v3 {
   position: absolute;
-  left: 50%;
-  top: -2cqi;
-  width: 26cqi;
-  height: 38cqi;
-  transform: translateX(-50%);
-  overflow: hidden;
-  z-index: 2;
+  /* SECONDARY focal element (§4): scaled DOWN with the wordmark (≈ 0.815× the old size) so
+     the figure stays subordinate to the name while the weave holds. width = 0.42 × wordmark
+     width (66cqi). Keep the 0.80 w/h ratio (matches the cutout asset) so the head stays whole.
+     Centered via `left`; crown sits just under the nav, body passes through the disc. */
+  left: calc(50% - 13.86cqi);
+  top: -1.63cqi;
+  width: 27.72cqi;
+  height: 34.65cqi;
+  overflow: visible;
   pointer-events: none;
-  -webkit-mask-image:
-    linear-gradient(to bottom, transparent 0%, black 8%, black 88%, transparent 100%),
-    radial-gradient(ellipse 75% 100% at 50% 50%, black 70%, transparent 100%);
-  -webkit-mask-composite: source-in;
-  mask-image:
-    linear-gradient(to bottom, transparent 0%, black 8%, black 88%, transparent 100%),
-    radial-gradient(ellipse 75% 100% at 50% 50%, black 70%, transparent 100%);
-  mask-composite: intersect;
 }
 
-.hero-photo-v3 {
-  width: 100%;
-  height: 100%;
-  position: relative;
-  overflow: hidden;
+/* The two parallax planes. The figure drifts MORE than the disc (rates set in
+   HeroPortrait.tsx) → real depth between them. Both z:2 (between filled wordmark z1 and
+   outline z3); the figure is later in the DOM so it paints over the disc. They are NOT
+   clipped to each other, so the relative drift can't tear or ghost. */
+.hero-portrait-disc-layer,
+.hero-portrait-figure-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  will-change: transform;
 }
 
-.hero-photo-v3__image {
+/* The anchor: a warm disc the figure passes THROUGH (head out the top, body out the
+   bottom). Given real presence — vivid warm gradient, firmer rim, near-opaque — but still a
+   radial that feathers out so the rim doesn't stamp a hard ring.
+   Tunables: size, top (centre on the torso), gradient stops/tones, opacity. */
+.hero-portrait-disc {
+  position: absolute;
+  left: 50%;
+  /* Disc diameter = frame width = 0.42 × wordmark width (scaled with the portrait).
+     WEAVE FIX: dropped 3.26 → 6.5cqi so the disc's centre sits on the chest and the wordmark
+     band now crosses the disc roughly through its middle (disc spans ≈7.5%h→50%h of the box,
+     reaching just past the wordmark baseline) — the type reads as passing THROUGH the figure
+     instead of the disc hovering above the word. The head still breaks out the disc's top. */
+  top: 6.5cqi;
+  width: 27.72cqi;
+  height: 27.72cqi;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  background: radial-gradient(circle at 50% 47%,
+      #efc488 0%,
+      #d27a39 60%,
+      rgba(199, 84, 46, 0) 83%);
+  /* Receded from 0.9 → 0.8 (and the transparent stop pulled 88% → 83%) so the disc reads as
+     a soft warm anchor BEHIND the figure, not the heaviest solid mass on screen — keeps the
+     wordmark the unambiguous primary focal element (§4). Don't go below ~0.7 or the disc
+     reads as absent (it was once over-faded). Raise toward 0.9 to re-assert. */
+  opacity: 0.8;
+}
+
+/* Wrapper carries the soft lift shadow — a drop-shadow on the masked image itself would be
+   clipped away by its own mask, so it goes on the parent. */
+.hero-portrait-figure {
+  position: absolute;
+  inset: 0;
+  filter: drop-shadow(0 10px 18px rgba(34, 30, 46, 0.28));
+}
+
+/* ONE image, clipped + broken out by a single mask that UNIONS two shapes:
+   - a circle → the body (turns the photo's straight cut-off edges into a clean curve). Its
+     bottom (centre frame-y 23 + radius 16 = 39cqi) sits ABOVE the photo's straight bottom
+     edge (frame-y 42.5), so the visible body bottom is the CURVE, never the straight cut —
+     and it reaches just past the disc's bottom edge so the figure isn't a small thing
+     floating inside the disc;
+   - a top band → the head (the break-out above the disc).
+   `mask-composite: add` unions them; the band overlaps the circle's top (no neck gap).
+   Warm grade joins the cool B&W to the palette (§6) + a slight contrast drop demotes it
+   under the wordmark (§4).
+   Tunables: circle radius/centre, the feather band (body→disc softness), the band stops
+   (land the fade on the neck), the warm filter. */
+.hero-portrait-img {
   object-fit: cover;
   object-position: center top;
+  filter: contrast(0.9) brightness(1.03) sepia(0.32) saturate(1.2) hue-rotate(-12deg);
+  /* Mask radius + circle centre-y are in cqi (absolute % of box width), so they must scale
+     with the frame. WEAVE FIX: centre-y dropped 18.75 → 20.5cqi to extend the visible torso
+     DOWN past the wordmark baseline (so the figure stands THROUGH the type, not above it).
+     Guardrails held: circle bottom (20.5 + 13.05 = 33.55cqi) still sits above the photo's
+     straight bottom (34.65cqi) → clean curved body, no straight cut; circle top (7.45cqi) still
+     overlaps the head band's end (24% × 34.65 = 8.32cqi) → no neck gap. Max safe centre-y =
+     34.65 − 13.05 = 21.6cqi. The top band uses % (of the frame) so it scales automatically. */
+  -webkit-mask-image:
+    radial-gradient(circle 13.05cqi at 50% 20.5cqi, #000 80%, transparent 100%),
+    linear-gradient(to bottom, #000 0 24%, transparent 36%);
+  -webkit-mask-composite: source-over;
+  mask-image:
+    radial-gradient(circle 13.05cqi at 50% 20.5cqi, #000 80%, transparent 100%),
+    linear-gradient(to bottom, #000 0 24%, transparent 36%);
+  mask-composite: add;
 }
 
 .works-cta-v3 {
   position: absolute;
-  top: 60%;
-  left: 9.2593%;
+  /* CTA — the action, deliberately detached from the name lockup with its own air (~4%h
+     below the tightened roles row). Tracks the roles' move up. Shares the wordmark left
+     anchor (17.9%). One step up the 1.25 type scale (= the greeting step, 1.188cqi). */
+  top: 55.3%;
+  left: 17.9%;
   display: inline-flex;
   align-items: center;
   gap: 1.1cqi;
@@ -463,7 +685,7 @@ button {
   background: var(--v3-text-dark);
   color: var(--v3-bg-primary);
   font-family: var(--font-pier);
-  font-size: 1.15cqi;
+  font-size: 1.188cqi;
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -501,14 +723,17 @@ button {
    ========================================================= */
 .hero-locator-v3 {
   position: absolute;
-  top: 55%;
-  right: 11.51%;
+  /* Locator metadata. Mirrors the roles row on the right anchor line (17.9% = the wordmark's
+     right edge inset), aligned to the same baseline as the roles → §1 shared anchor / §5
+     counterweight. Tracks the roles' new tightened top. Base step of the 1.25 scale (0.95cqi). */
+  top: 49.5%;
+  right: 17.9%;
   display: inline-flex;
   align-items: center;
   gap: 0.5cqi;
   color: var(--v3-text-dark);
   opacity: 0.75;
-  font-size: 0.9722cqi;
+  font-size: 0.95cqi;
   font-weight: 500;
   letter-spacing: 0.22em;
   text-transform: uppercase;
@@ -684,8 +909,13 @@ button {
 
   .hero-pratiush-photo-v3 {
     top: 6%;
+    /* pair left:50% with translateX(-50%) here — the desktop base centres via `left` alone */
+    left: 50%;
     width: min(52vw, 18rem);
+    /* aspect-ratio gives the frame a height so the absolutely-positioned parallax layers
+       (inset:0) don't collapse on tablet widths */
     height: auto;
+    aspect-ratio: 34 / 42.5;
     transform: translateX(-50%);
   }
 
@@ -778,6 +1008,423 @@ button {
   .site-nav-v3__contact,
   .site-nav-v3__link,
   .site-nav-v3__link::after {
+    transition: none;
+  }
+
+  .hero-aurora-v3__layer--a,
+  .hero-aurora-v3__layer--b,
+  .radial-glow-v3 {
+    animation: none;
+  }
+}
+
+/* =========================================================
+   V4 — page shell + continuous warm aurora
+   ========================================================= */
+.page-v4 {
+  position: relative;
+  isolation: isolate;
+  width: 100%;
+  overflow-x: clip; /* clip (NOT hidden) so the sticky work cards keep working */
+  background: var(--v3-bg-primary);
+}
+
+/* keep all real content above the fixed aurora field (z-index 0) */
+.page-v4 > .hero-root-v3,
+.statement-v4,
+.works-v4,
+.footer-v4 {
+  position: relative;
+  z-index: 1;
+}
+
+.footer-v4 {
+  height: 12vh;
+}
+
+/* One continuous, slowly drifting warm field behind the whole post-hero scroll.
+   Fixed = not an ancestor of the sticky cards, so it can never break their sticky. */
+.section-aurora-v4 {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.section-aurora-v4__layer {
+  position: absolute;
+  inset: -28%;
+  background-repeat: no-repeat;
+  opacity: 0.85;
+  will-change: transform;
+}
+
+.section-aurora-v4__layer--a {
+  background-image: var(--mesh-aurora-a);
+  animation: section-aurora-drift-a 26s ease-in-out infinite;
+}
+
+.section-aurora-v4__layer--b {
+  background-image: var(--mesh-aurora-b);
+  animation: section-aurora-drift-b 34s ease-in-out infinite;
+}
+
+.section-aurora-v4__grain {
+  position: absolute;
+  inset: 0;
+  background-image: var(--grain-url);
+  background-repeat: repeat;
+  background-size: var(--grain-scale) var(--grain-scale);
+  opacity: calc(var(--grain-opacity) * 0.55);
+  mix-blend-mode: overlay;
+}
+
+/* Slow figure-eight drift — calmer than the hero so it reads as quiet atmosphere. */
+@keyframes section-aurora-drift-a {
+  0%   { transform: translate3d(0%, 0%, 0) scale(1.05); }
+  25%  { transform: translate3d(5%, -3%, 0) scale(1.08); }
+  50%  { transform: translate3d(7%, 4%, 0) scale(1.06); }
+  75%  { transform: translate3d(3%, 6%, 0) scale(1.09); }
+  100% { transform: translate3d(0%, 0%, 0) scale(1.05); }
+}
+
+@keyframes section-aurora-drift-b {
+  0%   { transform: translate3d(0%, 0%, 0) scale(1.08); }
+  25%  { transform: translate3d(-6%, 4%, 0) scale(1.04); }
+  50%  { transform: translate3d(-8%, -3%, 0) scale(1.07); }
+  75%  { transform: translate3d(-3%, -6%, 0) scale(1.03); }
+  100% { transform: translate3d(0%, 0%, 0) scale(1.08); }
+}
+
+/* =========================================================
+   V4 — Signature Statement (pure typographic)
+   ========================================================= */
+.statement-v4 {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: clamp(2rem, 4.5vw, 4rem);
+  max-width: min(72rem, 94vw);
+  margin: 0 auto;
+  padding: clamp(7rem, 17vh, 14rem) var(--v3-page-gutter);
+  color: var(--v3-text-dark);
+}
+
+.statement-v4__eyebrow {
+  font-family: var(--font-pier);
+  font-size: clamp(0.7rem, 0.9vw, 0.8rem);
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  opacity: 0.55;
+}
+
+.statement-v4__headline {
+  font-family: var(--font-editorial);
+  font-optical-sizing: auto;
+  font-weight: 600;
+  font-size: clamp(1.9rem, 5vw, 4.25rem);
+  line-height: 1.06;
+  letter-spacing: -0.02em;
+}
+
+.statement-v4__line {
+  display: block;
+  overflow: hidden; /* mask for the line-rise reveal */
+  white-space: nowrap; /* each authored line stays on one row (no wrapping) */
+  padding-bottom: 0.12em; /* keep serif descenders from being clipped by the mask */
+}
+
+.statement-v4__line-inner {
+  display: block;
+  will-change: transform;
+}
+
+.statement-v4__mark {
+  color: var(--v3-accent-red);
+  margin-left: 0.1em;
+}
+
+.statement-v4__more {
+  font-family: var(--font-pier);
+  font-size: clamp(0.72rem, 0.95vw, 0.85rem);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--v3-text-dark);
+  opacity: 0.7;
+  border-bottom: 1px solid currentColor;
+  padding-bottom: 0.2em;
+  transition: opacity 0.25s ease, color 0.25s ease;
+}
+
+.statement-v4__more:hover {
+  opacity: 1;
+  color: var(--v3-accent-red);
+}
+
+/* =========================================================
+   V4 — Featured Works (stacking gallery)
+   ========================================================= */
+.works-v4 {
+  padding: clamp(4rem, 8vh, 8rem) 0 clamp(2rem, 6vh, 6rem);
+}
+
+/* wrapper scopes the pinned heading to the stack's scroll length. Full-width with the SAME
+   side gutter as the nav, so the pinned title lines up with the "PRATIUSH" logo at the
+   viewport edge; the cards inside stay centered via their own max-width + auto margins. */
+.works-v4__inner {
+  position: relative;
+  padding: 0 clamp(1.5rem, 3.5vw, 3.5rem);
+}
+
+/* big, bold, left-aligned title — pinned while the cards stack beneath it */
+.works-v4__head {
+  position: sticky;
+  top: calc(var(--v3-nav-height) + clamp(1rem, 2vh, 1.75rem));
+  z-index: 5;
+  pointer-events: none; /* never block the cards stacking beneath */
+  padding-bottom: clamp(1.25rem, 3vh, 2.5rem);
+  color: var(--v3-text-dark);
+}
+
+.works-v4__eyebrow {
+  font-family: var(--font-pier);
+  font-size: clamp(0.7rem, 0.9vw, 0.8rem);
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  opacity: 0.55;
+  margin-bottom: clamp(0.5rem, 1.5vh, 1rem);
+}
+
+.works-v4__title {
+  font-family: var(--font-editorial);
+  font-weight: 600;
+  font-size: clamp(2.2rem, 5vw, 3.75rem);
+  letter-spacing: -0.025em;
+  line-height: 1.02;
+  text-align: left;
+}
+
+.works-v4__stack {
+  position: relative;
+  /* Establish a BFC so the LAST card's margin-bottom is CONTAINED instead of collapsing
+     through the stack's bottom edge. Without this the last card gets zero trailing room and
+     the whole deck un-sticks the instant it arrives (pushing the stack up) instead of it
+     pinning on top. flow-root is not a scroll container, so sticky still works. */
+  display: flow-root;
+}
+
+/* Each card is a sticky layer; they SHARE one `top`, so later cards pin on top of earlier
+   ones and the gallery piles up (true stack). `top` sits BELOW the pinned title band so the
+   two never overlap. The margin below each card is the read window + recede scroll room —
+   the card holds alone, then the next rises to cover it. */
+.work-card-v4 {
+  position: sticky;
+  top: 26vh;
+  margin-bottom: 30vh; /* hold/cover scroll room = how long this card stays pinned (overlapping) */
+  display: flex;
+  justify-content: center;
+}
+
+/* The last card needs the SAME trailing room as the others, otherwise it never pins long
+   enough to stack on top — it just scrolls straight through and shoves the outro up behind
+   it. This keeps it pinned on top of the deck as the finale, then releases to the CTA. */
+.work-card-v4:last-child {
+  margin-bottom: 30vh;
+}
+
+/* the centered visual card that scales + tilts during recede */
+.work-card-v4__card {
+  position: relative;
+  width: min(60rem, 100%);
+  height: min(70vh, 38rem);
+  margin: 0 auto;
+  border-radius: var(--v3-radius-stage);
+  overflow: hidden;
+  background: var(--v3-card-2);
+  box-shadow: var(--v3-shadow-soft);
+  transform-origin: center;
+  will-change: transform;
+}
+
+/* inner wrapper is over-scaled so the photo still covers the frame while counter-rotating */
+.work-card-v4__img-wrap {
+  position: absolute;
+  inset: 0;
+  scale: 1.12;
+  will-change: transform;
+}
+
+.work-card-v4__img {
+  object-fit: cover;
+}
+
+/* soft bottom scrim so the white caption is legible on any image */
+.work-card-v4__scrim {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: linear-gradient(
+    to top,
+    rgba(18, 15, 26, 0.9) 0%,
+    rgba(18, 15, 26, 0.55) 34%,
+    rgba(18, 15, 26, 0.08) 60%,
+    transparent 74%
+  );
+}
+
+/* caption lives INSIDE the card (bottom-left over the scrim) so it stacks/recedes/fades
+   WITH its own card and can never overlap a sibling card */
+.work-card-v4__caption {
+  position: absolute;
+  z-index: 2;
+  left: clamp(1.5rem, 3vw, 3rem);
+  right: clamp(1.5rem, 3vw, 3rem);
+  bottom: clamp(1.5rem, 3.5vh, 3rem);
+  display: flex;
+  flex-direction: column;
+  gap: clamp(0.4rem, 0.8vh, 0.85rem);
+  max-width: 44ch;
+  color: #fff;
+  text-shadow: 0 1px 18px rgba(0, 0, 0, 0.35);
+}
+
+.work-card-v4__index {
+  font-family: var(--font-pier);
+  font-size: 0.75rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  opacity: 0.8;
+}
+
+.work-card-v4__name {
+  font-family: var(--font-editorial);
+  font-weight: 600;
+  font-size: clamp(1.8rem, 3.4vw, 3rem);
+  line-height: 1.04;
+  letter-spacing: -0.015em;
+}
+
+.work-card-v4__meta {
+  font-family: var(--font-pier);
+  font-size: 0.8rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--v3-accent-red);
+}
+
+.work-card-v4__desc {
+  font-size: clamp(0.95rem, 1.1vw, 1.1rem);
+  line-height: 1.5;
+  opacity: 0.92;
+}
+
+.works-v4__outro {
+  display: flex;
+  justify-content: center;
+  padding: clamp(3rem, 8vh, 7rem) var(--v3-page-gutter) 0;
+}
+
+.works-more-v4 {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.95rem 1.4rem 0.95rem 1.6rem;
+  border-radius: var(--v3-radius-pill);
+  background: var(--v3-text-dark);
+  color: var(--v3-bg-primary);
+  font-family: var(--font-pier);
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  line-height: 1;
+  transition: transform 0.25s ease, background-color 0.25s ease;
+}
+
+.works-more-v4:hover {
+  transform: translateY(-2px);
+  background: var(--v3-accent-red);
+}
+
+.works-more-v4__icon {
+  display: inline-flex;
+  width: 1rem;
+  height: 1rem;
+  transition: transform 0.25s ease;
+}
+
+.works-more-v4__icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.works-more-v4:hover .works-more-v4__icon {
+  transform: translate(2px, -2px);
+}
+
+/* ---- V4 responsive: stacking gallery → simple stacked images + overlay ---- */
+@media (max-width: 1100px) {
+  .statement-v4 {
+    padding: clamp(5rem, 14vh, 9rem) var(--v3-page-gutter);
+  }
+
+  /* drop the pinned heading + sticky stack: a simple normal-scroll list on mobile */
+  .works-v4__head {
+    position: static;
+    pointer-events: auto;
+  }
+
+  .works-v4__title {
+    font-size: clamp(2.2rem, 9vw, 3.25rem);
+  }
+
+  .work-card-v4 {
+    position: relative;
+    top: auto;
+    margin-bottom: clamp(2.5rem, 7vh, 4.5rem);
+  }
+
+  .work-card-v4:last-child {
+    margin-bottom: 0;
+  }
+
+  .work-card-v4__card {
+    width: 100%;
+    height: min(62vh, 30rem);
+  }
+}
+
+/* ---- V4 reduced-motion: still backdrop, no fold, no reveal ---- */
+@media (prefers-reduced-motion: reduce) {
+  .section-aurora-v4__layer--a,
+  .section-aurora-v4__layer--b {
+    animation: none;
+  }
+
+  .statement-v4__line-inner {
+    transform: none;
+  }
+
+  /* flow the cards normally — no sticky pile-up, no recede (JS already skips transforms) */
+  .works-v4__head {
+    position: static;
+  }
+
+  .work-card-v4 {
+    position: relative;
+    top: auto;
+    margin-bottom: clamp(3rem, 8vh, 6rem);
+  }
+
+  .work-card-v4:last-child {
+    margin-bottom: 0;
+  }
+
+  .works-more-v4,
+  .works-more-v4__icon {
     transition: none;
   }
 }
