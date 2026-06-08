@@ -15,12 +15,12 @@ type FluidSmokeProps = {
 };
 
 const DEFAULTS = {
-  SIM_RES: 256,
-  DYE_RES: 2048,
+  SIM_RES: 192,
+  DYE_RES: 1024,
   DENSITY_DISS: 0.4,
   VEL_DISS: 0.5,
   PRESSURE: 0.85,
-  PRESSURE_ITER: 20,
+  PRESSURE_ITER: 12,
   CURL: 8,
   SPLAT_FORCE: 1500,
   DYE_RADIUS: 0.005,
@@ -56,14 +56,19 @@ export function FluidSmoke({
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [enabled, setEnabled] = useState(false);
 
-  // Desktop / cursor-based devices only.
+  // Desktop / cursor-based devices only, and honor reduced motion.
   useEffect(() => {
     if (typeof window === 'undefined' || !window.matchMedia) return;
-    const mq = window.matchMedia('(hover: hover) and (pointer: fine)');
-    setEnabled(mq.matches);
-    const onChange = (e: MediaQueryListEvent) => setEnabled(e.matches);
-    mq.addEventListener('change', onChange);
-    return () => mq.removeEventListener('change', onChange);
+    const cursor = window.matchMedia('(hover: hover) and (pointer: fine)');
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const compute = () => setEnabled(cursor.matches && !reduced.matches);
+    compute();
+    cursor.addEventListener('change', compute);
+    reduced.addEventListener('change', compute);
+    return () => {
+      cursor.removeEventListener('change', compute);
+      reduced.removeEventListener('change', compute);
+    };
   }, []);
 
   // Keep latest config in a ref so runtime changes don't tear down the GL context.
@@ -499,7 +504,7 @@ void main(){
     }
 
     function resize() {
-      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
       const w = Math.max(1, Math.floor(canvas!.clientWidth * dpr));
       const h = Math.max(1, Math.floor(canvas!.clientHeight * dpr));
       if (canvas!.width === w && canvas!.height === h && targets.length > 0)
@@ -538,6 +543,7 @@ void main(){
       );
     }
     function onMove(e: MouseEvent) {
+      if (paused) return;
       [lmx, lmy] = [mx, my];
       [mx, my] = toUV(e.clientX, e.clientY);
       if (lmx < 0) {
@@ -552,16 +558,36 @@ void main(){
     }
     window.addEventListener('mousemove', onMove, { passive: true });
 
-    // Pause when tab hidden.
-    let paused = document.hidden;
-    function onVis() {
-      paused = document.hidden;
-      if (!paused) {
+    // Pause when tab hidden or canvas scrolled out of view.
+    let hidden = document.hidden;
+    let offscreen = false;
+    let paused = hidden || offscreen;
+    function resume() {
+      const next = hidden || offscreen;
+      if (paused && !next) {
+        paused = false;
         last = performance.now();
         raf = requestAnimationFrame(tick);
+      } else {
+        paused = next;
       }
     }
+    function onVis() {
+      hidden = document.hidden;
+      resume();
+    }
     document.addEventListener('visibilitychange', onVis);
+
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          offscreen = !entry.isIntersecting;
+        }
+        resume();
+      },
+      { rootMargin: '120px' },
+    );
+    io.observe(canvas);
 
     let last = performance.now();
     let raf = 0;
@@ -654,6 +680,7 @@ void main(){
       cancelAnimationFrame(raf);
       window.removeEventListener('mousemove', onMove);
       document.removeEventListener('visibilitychange', onVis);
+      io.disconnect();
       ro.disconnect();
       disposeFields();
       for (const p of programs) gl!.deleteProgram(p);
