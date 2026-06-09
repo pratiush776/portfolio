@@ -25,7 +25,7 @@ const Carousel: React.FC<CarouselProps> = ({ videos, imgs }) => {
             <img
               alt="project screenshot"
               src={img}
-              className="rounded-[20px] h-[min(40vh,400px)] w-auto max-w-[85vw] object-contain opacity-90 cursor-zoom-in"
+              className="rounded-[20px] max-h-[min(40vh,400px)] w-auto max-w-[min(85vw,37em)] object-contain opacity-90 cursor-zoom-in"
               style={{ objectPosition: "top center" }}
             />
           </Zoom>
