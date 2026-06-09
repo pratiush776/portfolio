@@ -2,7 +2,8 @@ import { FluidSmoke } from "@/components/decor/FluidSmoke";
 import { HeroAurora } from "@/components/decor/HeroAurora";
 import { RadialGlow } from "@/components/decor/RadialGlow";
 import { SectionAurora } from "@/components/decor/SectionAurora";
-import { HeroPortrait } from "@/components/hero/HeroPortrait";
+// TEMP (layout rework): portrait disabled — re-enable by uncommenting this import + its usage below.
+// import { HeroPortrait } from "@/components/hero/HeroPortrait";
 import { HeroPratiushText } from "@/components/hero/HeroPratiushText";
 import { WorksBadge } from "@/components/hero/WorksBadge";
 import { LocationPin } from "@/components/icons";
@@ -32,7 +33,17 @@ export default function Home() {
           <div className="hero-stage-v3">
             <div className="hero-composition-v3">
               <p className="hero-greeting-v3">Hi, I&apos;M</p>
-              <HeroPortrait />
+              {/*
+                TEMP (layout rework): portrait disabled.
+                <HeroPortrait /> = the cursor-parallax photo composition that sat between the
+                greeting and the PRATIUSH wordmark — one image (no second copy) split into two
+                independent parallax layers: a warm disc behind (hero-portrait-disc) and the
+                masked figure in front (hero-portrait-figure), each drifting at a different rate
+                so the figure passes THROUGH the disc with real depth. Desktop/fine-pointer only,
+                off under reduced-motion. Positioned via .hero-pratiush-photo-v3 in globals.css.
+                Re-enable: uncomment the import above + the line below.
+              */}
+              {/* <HeroPortrait /> */}
               <HeroPratiushText />
               <ul className="hero-domains-v3" aria-label="Roles">
                 <li className="hero-domain-v3">Software Engineer</li>
