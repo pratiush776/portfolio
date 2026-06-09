@@ -2,12 +2,17 @@ import { FluidSmoke } from "@/components/decor/FluidSmoke";
 import { HeroAurora } from "@/components/decor/HeroAurora";
 import { RadialGlow } from "@/components/decor/RadialGlow";
 import { SectionAurora } from "@/components/decor/SectionAurora";
-// TEMP (layout rework): portrait disabled — re-enable by uncommenting this import + its usage below.
+// TEMP (layout rework): portrait disabled — re-enable by uncommenting this import + re-adding it
+// to the hero cluster (it will need re-fitting to the new left-aligned layout).
 // import { HeroPortrait } from "@/components/hero/HeroPortrait";
-import { HeroPratiushText } from "@/components/hero/HeroPratiushText";
-import { WorksBadge } from "@/components/hero/WorksBadge";
-import { LocationPin } from "@/components/icons";
-import { SignatureStatement } from "@/components/statement/SignatureStatement";
+// The hero wordmark now lives in the layout-level <BrandMark/> (morphs into the nav on scroll),
+// so the in-flow <HeroPratiushText/> is no longer rendered here.
+import { HeroLede } from "@/components/hero/HeroLede";
+// TEMP (layout rework): "See my works" CTA removed for now — re-add <WorksBadge/> to bring it back.
+// import { WorksBadge } from "@/components/hero/WorksBadge";
+// Signature Statement section removed — its copy ("I like turning early ideas into polished
+// experiences people can use.") now lives as the hero tagline in HeroLede. Component file kept.
+// import { SignatureStatement } from "@/components/statement/SignatureStatement";
 import { FeaturedWorks } from "@/components/works/FeaturedWorks";
 
 export default function Home() {
@@ -31,28 +36,19 @@ export default function Home() {
         </div>
         <div className="canvas-v3 canvas-v3--hero">
           <div className="hero-stage-v3">
-            <div className="hero-composition-v3">
-              <p className="hero-greeting-v3">Hi, I&apos;M</p>
-              {/*
-                TEMP (layout rework): portrait disabled.
-                <HeroPortrait /> = the cursor-parallax photo composition that sat between the
-                greeting and the PRATIUSH wordmark — one image (no second copy) split into two
-                independent parallax layers: a warm disc behind (hero-portrait-disc) and the
-                masked figure in front (hero-portrait-figure), each drifting at a different rate
-                so the figure passes THROUGH the disc with real depth. Desktop/fine-pointer only,
-                off under reduced-motion. Positioned via .hero-pratiush-photo-v3 in globals.css.
-                Re-enable: uncomment the import above + the line below.
-              */}
-              {/* <HeroPortrait /> */}
-              <HeroPratiushText />
-              <ul className="hero-domains-v3" aria-label="Roles">
-                <li className="hero-domain-v3">Software Engineer</li>
-                <li className="hero-domain-v3">UI/UX Designer</li>
-              </ul>
-              <WorksBadge />
-              <span className="hero-locator-v3" aria-label="Based in USA">
-                <LocationPin aria-hidden />
-                <span>Based in USA</span>
+            {/*
+              Left-aligned hero lockup (eyebrow → wordmark → tagline) with a bottom meta strip
+              (credential label left / locator right). The wordmark is the layout-level
+              <BrandMark/>; HeroLede reserves its slot and fades the intro on scroll.
+              TEMP (layout rework): portrait + "See my works" CTA removed for now — see imports.
+              The old centered cqi composition (.hero-composition-v3 etc.) is superseded by this.
+            */}
+            <HeroLede />
+            {/* One subtle right-side element: vertical scroll cue (also signposts the scroll-morph). */}
+            <div className="hero-scroll-cue-v4" aria-hidden>
+              <span className="hero-scroll-cue-v4__label">Scroll</span>
+              <span className="hero-scroll-cue-v4__track">
+                <span className="hero-scroll-cue-v4__thumb" />
               </span>
             </div>
           </div>
@@ -60,7 +56,6 @@ export default function Home() {
         <div className="hero-grain-v3" aria-hidden />
       </section>
 
-      <SignatureStatement />
       <FeaturedWorks />
 
       <footer className="footer-v4" aria-hidden />

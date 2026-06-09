@@ -204,6 +204,14 @@ button {
   --v3-shell-inner-x: clamp(1.25rem, 0.9rem + 1.2vw, 2.25rem);
   --v3-surface-max: 144rem;
   --v3-nav-height: clamp(3rem, 2.65rem + 1vw, 4rem);
+
+  /* ── Brand wordmark (PRATIUSH) — shared by the hero ghost, the nav slot, and the morphing
+     <BrandMark/> so all three stay in lockstep. The gutter MUST match the nav's left inset
+     (.site-nav-v3 left) so the hero wordmark and the nav logo share one vertical line and the
+     scroll-morph has ~no horizontal drift. Wordmark aspect ratio = 1452 / 265. */
+  --brand-gutter: clamp(1.5rem, 3.5vw, 3.5rem);
+  --brand-hero-w: min(50vw, 48rem);          /* big hero size — master "name scale" knob */
+  --brand-nav-w: clamp(7rem, 8.5vw, 9rem);   /* docked logo size in the nav */
   --v3-outline-top: clamp(2.5rem, 5.581svh, 5rem);
   --v3-outline-right: clamp(2rem, 2.93vw, 3.75rem);
   --v3-outline-bottom: clamp(2.5rem, 5.505svh, 5rem);
@@ -261,8 +269,8 @@ button {
      luminance and forces alpha=1). Blended with `overlay` it modulates the image
      both lighter AND darker around mid-tone — like real grain, not dark speckle.
      Big seamless tile avoids visible repetition. --grain-opacity is the master dial. */
-  --grain-opacity: 0.18;
-  --grain-scale: 300px;
+  --grain-opacity: 0.28;
+  --grain-scale: 260px;
   --grain-url: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='grain'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0.33 0.33 0.33 0 0 0.33 0.33 0.33 0 0 0.33 0.33 0.33 0 0 0 0 0 0 1'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23grain)'/%3E%3C/svg%3E");
 }
 
@@ -274,7 +282,17 @@ button {
   min-height: 100svh;
   height: 100svh;
   padding: 0;
-  background: var(--v3-bg-primary);
+  /* Intentional, directional field: warm light pools from the upper-left (a deliberate light
+     source, reinforced by .radial-glow-v3), falling to a faint terracotta-tinted warmth at the
+     lower-right that grounds the footer strip. Not a flat fill. */
+  background:
+    radial-gradient(115% 100% at 16% 2%,
+        color-mix(in srgb, #FCEDCB 80%, var(--v3-bg-primary)) 0%,
+        transparent 54%),
+    radial-gradient(95% 85% at 90% 110%,
+        color-mix(in srgb, var(--v3-accent-red) 7%, var(--v3-bg-primary)) 0%,
+        transparent 56%),
+    var(--v3-bg-primary);
   overflow: hidden;
   isolation: isolate;
 }
@@ -316,15 +334,18 @@ button {
 
 .radial-glow-v3 {
   position: absolute;
-  left: -14rem;
-  top: -22rem;
-  width: 80rem;
-  height: 80rem;
+  left: -16rem;
+  top: -24rem;
+  width: 84rem;
+  height: 84rem;
   border-radius: 50%;
+  /* A deliberate warm light source (upper-left), cleaner falloff: bright gold core that holds,
+     then a smooth premium fade so it reads as ONE intentional halo rather than a soft smear. */
   background: radial-gradient(50% 50% at 50% 50%,
-      rgba(250, 226, 172, 1) 32%,
-      rgba(249, 230, 186, 0.55) 60%,
-      rgba(248, 232, 190, 0) 100%);
+      rgba(252, 230, 178, 0.95) 0%,
+      rgba(250, 224, 170, 0.85) 30%,
+      rgba(248, 226, 182, 0.4) 58%,
+      rgba(248, 232, 190, 0) 78%);
   pointer-events: none;
   z-index: 0;
   transform-origin: 38% 36%;
@@ -760,6 +781,7 @@ button {
   z-index: 100;
 }
 
+/* Legacy text logo — superseded by .site-nav-v3__brand (the morphing <BrandMark/> wordmark). */
 .site-nav-v3__logo {
   font-family: var(--font-pier);
   font-size: clamp(1.4rem, 1.32vw, 1.65rem);
@@ -767,6 +789,15 @@ button {
   font-weight: 700;
   line-height: 1;
   color: var(--v3-text-dark);
+}
+
+/* Invisible logo slot: reserves the wordmark's footprint (so the right-side links sit
+   correctly), is the measurement target for <BrandMark/> ([data-brand-nav]), and is the
+   clickable home link under the pointer-events:none wordmark. */
+.site-nav-v3__brand {
+  display: block;
+  width: var(--brand-nav-w);
+  aspect-ratio: 1452 / 265;
 }
 
 .site-nav-v3__links {
@@ -833,6 +864,215 @@ button {
 .site-nav-v3__contact-icon svg {
   width: 100%;
   height: 100%;
+}
+
+/* =========================================================
+   V4 — Left-aligned hero cluster + morphing brand wordmark
+   (supersedes the centered .hero-composition-v3 lockup above)
+   ========================================================= */
+
+/* The hero lockup fills the stage; content hugs the left gutter and is vertically centred.
+   The big right-side void is the point — premium = restraint + negative space. HeroLede fades
+   + lifts this whole block on scroll (the wordmark itself is the separate fixed <BrandMark/>). */
+.hero-cluster-v4 {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  /* Anchor the lockup to the lower band so it grounds just above the footer strip — the type
+     reads as one composed mass instead of floating dead-center with empty gaps top and bottom.
+     The open upper area is then carried by the halo (intentional light, not emptiness). */
+  justify-content: flex-end;
+  gap: 0; /* rhythm is controlled per-element below, not by a uniform gap */
+  padding: var(--v3-nav-height) var(--brand-gutter) clamp(6rem, 15svh, 9rem);
+  text-align: left;
+  will-change: transform, opacity;
+}
+
+/* Visually hidden but available to assistive tech (real <h1>). */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* Muted dark (not accent) so the wordmark + the tagline mark own the terracotta. */
+.hero-eyebrow-v4 {
+  margin: 0;
+  font-family: var(--font-pier);
+  font-size: clamp(0.72rem, 0.8vw, 0.9rem);
+  font-weight: 600;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--v3-text-dark);
+  opacity: 0.72; /* 0.6 dropped below AA (4.04:1) on the cream; 0.72 ≈ 4.9:1 */
+}
+
+/* Mid-tier of the lockup + the actual proposition. Editorial serif (Fraunces) against the
+   grotesque wordmark + tracked-caps labels = a considered 3-voice type system, not a template.
+   Constrained measure so it wraps to ~2 lines and adds horizontal mass that balances the void. */
+.hero-tagline-v4 {
+  margin: clamp(0.85rem, 1.4vh, 1.25rem) 0 0; /* wordmark → tagline (tightened) */
+  max-width: 22ch; /* wraps the line to a tight 2 rows */
+  font-family: var(--font-editorial);
+  /* Fraunces flattens its stroke contrast at low opsz/weight (font-optical-sizing:auto + 500
+     made it read like a humanist sans). Pin a HIGH optical size + heavier weight so the serif
+     reads as a true display serif — that's what makes the grotesque-vs-serif voice contrast land. */
+  font-weight: 600;
+  font-variation-settings: "wght" 600, "opsz" 144, "SOFT" 0, "WONK" 0;
+  font-size: clamp(1.5rem, 2.3vw, 2.65rem);
+  line-height: 1.16;
+  letter-spacing: -0.012em;
+  color: var(--v3-text-dark);
+  text-wrap: balance;
+}
+
+.hero-tagline-v4__mark {
+  color: var(--v3-accent-red);
+  margin-left: 0.06em;
+}
+
+/* Invisible footprint reserving the wordmark's space (the visible glyphs are <BrandMark/>);
+   also the start-rect <BrandMark/> measures via [data-brand-hero]. */
+.hero-brand-ghost {
+  width: var(--brand-hero-w);
+  aspect-ratio: 1452 / 265;
+  margin-top: clamp(0.5rem, 1vh, 0.75rem); /* eyebrow → wordmark (8-pt: ~8–12px) */
+  pointer-events: none;
+}
+
+/* Only populated under reduced motion (static hero wordmark in place of the morphing one). */
+.hero-brand-ghost svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  color: var(--v3-accent-red);
+}
+
+/* Bottom meta strip (left) = the credential label, and the footnote the tagline's asterisk
+   refers to. Pinned bottom-left so it pairs with the locator (bottom-right) into a full-width
+   baseline that frames the page. */
+.hero-roles-v4 {
+  position: absolute;
+  left: var(--brand-gutter);
+  bottom: clamp(1.75rem, 5svh, 3.25rem);
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-pier);
+  font-size: clamp(0.74rem, 0.85vw, 0.95rem);
+  font-weight: 500;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--v3-text-dark);
+}
+
+/* Matching footnote mark — terracotta, so the eye links it to the tagline's asterisk. */
+.hero-roles-v4__mark {
+  color: var(--v3-accent-red);
+  margin-right: 0.55em;
+}
+
+/* Bottom meta strip (right). Pinned bottom-right, same baseline as the roles → together they
+   form a full-width footer line that counterweights the left-anchored lockup. */
+.hero-meta-v4 {
+  position: absolute;
+  right: var(--brand-gutter);
+  bottom: clamp(1.75rem, 5svh, 3.25rem);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--font-pier);
+  font-size: clamp(0.68rem, 0.78vw, 0.82rem);
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--v3-text-dark);
+  opacity: 0.65;
+}
+
+.hero-meta-v4 svg {
+  width: 0.82em;
+  height: auto;
+}
+
+/* The single PRATIUSH wordmark, fixed to the viewport. <BrandMark/> drives x/y/scale to morph
+   it from the hero ghost (scroll 0) into the nav slot (docked), then it rests as the logo.
+   transform-origin: top left so the interpolated (x, y) place its top-left and scale shrinks
+   toward that corner. Colour is a one-line knob (terracotta accent → e.g. --v3-text-dark). */
+.brand-mark {
+  position: fixed;
+  top: 0;
+  left: 0;
+  transform-origin: top left;
+  color: var(--v3-accent-red);
+  pointer-events: none;
+  z-index: 90;
+  will-change: transform;
+}
+
+.brand-mark svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* One subtle right-side element: a vertical scroll cue (right-centre). Doubles as a signpost for
+   the wordmark→nav scroll interaction — a thin track with a terracotta segment drifting down. */
+.hero-scroll-cue-v4 {
+  position: absolute;
+  right: calc(var(--brand-gutter) + 0.25rem);
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 4;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.9rem;
+  pointer-events: none;
+}
+
+.hero-scroll-cue-v4__label {
+  writing-mode: vertical-rl;
+  font-family: var(--font-pier);
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: 0.34em;
+  text-transform: uppercase;
+  color: var(--v3-text-dark);
+  opacity: 0.5;
+}
+
+.hero-scroll-cue-v4__track {
+  position: relative;
+  width: 1px;
+  height: 5.5rem;
+  background: color-mix(in srgb, var(--v3-text-dark) 20%, transparent);
+  overflow: hidden;
+}
+
+.hero-scroll-cue-v4__thumb {
+  position: absolute;
+  inset: 0 auto auto 0;
+  width: 100%;
+  height: 1.6rem;
+  background: var(--v3-accent-red);
+  animation: hero-scroll-drift 2.4s ease-in-out infinite;
+}
+
+@keyframes hero-scroll-drift {
+  0% { transform: translateY(-1.6rem); opacity: 0; }
+  25% { opacity: 1; }
+  75% { opacity: 1; }
+  100% { transform: translateY(5.5rem); opacity: 0; }
 }
 
 @media (max-width: 1100px) {
@@ -960,6 +1200,33 @@ button {
     height: 1rem;
   }
 
+  /* V4 hero cluster — mobile (rough; full responsive pass is a separate workstream).
+     --brand-gutter matches the mobile nav's left inset so the morph stays vertically aligned. */
+  :root {
+    --brand-gutter: clamp(1rem, 3vw, 1.5rem);
+    --brand-hero-w: min(86vw, 30rem);
+    --brand-nav-w: clamp(6.5rem, 30vw, 8.5rem);
+  }
+
+  .hero-cluster-v4 {
+    justify-content: center;
+    gap: clamp(0.9rem, 3vh, 1.6rem);
+    padding-top: calc(var(--v3-nav-height) + 1.5rem);
+  }
+
+  /* On narrow screens a full-width roles/locator strip would collide — fold roles back into
+     the lockup and return the locator to bottom-left. */
+  .hero-roles-v4 {
+    position: static;
+  }
+
+  .hero-meta-v4 {
+    left: var(--brand-gutter);
+    right: auto;
+    bottom: clamp(1.25rem, 4svh, 2.5rem);
+  }
+
+  .hero-scroll-cue-v4,
   .radial-glow-v3,
   .neon-bg-v3 {
     display: none;
@@ -1015,6 +1282,11 @@ button {
   .hero-aurora-v3__layer--b,
   .radial-glow-v3 {
     animation: none;
+  }
+
+  /* Keep the static track + "Scroll" label; drop only the drifting segment. */
+  .hero-scroll-cue-v4__thumb {
+    display: none;
   }
 }
 
