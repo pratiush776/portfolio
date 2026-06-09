@@ -10,7 +10,7 @@ interface CarouselProps {
 }
 const Carousel: React.FC<CarouselProps> = ({ videos, imgs }) => {
   return (
-    <div className="carousel  carousel-center min-h-fit  rounded-box max-w-full space-x-4 p-4">
+    <div className="carousel carousel-center min-h-fit rounded-box w-fit max-w-full mx-auto space-x-4 p-4">
       {videos?.map((video: string, index: number) => (
         <div key={index} className="carousel-item">
           <VideoPreview videoSrc={video} />

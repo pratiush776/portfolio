@@ -143,42 +143,46 @@ export function FloatingProject({
                 aria-labelledby={dialogTitleId}
                 className="fixed h-[95svh] w-[100vw] md:w-[50em] md:bottom-0 md:py-[4em] bg-[#f5efeb97] md:border-r-[6px] md:rounded-[20px] md:border-navy md:border-1 md:left-1/2 md:-translate-x-1/2 bottom-0 left-0  overflow-x-hidden backdrop-blur-sm p-10 z-[60] overflow-y-auto"
               >
-                <button
-                  onClick={() => setIsExpanded(false)}
-                  aria-label={`Close ${title} details`}
-                  className="bg-navy cursor-pointer text-beige p-2 rounded-full absolute top-5 right-5"
-                >
-                  <Plus className=" rotate-45" size={16} />
-                </button>
-                <div className="flex flex-col gap-[24px] justify-start items-center md:w-[40em] mx-auto">
+                <div className="sticky top-0 z-[70] flex justify-end">
+                  <button
+                    onClick={() => setIsExpanded(false)}
+                    aria-label={`Close ${title} details`}
+                    className="bg-navy cursor-pointer text-beige p-2 rounded-full shadow-md hover:scale-105 transition-transform duration-200"
+                  >
+                    <Plus className=" rotate-45" size={16} />
+                  </button>
+                </div>
+                <div className="flex flex-col gap-[24px] justify-start items-stretch w-full md:w-[40em] mx-auto">
                   <h1
                     id={dialogTitleId}
-                    className={`${pierSans.className} !tracking-[1.2px] h3 text-navy`}
+                    className={`${pierSans.className} !tracking-[1.2px] h3 text-navy self-center text-center`}
                   >
                     {title}
                   </h1>
                   {/* <VideoPreview /> */}
                   <Carousel videos={videos} imgs={imgs} />
-                  <div className="flex flex-col text-navy px-[36px] self-start gap-2">
+                  <div className="flex flex-col text-navy px-2 md:px-[36px] w-full gap-2">
                     <p className="p bg-white border-navy border-1 w-fit button">
                       Tech Stack
                     </p>
-                    <ul className="flex gap-2 pl-[16px] text-navy text-nowrap overflow-auto">
+                    <ul className="flex flex-wrap gap-x-2 gap-y-1 pl-[16px] text-navy">
                       {(techStack ?? []).map((tech, index) => (
                         <li key={index}>
                           {tech}
-                          {index == (techStack?.length ?? 0) - 1 ? " " : " . "}
+                          {index == (techStack?.length ?? 0) - 1 ? "" : " ."}
                         </li>
                       ))}
                     </ul>
                   </div>
-                  <div className="self-start mx-[36px] text-navy">
+                  <div className="px-2 md:px-[36px] w-full text-navy">
                     <p className="p bg-white border-navy border-1 w-fit button">
                       Description
                     </p>
-                    <CollapsibleText
-                      fullDescription={fullDescription ? fullDescription : ""}
-                    />
+                    <div className="pl-[16px] mt-2">
+                      <CollapsibleText
+                        fullDescription={fullDescription ? fullDescription : ""}
+                      />
+                    </div>
                     {url ? (
                       <a
                         href={url}

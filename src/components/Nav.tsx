@@ -68,16 +68,16 @@ const NavToggle: React.FC<NavToggleProps> = ({ className }) => {
       initial={{
         height: "10vh",
         backgroundColor: "#2f4156",
-        borderRadius: "0px 0px 20px 20px",
+        borderRadius: "0px 0px 28px 28px",
       }}
       animate={{
         height: isOpen ? "100vh" : "10vh",
         backgroundColor: isOpen ? "#1d242d" : "#2f4156",
-        borderRadius: isOpen ? "0" : "0px 0px 20px 20px",
+        borderRadius: isOpen ? "0" : "0px 0px 28px 28px",
       }}
       transition={{ duration: 0.8, ease: "easeInOut" }}
       onAnimationComplete={() => setIsClosing(false)}
-      className={`fixed inset-x-0 top-0 z-50 flex flex-col rounded-b-[20px] overflow-hidden ${className}`}
+      className={`fixed inset-x-0 top-0 z-50 flex flex-col rounded-b-[28px] overflow-hidden ${className}`}
     >
       <button
         ref={toggleButtonRef}
