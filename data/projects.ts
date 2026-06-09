@@ -22,6 +22,13 @@ export const projects = [
     ],
     logo: "/projects_assets/NILINK/logo.png",
     url: "https://mvp-inky-eta.vercel.app/",
+    imgs: [
+      "/projects_assets/NILINK/dashboard_brand.webp",
+      "/projects_assets/NILINK/explore.webp",
+      "/projects_assets/NILINK/explore_brand.webp",
+      "/projects_assets/NILINK/deals.webp",
+      "/projects_assets/NILINK/deal_lifecycle.webp",
+    ],
   },
   {
     id: 5,
