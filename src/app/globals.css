@@ -214,7 +214,7 @@ button {
      (.site-nav-v3 left) so the hero wordmark and the nav logo share one vertical line and the
      scroll-morph has ~no horizontal drift. The cropped wordmark aspect ratio = 1436 / 265. */
   --brand-gutter: clamp(1.5rem, 3.5vw, 3.5rem);
-  --brand-hero-w: min(50vw, 48rem);          /* big hero size — master "name scale" knob */
+  --brand-hero-w: min(46.5vw, 44.5rem);      /* big hero size — master "name scale" knob (≈7% smaller so it breathes) */
   --brand-nav-w: clamp(7rem, 8.5vw, 9rem);   /* docked logo size in the nav */
   --v3-outline-top: clamp(2.5rem, 5.581svh, 5rem);
   --v3-outline-right: clamp(2rem, 2.93vw, 3.75rem);
@@ -273,7 +273,7 @@ button {
      luminance and forces alpha=1). Blended with `overlay` it modulates the image
      both lighter AND darker around mid-tone — like real grain, not dark speckle.
      Big seamless tile avoids visible repetition. --grain-opacity is the master dial. */
-  --grain-opacity: 0.22;
+  --grain-opacity: 0.34;
   --grain-scale: 260px;
   --grain-url: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='grain'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0.33 0.33 0.33 0 0 0.33 0.33 0.33 0 0 0.33 0.33 0.33 0 0 0 0 0 0 1'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23grain)'/%3E%3C/svg%3E");
 }
@@ -1040,14 +1040,11 @@ button {
   color: var(--v3-accent-red);
 }
 
-/* Bottom meta strip (left) = the credential label, and the footnote the tagline's asterisk
-   refers to. Pinned bottom-left so it pairs with the locator (bottom-right) into a full-width
-   baseline that frames the page. */
+/* Role subtitle. Flows in the lockup directly beneath the tagline (NOT pinned to the bottom),
+   so it reads as part of the intro — name → proposition → role — instead of a detached footer
+   label. Tracked caps keep it secondary to the serif tagline above it. */
 .hero-roles-v4 {
-  position: absolute;
-  left: var(--brand-gutter);
-  bottom: clamp(1.75rem, 5svh, 3.25rem);
-  margin: 0;
+  margin: clamp(0.85rem, 1.6vh, 1.35rem) 0 0;
   padding: 0;
   font-family: var(--font-pier);
   font-size: clamp(0.74rem, 0.85vw, 0.95rem);
@@ -1055,16 +1052,11 @@ button {
   letter-spacing: 0.24em;
   text-transform: uppercase;
   color: var(--v3-text-dark);
+  opacity: 0.82;
 }
 
-/* Matching footnote mark — terracotta, so the eye links it to the tagline's asterisk. */
-.hero-roles-v4__mark {
-  color: var(--v3-accent-red);
-  margin-right: 0.55em;
-}
-
-/* Bottom meta strip (right). Pinned bottom-right, same baseline as the roles → together they
-   form a full-width footer line that counterweights the left-anchored lockup. */
+/* Bottom meta strip (right). Pinned bottom-right as a lone locator that counterweights the
+   left-anchored lockup. */
 .hero-meta-v4 {
   position: absolute;
   right: var(--brand-gutter);
@@ -1123,16 +1115,17 @@ button {
   z-index: 4;
   display: grid;
   justify-items: center;
-  gap: 0.2rem;
+  gap: 0.26rem;
   pointer-events: none;
 
   /* The sheen: a wide bright band riding over a dim base. The image is ~2.8× the word's
      height so the band can travel fully through it; both ends are dim, so the loop reset
-     is invisible. Clipped to the glyphs via background-clip:text. */
-  --cue-dim: color-mix(in srgb, var(--v3-text-dark) 24%, transparent);
+     is invisible. Clipped to the glyphs via background-clip:text. The dim base is kept
+     legible at rest (the word should always read as "SCROLL"); the band just lifts it. */
+  --cue-dim: color-mix(in srgb, var(--v3-text-dark) 42%, transparent);
   --cue-bright: color-mix(
     in srgb,
-    color-mix(in srgb, var(--v3-accent-red) 45%, var(--v3-text-dark)) 60%,
+    color-mix(in srgb, var(--v3-accent-red) 55%, var(--v3-text-dark)) 88%,
     transparent
   );
   background-image: linear-gradient(
@@ -1155,7 +1148,7 @@ button {
 
 .hero-scroll-cue-v4__letter {
   font-family: var(--font-pier);
-  font-size: 0.62rem;
+  font-size: 0.68rem;
   font-weight: 600;
   line-height: 1;
 }
@@ -1174,7 +1167,6 @@ button {
     background-position: 50% 0%;
   }
 }
-
 @media (max-width: 1100px) {
   .hero-root-v3 {
     height: auto;
@@ -1315,12 +1307,6 @@ button {
       calc(var(--v3-nav-height) + 1.5rem)
       var(--brand-gutter)
       clamp(6.5rem, 14svh, 8rem);
-  }
-
-  .hero-roles-v4 {
-    position: absolute;
-    left: var(--brand-gutter);
-    bottom: clamp(1.25rem, 4svh, 2.5rem);
   }
 
   .hero-meta-v4 {

@@ -99,11 +99,8 @@ export function HeroLede() {
         </span>
       </motion.p>
 
-      {/* Bottom-left label = the footnote the tagline's asterisk refers to. */}
+      {/* Role subtitle — sits directly under the tagline as part of the intro lockup. */}
       <motion.p className="hero-roles-v4" {...entrance(BEAT.roles)}>
-        <span className="hero-roles-v4__mark" aria-hidden>
-          *
-        </span>
         Product-Minded Software Engineer
       </motion.p>
 
