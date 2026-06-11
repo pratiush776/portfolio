@@ -11,7 +11,7 @@ export function HeroPratiushText() {
       {/*
         TEMP (layout rework): PRATIUSH outline stroke disabled.
         This layer rendered PratiushOutline — a stroke-only copy of the wordmark
-        (stroke=currentColor, strokeWidth=6, fill=none, same 1452×265 viewBox as the filled
+        (stroke=currentColor, strokeWidth=6, fill=none, same cropped 1436×265 viewBox as the filled
         PratiushMain). It was stacked ON TOP of the filled main (.hero-pratiush-v3--outline is
         z-index 3 vs --main's z-index 1 in globals.css), so the two overlapped exactly and the
         outline added a crisp border edge around the solid letterforms. With this off, only the

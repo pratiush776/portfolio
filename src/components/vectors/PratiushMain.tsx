@@ -14,7 +14,7 @@ const PATHS = [
 export function PratiushMain({ className, "aria-hidden": ariaHidden }: Props) {
   return (
     <svg
-      viewBox="0 0 1452 265"
+      viewBox="16 0 1436 265"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       className={className}

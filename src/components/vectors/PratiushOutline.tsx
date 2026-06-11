@@ -5,7 +5,7 @@ export function PratiushOutline({ className, "aria-hidden": ariaHidden }: Props)
     <svg
       className={className}
       aria-hidden={ariaHidden}
-      viewBox="0 0 1452 265"
+      viewBox="16 0 1436 265"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
     >

@@ -1,10 +1,12 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { motion, useReducedMotion, useScroll, useTransform, type Variants } from "motion/react";
+import { motion, useScroll, useTransform } from "motion/react";
 
 import { LocationPin } from "@/components/icons";
 import { PratiushMain } from "@/components/vectors/PratiushMain";
+import { useIntro } from "@/components/intro/IntroProvider";
+import { BEAT, INTRO_EASE, type Beat } from "@/lib/intro";
 
 /**
  * The left-aligned hero lockup: eyebrow → (wordmark) → tagline, plus a bottom meta strip
@@ -16,28 +18,20 @@ import { PratiushMain } from "@/components/vectors/PratiushMain";
  * ([data-brand-hero]) so the copy flows around it AND <BrandMark/> has a rect to measure.
  *
  * Two motion layers, on purpose:
- *  • ENTRANCE — a one-shot staggered fade-up of the copy on mount (the "show skill via type +
- *    motion" beat). The ghost is deliberately NOT animated, so <BrandMark/>'s mount-time
- *    measurement reads its settled position.
+ *  • ENTRANCE — each copy element rises + fades on the shared FOREGROUND gate (see lib/intro),
+ *    keyed to the master schedule (BEAT) so the name, eyebrow, tagline and meta relate as one
+ *    choreographed moment instead of each running its own timer. The ghost is deliberately NOT
+ *    animated, so <BrandMark/>'s mount-time measurement reads its settled position.
  *  • EXIT — the whole cluster fades + drifts up with scroll, finishing BEFORE the wordmark
  *    finishes docking (fade ≈ 0.3·vh < morph 0.4·vh in BrandMark) so nothing crosses it.
  * Exit opacity lives on the parent; entrance opacity lives on the children — different nodes,
  * so they compose instead of fighting for the same property.
  */
-const EASE = [0.16, 1, 0.3, 1] as const;
-
-const container: Variants = {
-  hidden: {},
-  visible: { transition: { staggerChildren: 0.09, delayChildren: 0.08 } },
-};
-
-const item: Variants = {
-  hidden: { y: 18, opacity: 0 },
-  visible: { y: 0, opacity: 1, transition: { duration: 0.7, ease: EASE } },
-};
+const hidden = (beat: Beat) => ({ y: beat.y, opacity: 0 });
+const shown = { y: 0, opacity: 1 } as const;
 
 export function HeroLede() {
-  const reduce = useReducedMotion();
+  const { foregroundIn, reduce } = useIntro();
   const { scrollY } = useScroll();
   const fadeDist = useRef(500);
 
@@ -50,22 +44,43 @@ export function HeroLede() {
     return () => window.removeEventListener("resize", set);
   }, []);
 
-  const opacity = useTransform(scrollY, (v) => Math.max(0, 1 - v / fadeDist.current));
-  const y = useTransform(scrollY, (v) => -Math.min(40, (v / fadeDist.current) * 40));
+  const opacity = useTransform(scrollY, (v) =>
+    Math.max(0, 1 - v / fadeDist.current),
+  );
+  const y = useTransform(
+    scrollY,
+    (v) => -Math.min(40, (v / fadeDist.current) * 40),
+  );
+
+  // One entrance recipe for every copy element: rise + fade on the foreground gate, on the
+  // shared schedule. Reduced motion settles to the final state with no transform/transition.
+  const entrance = (beat: Beat) => ({
+    initial: reduce ? false : hidden(beat),
+    animate: reduce ? shown : foregroundIn ? shown : hidden(beat),
+    transition: reduce
+      ? { duration: 0 }
+      : { duration: beat.duration, ease: INTRO_EASE, delay: beat.delay },
+  });
 
   return (
     <motion.div
       className="hero-cluster-v4"
       // Reduced motion: drop the scroll-driven exit fade/drift entirely (was running for everyone).
-      style={{ opacity: reduce ? undefined : opacity, y: reduce ? undefined : y }}
-      variants={reduce ? undefined : container}
-      initial={reduce ? undefined : "hidden"}
-      animate={reduce ? undefined : "visible"}
+      style={{
+        opacity: reduce ? undefined : opacity,
+        y: reduce ? undefined : y,
+      }}
     >
       {/* The page's real heading for a11y/SEO — the visible wordmark is decorative SVG. */}
-      <h1 className="visually-hidden">Pratiush — Product-Minded Software Engineer</h1>
+      <h1 className="visually-hidden">
+        Pratiush — Product-Minded Software Engineer
+      </h1>
 
-      <motion.p className="hero-eyebrow-v4" variants={reduce ? undefined : item} aria-hidden>
+      <motion.p
+        className="hero-eyebrow-v4"
+        aria-hidden
+        {...entrance(BEAT.eyebrow)}
+      >
         Hi, I&apos;m
       </motion.p>
 
@@ -76,16 +91,16 @@ export function HeroLede() {
         {reduce ? <PratiushMain aria-hidden /> : null}
       </div>
 
-      <motion.p className="hero-tagline-v4" variants={reduce ? undefined : item}>
-        I turn ideas into polished products.
-        {/* Footnote ref — points to the credential in the bottom-left label (matching mark). */}
-        <span className="hero-tagline-v4__mark" aria-hidden>
-          *
+      <motion.p className="hero-tagline-v4" {...entrance(BEAT.tagline)}>
+        <span className="hero-tagline-v4__line">I turn ideas into</span>
+        <span className="hero-tagline-v4__line hero-tagline-v4__line--offset">
+          polished products.
+          {/* Footnote ref — points to the credential in the bottom-left label (matching mark). */}
         </span>
       </motion.p>
 
       {/* Bottom-left label = the footnote the tagline's asterisk refers to. */}
-      <motion.p className="hero-roles-v4" variants={reduce ? undefined : item}>
+      <motion.p className="hero-roles-v4" {...entrance(BEAT.roles)}>
         <span className="hero-roles-v4__mark" aria-hidden>
           *
         </span>
@@ -95,9 +110,9 @@ export function HeroLede() {
       <motion.span
         className="hero-meta-v4"
         aria-label="Based in USA"
-        variants={reduce ? undefined : item}
+        {...entrance(BEAT.meta)}
       >
-        <LocationPin aria-hidden />
+        {/* <LocationPin aria-hidden /> */}
         <span>Based in USA</span>
       </motion.span>
     </motion.div>

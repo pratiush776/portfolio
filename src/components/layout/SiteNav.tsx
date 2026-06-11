@@ -12,7 +12,7 @@ export function SiteNav() {
       */}
       <Link href="/" className="site-nav-v3__brand" aria-label="Pratiush — home" data-brand-nav />
       <div className="site-nav-v3__links">
-        <Link href="/works" className="site-nav-v3__link">
+        <Link href="/#works-heading" className="site-nav-v3__link">
           Works
         </Link>
         <Link
@@ -23,9 +23,9 @@ export function SiteNav() {
         >
           Resume
         </Link>
-        <button type="button" className="site-nav-v3__contact">
+        <Link href="mailto:pratiush776@gmail.com" className="site-nav-v3__contact">
           Connect
-        </button>
+        </Link>
       </div>
     </nav>
   );

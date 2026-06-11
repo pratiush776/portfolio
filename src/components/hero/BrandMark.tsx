@@ -4,6 +4,8 @@ import { useLayoutEffect, useRef, useState } from "react";
 import { motion, useReducedMotion, useScroll, useTransform } from "motion/react";
 
 import { PratiushMain } from "@/components/vectors/PratiushMain";
+import { useIntro } from "@/components/intro/IntroProvider";
+import { BEAT, INTRO_EASE } from "@/lib/intro";
 
 /**
  * The PRATIUSH wordmark, mounted ONCE at the layout level so it persists across the whole
@@ -46,6 +48,7 @@ const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
 
 export function BrandMark() {
   const reduce = useReducedMotion();
+  const { foregroundIn } = useIntro();
   const { scrollY } = useScroll();
   const geo = useRef<Geo>({
     hasHero: false,
@@ -133,11 +136,46 @@ export function BrandMark() {
       className="brand-mark"
       aria-hidden
       style={{ x, y, scale, width: box.width || undefined }}
-      initial={{ opacity: 0 }}
-      animate={{ opacity: box.ready ? 1 : 0 }}
-      transition={reduce ? { duration: 0 } : { duration: 0.6, ease: [0.16, 1, 0.3, 1], delay: 0.1 }}
     >
-      <PratiushMain aria-hidden />
+      <motion.div
+        className="brand-mark__reveal"
+        // The signature beat: an editorial mask-rise (the name lifts from behind its baseline
+        // and fades in), keyed to the shared FOREGROUND gate + the master schedule so it lands
+        // in concert with the hero copy. `box.ready` still gates on geometry (no first-paint flash).
+        initial={
+          reduce
+            ? false
+            : {
+                opacity: 0,
+                y: BEAT.wordmark.y,
+                clipPath: "inset(0 0 100% 0)",
+              }
+        }
+        animate={
+          box.ready && foregroundIn
+            ? {
+                opacity: 1,
+                y: 0,
+                clipPath: "inset(0 0 0% 0)",
+              }
+            : {
+                opacity: 0,
+                y: reduce ? 0 : BEAT.wordmark.y,
+                clipPath: reduce ? "inset(0)" : "inset(0 0 100% 0)",
+              }
+        }
+        transition={
+          reduce
+            ? { duration: 0 }
+            : {
+                duration: BEAT.wordmark.duration,
+                ease: INTRO_EASE,
+                delay: BEAT.wordmark.delay,
+              }
+        }
+      >
+        <PratiushMain aria-hidden />
+      </motion.div>
     </motion.div>
   );
 }
