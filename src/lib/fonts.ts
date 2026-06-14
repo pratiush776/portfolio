@@ -1,9 +1,16 @@
-import { Fraunces, Noto_Sans } from "next/font/google";
+import { Fraunces, Hanken_Grotesk, League_Spartan } from "next/font/google";
 import localFont from "next/font/local";
 
-export const notoSans = Noto_Sans({
-  variable: "--font-noto-sans",
+/**
+ * Workhorse: body copy + the tracked-caps micro-labels (eyebrow / role / locator). Hanken
+ * Grotesk is a humanist grotesque with a full weight axis — crafted and quietly confident
+ * where Noto Sans (the prior workhorse) read as a generic coverage default. Variable font,
+ * so every weight the labels need (400/500/600) comes from one file.
+ */
+export const hankenGrotesk = Hanken_Grotesk({
+  variable: "--font-hanken-sans",
   subsets: ["latin"],
+  display: "swap",
 });
 
 /**
@@ -16,6 +23,17 @@ export const fraunces = Fraunces({
   variable: "--font-fraunces",
   subsets: ["latin"],
   axes: ["opsz", "SOFT", "WONK"],
+});
+
+/**
+ * Heavy geometric display face for the morphing PRATIUSH / PROJECTS wordmark. The variable
+ * weight lets the mark carry enough mass at hero scale without forcing a static black cut.
+ */
+export const leagueSpartan = League_Spartan({
+  variable: "--font-league-spartan",
+  subsets: ["latin"],
+  weight: "variable",
+  display: "swap",
 });
 
 export const pierSans = localFont({

@@ -1,11 +1,10 @@
 import type { Metadata } from "next";
 
 import "./globals.css";
-import { fraunces, notoSans, pierSans } from "@/lib/fonts";
+import { fraunces, hankenGrotesk, leagueSpartan, pierSans } from "@/lib/fonts";
 import { Analytics } from "@vercel/analytics/next";
 import { SiteNav } from "@/components/layout/SiteNav";
 import { SmoothScroll } from "@/components/layout/SmoothScroll";
-import { BrandMark } from "@/components/hero/BrandMark";
 import { IntroProvider } from "@/components/intro/IntroProvider";
 
 export const metadata: Metadata = {
@@ -24,16 +23,12 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${notoSans.className} ${pierSans.variable} ${fraunces.variable} antialiased`}
+        className={`${hankenGrotesk.variable} ${pierSans.variable} ${fraunces.variable} ${leagueSpartan.variable} antialiased`}
       >
-        {/* IntroProvider is the single opening-choreography clock. It must sit above <BrandMark/>
-            (which is layout-scoped) so the wordmark, backdrop, hero copy and scroll cue all read
-            the same two gates instead of each animating independently. */}
+        {/* IntroProvider is the single opening-choreography clock — backdrop, hero copy, name
+            and scroll cue all read the same two gates instead of each animating independently. */}
         <IntroProvider>
           <SiteNav />
-          {/* The morphing PRATIUSH wordmark — lives here (not in the page) so it persists as the
-              site logo across every surface; on the landing page it animates in from the hero. */}
-          <BrandMark />
           <SmoothScroll>{children}</SmoothScroll>
         </IntroProvider>
         <Analytics />

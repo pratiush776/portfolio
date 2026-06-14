@@ -1,57 +1,118 @@
 /**
- * Featured Works — 3–4 selected pieces for the sticky-fold gallery on the landing page.
- * Placeholder content for now: titles/descriptions are stand-ins, and `image` points at
- * open-source photos (Lorem Picsum, Unsplash license) in /public/projects_assets/
- * placeholders/ purely so the layout looks premium while eyeballing. Swap all of it for
- * the real featured pieces later (keep aspect/cover behaviour identical so it's a pure
- * content swap).
+ * Real shipped work, in two tiers:
+ *  • `featured` — the four case panels on the landing page. Media is honest: a demo video
+ *    where one exists, a typographic poster where the only artifacts are rough screenshots
+ *    (a designed cover reads deliberate; a blurry capture reads careless).
+ *  • `archive` — the smaller pieces. NOT rendered on the landing page (by design); reserved
+ *    for the upcoming dedicated /works page that lists the full catalogue.
  */
-export type Work = {
+export type WorkMedia =
+  | { kind: "video"; src: string }
+  | {
+      kind: "poster";
+      /** Big display word on the poster face. */
+      word: string;
+      /** Small caps line under the word. */
+      caption: string;
+      /** Poster field colour (keep it in the warm/plum family). */
+      tint: string;
+    };
+
+export type FeaturedWork = {
   title: string;
   year: string;
-  category: string;
-  /** One- or two-sentence brief shown beside the card on desktop. */
+  role: string;
+  /** First-person, concrete. This is the human voice of the section. */
   description: string;
-  image: string;
-  /** Optional alt text; falls back to the title. */
-  alt?: string;
+  stack: string[];
+  media: WorkMedia;
+  links: { label: string; href: string }[];
 };
 
-export const works: Work[] = [
+export type ArchiveWork = {
+  title: string;
+  year: string;
+  note: string;
+  href?: string;
+};
+
+export const featured: FeaturedWork[] = [
   {
-    title: "Aurelia",
+    title: "NILINK",
     year: "2025",
-    category: "Brand & Web",
+    role: "Capstone · Software Engineer",
     description:
-      "A skincare house rebuilt around restraint — a quiet identity and storefront that lets the product breathe.",
-    image: "/projects_assets/placeholders/work-1.jpg",
-    alt: "Aurelia brand and web case study",
+      "A two-sided NIL marketplace where college athletes find brand deals and brands run campaigns, offers, contracts, and payouts. Built as my capstone MVP under real deadlines: role-aware dashboards on both sides, plus all the unglamorous glue that keeps a marketplace honest.",
+    stack: ["Next.js", "TypeScript", "Supabase", "SWR", "Vitest"],
+    media: {
+      kind: "poster",
+      word: "NILINK",
+      caption: "Athletes on one side. Brands on the other.",
+      tint: "#221E2E",
+    },
+    links: [{ label: "Visit live", href: "https://mvp-inky-eta.vercel.app/" }],
   },
   {
-    title: "Field Notes",
+    title: "Lucid Tone",
+    year: "2025",
+    role: "Founder",
+    description:
+      "A focus app that composes its audio in real time instead of looping a playlist. The engine paces every session through an entry, anchor, sustain, and re-focus arc, so the sound shifts with your attention rather than against it.",
+    stack: ["React", "TypeScript", "Python", "FastAPI"],
+    media: { kind: "video", src: "/projects_assets/LucidTone/demo.mp4" },
+    links: [],
+  },
+  {
+    title: "Private Law RAG Agent",
     year: "2024",
-    category: "Editorial",
+    role: "Solo build",
     description:
-      "A long-form reading experience for a design studio's journal, paced entirely by typography and white space.",
-    image: "/projects_assets/placeholders/work-2.jpg",
-    alt: "Field Notes editorial case study",
+      "A research assistant for law firms that can't ship documents to the cloud. Ingestion, embeddings, retrieval, and generation all run on local infrastructure, so decades of confidential records become searchable without a byte leaving the building.",
+    stack: ["Python", "ChromaDB", "Ollama", "Docker"],
+    media: {
+      kind: "poster",
+      word: "Private, by design",
+      caption: "Local-only RAG. Nothing leaves the building.",
+      tint: "#3A2A22",
+    },
+    links: [
+      {
+        label: "View code",
+        href: "https://github.com/pratiush776/Private-Law-RAG-Agent",
+      },
+    ],
   },
   {
-    title: "Lumen",
+    title: "Whisk It All",
     year: "2024",
-    category: "Product",
+    role: "Client work · Design & build",
     description:
-      "A lighting configurator where the interface disappears and the room you're designing takes the stage.",
-    image: "/projects_assets/placeholders/work-3.jpg",
-    alt: "Lumen product case study",
+      "A real website for a real bakery. I led design and development for a local business owner: story, services, testimonials, and a CMS they update without calling me. Small project, real stakes, actual customers.",
+    stack: ["Next.js", "Tailwind", "GSAP", "Tina CMS"],
+    media: { kind: "video", src: "/projects_assets/WhiskItAll/demo.mp4" },
+    links: [
+      { label: "Visit live", href: "https://whisk-it-all-official.onrender.com/" },
+    ],
   },
+];
+
+export const archive: ArchiveWork[] = [
   {
-    title: "Cadence",
+    title: "HomeDoc",
     year: "2023",
-    category: "Motion & Web",
-    description:
-      "A music label site built around rhythm — scroll-timed reveals tuned to feel like the drop, never the noise.",
-    image: "/projects_assets/placeholders/work-4.jpg",
-    alt: "Cadence motion and web case study",
+    note: "AI symptom checker started at a hackathon, finished solo when the weekend ran out.",
+    href: "https://homedoc-backend.onrender.com/",
+  },
+  {
+    title: "Whisk It All — business card",
+    year: "2023",
+    note: "QR-scannable digital card for the same bakery, before the full site.",
+    href: "https://whisk-it-all-business.web.app/",
+  },
+  {
+    title: "RoomMates",
+    year: "2022",
+    note: "Chore management for housemates. My first full-stack app end to end.",
+    href: "https://roommatesapp.onrender.com/",
   },
 ];

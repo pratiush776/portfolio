@@ -23,6 +23,9 @@ main::-webkit-scrollbar {
 body {
   margin: 0;
   padding: 0;
+  /* Workhorse face. The next/font variable is registered on <body>; this belt-and-braces
+     alias (see :root) keeps it resolving even if the var chain hiccups. */
+  font-family: var(--font-hanken), sans-serif;
 }
 
 button:focus-visible,
@@ -163,7 +166,7 @@ button {
 @theme {
   /* Font families */
   --font-pier: var(--font-pier-sans), sans-serif;
-  --font-noto: var(--font-noto-sans), sans-serif;
+  --font-hanken: var(--font-hanken-sans), sans-serif;
   /* Editorial display serif — Signature Statement + work titles. Swappable for any face
      that keeps the display-serif traits (v4-handbook/signature-statement/02). */
   --font-editorial: var(--font-fraunces), serif;
@@ -190,9 +193,20 @@ button {
   /* Warm gold accent — hero / nav-contact hover glow (was acid lime). */
   --v3-accent-lime: #E3B98A;
 
-  /* Expo-out — the one entrance curve, shared by the JS beats (lib/intro INTRO_EASE) and the
-     CSS backdrop bloom so foreground and background settle with the same feel. */
-  --intro-ease: cubic-bezier(0.16, 1, 0.3, 1);
+  /* Belt-and-braces re-declaration of the @theme font tokens. If the var chain ever fails
+     to resolve, font-family goes invalid and silently inherits the body sans (the manifesto
+     once rendered in the fallback because of exactly this). Declared here so they ALWAYS exist. */
+  --font-pier: var(--font-pier-sans), sans-serif;
+  --font-hanken: var(--font-hanken-sans), sans-serif;
+  --font-editorial: var(--font-fraunces), "Fraunces", Georgia, serif;
+
+  /* The motion voice: hard-landing curves (slow start, violent middle, dead stop).
+     --intro-ease — all masked rises / reveals (JS twin: lib/intro INTRO_EASE).
+     --ease-snap  — big scrubbed moves (JS twin: lib/intro SNAP_EASE).
+     --ease-micro — hover micro-interactions (underlines, arrows, link swaps). */
+  --intro-ease: cubic-bezier(0.82, 0, 0.18, 1);
+  --ease-snap: cubic-bezier(0.9, 0, 0.1, 1);
+  --ease-micro: cubic-bezier(0.98, 0, 0.02, 1);
 
   --v3-space-1: 0.25rem;
   --v3-space-2: 0.5rem;
@@ -209,13 +223,14 @@ button {
   --v3-surface-max: 144rem;
   --v3-nav-height: clamp(3rem, 2.65rem + 1vw, 4rem);
 
-  /* ── Brand wordmark (PRATIUSH) — shared by the hero ghost, the nav slot, and the morphing
-     <BrandMark/> so all three stay in lockstep. The gutter MUST match the nav's left inset
-     (.site-nav-v3 left) so the hero wordmark and the nav logo share one vertical line and the
-     scroll-morph has ~no horizontal drift. The cropped wordmark aspect ratio = 1436 / 265. */
+  /* ── Brand name. The hero name is TEXT (League Spartan heavy caps, so it can morph per-letter
+     into PROJECTS); the nav keeps the SVG wordmark (aspect 1436 / 265) as the identity mark.
+     The gutter MUST match the nav's left inset (.site-nav-v3 left) so the hero name and the
+     nav logo share one vertical line. --name-hero-size is the master "name scale" knob:
+     8 glyphs at this size span ≈ the old SVG hero width (~46vw). */
   --brand-gutter: clamp(1.5rem, 3.5vw, 3.5rem);
-  --brand-hero-w: min(46.5vw, 44.5rem);      /* big hero size — master "name scale" knob (≈7% smaller so it breathes) */
-  --brand-nav-w: clamp(7rem, 8.5vw, 9rem);   /* docked logo size in the nav */
+  --name-hero-size: clamp(3.2rem, 9.2vw, 10rem);
+  --brand-nav-w: clamp(7rem, 8.5vw, 9rem);   /* logo size in the nav */
   --v3-outline-top: clamp(2.5rem, 5.581svh, 5rem);
   --v3-outline-right: clamp(2rem, 2.93vw, 3.75rem);
   --v3-outline-bottom: clamp(2.5rem, 5.505svh, 5rem);
@@ -281,14 +296,36 @@ button {
 /* =========================================================
    V3 HOMEPAGE HERO
    ========================================================= */
-.hero-root-v3 {
+/* The pin: the track buys ~1.2 extra viewports of scroll; the hero sticks inside it while
+   the morph plays (copy exits → the name is pulled across → PROJECTS lands → short hold). */
+.hero-track-v4 {
   position: relative;
+  height: 220vh;
+}
+
+.hero-root-v3 {
+  position: sticky;
+  top: 0;
   min-height: 100svh;
   height: 100svh;
   padding: 0;
-  /* Intentional, directional field: warm light pools from the upper-left (a deliberate light
-     source, reinforced by .radial-glow-v3), falling to a faint terracotta-tinted warmth at the
-     lower-right that grounds the footer strip. Not a flat fill. */
+  /* NO background here. The hero's field lives on .hero-field-v3 below, feather-masked at
+     the bottom, so the hero dissolves into the page's continuous aurora field instead of
+     ending on a hard full-width seam (the old visible "cut" into the next section). */
+  background: transparent;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+/* The hero's directional field: warm light pools from the upper-left (a deliberate light
+   source, reinforced by .radial-glow-v3), falling to faint terracotta warmth lower-right.
+   The mask feathers the bottom ~quarter so the fixed SectionAurora behind shows through —
+   the hero and the rest of the page read as ONE continuous surface. */
+.hero-field-v3 {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
   background:
     radial-gradient(115% 100% at 16% 2%,
         color-mix(in srgb, #FCEDCB 80%, var(--v3-bg-primary)) 0%,
@@ -297,8 +334,27 @@ button {
         color-mix(in srgb, var(--v3-accent-red) 7%, var(--v3-bg-primary)) 0%,
         transparent 56%),
     var(--v3-bg-primary);
-  overflow: hidden;
-  isolation: isolate;
+  -webkit-mask-image: linear-gradient(to bottom, #000 72%, transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 72%, transparent 100%);
+}
+
+/* Every hero-scoped decor layer feathers out with the field — otherwise the grain/aurora
+   would stamp their own hard edge where the section ends. */
+.hero-root-v3 .hero-aurora-v3,
+.hero-root-v3 .radial-glow-wrap-v3,
+.hero-root-v3 .neon-bg-v3,
+.hero-root-v3 .hero-grain-v3 {
+  -webkit-mask-image: linear-gradient(to bottom, #000 72%, transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 72%, transparent 100%);
+}
+
+/* Carrier for the glow's gravity drift (motion drives x as the name is pulled). The wrap
+   stays inset:0 inside so the bloom transitions and feather mask keep working untouched. */
+.hero-glow-drift-v4 {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  will-change: transform;
 }
 
 .canvas-v3 {
@@ -862,9 +918,8 @@ button {
   color: var(--v3-text-dark);
 }
 
-/* Invisible logo slot: reserves the wordmark's footprint (so the right-side links sit
-   correctly), is the measurement target for <BrandMark/> ([data-brand-nav]), and is the
-   clickable home link under the pointer-events:none wordmark. */
+/* Logo slot: reserves the wordmark's footprint (so the right-side links sit correctly)
+   and is the clickable home link; the SVG inside is <NavLogo/>. */
 .site-nav-v3__brand {
   display: block;
   width: var(--brand-nav-w);
@@ -885,7 +940,7 @@ button {
   letter-spacing: 0.01em;
   line-height: 1;
   color: var(--v3-text-dark);
-  transition: color 0.2s ease;
+  transition: color 0.5s var(--ease-micro);
 }
 
 .site-nav-v3__link::after {
@@ -898,7 +953,7 @@ button {
   background: currentColor;
   transform: scaleX(0);
   transform-origin: left center;
-  transition: transform 0.25s ease;
+  transition: transform 0.55s var(--ease-micro);
 }
 
 .site-nav-v3__link:hover::after {
@@ -919,7 +974,7 @@ button {
   font-size: clamp(0.88rem, 0.92vw, 0.98rem);
   letter-spacing: 0.01em;
   line-height: 1;
-  transition: background-color 0.25s ease, transform 0.25s ease;
+  transition: background-color 0.5s var(--ease-micro), transform 0.5s var(--ease-micro);
 }
 
 .site-nav-v3__contact:hover {
@@ -957,7 +1012,7 @@ button {
      The open upper area is then carried by the halo (intentional light, not emptiness). */
   justify-content: flex-end;
   gap: 0; /* rhythm is controlled per-element below, not by a uniform gap */
-  padding: var(--v3-nav-height) var(--brand-gutter) clamp(6rem, 15svh, 9rem);
+  padding: var(--v3-nav-height) var(--brand-gutter) clamp(5.5rem, 10.5svh, 7rem);
   text-align: left;
   will-change: transform, opacity;
 }
@@ -979,29 +1034,31 @@ button {
 /* Muted dark (not accent) so the wordmark + the tagline mark own the terracotta. */
 .hero-eyebrow-v4 {
   margin: 0;
-  font-family: var(--font-pier);
+  font-family: var(--font-hanken), sans-serif;
   font-size: clamp(0.72rem, 0.8vw, 0.9rem);
   font-weight: 600;
-  letter-spacing: 0.3em;
+  line-height: 1.2;
+  letter-spacing: 0.22em;
   text-transform: uppercase;
   color: var(--v3-text-dark);
   opacity: 0.72; /* 0.6 dropped below AA (4.04:1) on the cream; 0.72 ≈ 4.9:1 */
 }
 
-/* Mid-tier of the lockup + the actual proposition. Editorial serif (Fraunces) against the
-   grotesque wordmark + tracked-caps labels = a considered 3-voice type system, not a template.
-   Constrained measure so it wraps to ~2 lines and adds horizontal mass that balances the void. */
+/* The closing statement — the personal voice note that ends the lockup. Editorial serif
+   (Fraunces) against the grotesque wordmark + tracked-caps labels = a considered 3-voice type
+   system, not a template. Constrained measure so it wraps to ~2 lines and adds horizontal mass. */
 .hero-tagline-v4 {
-  margin: clamp(0.85rem, 1.4vh, 1.25rem) 0 0; /* wordmark → tagline (tightened) */
-  font-family: var(--font-editorial);
-  /* Fraunces flattens its stroke contrast at low opsz/weight (font-optical-sizing:auto + 500
-     made it read like a humanist sans). Pin a HIGH optical size + heavier weight so the serif
-     reads as a true display serif — that's what makes the grotesque-vs-serif voice contrast land. */
-  font-weight: 550;
-  font-variation-settings: "wght" 550, "opsz" 144, "SOFT" 0, "WONK" 0;
-  font-size: clamp(1.5rem, 2.3vw, 2.65rem);
-  line-height: 1.08;
-  letter-spacing: -0.018em;
+  /* The cluster reads as two groups — [greeting + name + role] (the identity) and [statement]
+     (the voice). This is the divider between them, so it carries the largest gap in the lockup. */
+  margin: clamp(1.05rem, 2vh, 1.6rem) 0 0;
+  /* next/font exposes Fraunces on <body>; reference it directly so this does not silently
+     inherit the workhorse sans through a root-scoped alias. */
+  font-family: var(--font-fraunces), Georgia, serif;
+  font-weight: 475;
+  font-variation-settings: "wght" 475, "opsz" 96, "SOFT" 0, "WONK" 0;
+  font-size: clamp(1.45rem, 2.05vw, 2.35rem);
+  line-height: 1.06;
+  letter-spacing: -0.012em;
   color: var(--v3-text-dark);
 }
 
@@ -1010,49 +1067,126 @@ button {
   white-space: nowrap;
 }
 
-.hero-tagline-v4__line--offset {
-  margin-left: 0;
-}
-
 .hero-tagline-v4__mark {
   color: var(--v3-accent-red);
-  margin-left: 0.08em;
-  font-family: var(--font-noto);
-  font-size: 0.62em;
+  margin-left: 0.05em;
+  font-family: var(--font-hanken), sans-serif;
+  font-size: 0.5em;
   line-height: 0;
-  vertical-align: 0.45em;
+  vertical-align: 0.65em;
 }
 
-/* Invisible footprint reserving the wordmark's space (the visible glyphs are <BrandMark/>);
-   also the start-rect <BrandMark/> measures via [data-brand-hero]. */
-.hero-brand-ghost {
-  width: var(--brand-hero-w);
-  aspect-ratio: 1436 / 265;
-  margin-top: clamp(0.5rem, 1vh, 0.75rem); /* eyebrow → wordmark (8-pt: ~8–12px) */
+/* ── The hero name (MorphName): real text so the pinned hero can transform it per-letter
+   into PROJECTS. The row spans the full lockup width — the word starts at its left edge
+   and lands at its right edge (the mirror). ── */
+.hero-name-v4 {
+  width: 100%;
+  /* "Hi, I'm" + the name are one phrase, so this top gap is the tightest in the lockup.
+     League Spartan's caps sit high in a generous line box; the negative bottom margin removes
+     only that invisible under-space so the name-to-role gap below is the real, tunable one. */
+  margin: clamp(0.2rem, 0.5vh, 0.4rem) 0 -0.1em;
+  /* next/font defines this variable on <body>; a :root alias is invalid because the source
+     variable does not exist yet at the root's computed-value stage. Reference it in scope. */
+  font-family: var(--font-league-spartan), sans-serif;
+  font-weight: 850;
+  font-size: var(--name-hero-size);
+  font-kerning: normal;
+  font-feature-settings: "kern" 1;
+  letter-spacing: 0;
+  line-height: 1;
+  color: var(--v3-accent-red);
   pointer-events: none;
+  user-select: none;
 }
 
-/* Only populated under reduced motion (static hero wordmark in place of the morphing one). */
-.hero-brand-ghost svg {
+/* Entrance mask (the name rises from behind its baseline). Full row width + hidden
+   overflow: vertical for the entrance, horizontal is moot (letters never leave the row). */
+.hero-name-v4__reveal {
   display: block;
   width: 100%;
-  height: auto;
-  color: var(--v3-accent-red);
+  overflow: hidden;
 }
 
-/* Role subtitle. Flows in the lockup directly beneath the tagline (NOT pinned to the bottom),
-   so it reads as part of the intro — name → proposition → role — instead of a detached footer
-   label. Tracked caps keep it secondary to the serif tagline above it. */
+.hero-name-v4__run {
+  display: inline-flex;
+  /* optical alignment: cancel the P's left side bearing so the name's ink lines up with
+     the eyebrow/tagline above and below (tunable) */
+  margin-left: -0.035em;
+  will-change: transform;
+}
+
+/* Each slot clips its own glyph roll (old letter up, PROJECTS letter rises from below).
+   Width and pair-kerning are driven by MorphName so both words retain the font's intended fit. */
+.hero-name-v4__letter {
+  position: relative;
+  display: inline-block;
+  height: 1em;
+  overflow: hidden;
+  will-change: transform;
+}
+
+.hero-name-v4__roll {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  will-change: transform;
+}
+
+/* Glyphs shrink-wrap to their natural advance so the slot can measure them. */
+.hero-name-v4__roll span {
+  display: inline-block;
+  height: 1em;
+  line-height: 1;
+  white-space: pre;
+}
+
+/* Offscreen pair samples let MorphName recover the kerning that is normally lost when a word
+   is split into independently animated spans. */
+.hero-name-v4__metrics {
+  position: absolute;
+  inset: 0 auto auto 0;
+  width: max-content;
+  height: auto;
+  visibility: hidden;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+.hero-name-v4__metrics span {
+  display: inline-block;
+  white-space: pre;
+}
+
+/* Exit wrappers around the COPY (not the name): full width so the absolute locator keeps
+   its anchoring; the abs variant is the locator's own containing block (inset: 0). */
+.hero-exit-v4 {
+  width: 100%;
+  will-change: transform, opacity;
+}
+
+.hero-exit-abs-v4 {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  will-change: transform, opacity;
+}
+
+/* Role / credential. Sits directly beneath the name as its descriptor (name → role →
+   statement), so it qualifies the wordmark at a glance. Tracked caps mirror the eyebrow
+   above the name, bracketing the wordmark in two quiet labels. */
 .hero-roles-v4 {
-  margin: clamp(0.85rem, 1.6vh, 1.35rem) 0 0;
+  /* The role hugs the name as its quiet credential (intra-group), so this name-to-role gap is
+     smaller than the role-to-statement divider below it. */
+  margin: clamp(0.6rem, 1.25vh, 0.85rem) 0 0;
   padding: 0;
-  font-family: var(--font-pier);
-  font-size: clamp(0.74rem, 0.85vw, 0.95rem);
+  font-family: var(--font-hanken), sans-serif;
+  font-size: clamp(0.66rem, 0.68vw, 0.76rem);
   font-weight: 500;
-  letter-spacing: 0.24em;
+  line-height: 1.2;
+  letter-spacing: 0.135em;
   text-transform: uppercase;
   color: var(--v3-text-dark);
-  opacity: 0.82;
+  opacity: 0.78;
 }
 
 /* Bottom meta strip (right). Pinned bottom-right as a lone locator that counterweights the
@@ -1064,13 +1198,16 @@ button {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  font-family: var(--font-pier);
+  font-family: var(--font-hanken), sans-serif;
   font-size: clamp(0.68rem, 0.78vw, 0.82rem);
   font-weight: 500;
-  letter-spacing: 0.22em;
+  line-height: 1.2;
+  letter-spacing: 0.18em;
   text-transform: uppercase;
   color: var(--v3-text-dark);
-  opacity: 0.65;
+  /* 0.65 cleared AA only by a hair (≈4.6:1) and this is the smallest label (down to 0.58rem
+     on mobile); 0.70 buys headroom (≈4.9:1) with no perceptible change. */
+  opacity: 0.7;
 }
 
 .hero-meta-v4 svg {
@@ -1078,31 +1215,18 @@ button {
   height: auto;
 }
 
-/* The single PRATIUSH wordmark, fixed to the viewport. <BrandMark/> drives x/y/scale to morph
-   it from the hero ghost (scroll 0) into the nav slot (docked), then it rests as the logo.
-   transform-origin: top left so the interpolated (x, y) place its top-left and scale shrinks
-   toward that corner. Colour is a one-line knob (terracotta accent → e.g. --v3-text-dark). */
-.brand-mark {
-  position: fixed;
-  top: 0;
-  left: 0;
-  transform-origin: top left;
+/* The nav's wordmark SVG (NavLogo). Hidden at the top of the landing while the big hero
+   name owns the stage; scrub-reveals as the name morphs away (motion drives opacity/y). */
+.nav-logo-v4 {
+  display: block;
+  width: 100%;
   color: var(--v3-accent-red);
-  pointer-events: none;
-  z-index: 90;
-  will-change: transform;
 }
 
-.brand-mark svg {
+.nav-logo-v4 svg {
   display: block;
   width: 100%;
   height: auto;
-}
-
-.brand-mark__reveal {
-  width: 100%;
-  overflow: hidden;
-  will-change: transform, opacity, clip-path;
 }
 
 /* Minimal right-rail cue. A single soft warm highlight glides continuously down the whole
@@ -1146,6 +1270,14 @@ button {
   animation: hero-scroll-sweep 4.2s cubic-bezier(0.45, 0, 0.55, 1) infinite;
 }
 
+/* Inner node carries the scroll-out fade (motion), separate from the CSS entrance gate on
+   the outer node; it inherits the stacked-grid layout for the letters. */
+.hero-scroll-cue-v4__inner {
+  display: grid;
+  justify-items: center;
+  gap: 0.26rem;
+}
+
 .hero-scroll-cue-v4__letter {
   font-family: var(--font-pier);
   font-size: 0.68rem;
@@ -1168,24 +1300,30 @@ button {
   }
 }
 @media (max-width: 1100px) {
+  /* the pin needs a fixed-height stage — the text-only lockup fits 100svh on small screens */
+  .hero-track-v4 {
+    height: 190vh;
+  }
+
   .hero-root-v3 {
-    height: auto;
+    height: 100svh;
     min-height: 100svh;
-    padding: 0 0 var(--v3-space-6);
+    padding: 0;
   }
 
   .canvas-v3--hero {
     width: 100%;
-    height: auto;
+    height: 100svh;
     min-height: 100svh;
     margin: 0;
-    padding: var(--v3-page-gutter) var(--v3-page-gutter) var(--v3-space-7);
-    overflow: visible;
+    padding: 0;
+    overflow: hidden;
   }
 
   .hero-stage-v3 {
     width: 100%;
-    min-height: max(38rem, calc(100svh - (var(--v3-page-gutter) * 2)));
+    height: 100svh;
+    min-height: 100svh;
     aspect-ratio: auto;
   }
 
@@ -1293,10 +1431,10 @@ button {
   }
 
   /* V4 hero cluster — keep the lower-left composition on tablet/mobile.
-     --brand-gutter matches the nav's left inset so the morph stays vertically aligned. */
+     --brand-gutter matches the nav's left inset so the name and logo stay on one line. */
   :root {
     --brand-gutter: clamp(1rem, 3vw, 1.5rem);
-    --brand-hero-w: min(86vw, 30rem);
+    --name-hero-size: clamp(2.2rem, 9.2vw, 6.4rem);
     --brand-nav-w: clamp(6.5rem, 30vw, 8.5rem);
   }
 
@@ -1324,8 +1462,8 @@ button {
 
 @media (max-width: 640px) {
   .canvas-v3--hero {
-    min-height: 34rem;
-    padding-top: calc(var(--v3-nav-height) + var(--v3-space-7));
+    min-height: 100svh;
+    padding-top: 0;
   }
 
   .site-nav-v3 {
@@ -1334,8 +1472,20 @@ button {
   }
 
   .site-nav-v3__links {
-    max-width: 60%;
+    max-width: none;
+    flex-wrap: nowrap;
+    gap: var(--v3-space-2);
     justify-content: flex-end;
+  }
+
+  .site-nav-v3__link {
+    font-size: 0.875rem;
+  }
+
+  .site-nav-v3__contact {
+    min-height: 2.5rem;
+    padding: 0 0.75rem;
+    font-size: 0.8125rem;
   }
 
   .site-nav-v3__location {
@@ -1422,16 +1572,12 @@ button {
 }
 
 /* keep all real content above the fixed aurora field (z-index 0) */
-.page-v4 > .hero-root-v3,
-.statement-v4,
+.page-v4 > .hero-track-v4,
+.manifesto-v4,
 .works-v4,
 .footer-v4 {
   position: relative;
   z-index: 1;
-}
-
-.footer-v4 {
-  height: 12vh;
 }
 
 /* One continuous, slowly drifting warm field behind the whole post-hero scroll.
@@ -1490,334 +1636,468 @@ button {
 }
 
 /* =========================================================
-   V4 — Signature Statement (pure typographic)
+   V4 — the thesis (scroll-scrubbed manifesto, no label)
+   A short track (~0.8 extra viewport) pins the stage while the words ink in
+   (per-word opacity scrub lives in ScrollManifesto.tsx). Copy is three beats,
+   so it's set BIG — a statement, not a paragraph.
    ========================================================= */
-.statement-v4 {
+.manifesto-v4__track {
+  height: 180vh;
+}
+
+.manifesto-v4__stage {
+  position: sticky;
+  top: 0;
+  height: 100svh;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  text-align: center;
-  gap: clamp(2rem, 4.5vw, 4rem);
-  max-width: min(72rem, 94vw);
-  margin: 0 auto;
-  padding: clamp(7rem, 17vh, 14rem) var(--v3-page-gutter);
-  color: var(--v3-text-dark);
+  justify-content: center;
+  padding: 0 var(--brand-gutter);
 }
 
-.statement-v4__eyebrow {
-  font-family: var(--font-pier);
-  font-size: clamp(0.7rem, 0.9vw, 0.8rem);
-  letter-spacing: 0.32em;
-  text-transform: uppercase;
-  opacity: 0.55;
-}
-
-.statement-v4__headline {
+.manifesto-v4__copy {
+  margin: 0;
+  max-width: 16ch;
   font-family: var(--font-editorial);
-  font-optical-sizing: auto;
-  font-weight: 600;
-  font-size: clamp(1.9rem, 5vw, 4.25rem);
-  line-height: 1.06;
-  letter-spacing: -0.02em;
-}
-
-.statement-v4__line {
-  display: block;
-  overflow: hidden; /* mask for the line-rise reveal */
-  white-space: nowrap; /* each authored line stays on one row (no wrapping) */
-  padding-bottom: 0.12em; /* keep serif descenders from being clipped by the mask */
-}
-
-.statement-v4__line-inner {
-  display: block;
-  will-change: transform;
-}
-
-.statement-v4__mark {
-  color: var(--v3-accent-red);
-  margin-left: 0.1em;
-}
-
-.statement-v4__more {
-  font-family: var(--font-pier);
-  font-size: clamp(0.72rem, 0.95vw, 0.85rem);
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
+  font-weight: 550;
+  font-variation-settings: "wght" 550, "opsz" 144, "SOFT" 0, "WONK" 0;
+  font-size: clamp(2.1rem, 4.6vw, 4.6rem);
+  line-height: 1.16;
+  letter-spacing: -0.018em;
   color: var(--v3-text-dark);
-  opacity: 0.7;
-  border-bottom: 1px solid currentColor;
-  padding-bottom: 0.2em;
-  transition: opacity 0.25s ease, color 0.25s ease;
 }
 
-.statement-v4__more:hover {
-  opacity: 1;
+.manifesto-v4__word--accent {
   color: var(--v3-accent-red);
+}
+
+/* Reduced motion: an ordinary, fully-inked statement — no track, no pin. */
+.manifesto-v4--static {
+  display: flex;
+  flex-direction: column;
+  padding: clamp(7rem, 18vh, 12rem) var(--brand-gutter);
 }
 
 /* =========================================================
-   V4 — Featured Works (stacking gallery)
+   V4 — PROJECTS (editorial case panels; the hero lands as the title)
    ========================================================= */
 .works-v4 {
-  padding: clamp(4rem, 8vh, 8rem) 0 clamp(2rem, 6vh, 6rem);
-}
-
-/* wrapper scopes the pinned heading to the stack's scroll length. Full-width with the SAME
-   side gutter as the nav, so the pinned title lines up with the "PRATIUSH" logo at the
-   viewport edge; the cards inside stay centered via their own max-width + auto margins. */
-.works-v4__inner {
-  position: relative;
-  padding: 0 clamp(1.5rem, 3.5vw, 3.5rem);
-}
-
-/* big, bold, left-aligned title — pinned while the cards stack beneath it */
-.works-v4__head {
-  position: sticky;
-  top: calc(var(--v3-nav-height) + clamp(1rem, 2vh, 1.75rem));
-  z-index: 5;
-  pointer-events: none; /* never block the cards stacking beneath */
-  padding-bottom: clamp(1.25rem, 3vh, 2.5rem);
+  padding: 0 var(--brand-gutter);
+  /* The handoff: pull the section up under the hero's hold, so the first panel crests
+     through the feathered bottom of the stage WHILE the landed PROJECTS is still pinned —
+     the title is never stranded alone in an empty frame. (Same z-index as the hero track;
+     later in the DOM, so the panel paints over the feather.) */
+  margin-top: -30vh;
+  scroll-margin-top: 0;
   color: var(--v3-text-dark);
 }
 
-.works-v4__eyebrow {
-  font-family: var(--font-pier);
-  font-size: clamp(0.7rem, 0.9vw, 0.8rem);
-  letter-spacing: 0.32em;
-  text-transform: uppercase;
-  opacity: 0.55;
-  margin-bottom: clamp(0.5rem, 1.5vh, 1rem);
-}
-
-.works-v4__title {
-  font-family: var(--font-editorial);
-  font-weight: 600;
-  font-size: clamp(2.2rem, 5vw, 3.75rem);
-  letter-spacing: -0.025em;
-  line-height: 1.02;
-  text-align: left;
-  scroll-margin-top: calc(var(--v3-nav-height) + clamp(3rem, 6vh, 5rem));
-}
-
-.works-v4__stack {
-  position: relative;
-  /* Establish a BFC so the LAST card's margin-bottom is CONTAINED instead of collapsing
-     through the stack's bottom edge. Without this the last card gets zero trailing room and
-     the whole deck un-sticks the instant it arrives (pushing the stack up) instead of it
-     pinning on top. flow-root is not a scroll container, so sticky still works. */
-  display: flow-root;
-}
-
-/* Each card is a sticky layer; they SHARE one `top`, so later cards pin on top of earlier
-   ones and the gallery piles up (true stack). `top` sits BELOW the pinned title band so the
-   two never overlap. The margin below each card is the read window + recede scroll room —
-   the card holds alone, then the next rises to cover it. */
-.work-card-v4 {
-  position: sticky;
-  top: 26vh;
-  margin-bottom: 30vh; /* hold/cover scroll room = how long this card stays pinned (overlapping) */
+.works-v4__panels {
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  gap: clamp(5rem, 13vh, 10rem);
+  padding-top: 0;
 }
 
-/* The last card needs the SAME trailing room as the others, otherwise it never pins long
-   enough to stack on top — it just scrolls straight through and shoves the outro up behind
-   it. This keeps it pinned on top of the deck as the finale, then releases to the CTA. */
-.work-card-v4:last-child {
-  margin-bottom: 30vh;
+/* ---- one case panel ---- */
+.work-panel-v4__grid {
+  display: grid;
+  grid-template-columns: 7fr 5fr;
+  gap: clamp(2.5rem, 5vw, 5.5rem);
+  align-items: center;
 }
 
-/* the centered visual card that scales + tilts during recede */
-.work-card-v4__card {
+.work-panel-v4--flip .work-panel-v4__grid {
+  grid-template-columns: 5fr 7fr;
+}
+
+.work-panel-v4--flip .work-panel-v4__media {
+  order: 2;
+}
+
+.work-panel-v4--flip .work-panel-v4__body {
+  order: 1;
+}
+
+/* The frame the clip-path reveal opens onto. border-radius matches the settled clip rounding
+   so the resting state and the scrubbed state agree. */
+.work-panel-v4__media {
   position: relative;
-  width: min(60rem, 100%);
-  height: min(70vh, 38rem);
-  margin: 0 auto;
-  border-radius: var(--v3-radius-stage);
+  aspect-ratio: 16 / 10;
   overflow: hidden;
-  background: var(--v3-card-2);
+  border-radius: 28px;
+  background: color-mix(in srgb, var(--v3-text-dark) 8%, var(--v3-bg-primary));
   box-shadow: var(--v3-shadow-soft);
-  transform-origin: center;
-  will-change: transform;
 }
 
-/* inner wrapper is over-scaled so the photo still covers the frame while counter-rotating */
-.work-card-v4__img-wrap {
+/* Vertical bleed (±10%) gives the parallax drift (±7% of this layer) room — the media edge
+   can never enter the frame. */
+.work-panel-v4__media-inner {
   position: absolute;
-  inset: 0;
-  scale: 1.12;
+  inset: -10% 0;
   will-change: transform;
 }
 
-.work-card-v4__img {
+.work-panel-v4__video {
+  width: 100%;
+  height: 100%;
   object-fit: cover;
 }
 
-/* soft bottom scrim so the white caption is legible on any image */
-.work-card-v4__scrim {
+/* Typographic poster — the honest stand-in where the only screenshots are rough captures.
+   A flat tinted field, one big serif word, a caps caption, soft top-light + grain. */
+.work-panel-v4__poster {
   position: absolute;
   inset: 0;
-  z-index: 1;
-  pointer-events: none;
-  background: linear-gradient(
-    to top,
-    rgba(18, 15, 26, 0.9) 0%,
-    rgba(18, 15, 26, 0.55) 34%,
-    rgba(18, 15, 26, 0.08) 60%,
-    transparent 74%
-  );
-}
-
-/* caption lives INSIDE the card (bottom-left over the scrim) so it stacks/recedes/fades
-   WITH its own card and can never overlap a sibling card */
-.work-card-v4__caption {
-  position: absolute;
-  z-index: 2;
-  left: clamp(1.5rem, 3vw, 3rem);
-  right: clamp(1.5rem, 3vw, 3rem);
-  bottom: clamp(1.5rem, 3.5vh, 3rem);
+  container-type: inline-size;
   display: flex;
   flex-direction: column;
-  gap: clamp(0.4rem, 0.8vh, 0.85rem);
-  max-width: 44ch;
-  color: #fff;
-  text-shadow: 0 1px 18px rgba(0, 0, 0, 0.35);
+  justify-content: flex-end;
+  gap: 0.85rem;
+  padding: clamp(1.5rem, 7cqi, 3.25rem);
 }
 
-.work-card-v4__index {
+.work-panel-v4__poster::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(85% 95% at 16% 6%, rgba(227, 185, 138, 0.22) 0%, transparent 62%);
+}
+
+.work-panel-v4__poster::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: var(--grain-url);
+  background-repeat: repeat;
+  background-size: var(--grain-scale) var(--grain-scale);
+  opacity: 0.28;
+  mix-blend-mode: overlay;
+}
+
+.work-panel-v4__poster-word {
+  position: relative;
+  z-index: 1;
+  font-family: var(--font-editorial);
+  font-weight: 550;
+  font-variation-settings: "wght" 550, "opsz" 144, "SOFT" 0, "WONK" 0;
+  font-size: clamp(1.8rem, 11.5cqi, 6rem);
+  line-height: 1.04;
+  letter-spacing: -0.02em;
+  color: var(--v3-bg-primary);
+}
+
+.work-panel-v4__poster-caption {
+  position: relative;
+  z-index: 1;
   font-family: var(--font-pier);
-  font-size: 0.75rem;
+  font-size: clamp(0.62rem, 2.2cqi, 0.8rem);
   letter-spacing: 0.22em;
   text-transform: uppercase;
-  opacity: 0.8;
+  color: color-mix(in srgb, var(--v3-bg-primary) 72%, transparent);
 }
 
-.work-card-v4__name {
+/* ---- panel copy ---- */
+.work-panel-v4__body {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: clamp(0.9rem, 1.9vh, 1.4rem);
+}
+
+.work-panel-v4__title {
   font-family: var(--font-editorial);
   font-weight: 600;
-  font-size: clamp(1.8rem, 3.4vw, 3rem);
-  line-height: 1.04;
-  letter-spacing: -0.015em;
+  font-size: clamp(2rem, 3.1vw, 3.2rem);
+  line-height: 1.05;
+  letter-spacing: -0.02em;
 }
 
-.work-card-v4__meta {
+.work-panel-v4__title-mask {
+  display: block;
+  overflow: hidden;
+  padding-bottom: 0.1em; /* keep serif descenders clear of the mask */
+}
+
+.work-panel-v4__title-inner {
+  display: block;
+  will-change: transform;
+}
+
+/* The one quiet context line (year · role) — content, not a label. */
+.work-panel-v4__meta {
+  margin: 0;
   font-family: var(--font-pier);
-  font-size: 0.8rem;
+  font-size: clamp(0.7rem, 0.85vw, 0.85rem);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  opacity: 0.55;
+}
+
+.work-panel-v4__desc {
+  margin: 0;
+  max-width: 44ch;
+  font-size: clamp(1rem, 1.1vw, 1.125rem);
+  line-height: 1.65;
+  opacity: 0.88;
+}
+
+.work-panel-v4__stack {
+  display: flex;
+  flex-wrap: wrap;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-family: var(--font-pier);
+  font-size: 0.72rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  opacity: 0.6;
+}
+
+.work-panel-v4__stack li:not(:last-child)::after {
+  content: "·";
+  margin: 0 0.6em;
+}
+
+.work-panel-v4__links {
+  display: flex;
+  gap: clamp(1.25rem, 2vw, 2rem);
+  margin-top: 0.25rem;
+}
+
+.work-panel-v4__link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-family: var(--font-pier);
+  font-size: clamp(0.74rem, 0.9vw, 0.88rem);
   letter-spacing: 0.16em;
   text-transform: uppercase;
+  color: var(--v3-text-dark);
+  border-bottom: 1px solid currentColor;
+  padding-bottom: 0.25em;
+  transition: color 0.5s var(--ease-micro);
+}
+
+.work-panel-v4__link:hover {
   color: var(--v3-accent-red);
 }
 
-.work-card-v4__desc {
-  font-size: clamp(0.95rem, 1.1vw, 1.1rem);
-  line-height: 1.5;
-  opacity: 0.92;
-}
-
-.works-v4__outro {
-  display: flex;
-  justify-content: center;
-  padding: clamp(3rem, 8vh, 7rem) var(--v3-page-gutter) 0;
-}
-
-.works-more-v4 {
+.work-panel-v4__link-icon {
   display: inline-flex;
-  align-items: center;
-  gap: 0.6rem;
-  padding: 0.95rem 1.4rem 0.95rem 1.6rem;
-  border-radius: var(--v3-radius-pill);
-  background: var(--v3-text-dark);
-  color: var(--v3-bg-primary);
-  font-family: var(--font-pier);
-  font-size: 0.85rem;
-  font-weight: 700;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  line-height: 1;
-  transition: transform 0.25s ease, background-color 0.25s ease;
+  width: 0.8em;
+  height: 0.8em;
+  transition: transform 0.6s var(--ease-micro);
 }
 
-.works-more-v4:hover {
-  transform: translateY(-2px);
-  background: var(--v3-accent-red);
-}
-
-.works-more-v4__icon {
-  display: inline-flex;
-  width: 1rem;
-  height: 1rem;
-  transition: transform 0.25s ease;
-}
-
-.works-more-v4__icon svg {
+.work-panel-v4__link-icon svg {
   width: 100%;
   height: 100%;
 }
 
-.works-more-v4:hover .works-more-v4__icon {
+.work-panel-v4__link:hover .work-panel-v4__link-icon {
   transform: translate(2px, -2px);
 }
 
-/* ---- V4 responsive: stacking gallery → simple stacked images + overlay ---- */
+/* =========================================================
+   V4 — 03 · The ask (dark contact finale)
+   The page's only dark surface: a plum sheet with rounded shoulders rising over the warm
+   field — the curtain after the pitch. Email is the hero element; gold on plum holds AA.
+   ========================================================= */
+.footer-v4 {
+  margin-top: clamp(6rem, 15vh, 11rem);
+  background: var(--v3-text-dark);
+  color: var(--v3-bg-primary);
+  border-radius: var(--v3-radius-stage) var(--v3-radius-stage) 0 0;
+  padding: clamp(5rem, 13vh, 9rem) var(--brand-gutter) clamp(1.75rem, 4vh, 2.75rem);
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.footer-v4__inner {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: clamp(1.75rem, 4.5vh, 3rem);
+}
+
+.footer-v4__headline {
+  font-family: var(--font-editorial);
+  font-weight: 600;
+  font-size: clamp(2.5rem, 6.5vw, 5.25rem);
+  line-height: 1.04;
+  letter-spacing: -0.025em;
+}
+
+.footer-v4__line {
+  display: block;
+  overflow: hidden;
+  padding-bottom: 0.1em;
+}
+
+.footer-v4__line-inner {
+  display: block;
+  will-change: transform;
+}
+
+.footer-v4__email {
+  font-family: var(--font-editorial);
+  font-weight: 550;
+  font-variation-settings: "wght" 550, "opsz" 144, "SOFT" 0, "WONK" 0;
+  font-size: clamp(1.35rem, 2.6vw, 2.3rem);
+  letter-spacing: -0.01em;
+  color: var(--v3-accent-lime);
+  border-bottom: 1px solid color-mix(in srgb, var(--v3-accent-lime) 45%, transparent);
+  padding-bottom: 0.12em;
+  transition: color 0.5s var(--ease-micro), border-color 0.5s var(--ease-micro);
+}
+
+.footer-v4__email:hover {
+  color: var(--v3-bg-primary);
+  border-color: var(--v3-bg-primary);
+}
+
+.footer-v4__meta {
+  width: 100%;
+  margin-top: clamp(2rem, 6vh, 4rem);
+  padding-top: clamp(1.1rem, 2.5vh, 1.5rem);
+  border-top: 1px solid color-mix(in srgb, var(--v3-bg-primary) 18%, transparent);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem 2rem;
+  flex-wrap: wrap;
+}
+
+.footer-v4__links {
+  display: flex;
+  gap: clamp(1.25rem, 2.5vw, 2.5rem);
+}
+
+.footer-v4__link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-family: var(--font-pier);
+  font-size: 0.78rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  opacity: 0.8;
+  transition: opacity 0.5s var(--ease-micro);
+}
+
+.footer-v4__link:hover {
+  opacity: 1;
+}
+
+.footer-v4__link-icon {
+  display: inline-flex;
+  width: 0.7rem;
+  height: 0.7rem;
+  transition: transform 0.6s var(--ease-micro);
+}
+
+.footer-v4__link-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.footer-v4__link:hover .footer-v4__link-icon {
+  transform: translate(2px, -2px);
+}
+
+.footer-v4__colophon {
+  display: flex;
+  gap: 1.75rem;
+  margin: 0;
+  font-size: 0.8rem;
+  opacity: 0.55;
+}
+
+.footer-v4__grain {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image: var(--grain-url);
+  background-repeat: repeat;
+  background-size: var(--grain-scale) var(--grain-scale);
+  opacity: calc(var(--grain-opacity) * 0.5);
+  mix-blend-mode: overlay;
+}
+
+/* =========================================================
+   V4 — responsive (≤1100px: panels stack, morph + manifesto rescale)
+   ========================================================= */
 @media (max-width: 1100px) {
-  .statement-v4 {
-    padding: clamp(5rem, 14vh, 9rem) var(--v3-page-gutter);
+  .manifesto-v4__track {
+    height: 160vh;
   }
 
-  /* drop the pinned heading + sticky stack: a simple normal-scroll list on mobile */
-  .works-v4__head {
-    position: static;
-    pointer-events: auto;
+  .manifesto-v4__copy {
+    max-width: 14ch;
+    font-size: clamp(1.9rem, 7.2vw, 3rem);
   }
 
-  .works-v4__title {
-    font-size: clamp(2.2rem, 9vw, 3.25rem);
+  .work-panel-v4__grid,
+  .work-panel-v4--flip .work-panel-v4__grid {
+    grid-template-columns: 1fr;
+    gap: clamp(1.5rem, 4vh, 2.5rem);
   }
 
-  .work-card-v4 {
-    position: relative;
-    top: auto;
-    margin-bottom: clamp(2.5rem, 7vh, 4.5rem);
+  /* media always leads on small screens, whichever side it sat on desktop */
+  .work-panel-v4--flip .work-panel-v4__media {
+    order: 0;
   }
 
-  .work-card-v4:last-child {
-    margin-bottom: 0;
-  }
-
-  .work-card-v4__card {
-    width: 100%;
-    height: min(62vh, 30rem);
+  .work-panel-v4--flip .work-panel-v4__body {
+    order: 0;
   }
 }
 
-/* ---- V4 reduced-motion: still backdrop, no fold, no reveal ---- */
+@media (max-width: 640px) {
+  .work-panel-v4__media {
+    aspect-ratio: 4 / 3;
+    border-radius: 20px;
+  }
+
+  .footer-v4__meta {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+/* =========================================================
+   V4 — reduced motion: settle everything, strip transitions
+   (the components already render final states; this kills the hover micro-motion
+   and unpins the hero — no morph means no need for the tall track)
+   ========================================================= */
 @media (prefers-reduced-motion: reduce) {
-  .section-aurora-v4__layer--a,
-  .section-aurora-v4__layer--b {
-    animation: none;
+  .hero-track-v4 {
+    height: auto;
   }
 
-  .statement-v4__line-inner {
-    transform: none;
-  }
-
-  /* flow the cards normally — no sticky pile-up, no recede (JS already skips transforms) */
-  .works-v4__head {
-    position: static;
-  }
-
-  .work-card-v4 {
+  .hero-root-v3 {
     position: relative;
-    top: auto;
-    margin-bottom: clamp(3rem, 8vh, 6rem);
   }
 
-  .work-card-v4:last-child {
-    margin-bottom: 0;
+  /* no pinned hold to crest under — the section flows normally */
+  .works-v4 {
+    margin-top: 0;
   }
 
-  .works-more-v4,
-  .works-more-v4__icon {
+  .works-v4__panels {
+    padding-top: clamp(3rem, 9vh, 7rem);
+  }
+
+  .work-panel-v4__link,
+  .work-panel-v4__link-icon,
+  .footer-v4__email,
+  .footer-v4__link,
+  .footer-v4__link-icon {
     transition: none;
   }
 }

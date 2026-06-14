@@ -1,36 +1,28 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { motion, useScroll, useTransform } from "motion/react";
+import { motion, useScroll, useTransform, type MotionValue } from "motion/react";
 
-import { LocationPin } from "@/components/icons";
-import { PratiushMain } from "@/components/vectors/PratiushMain";
+import { MorphName } from "@/components/hero/MorphName";
 import { useIntro } from "@/components/intro/IntroProvider";
 import { BEAT, INTRO_EASE, type Beat } from "@/lib/intro";
 
 /**
- * The left-aligned hero lockup: eyebrow → (wordmark) → tagline, plus a bottom meta strip
- * (the credential label, left / locator, right). The tagline's trailing asterisk is a footnote
- * mark whose matching mark sits on the bottom-left label.
+ * The left-aligned hero lockup: eyebrow → name → role → statement, plus the bottom-right
+ * locator. The name is <MorphName/> — real text that the pinned hero transforms into
+ * PROJECTS on scroll (the landing's one big move).
  *
- * The wordmark is NOT rendered here — it's the layout-level <BrandMark/> that morphs into the
- * nav on scroll. This component reserves its footprint with an invisible ghost
- * ([data-brand-hero]) so the copy flows around it AND <BrandMark/> has a rect to measure.
- *
- * Two motion layers, on purpose:
- *  • ENTRANCE — each copy element rises + fades on the shared FOREGROUND gate (see lib/intro),
- *    keyed to the master schedule (BEAT) so the name, eyebrow, tagline and meta relate as one
- *    choreographed moment instead of each running its own timer. The ghost is deliberately NOT
- *    animated, so <BrandMark/>'s mount-time measurement reads its settled position.
- *  • EXIT — the whole cluster fades + drifts up with scroll, finishing BEFORE the wordmark
- *    finishes docking (fade ≈ 0.3·vh < morph 0.4·vh in BrandMark) so nothing crosses it.
- * Exit opacity lives on the parent; entrance opacity lives on the children — different nodes,
- * so they compose instead of fighting for the same property.
+ * Motion layers, kept on separate nodes so they compose instead of fighting:
+ *  • ENTRANCE — each copy element rises on the shared FOREGROUND gate, keyed to the master
+ *    schedule (BEAT), exactly as before.
+ *  • EXIT — the COPY fades + lifts away early in the pin (two thin wrappers around the
+ *    copy groups share one set of motion values). The name is deliberately outside the
+ *    wrappers: it must stay at full ink while gravity takes it.
  */
 const hidden = (beat: Beat) => ({ y: beat.y, opacity: 0 });
 const shown = { y: 0, opacity: 1 } as const;
 
-export function HeroLede() {
+export function HeroLede({ progress }: { progress: MotionValue<number> }) {
   const { foregroundIn, reduce } = useIntro();
   const { scrollY } = useScroll();
   const fadeDist = useRef(500);
@@ -51,6 +43,7 @@ export function HeroLede() {
     scrollY,
     (v) => -Math.min(40, (v / fadeDist.current) * 40),
   );
+  const exitStyle = reduce ? undefined : { opacity, y };
 
   // One entrance recipe for every copy element: rise + fade on the foreground gate, on the
   // shared schedule. Reduced motion settles to the final state with no transform/transition.
@@ -63,55 +56,55 @@ export function HeroLede() {
   });
 
   return (
-    <motion.div
-      className="hero-cluster-v4"
-      // Reduced motion: drop the scroll-driven exit fade/drift entirely (was running for everyone).
-      style={{
-        opacity: reduce ? undefined : opacity,
-        y: reduce ? undefined : y,
-      }}
-    >
-      {/* The page's real heading for a11y/SEO — the visible wordmark is decorative SVG. */}
+    <div className="hero-cluster-v4">
+      {/* The page's real heading for a11y/SEO — the visible name is decorative text. */}
       <h1 className="visually-hidden">
-        Pratiush — Product-Minded Software Engineer
+        Pratiush — Software Engineer, Product &amp; Design
       </h1>
 
-      <motion.p
-        className="hero-eyebrow-v4"
-        aria-hidden
-        {...entrance(BEAT.eyebrow)}
-      >
-        Hi, I&apos;m
-      </motion.p>
+      <motion.div className="hero-exit-v4" style={exitStyle}>
+        <motion.p
+          className="hero-eyebrow-v4"
+          aria-hidden
+          {...entrance(BEAT.eyebrow)}
+        >
+          Hi, I&apos;m
+        </motion.p>
+      </motion.div>
 
-      {/* Reserves the wordmark's space + gives <BrandMark/> its start rect (NOT animated).
-          Under reduced motion the wordmark doesn't fly in from <BrandMark/> (which then just sits
-          docked in the nav), so render a STATIC one here to keep the hero name. */}
-      <div className="hero-brand-ghost" data-brand-hero aria-hidden>
-        {reduce ? <PratiushMain aria-hidden /> : null}
-      </div>
+      {/* The name — NOT inside an exit wrapper; it stays while gravity takes it. */}
+      <MorphName progress={progress} />
 
-      <motion.p className="hero-tagline-v4" {...entrance(BEAT.tagline)}>
-        <span className="hero-tagline-v4__line">I turn ideas into</span>
-        <span className="hero-tagline-v4__line hero-tagline-v4__line--offset">
-          polished products.
-          {/* Footnote ref — points to the credential in the bottom-left label (matching mark). */}
-        </span>
-      </motion.p>
+      <motion.div className="hero-exit-v4" style={exitStyle}>
+        {/* Role — the credential, set directly beneath the name so it qualifies it at a glance. */}
+        <motion.p className="hero-roles-v4" {...entrance(BEAT.roles)}>
+          Software Engineer · Product &amp; Design
+        </motion.p>
 
-      {/* Role subtitle — sits directly under the tagline as part of the intro lockup. */}
-      <motion.p className="hero-roles-v4" {...entrance(BEAT.roles)}>
-        Product-Minded Software Engineer
-      </motion.p>
+        {/* The serif statement closes the lockup — the lingering, personal voice note. */}
+        <motion.p className="hero-tagline-v4" {...entrance(BEAT.tagline)}>
+          <span className="hero-tagline-v4__line">Good products feel obvious.</span>
+          <span className="hero-tagline-v4__line">
+            Getting there isn&apos;t.
+            <span className="hero-tagline-v4__mark" aria-hidden>
+              *
+            </span>
+          </span>
+        </motion.p>
+      </motion.div>
 
-      <motion.span
-        className="hero-meta-v4"
-        aria-label="Based in USA"
-        {...entrance(BEAT.meta)}
-      >
-        {/* <LocationPin aria-hidden /> */}
-        <span>Based in USA</span>
-      </motion.span>
-    </motion.div>
+      {/* The locator is absolutely positioned, so it rides its own full-inset exit wrapper
+          (a transformed wrapper becomes the containing block — this keeps its coordinates
+          anchored to the cluster, not to the copy column). */}
+      <motion.div className="hero-exit-abs-v4" style={exitStyle}>
+        <motion.span
+          className="hero-meta-v4"
+          aria-label="Based in USA"
+          {...entrance(BEAT.meta)}
+        >
+          <span>Based in USA</span>
+        </motion.span>
+      </motion.div>
+    </div>
   );
 }
