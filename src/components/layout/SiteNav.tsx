@@ -22,6 +22,10 @@ export function SiteNav() {
           rel="noopener noreferrer"
         >
           Resume
+          {/* Signposts the PDF as a grabbable artifact — the recruiter's highest-intent target. */}
+          <span className="site-nav-v3__ext" aria-hidden>
+            ↗
+          </span>
         </Link>
         <Link href="/#contact" className="site-nav-v3__contact">
           Connect

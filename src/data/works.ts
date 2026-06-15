@@ -7,7 +7,13 @@
  *    for the upcoming dedicated /works page that lists the full catalogue.
  */
 export type WorkMedia =
-  | { kind: "video"; src: string }
+  | {
+      kind: "video";
+      src: string;
+      /** First-frame still shown before the video downloads/plays — keeps the frame from
+          flashing an empty black box while preload="none" defers the actual video. */
+      poster?: string;
+    }
   | {
       kind: "poster";
       /** Big display word on the poster face. */
@@ -59,7 +65,11 @@ export const featured: FeaturedWork[] = [
     description:
       "A focus app that composes its audio in real time instead of looping a playlist. The engine paces every session through an entry, anchor, sustain, and re-focus arc, so the sound shifts with your attention rather than against it.",
     stack: ["React", "TypeScript", "Python", "FastAPI"],
-    media: { kind: "video", src: "/projects_assets/LucidTone/demo.mp4" },
+    media: {
+      kind: "video",
+      src: "/projects_assets/LucidTone/demo.mp4",
+      poster: "/projects_assets/LucidTone/poster.jpg",
+    },
     links: [],
   },
   {
@@ -89,7 +99,11 @@ export const featured: FeaturedWork[] = [
     description:
       "A real website for a real bakery. I led design and development for a local business owner: story, services, testimonials, and a CMS they update without calling me. Small project, real stakes, actual customers.",
     stack: ["Next.js", "Tailwind", "GSAP", "Tina CMS"],
-    media: { kind: "video", src: "/projects_assets/WhiskItAll/demo.mp4" },
+    media: {
+      kind: "video",
+      src: "/projects_assets/WhiskItAll/demo.mp4",
+      poster: "/projects_assets/WhiskItAll/poster.jpg",
+    },
     links: [
       { label: "Visit live", href: "https://whisk-it-all-official.onrender.com/" },
     ],

@@ -94,6 +94,7 @@ export function WorkPanel({ work, index }: { work: FeaturedWork; index: number }
                 ref={videoRef}
                 className="work-panel-v4__video"
                 src={work.media.src}
+                poster={work.media.poster}
                 muted
                 loop
                 playsInline

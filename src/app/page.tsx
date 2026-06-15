@@ -1,15 +1,14 @@
 import { SectionAurora } from "@/components/decor/SectionAurora";
 import { SiteFooter } from "@/components/footer/SiteFooter";
 import { HeroSection } from "@/components/hero/HeroSection";
-import { ScrollManifesto } from "@/components/manifesto/ScrollManifesto";
 import { WorksSection } from "@/components/works/WorksSection";
 
 /**
  * The landing reads as one pitch, shown not told (no section labels anywhere):
- *   hero (the name) → PROJECTS morph + case panels (the work) → manifesto (the thesis)
- *   → dark footer (the ask).
+ *   hero (the name) → PROJECTS morph + case panels (the work) → dark footer (the ask).
  * The works lead straight out of the hero — the PRATIUSH→PROJECTS gravity morph IS the
- * transition — and the manifesto lands as a conclusion after the proof.
+ * transition. The thesis ("Most software works…") used to be a standalone section after the
+ * work; it now inks in beside the landed PROJECTS (see HeroThesis), so the pitch opens on it.
  * TEMP (layout rework): portrait + "See my works" CTA removed for now. Re-enable by re-adding
  * <HeroPortrait/> / <WorksBadge/> inside HeroSection (they'll need re-fitting to the
  * left-aligned layout).
@@ -22,7 +21,6 @@ export default function Home() {
       <SectionAurora />
       <HeroSection />
       <WorksSection />
-      <ScrollManifesto />
       <SiteFooter />
     </main>
   );

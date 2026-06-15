@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import { motion, useScroll, useTransform, type MotionValue } from "motion/react";
 
+import { HeroThesis } from "@/components/hero/HeroThesis";
 import { MorphName } from "@/components/hero/MorphName";
 import { useIntro } from "@/components/intro/IntroProvider";
 import { BEAT, INTRO_EASE, type Beat } from "@/lib/intro";
@@ -84,12 +85,7 @@ export function HeroLede({ progress }: { progress: MotionValue<number> }) {
         {/* The serif statement closes the lockup — the lingering, personal voice note. */}
         <motion.p className="hero-tagline-v4" {...entrance(BEAT.tagline)}>
           <span className="hero-tagline-v4__line">Good products feel obvious.</span>
-          <span className="hero-tagline-v4__line">
-            Getting there isn&apos;t.
-            <span className="hero-tagline-v4__mark" aria-hidden>
-              *
-            </span>
-          </span>
+          <span className="hero-tagline-v4__line">Getting there isn&apos;t.</span>
         </motion.p>
       </motion.div>
 
@@ -105,6 +101,12 @@ export function HeroLede({ progress }: { progress: MotionValue<number> }) {
           <span>Based in USA</span>
         </motion.span>
       </motion.div>
+
+      {/* The line that frames the work, anchored upper-left — a diagonal thirds composition with
+          the landed PROJECTS (mid-right), leaving the lower band free for the first work panel to
+          crest into. It inks in as the name brakes into PROJECTS. Only on the morph path: reduced
+          motion keeps the name as PRATIUSH, so there is no landed frame to caption. */}
+      {!reduce && <HeroThesis progress={progress} />}
     </div>
   );
 }

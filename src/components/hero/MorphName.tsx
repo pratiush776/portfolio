@@ -217,6 +217,16 @@ export function MorphName({ progress }: { progress: MotionValue<number> }) {
   const runRef = useRef<HTMLSpanElement>(null);
   const shift = useMotionValue(0);
 
+  // The ghosted "MY" graphic behind the LANDED word: an oversized, faint echo of the title (see
+  // .hero-name-ghost-v4). It fades in to its faint rest opacity as the leader letter brakes;
+  // positioning lives entirely in CSS, so it needs no transform here.
+  const ghostOpacity = useTransform(
+    progress,
+    [PULL_END - 0.05, PULL_END + 0.05],
+    [0, 0.09],
+    { ease: reveal },
+  );
+
   useLayoutEffect(() => {
     if (reduce) return;
     const measure = () => {
@@ -246,6 +256,12 @@ export function MorphName({ progress }: { progress: MotionValue<number> }) {
 
   return (
     <p ref={rowRef} className="hero-name-v4" aria-hidden>
+      {/* The ghosted "MY" graphic — oversized + faint, parked BEHIND PROJECTS (CSS) for depth,
+          fading in as the word lands (see ghostOpacity). */}
+      <motion.span className="hero-name-ghost-v4" style={{ opacity: ghostOpacity }}>
+        My
+      </motion.span>
+
       {/* Entrance mask: the name rises from behind its baseline on the foreground gate —
           a separate node from the scrubbed letters, so the two never fight. */}
       <span className="hero-name-v4__reveal">

@@ -32,7 +32,9 @@ button:focus-visible,
 a:focus-visible,
 input:focus-visible,
 textarea:focus-visible {
-  outline: 2px solid #2f4156;
+  /* On-brand focus ring (was a hard-coded v2 navy). Plum ink reads ~13:1 on the cream — well
+     clear of the 3:1 non-text-UI floor — and matches the palette. */
+  outline: 2px solid var(--v3-text-dark);
   outline-offset: 3px;
 }
 
@@ -330,9 +332,17 @@ button {
     radial-gradient(115% 100% at 16% 2%,
         color-mix(in srgb, #FCEDCB 80%, var(--v3-bg-primary)) 0%,
         transparent 54%),
-    radial-gradient(95% 85% at 90% 110%,
-        color-mix(in srgb, var(--v3-accent-red) 7%, var(--v3-bg-primary)) 0%,
-        transparent 56%),
+    /* Soft ambient fill in the right-of-centre void — kept well below the upper-left key light
+       (38% vs 80%) so the directional light source survives; it just keeps the resting frame's
+       negative space lit and composed instead of flat cream, and warms the zone PROJECTS lands in. */
+    radial-gradient(72% 66% at 78% 44%,
+        color-mix(in srgb, #FCEDCB 38%, var(--v3-bg-primary)) 0%,
+        transparent 62%),
+    /* Lifted into frame (was 90% 110%, mostly off-screen) so the brand terracotta gives the
+       lower-right real presence rather than a sliver clipped at the corner. */
+    radial-gradient(95% 85% at 90% 100%,
+        color-mix(in srgb, var(--v3-accent-red) 9%, var(--v3-bg-primary)) 0%,
+        transparent 58%),
     var(--v3-bg-primary);
   -webkit-mask-image: linear-gradient(to bottom, #000 72%, transparent 100%);
   mask-image: linear-gradient(to bottom, #000 72%, transparent 100%);
@@ -395,17 +405,18 @@ button {
 .radial-glow-v3 {
   position: absolute;
   left: -16rem;
-  top: -24rem;
+  top: -14rem;
   width: 84rem;
   height: 84rem;
   border-radius: 50%;
-  /* A deliberate warm light source (upper-left), cleaner falloff: bright gold core that holds,
-     then a smooth premium fade so it reads as ONE intentional halo rather than a soft smear. */
+  /* A deliberate warm light source. Core pulled DOWN from off-screen-top to ~mid-left so it
+     pools behind/above the lifted lockup and frames the name, rather than lighting empty space
+     up top. Bright gold core that holds, then a smooth premium fade — one intentional halo. */
   background: radial-gradient(50% 50% at 50% 50%,
-      rgba(252, 230, 178, 0.95) 0%,
-      rgba(250, 224, 170, 0.85) 30%,
-      rgba(248, 226, 182, 0.4) 58%,
-      rgba(248, 232, 190, 0) 78%);
+      rgba(252, 230, 178, 0.97) 0%,
+      rgba(250, 224, 170, 0.88) 32%,
+      rgba(248, 226, 182, 0.5) 60%,
+      rgba(248, 232, 190, 0) 80%);
   pointer-events: none;
   z-index: 0;
   transform-origin: 38% 36%;
@@ -960,6 +971,22 @@ button {
   transform: scaleX(1);
 }
 
+/* External-artifact cue on the Resume link — the terracotta accent marks it as the grabbable
+   PDF (recruiter's highest-intent target) without giving it a competing pill. */
+.site-nav-v3__ext {
+  display: inline-block;
+  margin-left: 0.28em;
+  font-size: 0.78em;
+  line-height: 0;
+  vertical-align: 0.08em;
+  color: var(--v3-accent-red);
+  transition: transform 0.5s var(--ease-micro);
+}
+
+.site-nav-v3__link:hover .site-nav-v3__ext {
+  transform: translate(0.1em, -0.1em);
+}
+
 .site-nav-v3__contact {
   display: inline-flex;
   align-items: center;
@@ -980,6 +1007,11 @@ button {
 .site-nav-v3__contact:hover {
   background: var(--v3-accent-red);
   transform: translateY(-1px);
+}
+
+/* Press feedback — settles from the lifted hover back to the baseline so the click reads. */
+.site-nav-v3__contact:active {
+  transform: translateY(0);
 }
 
 .site-nav-v3__contact-icon {
@@ -1007,12 +1039,13 @@ button {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  /* Anchor the lockup to the lower band so it grounds just above the footer strip — the type
-     reads as one composed mass instead of floating dead-center with empty gaps top and bottom.
-     The open upper area is then carried by the halo (intentional light, not emptiness). */
+  /* Anchor the lockup to the lower band, but lifted clear of the bottom edge so it sits in the
+     lower-third — the glow (pulled down to meet it, see .radial-glow-v3) then frames the name
+     from above instead of lighting an empty upper field while the type sits unlit at the floor.
+     The locator + scroll cue still anchor the bottom corners, so nothing floats. */
   justify-content: flex-end;
   gap: 0; /* rhythm is controlled per-element below, not by a uniform gap */
-  padding: var(--v3-nav-height) var(--brand-gutter) clamp(5.5rem, 10.5svh, 7rem);
+  padding: var(--v3-nav-height) var(--brand-gutter) clamp(8rem, 22svh, 14rem);
   text-align: left;
   will-change: transform, opacity;
 }
@@ -1035,13 +1068,15 @@ button {
 .hero-eyebrow-v4 {
   margin: 0;
   font-family: var(--font-hanken), sans-serif;
-  font-size: clamp(0.72rem, 0.8vw, 0.9rem);
+  /* Matched label tier with .hero-roles-v4 — the two caps labels bracket the name as a
+     deliberate pair (same size/weight/opacity), differing only in tracking-to-length. */
+  font-size: clamp(0.74rem, 0.78vw, 0.85rem);
   font-weight: 600;
   line-height: 1.2;
-  letter-spacing: 0.22em;
+  letter-spacing: 0.2em; /* shorter label takes the wider tracking */
   text-transform: uppercase;
   color: var(--v3-text-dark);
-  opacity: 0.72; /* 0.6 dropped below AA (4.04:1) on the cream; 0.72 ≈ 4.9:1 */
+  opacity: 0.75; /* ≈5.1:1 on the cream — AA clear (0.6 would be 4.04:1) */
 }
 
 /* The closing statement — the personal voice note that ends the lockup. Editorial serif
@@ -1067,19 +1102,11 @@ button {
   white-space: nowrap;
 }
 
-.hero-tagline-v4__mark {
-  color: var(--v3-accent-red);
-  margin-left: 0.05em;
-  font-family: var(--font-hanken), sans-serif;
-  font-size: 0.5em;
-  line-height: 0;
-  vertical-align: 0.65em;
-}
-
 /* ── The hero name (MorphName): real text so the pinned hero can transform it per-letter
    into PROJECTS. The row spans the full lockup width — the word starts at its left edge
    and lands at its right edge (the mirror). ── */
 .hero-name-v4 {
+  position: relative; /* containing block for the "My" eyebrow (.hero-name-eyebrow-v4) */
   width: 100%;
   /* "Hi, I'm" + the name are one phrase, so this top gap is the tightest in the lockup.
      League Spartan's caps sit high in a generous line box; the negative bottom margin removes
@@ -1103,6 +1130,8 @@ button {
    overflow: vertical for the entrance, horizontal is moot (letters never leave the row). */
 .hero-name-v4__reveal {
   display: block;
+  position: relative;
+  z-index: 1; /* the solid letters sit IN FRONT of the ghosted "MY" graphic behind them */
   width: 100%;
   overflow: hidden;
 }
@@ -1113,6 +1142,35 @@ button {
      the eyebrow/tagline above and below (tunable) */
   margin-left: -0.035em;
   will-change: transform;
+}
+
+/* The ghosted "MY" — an oversized, faint INK echo in the same display face as the name, parked
+   BEHIND the solid PROJECTS (the reveal block sits at z-index 1). It is toned in ink rather than
+   the accent so it separates from the terracotta word by value (an earlier same-terracotta pass
+   read as inline glyphs, "PROJE-MY-CTS"); its centre is raised above the cap band and it bleeds
+   off the right edge, so the word occludes only its lower portion and it reads as a tonal echo set
+   back and above — depth, not a label sitting in the word.
+   Opacity is driven by the morph (fades to its faint rest value as the word lands). */
+.hero-name-ghost-v4 {
+  position: absolute;
+  /* Bleed a touch off the row's right edge and ride ABOVE the cap band (center raised above
+     the word's), so PROJECTS occludes only the ghost's lower portion — "MY" reads as an echo
+     set BEHIND and above the title, never as glyphs interleaved into the word. */
+  right: -0.06em;
+  top: 36%;
+  transform: translateY(-50%);
+  font-family: var(--font-league-spartan), sans-serif;
+  font-weight: 850;
+  font-size: calc(var(--name-hero-size) * 1.5);
+  line-height: 0.8;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  /* Ink, NOT the accent — a tonal shadow-echo separates fore/background by VALUE, so the
+     occlusion reads as depth. Same-terracotta made M/Y read as inline letters (PROJE-MY-CTS). */
+  color: var(--v3-text-dark);
+  pointer-events: none;
+  will-change: opacity;
 }
 
 /* Each slot clips its own glyph roll (old letter up, PROJECTS letter rises from below).
@@ -1157,6 +1215,49 @@ button {
   white-space: pre;
 }
 
+/* The signature voice note, re-staged beside the LANDED name. Gravity parks the word as
+   PROJECTS at the row's right edge, leaving the left empty — so the serif statement reveals
+   there (see MorphName), giving the landed frame a left anchor instead of an orphaned title.
+   Anchored INSIDE the name row and vertically centred to the caps band, so it tracks the
+   word's exact position. Hidden at rest (opacity scrubbed from 0) and never rendered in
+   reduced motion (no morph → no landed frame). The outer node owns the vertical centring;
+   the inner node (motion) owns the fade + drift, so transform isn't double-claimed. */
+/* The framing line, revealed as the name parks as PROJECTS (which lands just below centre,
+   right). Anchored LEFT and just ABOVE the vertical centre, so it sits off-centre against the
+   title — a gentle diagonal rather than a level two-column row, and clear of both the nav up top
+   and the work panel cresting along the bottom (works-v4 margin-top: -30vh). Revealed by the
+   morph (gate + per-word ink in HeroThesis); never rendered in reduced motion. */
+.hero-thesis-v4 {
+  position: absolute;
+  left: var(--brand-gutter);
+  /* Golden-ratio upper line (1 − 0.618 ≈ 0.382). PROJECTS lands near the lower golden line
+     (~62%), so the two settle into a golden-section pairing — balanced, not centred, not level. */
+  top: 38.2%;
+  transform: translateY(-50%);
+  margin: 0;
+  max-width: min(18ch, 26%);
+  font-family: var(--font-fraunces), Georgia, serif;
+  font-weight: 475;
+  font-variation-settings: "wght" 475, "opsz" 96, "SOFT" 0, "WONK" 0;
+  font-size: clamp(1.55rem, 2.3vw, 2.8rem);
+  line-height: 1.1;
+  letter-spacing: -0.014em;
+  color: var(--v3-text-dark);
+  text-wrap: balance;
+  pointer-events: none;
+  will-change: opacity;
+}
+
+/* Each word's opacity is animated per-word (HeroThesis); inline so the line wraps naturally.
+   The accent word carries the terracotta, tying the copy to PROJECTS. */
+.hero-thesis-v4__word {
+  will-change: opacity;
+}
+
+.hero-thesis-v4__word--accent {
+  color: var(--v3-accent-red);
+}
+
 /* Exit wrappers around the COPY (not the name): full width so the absolute locator keeps
    its anchoring; the abs variant is the locator's own containing block (inset: 0). */
 .hero-exit-v4 {
@@ -1180,13 +1281,16 @@ button {
   margin: clamp(0.6rem, 1.25vh, 0.85rem) 0 0;
   padding: 0;
   font-family: var(--font-hanken), sans-serif;
-  font-size: clamp(0.66rem, 0.68vw, 0.76rem);
-  font-weight: 500;
+  /* Matched label tier with .hero-eyebrow-v4 (same size/weight/opacity) so the two caps labels
+     read as a deliberate pair bracketing the name, not two almost-equal sizes. Stepped up from
+     0.66–0.76rem also eases the huge-name → label → serif-statement hierarchy. */
+  font-size: clamp(0.74rem, 0.78vw, 0.85rem);
+  font-weight: 600;
   line-height: 1.2;
-  letter-spacing: 0.135em;
+  letter-spacing: 0.15em; /* longer label takes slightly tighter tracking than the eyebrow */
   text-transform: uppercase;
   color: var(--v3-text-dark);
-  opacity: 0.78;
+  opacity: 0.75;
 }
 
 /* Bottom meta strip (right). Pinned bottom-right as a lone locator that counterweights the
@@ -1245,8 +1349,10 @@ button {
   /* The sheen: a wide bright band riding over a dim base. The image is ~2.8× the word's
      height so the band can travel fully through it; both ends are dim, so the loop reset
      is invisible. Clipped to the glyphs via background-clip:text. The dim base is kept
-     legible at rest (the word should always read as "SCROLL"); the band just lifts it. */
-  --cue-dim: color-mix(in srgb, var(--v3-text-dark) 42%, transparent);
+     legible at rest (the word should always read as "SCROLL"); the band just lifts it.
+     65% ink on the cream clears WCAG AA for this small label (4.63:1); 52% read as ~3.2:1
+     and failed. The travelling band still lifts it well past that. */
+  --cue-dim: color-mix(in srgb, var(--v3-text-dark) 65%, transparent);
   --cue-bright: color-mix(
     in srgb,
     color-mix(in srgb, var(--v3-accent-red) 55%, var(--v3-text-dark)) 88%,
@@ -1553,8 +1659,8 @@ button {
   .hero-scroll-cue-v4 {
     animation: none;
     background-image: none;
-    -webkit-text-fill-color: color-mix(in srgb, var(--v3-text-dark) 45%, transparent);
-    color: color-mix(in srgb, var(--v3-text-dark) 45%, transparent);
+    -webkit-text-fill-color: color-mix(in srgb, var(--v3-text-dark) 52%, transparent);
+    color: color-mix(in srgb, var(--v3-text-dark) 52%, transparent);
     opacity: 1 !important;
     transition: none !important;
   }
@@ -1573,7 +1679,6 @@ button {
 
 /* keep all real content above the fixed aurora field (z-index 0) */
 .page-v4 > .hero-track-v4,
-.manifesto-v4,
 .works-v4,
 .footer-v4 {
   position: relative;
@@ -1633,49 +1738,6 @@ button {
   50%  { transform: translate3d(-8%, -3%, 0) scale(1.07); }
   75%  { transform: translate3d(-3%, -6%, 0) scale(1.03); }
   100% { transform: translate3d(0%, 0%, 0) scale(1.08); }
-}
-
-/* =========================================================
-   V4 — the thesis (scroll-scrubbed manifesto, no label)
-   A short track (~0.8 extra viewport) pins the stage while the words ink in
-   (per-word opacity scrub lives in ScrollManifesto.tsx). Copy is three beats,
-   so it's set BIG — a statement, not a paragraph.
-   ========================================================= */
-.manifesto-v4__track {
-  height: 180vh;
-}
-
-.manifesto-v4__stage {
-  position: sticky;
-  top: 0;
-  height: 100svh;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  padding: 0 var(--brand-gutter);
-}
-
-.manifesto-v4__copy {
-  margin: 0;
-  max-width: 16ch;
-  font-family: var(--font-editorial);
-  font-weight: 550;
-  font-variation-settings: "wght" 550, "opsz" 144, "SOFT" 0, "WONK" 0;
-  font-size: clamp(2.1rem, 4.6vw, 4.6rem);
-  line-height: 1.16;
-  letter-spacing: -0.018em;
-  color: var(--v3-text-dark);
-}
-
-.manifesto-v4__word--accent {
-  color: var(--v3-accent-red);
-}
-
-/* Reduced motion: an ordinary, fully-inked statement — no track, no pin. */
-.manifesto-v4--static {
-  display: flex;
-  flex-direction: column;
-  padding: clamp(7rem, 18vh, 12rem) var(--brand-gutter);
 }
 
 /* =========================================================
@@ -2030,18 +2092,9 @@ button {
 }
 
 /* =========================================================
-   V4 — responsive (≤1100px: panels stack, morph + manifesto rescale)
+   V4 — responsive (≤1100px: panels stack, morph rescales)
    ========================================================= */
 @media (max-width: 1100px) {
-  .manifesto-v4__track {
-    height: 160vh;
-  }
-
-  .manifesto-v4__copy {
-    max-width: 14ch;
-    font-size: clamp(1.9rem, 7.2vw, 3rem);
-  }
-
   .work-panel-v4__grid,
   .work-panel-v4--flip .work-panel-v4__grid {
     grid-template-columns: 1fr;
