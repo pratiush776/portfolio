@@ -32,10 +32,10 @@ export function HeroSection() {
   // The cue dies the moment the reader obeys it.
   const cueFade = useTransform(scrollYProgress, [0, 0.06], [1, 0]);
 
-  // The same gravity that takes the name drags the light with it: the warm pool slides
-  // from the upper-left toward the landing zone, so the settled PROJECTS frame is lit
-  // instead of stranded in a flat field.
-  const glowX = useTransform(scrollYProgress, [0.14, 0.78], ["0vw", "36vw"], {
+  // The name morphs in place (left-anchored), so the light no longer chases it across the
+  // stage. Instead the warm pool eases gently further left as the word lands, concentrating
+  // over the lower-left PROJECTS so the settled title is lit rather than stranded in flat field.
+  const glowX = useTransform(scrollYProgress, [0.14, 0.78], ["0vw", "-5vw"], {
     ease: cubicBezier(...SNAP_EASE),
   });
 

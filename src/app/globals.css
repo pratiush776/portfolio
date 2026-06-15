@@ -1153,10 +1153,10 @@ button {
    Opacity is driven by the morph (fades to its faint rest value as the word lands). */
 .hero-name-ghost-v4 {
   position: absolute;
-  /* Bleed a touch off the row's right edge and ride ABOVE the cap band (center raised above
-     the word's), so PROJECTS occludes only the ghost's lower portion — "MY" reads as an echo
-     set BEHIND and above the title, never as glyphs interleaved into the word. */
-  right: -0.06em;
+  /* Bleed a touch off the row's LEFT edge (where PROJECTS now lands) and ride ABOVE the cap band
+     (center raised above the word's), so PROJECTS occludes only the ghost's lower portion — "MY"
+     reads as an echo set BEHIND and above the title, never as glyphs interleaved into the word. */
+  left: -0.06em;
   top: 36%;
   transform: translateY(-50%);
   font-family: var(--font-league-spartan), sans-serif;
@@ -1215,21 +1215,17 @@ button {
   white-space: pre;
 }
 
-/* The signature voice note, re-staged beside the LANDED name. Gravity parks the word as
-   PROJECTS at the row's right edge, leaving the left empty — so the serif statement reveals
-   there (see MorphName), giving the landed frame a left anchor instead of an orphaned title.
-   Anchored INSIDE the name row and vertically centred to the caps band, so it tracks the
-   word's exact position. Hidden at rest (opacity scrubbed from 0) and never rendered in
-   reduced motion (no morph → no landed frame). The outer node owns the vertical centring;
-   the inner node (motion) owns the fade + drift, so transform isn't double-claimed. */
-/* The framing line, revealed as the name parks as PROJECTS (which lands just below centre,
-   right). Anchored LEFT and just ABOVE the vertical centre, so it sits off-centre against the
-   title — a gentle diagonal rather than a level two-column row, and clear of both the nav up top
-   and the work panel cresting along the bottom (works-v4 margin-top: -30vh). Revealed by the
-   morph (gate + per-word ink in HeroThesis); never rendered in reduced motion. */
+/* The framing line, revealed as the name morphs in place into PROJECTS. The name holds its LEFT
+   anchor and lands lower-left, leaving the right side open — so the serif statement reveals on the
+   RIGHT, giving the landed frame a counter-anchor instead of an orphaned title. Anchored just
+   ABOVE the vertical centre and to the right gutter, so it sits off-centre against the title — a
+   gentle diagonal (upper-right ↔ lower-left) rather than a level two-column row, clear of both the
+   nav up top and the work panel cresting along the bottom (works-v4 margin-top: -30vh). Hidden at
+   rest (opacity scrubbed from 0); revealed by the morph (gate + per-word ink in HeroThesis); never
+   rendered in reduced motion (no morph → no landed frame). */
 .hero-thesis-v4 {
   position: absolute;
-  left: var(--brand-gutter);
+  right: var(--brand-gutter);
   /* Golden-ratio upper line (1 − 0.618 ≈ 0.382). PROJECTS lands near the lower golden line
      (~62%), so the two settle into a golden-section pairing — balanced, not centred, not level. */
   top: 38.2%;
@@ -1242,6 +1238,9 @@ button {
   font-size: clamp(1.55rem, 2.3vw, 2.8rem);
   line-height: 1.1;
   letter-spacing: -0.014em;
+  /* Right-anchored copy reads cleaner ragged-left: the lines hug the right gutter where the
+     statement now lives, mirroring the lower-left title. */
+  text-align: right;
   color: var(--v3-text-dark);
   text-wrap: balance;
   pointer-events: none;
