@@ -1,10 +1,11 @@
 "use client";
 
-import { useLayoutEffect, useRef, useState } from "react";
+import { type CSSProperties, useLayoutEffect, useRef, useState } from "react";
 import {
   cubicBezier,
   motion,
   useTransform,
+  type MotionStyle,
   type MotionValue,
 } from "motion/react";
 
@@ -68,6 +69,22 @@ const ROLL_START = 0.08; // the leader (first CHANGING slot, left) begins its gl
 const ROLL_DUR = 0.16; // duration of a single letter's glyph roll
 const ROLL_STAGGER = 0.038; // delay between consecutive letters' starts (≪ ROLL_DUR → wavy overlap)
 
+/* ── Roll geometry: the gap between the two stacked glyphs (the "make room ahead" trick) ──────
+ *
+ * Each changing slot stacks two 1em glyphs (outgoing above, incoming below) inside a 1em clip
+ * box, and the box gains vertical HEADROOM (padding) so the elastic stretch + incoming tilt have
+ * room before the hard clip edge — no more sliced glyph tops. To stop that headroom from
+ * revealing the OTHER stacked glyph at rest, the two glyphs are separated by an equal vertical
+ * gap. ROLL_GAP is the single source of truth: it is pushed to CSS as `--roll-gap` (the column's
+ * `gap` AND the slot's padding/margin derive from it) and the roll travel below is computed from
+ * it, so the two can never desync. In em (of the name's font size). Half of it becomes the
+ * headroom on EACH side of the clip box, so the centre-origin stretch (which pokes up AND down)
+ * clears the edge symmetrically. */
+const ROLL_GAP = 0.3;
+// The column is (2 + gap) em tall and the swap slides it by (1 + gap) em, so the roll travels
+// this fraction of the column — derived so the incoming glyph lands dead-centre in the clip box.
+const ROLL_TRAVEL = ((1 + ROLL_GAP) / (2 + ROLL_GAP)) * 100; // %
+
 // A smooth, premium ease-in-out cubic for width/kerning + the incoming rotation — gentler than the
 // site's hard-landing INTRO_EASE so those glide rather than snap.
 const MORPH_EASE = [0.65, 0, 0.35, 1] as const;
@@ -78,8 +95,12 @@ const reveal = cubicBezier(...MORPH_EASE);
 const OUTGOING_EASE = [0.16, 1, 0.3, 1] as const;
 const outgoingEase = cubicBezier(...OUTGOING_EASE);
 
-// The incoming glyph enters TILTED and rotates to 0° (properly aligned) as it lands.
-const INCOMING_ROT = -16; // degrees
+// The incoming glyph enters TILTED and rotates to 0° (properly aligned) as it lands. It pivots from
+// the TOP of the box (transform-origin 50% 0% on the span): caps sit high in the slot with the empty
+// descender room below, so a top pivot swings the letter DOWN into that room instead of up past the
+// roll mask's clip edge — which is what was slicing the tops off. Keep the angle modest for the same
+// reason (the slot must stay overflow-clipped to mask the two stacked glyphs).
+const INCOMING_ROT = -8; // degrees
 
 /*
  * Roll order, walked LEFT-TO-RIGHT across only the letters that actually change. A slot whose
@@ -110,8 +131,10 @@ const FIRST_CHANGE = ROLL_ORDER.findIndex((r) => r !== null);
  * as energy thrown into the next letter — it's already mid-build as this one snaps.
  *
  * IMPORTANT: only the OUTGOING glyph stretches, and it stretches from its CENTRE (the span's default
- * transform-origin) so it elongates evenly through the middle and never looks deformed. The INCOMING
- * glyph (the PROJECTS letter rising from below) is never scaled — it arrives clean and undistorted.
+ * transform-origin) so it elongates evenly through the middle and never looks deformed — it loads
+ * tension in place, then shoots up. The slot now carries vertical headroom (the gap padding) so that
+ * stretch clears the clip edge. The INCOMING glyph (the PROJECTS letter rising from below) is never
+ * scaled — it arrives clean and undistorted.
  *
  * Tension τ ∈ [0,1] per slot is a piecewise curve over `d = progress − peak`:
  *   • BUILD  d ∈ [−WAVE_BUILD, 0]         : τ = n²  (ease-in) — slow load.
@@ -141,6 +164,106 @@ function waveTension(d: number): number {
   const n = (d - WAVE_HOLD) / WAVE_SNAP; // 0 → 1 across the snap
   const k = 1 - n;
   return k * k; // fast release, settling into rest
+}
+
+/* ── Per-letter halo colour: sample the hero's warm field at each letter's position ───────────
+ *
+ * The separating halo (see .hero-name-v4__roll span) must read as "the background showing
+ * through" so overlapping glyphs and the dark "MY" ghost get a clean gap. A single flat cream
+ * looked white-ish against the golden glow pooled at the lower-left. Instead each letter samples
+ * the colour of the field BEHIND it — the base radial field (.hero-field-v3) PLUS the gold radial
+ * glow (.radial-glow-v3) composited over it — so left letters get warm gold and the tone eases to
+ * cream toward the right, matching the real background at every letter. (The slow breathe/aurora
+ * are diffuse and animated; we approximate with their resting state — close enough to read as bg.)
+ */
+type RGB = [number, number, number];
+
+// "source over" composite of `src` (alpha `a`) onto opaque `dst`.
+function over(dst: RGB, src: RGB, a: number): RGB {
+  return [
+    src[0] * a + dst[0] * (1 - a),
+    src[1] * a + dst[1] * (1 - a),
+    src[2] * a + dst[2] * (1 - a),
+  ];
+}
+
+// Alpha of one radial-gradient stack layer at a normalised point, given centre/radii (in the same
+// fraction units as the point) and the stop fraction at which it reaches transparent.
+function radialAlpha(
+  nx: number,
+  ny: number,
+  cx: number,
+  cy: number,
+  rx: number,
+  ry: number,
+  stop: number,
+): number {
+  const dx = (nx - cx) / rx;
+  const dy = (ny - cy) / ry;
+  const r = Math.sqrt(dx * dx + dy * dy);
+  return Math.max(0, Math.min(1, 1 - r / stop));
+}
+
+// The base field surface (.hero-field-v3): three warm radials over the cream base. Layers are
+// listed BOTTOM-to-TOP (reverse of the CSS background order) for compositing.
+const FIELD_BASE: RGB = [244, 227, 206]; // #F4E3CE
+const FIELD_LAYERS: { c: RGB; cx: number; cy: number; rx: number; ry: number; stop: number }[] = [
+  { c: [240, 214, 192], cx: 0.9, cy: 1.0, rx: 0.95, ry: 0.85, stop: 0.58 }, // terracotta, lower-right
+  { c: [247, 231, 205], cx: 0.78, cy: 0.44, rx: 0.72, ry: 0.66, stop: 0.62 }, // ambient, centre-right
+  { c: [250, 235, 204], cx: 0.16, cy: 0.02, rx: 1.15, ry: 1.0, stop: 0.54 }, // key light, upper-left
+];
+
+function sampleField(nx: number, ny: number): RGB {
+  let col = FIELD_BASE;
+  for (const L of FIELD_LAYERS) {
+    col = over(col, L.c, radialAlpha(nx, ny, L.cx, L.cy, L.rx, L.ry, L.stop));
+  }
+  return col;
+}
+
+// The gold glow (.radial-glow-v3): an 84rem circle parked at left:-16rem top:-14rem, so its centre
+// sits at (26rem, 28rem) with a 42rem radius. Sampled in viewport px (needs the root rem). The
+// breathe animation is approximated at a resting opacity.
+const GLOW_C_REM = 26;
+const GLOW_CY_REM = 28;
+const GLOW_R_REM = 42;
+const GLOW_OPACITY = 0.9; // breathe rides 0.82→1; rest ~0.9
+const GLOW_STOPS: { o: number; c: RGB; a: number }[] = [
+  { o: 0.0, c: [252, 230, 178], a: 0.97 },
+  { o: 0.32, c: [250, 224, 170], a: 0.88 },
+  { o: 0.6, c: [248, 226, 182], a: 0.5 },
+  { o: 0.8, c: [248, 232, 190], a: 0.0 },
+];
+
+function sampleGlow(px: number, py: number, rem: number): { c: RGB; a: number } {
+  const cx = GLOW_C_REM * rem;
+  const cy = GLOW_CY_REM * rem;
+  const r = GLOW_R_REM * rem;
+  const f = Math.sqrt((px - cx) ** 2 + (py - cy) ** 2) / r;
+  const last = GLOW_STOPS[GLOW_STOPS.length - 1];
+  if (f <= GLOW_STOPS[0].o) return { c: GLOW_STOPS[0].c, a: GLOW_STOPS[0].a * GLOW_OPACITY };
+  if (f >= last.o) return { c: last.c, a: 0 };
+  for (let i = 0; i < GLOW_STOPS.length - 1; i++) {
+    const s = GLOW_STOPS[i];
+    const n = GLOW_STOPS[i + 1];
+    if (f >= s.o && f <= n.o) {
+      const t = (f - s.o) / (n.o - s.o);
+      const lerp = (a: number, b: number) => a + (b - a) * t;
+      return {
+        c: [lerp(s.c[0], n.c[0]), lerp(s.c[1], n.c[1]), lerp(s.c[2], n.c[2])],
+        a: lerp(s.a, n.a) * GLOW_OPACITY,
+      };
+    }
+  }
+  return { c: last.c, a: 0 };
+}
+
+// The composited background colour at a viewport point — field + gold glow over it.
+function sampleHalo(px: number, py: number, viewW: number, viewH: number, rem: number): string {
+  const field = sampleField(px / viewW, py / viewH);
+  const glow = sampleGlow(px, py, rem);
+  const [r, g, b] = over(field, glow.c, glow.a);
+  return `rgb(${Math.round(r)}, ${Math.round(g)}, ${Math.round(b)})`;
 }
 
 function MorphLetter({
@@ -181,6 +304,9 @@ function MorphLetter({
   const liftY = useTransform(tension, (t) => `${(-t * WAVE_LIFT).toFixed(4)}em`);
   // ONLY the outgoing glyph stretches, from its centre, so it elongates cleanly as it leaves.
   const outgoingScaleY = useTransform(tension, (t) => 1 + t * WAVE_STRETCH_Y);
+  // Raise the active letter above its neighbours so it's never occluded while it lifts/tilts —
+  // the more tension a slot carries, the higher it stacks; settled letters fall back to 0.
+  const zLift = useTransform(tension, (t) => Math.round(t * 100));
 
   // Natural advance widths plus each word's real pair-kerning correction. A generic negative
   // margin cannot fit PR, RA, AT, TI, etc. because every pair needs a different adjustment.
@@ -190,12 +316,16 @@ function MorphLetter({
   const toCurrentRef = useRef<HTMLSpanElement>(null);
   const fromPairRef = useRef<HTMLSpanElement>(null);
   const toPairRef = useRef<HTMLSpanElement>(null);
+  const letterRef = useRef<HTMLSpanElement>(null);
   const [metrics, setMetrics] = useState<{
     fromWidth: number;
     toWidth: number;
     fromKern: number;
     toKern: number;
   } | null>(null);
+  // The background colour sampled at this letter's resting position (field + gold glow), used as
+  // the separating halo so it reads as the real background rather than a flat cream.
+  const [halo, setHalo] = useState<string | null>(null);
 
   useLayoutEffect(() => {
     const visualWidth = (node: HTMLSpanElement | null) =>
@@ -237,6 +367,20 @@ function MorphLetter({
         }
         return next;
       });
+
+      // Sample the field colour behind this slot at its RESTING position. offsetLeft/offsetTop are
+      // layout coords (independent of the run's entrance/scrub transforms), measured against the
+      // untransformed .hero-name-v4 container — so the sample point is stable through the morph.
+      const slot = letterRef.current;
+      const nameEl = slot?.closest(".hero-name-v4") as HTMLElement | null;
+      if (slot && nameEl) {
+        const nameRect = nameEl.getBoundingClientRect();
+        const px = nameRect.left + slot.offsetLeft + slot.offsetWidth / 2;
+        const py = nameRect.top + slot.offsetTop + slot.offsetHeight / 2;
+        const rem = Number.parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
+        const next = sampleHalo(px, py, window.innerWidth, window.innerHeight, rem);
+        setHalo((current) => (current === next ? current : next));
+      }
     };
     measure();
     window.addEventListener("resize", measure);
@@ -246,7 +390,7 @@ function MorphLetter({
 
   // The glyph roll runs on the fast-start ease — the outgoing letter shoots up immediately, the
   // incoming eases in beneath it. Width/kerning stay on the smooth `reveal`.
-  const y = useTransform(progress, [start, end], ["0%", "-50%"], {
+  const y = useTransform(progress, [start, end], ["0%", `-${ROLL_TRAVEL}%`], {
     ease: outgoingEase,
   });
   // The incoming glyph enters tilted and rotates to 0° (aligned) over the same window.
@@ -268,12 +412,17 @@ function MorphLetter({
 
   return (
     <motion.span
+      ref={letterRef}
       className="hero-name-v4__letter"
-      style={{
-        width: metrics ? width : undefined,
-        marginLeft: metrics ? marginLeft : undefined,
-        y: liftY,
-      }}
+      style={
+        {
+          width: metrics ? width : undefined,
+          marginLeft: metrics ? marginLeft : undefined,
+          y: liftY,
+          zIndex: zLift,
+          "--halo": halo ?? undefined,
+        } as MotionStyle
+      }
     >
       {isStatic ? (
         // Shared glyph (P / R): one static letter, no roll stack, no transform — dead still.
@@ -282,10 +431,15 @@ function MorphLetter({
         </span>
       ) : (
         <motion.span className="hero-name-v4__roll" style={{ y }}>
-          {/* OUTGOING glyph: stretches (centre origin) as it rolls up and out. */}
+          {/* OUTGOING glyph: stretches (centre origin) as it rolls up and out — it loads tension
+              and elongates in place, then shoots up. The slot's vertical headroom (see the gap
+              padding in CSS) gives that stretch room on BOTH sides so it no longer clips. */}
           <motion.span style={{ scaleY: outgoingScaleY }}>{from}</motion.span>
-          {/* INCOMING glyph: never scaled — enters tilted, rotates to aligned as it lands. */}
-          <motion.span style={{ rotate: incomingRotate }}>{to}</motion.span>
+          {/* INCOMING glyph: never scaled — enters tilted, rotates to aligned as it lands. Pivots
+              from the top so the tilt swings into the descender room, clear of the mask's clip. */}
+          <motion.span style={{ rotate: incomingRotate, transformOrigin: "50% 0%" }}>
+            {to}
+          </motion.span>
         </motion.span>
       )}
       <span className="hero-name-v4__metrics" aria-hidden>
@@ -337,7 +491,13 @@ export function MorphName({ progress }: { progress: MotionValue<number> }) {
   }
 
   return (
-    <p className="hero-name-v4" aria-hidden>
+    <p
+      className="hero-name-v4"
+      aria-hidden
+      // Single source of truth for the roll's vertical gap (see ROLL_GAP): the slot headroom and
+      // the column gap derive from it in CSS, and the roll travel above derives from it in JS.
+      style={{ "--roll-gap": `${ROLL_GAP}em` } as CSSProperties}
+    >
       {/* The ghosted "MY" graphic — oversized + faint, parked BEHIND the left-landing PROJECTS
           (CSS) for depth, fading in as the word lands (see ghostOpacity). */}
       <motion.span

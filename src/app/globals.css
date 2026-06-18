@@ -1170,11 +1170,18 @@ button {
 }
 
 /* Each slot clips its own glyph roll (old letter up, PROJECTS letter rises from below).
-   Width and pair-kerning are driven by MorphName so both words retain the font's intended fit. */
+   Width and pair-kerning are driven by MorphName so both words retain the font's intended fit.
+   The clip box keeps its 1em CONTENT height but gains vertical HEADROOM (padding = half the
+   roll gap, cancelled by an equal negative margin so the baseline/lockup rhythm is unchanged):
+   `overflow` clips at the padding-box edge, so the elastic stretch + incoming tilt now have room
+   before the hard edge — no sliced glyph tops. The matching column gap below keeps that headroom
+   showing only empty space, never the other stacked glyph. */
 .hero-name-v4__letter {
   position: relative;
   display: inline-block;
   height: 1em;
+  padding: calc(var(--roll-gap, 0px) / 2) 0;
+  margin: calc(var(--roll-gap, 0px) / -2) 0;
   overflow: hidden;
   will-change: transform;
 }
@@ -1183,15 +1190,29 @@ button {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
+  /* Separates the two stacked glyphs so the slot's headroom reveals only this empty gap, never
+     the neighbour glyph (the static P/R slot has a single child, so this is a no-op there). The
+     roll travel in MorphName is derived from the same ROLL_GAP, so the landing stays centred. */
+  gap: var(--roll-gap, 0px);
   will-change: transform;
 }
 
-/* Glyphs shrink-wrap to their natural advance so the slot can measure them. */
+/* Glyphs shrink-wrap to their natural advance so the slot can measure them.
+   The halo is the gradient-matched separator: `paint-order: stroke fill` draws a background-toned
+   ring BEHIND the terracotta fill (the letterform stays crisp), so it is invisible on the warm
+   field but becomes a clean separating gap wherever a glyph overlaps another glyph mid-morph or
+   the dark ghosted "MY" behind the landed word. The soft same-tone shadow feathers that gap.
+   The tone is `--halo` — the actual background colour sampled BEHIND each letter (field + gold
+   glow, set per-slot by MorphName) so the ring matches the warm gradient at each position instead
+   of one flat cream; the base token is the fallback before the sample lands / in reduced motion. */
 .hero-name-v4__roll span {
   display: inline-block;
   height: 1em;
   line-height: 1;
   white-space: pre;
+  paint-order: stroke fill;
+  -webkit-text-stroke: 0.06em var(--halo, var(--v3-bg-primary));
+  text-shadow: 0 0 0.04em var(--halo, var(--v3-bg-primary));
 }
 
 /* Offscreen pair samples let MorphName recover the kerning that is normally lost when a word

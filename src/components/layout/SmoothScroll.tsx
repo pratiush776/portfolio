@@ -34,9 +34,10 @@ export function SmoothScroll({ children }: { children: React.ReactNode }) {
   if (prefersReducedMotion) return <>{children}</>;
 
   return (
-    // lerp 0.085 (was 0.1): a slightly heavier glide to match the hard-landing ease voice —
-    // the page coasts, then stops, instead of feathering out.
-    <ReactLenis root options={{ lerp: 0.085, smoothWheel: true }}>
+    // lerp 0.05 (lower = MORE smoothing): the scroll position eases toward the target rather than
+    // tracking the wheel 1:1, so the pinned hero's morph + wave have room to actually play out and
+    // settle smoothly instead of feeling rigidly welded to each scroll tick.
+    <ReactLenis root options={{ lerp: 0.05, smoothWheel: true }}>
       {children}
     </ReactLenis>
   );
