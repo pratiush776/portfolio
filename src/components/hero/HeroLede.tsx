@@ -1,7 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
-import { motion, useScroll, useTransform, type MotionValue } from "motion/react";
+import { cubicBezier, motion, useTransform, type MotionValue } from "motion/react";
 
 import { HeroThesis } from "@/components/hero/HeroThesis";
 import { MorphName } from "@/components/hero/MorphName";
@@ -16,35 +15,47 @@ import { BEAT, INTRO_EASE, type Beat } from "@/lib/intro";
  * Motion layers, kept on separate nodes so they compose instead of fighting:
  *  • ENTRANCE — each copy element rises on the shared FOREGROUND gate, keyed to the master
  *    schedule (BEAT), exactly as before.
- *  • EXIT — the COPY fades + lifts away early in the pin (two thin wrappers around the
- *    copy groups share one set of motion values). The name is deliberately outside the
- *    wrappers: it must stay at full ink while gravity takes it.
+ *  • EXIT — the COPY peels away on the SAME pinned-track progress that drives the morph, in a
+ *    staggered top-down cascade (eyebrow first), each group lifting + blurring + fading out and
+ *    fully CLEARING before the name starts to morph (< ROLL_START 0.14). The name is deliberately
+ *    outside the wrappers: it holds dead still as the lockup departs around it, so the move reads
+ *    as authored against the anchor rather than two clocks drifting apart.
  */
 const hidden = (beat: Beat) => ({ y: beat.y, opacity: 0 });
 const shown = { y: 0, opacity: 1 } as const;
 
+const exitEase = cubicBezier(...INTRO_EASE);
+
+/* Staggered exit windows (fractions of the pinned track). The peel runs from the first scroll and
+   hands straight into the morph (ROLL_START ≈ 0.08) — the tails overlap the leading letters by
+   design, so motion is continuous rather than copy-clears-then-name-moves with a dead beat. */
+const EXIT = {
+  eyebrow: { start: 0.0, end: 0.05, lift: -64 },
+  body: { start: 0.015, end: 0.09, lift: -52 },
+  meta: { start: 0.03, end: 0.11, lift: -44 },
+} as const;
+
+function useExit(
+  progress: MotionValue<number>,
+  { start, end, lift }: { start: number; end: number; lift: number },
+) {
+  const opacity = useTransform(progress, [start, end], [1, 0], { ease: exitEase });
+  const y = useTransform(progress, [start, end], [0, lift], { ease: exitEase });
+  const filter = useTransform(
+    progress,
+    [start, end],
+    ["blur(0px)", "blur(6px)"],
+    { ease: exitEase },
+  );
+  return { opacity, y, filter };
+}
+
 export function HeroLede({ progress }: { progress: MotionValue<number> }) {
   const { foregroundIn, reduce } = useIntro();
-  const { scrollY } = useScroll();
-  const fadeDist = useRef(500);
 
-  useEffect(() => {
-    const set = () => {
-      fadeDist.current = Math.max(1, window.innerHeight * 0.3);
-    };
-    set();
-    window.addEventListener("resize", set);
-    return () => window.removeEventListener("resize", set);
-  }, []);
-
-  const opacity = useTransform(scrollY, (v) =>
-    Math.max(0, 1 - v / fadeDist.current),
-  );
-  const y = useTransform(
-    scrollY,
-    (v) => -Math.min(40, (v / fadeDist.current) * 40),
-  );
-  const exitStyle = reduce ? undefined : { opacity, y };
+  const eyebrowExit = useExit(progress, EXIT.eyebrow);
+  const bodyExit = useExit(progress, EXIT.body);
+  const metaExit = useExit(progress, EXIT.meta);
 
   // One entrance recipe for every copy element: rise + fade on the foreground gate, on the
   // shared schedule. Reduced motion settles to the final state with no transform/transition.
@@ -63,7 +74,7 @@ export function HeroLede({ progress }: { progress: MotionValue<number> }) {
         Pratiush — Software Engineer, Product &amp; Design
       </h1>
 
-      <motion.div className="hero-exit-v4" style={exitStyle}>
+      <motion.div className="hero-exit-v4" style={reduce ? undefined : eyebrowExit}>
         <motion.p
           className="hero-eyebrow-v4"
           aria-hidden
@@ -73,10 +84,10 @@ export function HeroLede({ progress }: { progress: MotionValue<number> }) {
         </motion.p>
       </motion.div>
 
-      {/* The name — NOT inside an exit wrapper; it stays while gravity takes it. */}
+      {/* The name — NOT inside an exit wrapper; it holds dead still as the copy peels away. */}
       <MorphName progress={progress} />
 
-      <motion.div className="hero-exit-v4" style={exitStyle}>
+      <motion.div className="hero-exit-v4" style={reduce ? undefined : bodyExit}>
         {/* Role — the credential, set directly beneath the name so it qualifies it at a glance. */}
         <motion.p className="hero-roles-v4" {...entrance(BEAT.roles)}>
           Software Engineer · Product &amp; Design
@@ -92,7 +103,7 @@ export function HeroLede({ progress }: { progress: MotionValue<number> }) {
       {/* The locator is absolutely positioned, so it rides its own full-inset exit wrapper
           (a transformed wrapper becomes the containing block — this keeps its coordinates
           anchored to the cluster, not to the copy column). */}
-      <motion.div className="hero-exit-abs-v4" style={exitStyle}>
+      <motion.div className="hero-exit-abs-v4" style={reduce ? undefined : metaExit}>
         <motion.span
           className="hero-meta-v4"
           aria-label="Based in USA"

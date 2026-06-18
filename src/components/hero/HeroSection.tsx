@@ -29,13 +29,10 @@ export function HeroSection() {
     offset: ["start start", "end end"],
   });
 
-  // The cue dies the moment the reader obeys it.
-  const cueFade = useTransform(scrollYProgress, [0, 0.06], [1, 0]);
-
   // The name morphs in place (left-anchored), so the light no longer chases it across the
   // stage. Instead the warm pool eases gently further left as the word lands, concentrating
   // over the lower-left PROJECTS so the settled title is lit rather than stranded in flat field.
-  const glowX = useTransform(scrollYProgress, [0.14, 0.78], ["0vw", "-5vw"], {
+  const glowX = useTransform(scrollYProgress, [0.06, 0.55], ["0vw", "-5vw"], {
     ease: cubicBezier(...SNAP_EASE),
   });
 
@@ -67,19 +64,6 @@ export function HeroSection() {
         <div className="canvas-v3 canvas-v3--hero">
           <div className="hero-stage-v3">
             <HeroLede progress={scrollYProgress} />
-            {/* Minimal right-rail cue: a warm highlight travels down the stacked letters.
-                The outer node keeps the CSS entrance gate; the inner one carries the
-                scroll-out fade — separate nodes, so the opacities compose. */}
-            <div className="hero-scroll-cue-v4" aria-hidden>
-              <motion.div className="hero-scroll-cue-v4__inner" style={{ opacity: cueFade }}>
-                <span className="hero-scroll-cue-v4__letter">S</span>
-                <span className="hero-scroll-cue-v4__letter">C</span>
-                <span className="hero-scroll-cue-v4__letter">R</span>
-                <span className="hero-scroll-cue-v4__letter">O</span>
-                <span className="hero-scroll-cue-v4__letter">L</span>
-                <span className="hero-scroll-cue-v4__letter">L</span>
-              </motion.div>
-            </div>
           </div>
         </div>
         <div className="hero-grain-v3" aria-hidden />

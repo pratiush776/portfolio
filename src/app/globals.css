@@ -577,16 +577,6 @@ button {
   transition: opacity 0.9s var(--intro-ease);
 }
 
-/* The scroll cue joins last, on the FOREGROUND gate — delay matches lib/intro BEAT.cue. */
-.hero-root-v3[data-foreground="out"] .hero-scroll-cue-v4 {
-  opacity: 0;
-}
-
-.hero-root-v3[data-foreground="in"] .hero-scroll-cue-v4 {
-  opacity: 1;
-  transition: opacity 0.6s var(--intro-ease) 1.2s;
-}
-
 /* Pre-existing paper-PNG texture surface (used by PaperTexture.tsx). */
 .paper-texture-v3 {
   position: absolute;
@@ -1127,12 +1117,17 @@ button {
 }
 
 /* Entrance mask (the name rises from behind its baseline). Full row width + hidden
-   overflow: vertical for the entrance, horizontal is moot (letters never leave the row). */
+   overflow: vertical for the entrance, horizontal is moot (letters never leave the row).
+   The entrance only needs to clip the BOTTOM (name rising from below), but the travelling-wave
+   LIFT pushes letters UP — so open headroom at the top with padding and cancel it with an equal
+   negative margin, keeping the baseline put while giving the crest room before the clip edge. */
 .hero-name-v4__reveal {
   display: block;
   position: relative;
   z-index: 1; /* the solid letters sit IN FRONT of the ghosted "MY" graphic behind them */
   width: 100%;
+  padding-top: 0.6em;
+  margin-top: -0.6em;
   overflow: hidden;
 }
 
@@ -1158,7 +1153,8 @@ button {
      reads as an echo set BEHIND and above the title, never as glyphs interleaved into the word. */
   left: -0.06em;
   top: 36%;
-  transform: translateY(-50%);
+  /* Vertical centring (-50% of own height) AND the rise-in are driven together by MorphName's
+     ghostY motion value, so this element intentionally sets no transform of its own. */
   font-family: var(--font-league-spartan), sans-serif;
   font-weight: 850;
   font-size: calc(var(--name-hero-size) * 1.5);
@@ -1247,10 +1243,25 @@ button {
   will-change: opacity;
 }
 
-/* Each word's opacity is animated per-word (HeroThesis); inline so the line wraps naturally.
-   The accent word carries the terracotta, tying the copy to PROJECTS. */
+/* Each word is two exactly-overlaid layers (HeroThesis): a faint GHOST that is always present
+   (sets the box, acts as the guide) and an INK layer that wipes across it left-to-right. The word
+   is inline-block so clip-path applies to its box; the inter-word space is a real text node
+   outside it so the line still wraps. The accent word carries the terracotta, tying it to PROJECTS. */
 .hero-thesis-v4__word {
-  will-change: opacity;
+  position: relative;
+  display: inline-block;
+}
+
+/* The guide: the whole word, faintly inked, always visible once the line's gate has opened. */
+.hero-thesis-v4__ghost {
+  opacity: 0.16;
+}
+
+/* The ink drawn over the guide — same glyphs, exactly overlaid, revealed by the clip wipe. */
+.hero-thesis-v4__ink {
+  position: absolute;
+  inset: 0;
+  will-change: clip-path;
 }
 
 .hero-thesis-v4__word--accent {
@@ -1323,7 +1334,7 @@ button {
 .nav-logo-v4 {
   display: block;
   width: 100%;
-  color: var(--v3-accent-red);
+  color: var(--v3-text-dark);
 }
 
 .nav-logo-v4 svg {
@@ -1332,78 +1343,6 @@ button {
   height: auto;
 }
 
-/* Minimal right-rail cue. A single soft warm highlight glides continuously down the whole
-   stacked word (one gradient sheen clipped to the text), signposting the scroll interaction
-   without introducing another graphic shape — and without the choppy per-letter pulse. */
-.hero-scroll-cue-v4 {
-  position: absolute;
-  right: var(--brand-gutter);
-  top: 41%;
-  z-index: 4;
-  display: grid;
-  justify-items: center;
-  gap: 0.26rem;
-  pointer-events: none;
-
-  /* The sheen: a wide bright band riding over a dim base. The image is ~2.8× the word's
-     height so the band can travel fully through it; both ends are dim, so the loop reset
-     is invisible. Clipped to the glyphs via background-clip:text. The dim base is kept
-     legible at rest (the word should always read as "SCROLL"); the band just lifts it.
-     65% ink on the cream clears WCAG AA for this small label (4.63:1); 52% read as ~3.2:1
-     and failed. The travelling band still lifts it well past that. */
-  --cue-dim: color-mix(in srgb, var(--v3-text-dark) 65%, transparent);
-  --cue-bright: color-mix(
-    in srgb,
-    color-mix(in srgb, var(--v3-accent-red) 55%, var(--v3-text-dark)) 88%,
-    transparent
-  );
-  background-image: linear-gradient(
-    to bottom,
-    var(--cue-dim) 0%,
-    var(--cue-dim) 32%,
-    var(--cue-bright) 50%,
-    var(--cue-dim) 68%,
-    var(--cue-dim) 100%
-  );
-  background-repeat: no-repeat;
-  background-size: 100% 300%;
-  background-position: 50% 100%;
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  color: transparent;
-  animation: hero-scroll-sweep 4.2s cubic-bezier(0.45, 0, 0.55, 1) infinite;
-}
-
-/* Inner node carries the scroll-out fade (motion), separate from the CSS entrance gate on
-   the outer node; it inherits the stacked-grid layout for the letters. */
-.hero-scroll-cue-v4__inner {
-  display: grid;
-  justify-items: center;
-  gap: 0.26rem;
-}
-
-.hero-scroll-cue-v4__letter {
-  font-family: var(--font-pier);
-  font-size: 0.68rem;
-  font-weight: 600;
-  line-height: 1;
-}
-
-@keyframes hero-scroll-sweep {
-  0% {
-    /* Band starts above the word and travels down through it (a "scroll down" gesture).
-       Lower background-position-y shifts the image down, so the bright band moves downward. */
-    background-position: 50% 100%;
-  }
-  62% {
-    background-position: 50% 0%;
-  }
-  100% {
-    /* Hold at the dim edge before looping, so the cue breathes instead of racing. */
-    background-position: 50% 0%;
-  }
-}
 @media (max-width: 1100px) {
   /* the pin needs a fixed-height stage — the text-only lockup fits 100svh on small screens */
   .hero-track-v4 {
@@ -1558,7 +1497,6 @@ button {
     bottom: clamp(1.25rem, 4svh, 2.5rem);
   }
 
-  .hero-scroll-cue-v4,
   .radial-glow-v3,
   .neon-bg-v3 {
     display: none;
@@ -1655,14 +1593,6 @@ button {
     transition: none !important;
   }
 
-  .hero-scroll-cue-v4 {
-    animation: none;
-    background-image: none;
-    -webkit-text-fill-color: color-mix(in srgb, var(--v3-text-dark) 52%, transparent);
-    color: color-mix(in srgb, var(--v3-text-dark) 52%, transparent);
-    opacity: 1 !important;
-    transition: none !important;
-  }
 }
 
 /* =========================================================
