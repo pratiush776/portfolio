@@ -68,10 +68,18 @@ const ROLL_START = 0.08; // the leader (first CHANGING slot, left) begins its gl
 const ROLL_DUR = 0.16; // duration of a single letter's glyph roll
 const ROLL_STAGGER = 0.038; // delay between consecutive letters' starts (≪ ROLL_DUR → wavy overlap)
 
-// A smooth, premium ease-in-out cubic for the morph roll + wave handoff — gentler than the site's
-// hard-landing INTRO_EASE so the per-letter motion glides through its window rather than snapping.
+// A smooth, premium ease-in-out cubic for width/kerning + the incoming rotation — gentler than the
+// site's hard-landing INTRO_EASE so those glide rather than snap.
 const MORPH_EASE = [0.65, 0, 0.35, 1] as const;
 const reveal = cubicBezier(...MORPH_EASE);
+
+// The outgoing letters exit on a FAST-START ease — quick off the mark, then a long settle — so the
+// old glyph shoots up immediately while the new one eases in beneath it.
+const OUTGOING_EASE = [0.16, 1, 0.3, 1] as const;
+const outgoingEase = cubicBezier(...OUTGOING_EASE);
+
+// The incoming glyph enters TILTED and rotates to 0° (properly aligned) as it lands.
+const INCOMING_ROT = -16; // degrees
 
 /*
  * Roll order, walked LEFT-TO-RIGHT across only the letters that actually change. A slot whose
@@ -92,28 +100,48 @@ const ROLL_END = ROLL_START + Math.max(0, ROLL_COUNT - 1) * ROLL_STAGGER + ROLL_
 // timed off this so each letter's LIFT peaks as it rolls.
 const FIRST_CHANGE = ROLL_ORDER.findIndex((r) => r !== null);
 
-/* ── Travelling wave (the "force") ──────────────────────────────────────────────────────────
+/* ── Travelling ELASTIC wave (the "force") ───────────────────────────────────────────────────
  *
- * A SECOND motion layer, independent of the glyph roll: a single crest that travels left→right
- * across the whole word like a wave through water — every slot LIFTS as the crest passes its
- * position, then eases back. This is what makes the morph read as a force propagating through the
- * letters rather than glyphs swapping in place.
+ * A SECOND motion layer, independent of the glyph roll: a force that travels left→right through
+ * the word like a whip/elastic crack. As the crest APPROACHES a slot it loads TENSION — the whole
+ * slot LIFTS (a rigid bob, no deformation) over a slow build, and the OUTGOING glyph — the old
+ * letter rolling UP and out — stretches taller as it leaves. When the tension maxes out it RELEASES:
+ * the slot snaps back in a fast beat, and because every slot's snap is staggered, that release reads
+ * as energy thrown into the next letter — it's already mid-build as this one snaps.
  *
- *  • WAVE_AMP        — crest height (em), the lift of a letter at the peak.
- *  • WAVE_HALF       — half-width of the crest in TRACK PROGRESS. This sets how far the force
- *                      reaches: with peaks spaced ROLL_STAGGER apart, the number of letters lifted
- *                      at once ≈ 2·WAVE_HALF / ROLL_STAGGER. 0.11 / 0.038 → ~5–6 letters in motion.
- *  • WAVE_STATIC_DAMP— the shared P & R DO feel the force (the crest reaches them first, from the
- *                      left) but are pinned: they get only this fraction of the lift — a small held
- *                      tremor that reads as "something is holding them in place" on purpose.
+ * IMPORTANT: only the OUTGOING glyph stretches, and it stretches from its CENTRE (the span's default
+ * transform-origin) so it elongates evenly through the middle and never looks deformed. The INCOMING
+ * glyph (the PROJECTS letter rising from below) is never scaled — it arrives clean and undistorted.
  *
- * Each slot's crest peaks at `peak = ROLL_START + (i - FIRST_CHANGE)·ROLL_STAGGER + ROLL_DUR/2`,
- * so the lift rides the same line as the roll (and extrapolates LEFT onto the static P/R, which the
- * force hits before it reaches the rolling letters). The shape is a raised cosine — a smooth, single
- * sine-like hump — zero outside ±WAVE_HALF, peak at the centre. */
-const WAVE_AMP = 0.4;
-const WAVE_HALF = 0.11;
-const WAVE_STATIC_DAMP = 0.16;
+ * Tension τ ∈ [0,1] per slot is a piecewise curve over `d = progress − peak`:
+ *   • BUILD  d ∈ [−WAVE_BUILD, 0]         : τ = n²  (ease-in) — slow load.
+ *   • HOLD   d ∈ [0, WAVE_HOLD]           : τ = 1   — the stretch lingers at full before releasing.
+ *   • SNAP   d ∈ [WAVE_HOLD, +WAVE_SNAP]  : τ = (1−n)²  (fast settle) — the shoot-back.
+ * WAVE_BUILD is the REACH of the force: with peaks ROLL_STAGGER apart, ≈ WAVE_BUILD / ROLL_STAGGER
+ * letters are loading at once (0.2 / 0.038 ≈ 5). WAVE_SNAP ≪ WAVE_BUILD makes the release a snap; the
+ * WAVE_HOLD plateau keeps the stretch up a beat longer before it shoots. Static P & R feel it but are
+ * pinned — only WAVE_STATIC_DAMP of the motion (a held tremor). The crest line
+ * `peak = ROLL_START + (i − FIRST_CHANGE)·ROLL_STAGGER + ROLL_DUR/2` rides the roll and extrapolates
+ * LEFT onto P/R (the force reaches them first). */
+const WAVE_LIFT = 0.28; // em — peak upward lift (rigid bob of the whole slot) at full tension
+const WAVE_STRETCH_Y = 0.34; // peak vertical stretch of the OUTGOING glyph only (scaleY = 1 + this)
+const WAVE_BUILD = 0.2; // progress-width of the tension load (the force's reach)
+const WAVE_HOLD = 0.03; // progress-width the stretch lingers at full before the snap
+const WAVE_SNAP = 0.05; // progress-width of the fast release (≪ WAVE_BUILD → a snap)
+const WAVE_STATIC_DAMP = 0.18; // P & R feel the force but are held to this fraction
+
+// Tension load → hold → release curve for one slot, given its distance from the crest centre.
+function waveTension(d: number): number {
+  if (d <= -WAVE_BUILD || d >= WAVE_HOLD + WAVE_SNAP) return 0;
+  if (d <= 0) {
+    const n = (d + WAVE_BUILD) / WAVE_BUILD; // 0 → 1 across the build
+    return n * n; // ease-in: load accelerates
+  }
+  if (d <= WAVE_HOLD) return 1; // hold at full stretch
+  const n = (d - WAVE_HOLD) / WAVE_SNAP; // 0 → 1 across the snap
+  const k = 1 - n;
+  return k * k; // fast release, settling into rest
+}
 
 function MorphLetter({
   from,
@@ -144,17 +172,15 @@ function MorphLetter({
   const start = ROLL_START + (roll ?? 0) * ROLL_STAGGER;
   const end = start + ROLL_DUR;
 
-  // The travelling-wave LIFT — a crest centred on this slot's spatial position that rides across
-  // the whole word (static letters included). Built as a raised-cosine hump so it rises and eases
-  // back smoothly as the crest passes; the static P/R are damped so they only tremble.
+  // The travelling ELASTIC wave — tension loads as the crest nears this slot, then snaps back. One
+  // τ scalar (damped on the held P/R) drives the lift, the vertical stretch, and the volume squeeze.
   const peak = ROLL_START + (index - FIRST_CHANGE) * ROLL_STAGGER + ROLL_DUR / 2;
-  const lift = useTransform(progress, (p) => {
-    const d = (p - peak) / WAVE_HALF;
-    if (d <= -1 || d >= 1) return "0em";
-    const crest = 0.5 * (1 + Math.cos(Math.PI * d)); // 0 → 1 → 0, smooth sine-like hump
-    const amp = isStatic ? WAVE_AMP * WAVE_STATIC_DAMP : WAVE_AMP;
-    return `${(-amp * crest).toFixed(4)}em`;
-  });
+  const damp = isStatic ? WAVE_STATIC_DAMP : 1;
+  const tension = useTransform(progress, (p) => waveTension(p - peak) * damp);
+  // The whole slot bobs up (rigid translate — no deformation).
+  const liftY = useTransform(tension, (t) => `${(-t * WAVE_LIFT).toFixed(4)}em`);
+  // ONLY the outgoing glyph stretches, from its centre, so it elongates cleanly as it leaves.
+  const outgoingScaleY = useTransform(tension, (t) => 1 + t * WAVE_STRETCH_Y);
 
   // Natural advance widths plus each word's real pair-kerning correction. A generic negative
   // margin cannot fit PR, RA, AT, TI, etc. because every pair needs a different adjustment.
@@ -218,8 +244,13 @@ function MorphLetter({
     return () => window.removeEventListener("resize", measure);
   }, [from, fromOpticalFit, previousFrom, previousTo, to, toOpticalFit]);
 
-  // Glyph roll + width/kerning handoff share this slot's [start, end] window.
+  // The glyph roll runs on the fast-start ease — the outgoing letter shoots up immediately, the
+  // incoming eases in beneath it. Width/kerning stay on the smooth `reveal`.
   const y = useTransform(progress, [start, end], ["0%", "-50%"], {
+    ease: outgoingEase,
+  });
+  // The incoming glyph enters tilted and rotates to 0° (aligned) over the same window.
+  const incomingRotate = useTransform(progress, [start, end], [INCOMING_ROT, 0], {
     ease: reveal,
   });
   const width = useTransform(
@@ -241,7 +272,7 @@ function MorphLetter({
       style={{
         width: metrics ? width : undefined,
         marginLeft: metrics ? marginLeft : undefined,
-        y: lift,
+        y: liftY,
       }}
     >
       {isStatic ? (
@@ -251,8 +282,10 @@ function MorphLetter({
         </span>
       ) : (
         <motion.span className="hero-name-v4__roll" style={{ y }}>
-          <span>{from}</span>
-          <span>{to}</span>
+          {/* OUTGOING glyph: stretches (centre origin) as it rolls up and out. */}
+          <motion.span style={{ scaleY: outgoingScaleY }}>{from}</motion.span>
+          {/* INCOMING glyph: never scaled — enters tilted, rotates to aligned as it lands. */}
+          <motion.span style={{ rotate: incomingRotate }}>{to}</motion.span>
         </motion.span>
       )}
       <span className="hero-name-v4__metrics" aria-hidden>

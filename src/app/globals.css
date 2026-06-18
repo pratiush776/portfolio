@@ -1126,8 +1126,8 @@ button {
   position: relative;
   z-index: 1; /* the solid letters sit IN FRONT of the ghosted "MY" graphic behind them */
   width: 100%;
-  padding-top: 0.6em;
-  margin-top: -0.6em;
+  padding-top: 0.45em;
+  margin-top: -0.45em;
   overflow: hidden;
 }
 
