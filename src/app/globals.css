@@ -1182,7 +1182,12 @@ button {
   height: 1em;
   padding: calc(var(--roll-gap, 0px) / 2) 0;
   margin: calc(var(--roll-gap, 0px) / -2) 0;
-  overflow: hidden;
+  /* Clip the VERTICAL axis ONLY — that masks the glyph roll (old up / new from below). The slot's
+     width is the glyph's ADVANCE width, so a full `overflow: hidden` also clips the X axis, which
+     shaved the halo stroke (and the ink itself on tight-bearing glyphs — e.g. PROJECTS' E sits
+     0.004em off its right edge) off the landed word. Nothing ever moves horizontally inside a slot,
+     so X must stay visible; `clip` on Y keeps the `visible` X from coercing to `auto` (no scroll). */
+  overflow: visible clip;
   will-change: transform;
 }
 
