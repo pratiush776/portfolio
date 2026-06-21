@@ -43,16 +43,16 @@ const FROM = "PRATIUSH".split("");
 const TO = "PROJECTS".split("");
 
 /*
- * League Spartan's native kerning is built for normal reading sizes. At this wordmark scale the
- * counter-space goes uneven, so each offset (in em, applied to the gap BEFORE that letter) nudges
- * one pair toward even color rather than imposing uniform tracking; index 0 has no preceding pair.
- * The earlier pass over-opened R|A and A|T, which left the centre loose against the tighter ends —
- * those are eased back, and the naturally gappy T|I (the crossbar leaves air before the I stem) is
- * pulled in. Net result reads as one even-toned word. Per-pair signs: + opens the gap, − tightens.
+ * Per-pair optical tracking nudges (in em, applied to the gap BEFORE each letter) to even out the
+ * counter-space at wordmark scale; index 0 has no preceding pair. Per-pair signs: + opens the gap,
+ * − tightens. Start at 0 for Bricolage Grotesque; re-tune by eye here if a pair reads loose or tight
+ * at hero scale (the original League Spartan values were [0,0,0.02,0.025,-0.02,-0.01,0,0]).
  */
-//                            P  R     A     T      I      U      S  H
-const FROM_OPTICAL_FIT = [0, 0, 0.02, 0.025, -0.02, -0.01, 0, 0];
-const TO_OPTICAL_FIT = [0, 0, 0, 0, 0, 0, 0, 0];
+// A gentle uniform NEGATIVE tracking (−0.01em per gap) knits the heavy display caps together — big
+// Bricolage caps read better slightly tighter than their text spacing. Index 0 has no preceding gap.
+//                                P      R      A      T      I      U      S      H
+const FROM_OPTICAL_FIT = [0, -0.01, -0.01, -0.01, -0.01, -0.01, -0.01, -0.01];
+const TO_OPTICAL_FIT = [0, -0.01, -0.01, -0.01, -0.01, -0.01, -0.01, -0.01];
 
 /* ── Choreography knobs (fractions of the hero's pinned track) ──────────────────────────────
  *
@@ -385,7 +385,19 @@ function MorphLetter({
     measure();
     window.addEventListener("resize", measure);
     document.fonts?.ready.then(measure).catch(() => {});
-    return () => window.removeEventListener("resize", measure);
+
+    // Re-measure the instant the web font swaps in. `document.fonts.ready` can resolve BEFORE a
+    // cold-loaded `font-display: swap` face actually paints, so the slot widths/kerns stay pinned to
+    // the fallback font's metrics while the visible glyphs are the real face — a mismatch that splits
+    // the word (e.g. "PRA TIUSH"). A ResizeObserver on the hidden metric samples fires exactly when
+    // their advance widths change (fallback → real glyph), guaranteeing the fit uses real metrics.
+    const ro = new ResizeObserver(measure);
+    if (fromCurrentRef.current) ro.observe(fromCurrentRef.current);
+    if (toCurrentRef.current) ro.observe(toCurrentRef.current);
+    return () => {
+      window.removeEventListener("resize", measure);
+      ro.disconnect();
+    };
   }, [from, fromOpticalFit, previousFrom, previousTo, to, toOpticalFit]);
 
   // The glyph roll runs on the fast-start ease — the outgoing letter shoots up immediately, the

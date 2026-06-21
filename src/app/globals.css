@@ -169,9 +169,8 @@ button {
   /* Font families */
   --font-pier: var(--font-pier-sans), sans-serif;
   --font-hanken: var(--font-hanken-sans), sans-serif;
-  /* Editorial display serif — Signature Statement + work titles. Swappable for any face
-     that keeps the display-serif traits (v4-handbook/signature-statement/02). */
-  --font-editorial: var(--font-fraunces), serif;
+  /* Editorial display serif — Signature Statement + work titles. Gambetta (Fontshare/ITF), a warm calligraphic serif; swappable for any face that keeps the display-serif traits. */
+  --font-editorial: var(--font-gambetta), serif;
 
   /* Color palette */
   --color-navy: #2f4156;
@@ -200,7 +199,7 @@ button {
      once rendered in the fallback because of exactly this). Declared here so they ALWAYS exist. */
   --font-pier: var(--font-pier-sans), sans-serif;
   --font-hanken: var(--font-hanken-sans), sans-serif;
-  --font-editorial: var(--font-fraunces), "Fraunces", Georgia, serif;
+  --font-editorial: var(--font-gambetta), "Gambetta", Georgia, serif;
 
   /* The motion voice: hard-landing curves (slow start, violent middle, dead stop).
      --intro-ease — all masked rises / reveals (JS twin: lib/intro INTRO_EASE).
@@ -225,7 +224,7 @@ button {
   --v3-surface-max: 144rem;
   --v3-nav-height: clamp(3rem, 2.65rem + 1vw, 4rem);
 
-  /* ── Brand name. The hero name is TEXT (League Spartan heavy caps, so it can morph per-letter
+  /* ── Brand name. The hero name is TEXT (Bricolage Grotesque heavy caps, so it can morph per-letter
      into PROJECTS); the nav keeps the SVG wordmark (aspect 1436 / 265) as the identity mark.
      The gutter MUST match the nav's left inset (.site-nav-v3 left) so the hero name and the
      nav logo share one vertical line. --name-hero-size is the master "name scale" knob:
@@ -1054,36 +1053,44 @@ button {
   white-space: nowrap;
 }
 
-/* Muted dark (not accent) so the wordmark + the tagline mark own the terracotta. */
+/* The greeting is a quiet spoken lead-in to the name — small, sentence-case, in the display
+   grotesque (Bricolage) so it belongs to the name it introduces rather than the serif voice below.
+   Sentence case (not the role's tracked caps) keeps it conversational; modest size keeps it a
+   whisper above the big name, never a competing block. Muted dark, not the accent. */
 .hero-eyebrow-v4 {
-  margin: 0;
-  font-family: var(--font-hanken), sans-serif;
-  /* Matched label tier with .hero-roles-v4 — the two caps labels bracket the name as a
-     deliberate pair (same size/weight/opacity), differing only in tracking-to-length. */
-  font-size: clamp(0.74rem, 0.78vw, 0.85rem);
-  font-weight: 600;
-  line-height: 1.2;
-  letter-spacing: 0.2em; /* shorter label takes the wider tracking */
-  text-transform: uppercase;
+  /* Tier 4 (quietest): a whisper lead-in bonded to the name as one phrase. The slight negative
+     bottom margin closes the gap to PRATIUSH so "Hi, I'm" reads as its opening, not a floating block. */
+  margin: 0 0 -0.05em;
+  font-family: var(--font-bricolage), sans-serif;
+  font-size: clamp(0.9rem, 0.98vw, 1.05rem);
+  font-weight: 500;
+  line-height: 1.15;
+  letter-spacing: 0;
+  font-optical-sizing: auto;
   color: var(--v3-text-dark);
-  opacity: 0.75; /* ≈5.1:1 on the cream — AA clear (0.6 would be 4.04:1) */
+  opacity: 0.6;
 }
 
 /* The closing statement — the personal voice note that ends the lockup. Editorial serif
-   (Fraunces) against the grotesque wordmark + tracked-caps labels = a considered 3-voice type
-   system, not a template. Constrained measure so it wraps to ~2 lines and adds horizontal mass. */
+   (Gambetta) against the Bricolage grotesque name + labels = a considered serif/grotesque
+   contrast, not a template. Constrained measure so it wraps to ~2 lines and adds horizontal mass. */
 .hero-tagline-v4 {
-  /* The cluster reads as two groups — [greeting + name + role] (the identity) and [statement]
-     (the voice). This is the divider between them, so it carries the largest gap in the lockup. */
-  margin: clamp(1.05rem, 2vh, 1.6rem) 0 0;
-  /* next/font exposes Fraunces on <body>; reference it directly so this does not silently
-     inherit the workhorse sans through a root-scoped alias. */
-  font-family: var(--font-fraunces), Georgia, serif;
-  font-weight: 475;
-  font-variation-settings: "wght" 475, "opsz" 96, "SOFT" 0, "WONK" 0;
-  font-size: clamp(1.45rem, 2.05vw, 2.35rem);
-  line-height: 1.06;
-  letter-spacing: -0.012em;
+  /* Tier 2 (the voice): the clear second after the name — substantial, but stepped DOWN from the
+     old 2.35rem so PRATIUSH unambiguously dominates and the two stop competing for the eye.
+     The cluster reads as two groups — [greeting + name + role] (identity) and [statement] (voice);
+     this carries the largest gap in the lockup, the divider between them. */
+  margin: clamp(1.15rem, 2.2vh, 1.75rem) 0 0;
+  /* Gambetta (self-hosted warm serif); Georgia is the metric fallback. */
+  font-family: var(--font-gambetta), Georgia, serif;
+  font-weight: 500;
+  font-size: clamp(1.35rem, 1.85vw, 2rem);
+  line-height: 1.1;
+  letter-spacing: -0.006em;
+  /* x-height harmony: Gambetta (humanist serif) has a smaller x-height than Bricolage at the same
+     px, so it would read visually smaller / weaker beside the grotesque. font-size-adjust normalises
+     its x-height to ~0.50em — lifting the serif to sit at equal optical size to the labels above —
+     and keeps that constant across the Gambetta→Georgia load swap. Tunable knob (Bricolage ≈ 0.52). */
+  font-size-adjust: 0.5;
   color: var(--v3-text-dark);
 }
 
@@ -1098,17 +1105,24 @@ button {
 .hero-name-v4 {
   position: relative; /* containing block for the "My" eyebrow (.hero-name-eyebrow-v4) */
   width: 100%;
-  /* "Hi, I'm" + the name are one phrase, so this top gap is the tightest in the lockup.
-     League Spartan's caps sit high in a generous line box; the negative bottom margin removes
-     only that invisible under-space so the name-to-role gap below is the real, tunable one. */
-  margin: clamp(0.2rem, 0.5vh, 0.4rem) 0 -0.1em;
-  /* next/font defines this variable on <body>; a :root alias is invalid because the source
-     variable does not exist yet at the root's computed-value stage. Reference it in scope. */
-  font-family: var(--font-league-spartan), sans-serif;
-  font-weight: 850;
+  /* "Hi, I'm" + the name are one phrase, so this top gap is the tightest in the lockup — kept
+     minimal to bond the greeting to PRATIUSH. Bricolage's caps sit high in a generous line box; the
+     negative bottom margin removes only that invisible under-space so the name-to-role gap below
+     is the real, tunable one. */
+  margin: clamp(0.05rem, 0.2vh, 0.18rem) 0 -0.1em;
+  /* next/font defines this variable on <body>; reference it in scope. Bricolage Grotesque Extrabold
+     (800) — a contemporary grotesque with deliberate quirk, so the giant wordmark reads confident
+     and characterful rather than squat (Cabinet) or generic (League Spartan). The per-letter morph
+     re-measures glyph widths at runtime so the family swap re-fits automatically (the optical-fit
+     nudges in MorphName are reset to 0). */
+  font-family: var(--font-bricolage), sans-serif;
+  font-weight: 800;
   font-size: var(--name-hero-size);
   font-kerning: normal;
   font-feature-settings: "kern" 1;
+  /* Bricolage has an opsz axis — let the browser pick the DISPLAY master at this hero scale so the
+     wordmark gets the tighter, more assertive display cut rather than the text-optimised one. */
+  font-optical-sizing: auto;
   letter-spacing: 0;
   line-height: 1;
   color: var(--v3-accent-red);
@@ -1155,8 +1169,8 @@ button {
   top: 36%;
   /* Vertical centring (-50% of own height) AND the rise-in are driven together by MorphName's
      ghostY motion value, so this element intentionally sets no transform of its own. */
-  font-family: var(--font-league-spartan), sans-serif;
-  font-weight: 850;
+  font-family: var(--font-bricolage), sans-serif;
+  font-weight: 800;
   font-size: calc(var(--name-hero-size) * 1.5);
   line-height: 0.8;
   letter-spacing: -0.02em;
@@ -1254,12 +1268,12 @@ button {
   transform: translateY(-50%);
   margin: 0;
   max-width: min(18ch, 26%);
-  font-family: var(--font-fraunces), Georgia, serif;
-  font-weight: 475;
-  font-variation-settings: "wght" 475, "opsz" 96, "SOFT" 0, "WONK" 0;
+  font-family: var(--font-gambetta), Georgia, serif;
+  font-weight: 500;
   font-size: clamp(1.55rem, 2.3vw, 2.8rem);
-  line-height: 1.1;
-  letter-spacing: -0.014em;
+  line-height: 1.12;
+  letter-spacing: -0.008em;
+  font-size-adjust: 0.5; /* match the tagline's x-height normalisation (see .hero-tagline-v4) */
   /* Right-anchored copy reads cleaner ragged-left: the lines hug the right gutter where the
      statement now lives, mirroring the lower-left title. */
   text-align: right;
@@ -1309,22 +1323,25 @@ button {
 }
 
 /* Role / credential. Sits directly beneath the name as its descriptor (name → role →
-   statement), so it qualifies the wordmark at a glance. Tracked caps mirror the eyebrow
-   above the name, bracketing the wordmark in two quiet labels. */
+   statement), so it qualifies the wordmark at a glance. The lockup's one tracked-caps label —
+   the quiet credential register between the sentence-case greeting and the serif statement. */
 .hero-roles-v4 {
   /* The role hugs the name as its quiet credential (intra-group), so this name-to-role gap is
-     smaller than the role-to-statement divider below it. */
-  margin: clamp(0.6rem, 1.25vh, 0.85rem) 0 0;
+     smaller than the role-to-statement divider below it — they belong to the same identity group. */
+  margin: clamp(0.45rem, 0.95vh, 0.7rem) 0 0;
   padding: 0;
-  font-family: var(--font-hanken), sans-serif;
-  /* Matched label tier with .hero-eyebrow-v4 (same size/weight/opacity) so the two caps labels
-     read as a deliberate pair bracketing the name, not two almost-equal sizes. Stepped up from
-     0.66–0.76rem also eases the huge-name → label → serif-statement hierarchy. */
+  /* Bricolage (the display grotesque) carries the labels too, so the whole identity block — name
+     + greeting + role — speaks in one grotesque, set against the Gambetta serif statement. */
+  font-family: var(--font-bricolage), sans-serif;
   font-size: clamp(0.74rem, 0.78vw, 0.85rem);
-  font-weight: 600;
+  font-weight: 700;
   line-height: 1.2;
   letter-spacing: 0.15em; /* longer label takes slightly tighter tracking than the eyebrow */
   text-transform: uppercase;
+  /* "case" lifts the · separator and any punctuation to cap-height (it sits on the baseline by
+     default, which looks dropped in all-caps); "kern" keeps pair spacing on. opsz → text master. */
+  font-feature-settings: "case" 1, "kern" 1;
+  font-optical-sizing: auto;
   color: var(--v3-text-dark);
   opacity: 0.75;
 }
@@ -1338,12 +1355,14 @@ button {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  font-family: var(--font-hanken), sans-serif;
+  font-family: var(--font-bricolage), sans-serif;
   font-size: clamp(0.68rem, 0.78vw, 0.82rem);
   font-weight: 500;
   line-height: 1.2;
   letter-spacing: 0.18em;
   text-transform: uppercase;
+  font-feature-settings: "case" 1, "kern" 1;
+  font-optical-sizing: auto;
   color: var(--v3-text-dark);
   /* 0.65 cleared AA only by a hair (≈4.6:1) and this is the smallest label (down to 0.58rem
      on mobile); 0.70 buys headroom (≈4.9:1) with no perceptible change. */

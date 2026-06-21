@@ -1,11 +1,10 @@
-import { Fraunces, Hanken_Grotesk, League_Spartan } from "next/font/google";
+import { Bricolage_Grotesque, Hanken_Grotesk } from "next/font/google";
 import localFont from "next/font/local";
 
 /**
- * Workhorse: body copy + the tracked-caps micro-labels (eyebrow / role / locator). Hanken
- * Grotesk is a humanist grotesque with a full weight axis — crafted and quietly confident
- * where Noto Sans (the prior workhorse) read as a generic coverage default. Variable font,
- * so every weight the labels need (400/500/600) comes from one file.
+ * Workhorse: long-form body copy. Hanken Grotesk is a humanist grotesque with a full weight axis —
+ * crafted and quietly confident where Noto Sans (the prior workhorse) read as a generic coverage
+ * default. Variable, so every body weight comes from one file.
  */
 export const hankenGrotesk = Hanken_Grotesk({
   variable: "--font-hanken-sans",
@@ -14,26 +13,32 @@ export const hankenGrotesk = Hanken_Grotesk({
 });
 
 /**
- * Editorial display serif for the Signature Statement headline. Fraunces is a variable,
- * high-contrast serif with an optical-sizing axis — it satisfies the display-serif traits
- * in v4-handbook/signature-statement/02-typography-traits.md. Swappable for any face that
- * keeps those traits (high contrast, display cut, refined serifs, strong weight).
+ * Display + label grotesque (Google Fonts, open source — free for commercial use). Bricolage
+ * Grotesque takes a geometric-grotesque skeleton and adds deliberate quirk: confident, contemporary,
+ * and characterful rather than neutral. It carries the morphing PRATIUSH / PROJECTS wordmark
+ * (Extrabold) and the hero's tracked-caps labels (Medium). Chosen after League Spartan read generic,
+ * Cabinet Grotesk read squat at hero scale, and Clash Display felt impersonal. Variable, so the
+ * heavy display weight and the lighter label weight come from one file.
  */
-export const fraunces = Fraunces({
-  variable: "--font-fraunces",
+export const bricolageGrotesque = Bricolage_Grotesque({
+  variable: "--font-bricolage",
   subsets: ["latin"],
-  axes: ["opsz", "SOFT", "WONK"],
+  display: "swap",
 });
 
 /**
- * Heavy geometric display face for the morphing PRATIUSH / PROJECTS wordmark. The variable
- * weight lets the mark carry enough mass at hero scale without forcing a static black cut.
+ * Editorial serif (Fontshare, ITF — free for commercial use). The page's human voice: the hero
+ * tagline, the scroll manifesto, and the work titles. Gambetta is a warm, calligraphic-rooted serif
+ * with real humanist character — distinct from the banned AI-default serifs (Fraunces, Newsreader,
+ * Playfair…) and a warmer counterpart to Bricolage's contemporary grotesque.
  */
-export const leagueSpartan = League_Spartan({
-  variable: "--font-league-spartan",
-  subsets: ["latin"],
-  weight: "variable",
+export const gambetta = localFont({
+  variable: "--font-gambetta",
   display: "swap",
+  src: [
+    { path: "../fonts/Gambetta/Gambetta-Regular.woff2", weight: "400", style: "normal" },
+    { path: "../fonts/Gambetta/Gambetta-Medium.woff2", weight: "500", style: "normal" },
+  ],
 });
 
 export const pierSans = localFont({
