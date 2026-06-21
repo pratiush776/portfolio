@@ -1053,22 +1053,25 @@ button {
   white-space: nowrap;
 }
 
-/* The greeting is a quiet spoken lead-in to the name — small, sentence-case, in the display
-   grotesque (Bricolage) so it belongs to the name it introduces rather than the serif voice below.
-   Sentence case (not the role's tracked caps) keeps it conversational; modest size keeps it a
-   whisper above the big name, never a competing block. Muted dark, not the accent. */
+/* The greeting is a hand-lettered spoken lead-in to the name — a warm, personal "hello" written by
+   hand above the big wordmark. Brush script (Kaushan) instead of the prior muted grotesque whisper:
+   a script reads as a genuine human note, so the greeting feels deliberate and warm rather than
+   silent/hesitant. Set in the brand terracotta as a tonal lead-in to the terracotta name it
+   introduces (same family, smaller scale), and at near-full opacity so it has real presence. */
 .hero-eyebrow-v4 {
-  /* Tier 4 (quietest): a whisper lead-in bonded to the name as one phrase. The slight negative
-     bottom margin closes the gap to PRATIUSH so "Hi, I'm" reads as its opening, not a floating block. */
-  margin: 0 0 -0.05em;
-  font-family: var(--font-bricolage), sans-serif;
-  font-size: clamp(0.9rem, 0.98vw, 1.05rem);
-  font-weight: 500;
-  line-height: 1.15;
-  letter-spacing: 0;
-  font-optical-sizing: auto;
-  color: var(--v3-text-dark);
-  opacity: 0.6;
+  /* Bonded to the name as one phrase; the negative bottom margin closes the gap to PRATIUSH so the
+     hand-written "Hi, I'm" reads as its opening flourish, not a floating block. Script faces sit on
+     a tighter baseline with a low x-height, so this stays subordinate even at the larger size. */
+  margin: 0 0 -0.1em;
+  font-family: var(--font-kaushan), cursive;
+  /* Scripts read visually smaller than a sans at the same px (low x-height), so it's bumped up from
+     the old ~1rem to carry presence as a confident greeting while staying clearly below the name. */
+  font-size: clamp(1.5rem, 2vw, 2rem);
+  font-weight: 400;
+  line-height: 1.1;
+  letter-spacing: 0; /* brush script connects — no tracking */
+  color: var(--v3-accent-red);
+  opacity: 0.92;
 }
 
 /* The closing statement — the personal voice note that ends the lockup. Editorial serif
@@ -1153,31 +1156,33 @@ button {
   will-change: transform;
 }
 
-/* The ghosted "MY" — an oversized, faint INK echo in the same display face as the name, parked
-   BEHIND the solid PROJECTS (the reveal block sits at z-index 1). It is toned in ink rather than
-   the accent so it separates from the terracotta word by value (an earlier same-terracotta pass
-   read as inline glyphs, "PROJE-MY-CTS"); its centre is raised above the cap band and it bleeds
-   off the right edge, so the word occludes only its lower portion and it reads as a tonal echo set
+/* The ghosted "My" — an oversized, faint hand-lettered echo (brush script, matching the "Hi, I'm"
+   greeting) parked BEHIND the solid PROJECTS (the reveal block sits at z-index 1). Together they
+   read "My Projects" — the personal word written by hand, the structural word in the grotesque.
+   Toned in ink rather than the accent so it separates from the terracotta word by value (an earlier
+   same-terracotta pass read as inline glyphs); its centre is raised above the cap band and it bleeds
+   off the left edge, so the word occludes only its lower portion and it reads as a tonal echo set
    back and above — depth, not a label sitting in the word.
    Opacity is driven by the morph (fades to its faint rest value as the word lands). */
 .hero-name-ghost-v4 {
   position: absolute;
   /* Bleed a touch off the row's LEFT edge (where PROJECTS now lands) and ride ABOVE the cap band
-     (center raised above the word's), so PROJECTS occludes only the ghost's lower portion — "MY"
+     (center raised above the word's), so PROJECTS occludes only the ghost's lower portion — "My"
      reads as an echo set BEHIND and above the title, never as glyphs interleaved into the word. */
   left: -0.06em;
   top: 36%;
   /* Vertical centring (-50% of own height) AND the rise-in are driven together by MorphName's
      ghostY motion value, so this element intentionally sets no transform of its own. */
-  font-family: var(--font-bricolage), sans-serif;
-  font-weight: 800;
-  font-size: calc(var(--name-hero-size) * 1.5);
+  font-family: var(--font-kaushan), cursive;
+  font-weight: 400;
+  /* Bumped from 1.5× — the brush script's low x-height reads visually smaller than the grotesque at
+     the same px, so it needs more size to keep the oversized-echo presence behind the title. */
+  font-size: calc(var(--name-hero-size) * 1.75);
   line-height: 0.8;
-  letter-spacing: -0.02em;
-  text-transform: uppercase;
+  letter-spacing: 0; /* script connects — sentence case "My", no uppercasing, no tracking */
   white-space: nowrap;
   /* Ink, NOT the accent — a tonal shadow-echo separates fore/background by VALUE, so the
-     occlusion reads as depth. Same-terracotta made M/Y read as inline letters (PROJE-MY-CTS). */
+     occlusion reads as depth. Same-terracotta made the letters read as part of the word. */
   color: var(--v3-text-dark);
   pointer-events: none;
   will-change: opacity;
@@ -1343,7 +1348,9 @@ button {
   font-feature-settings: "case" 1, "kern" 1;
   font-optical-sizing: auto;
   color: var(--v3-text-dark);
-  opacity: 0.75;
+  /* Tracked grotesque caps at sub-1 opacity read perceptually lighter than the raw ratio implies;
+     0.85 keeps the credential firmly legible against the warm field without competing with the name. */
+  opacity: 0.85;
 }
 
 /* Bottom meta strip (right). Pinned bottom-right as a lone locator that counterweights the
@@ -1364,9 +1371,10 @@ button {
   font-feature-settings: "case" 1, "kern" 1;
   font-optical-sizing: auto;
   color: var(--v3-text-dark);
-  /* 0.65 cleared AA only by a hair (≈4.6:1) and this is the smallest label (down to 0.58rem
-     on mobile); 0.70 buys headroom (≈4.9:1) with no perceptible change. */
-  opacity: 0.7;
+  /* This is the smallest label on the page (down to 0.58rem on mobile) and sits over the peach-
+     saturated right side where local contrast dips below the cream-based estimate; 0.78 lifts it to
+     a comfortable AA margin without making the locator shout. */
+  opacity: 0.78;
 }
 
 .hero-meta-v4 svg {

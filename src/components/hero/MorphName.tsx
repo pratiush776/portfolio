@@ -483,7 +483,7 @@ export function MorphName({ progress }: { progress: MotionValue<number> }) {
   const ghostOpacity = useTransform(
     progress,
     [ROLL_END - 0.18, ROLL_END],
-    [0, 0.16],
+    [0, 0.2],
     { ease: reveal },
   );
   const ghostY = useTransform(

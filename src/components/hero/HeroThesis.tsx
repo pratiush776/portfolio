@@ -35,10 +35,15 @@ const reveal = cubicBezier(...INTRO_EASE);
    (ROLL_END ≈ 0.44). */
 const GATE_START = 0.38;
 const GATE_END = 0.46;
-/* The per-word ink-in spans this slice — it opens as the word lands and washes on through the
-   back half of the pin, so the reader always has copy resolving while PROJECTS holds. */
+/* The per-word ink-in spans this slice — it opens as the word lands and washes in as ONE quick
+   gesture, completing shortly after the landing rather than crawling across the whole back half.
+   The old INK_END (0.92) left the line stuck half-inked for most of the pin: because the wash runs
+   left-to-right across a RIGHT-aligned, ragged-left block, the gutter-terminating word ("products")
+   inks last, so the line's strong right edge sat in faint-ghost form for almost the entire scrub and
+   read as a cut/clipped margin. Completing the wash by ~0.66 means the full statement is formed and
+   holding (not mid-reveal) through the rest of the pin, where PROJECTS holds. */
 const INK_START = 0.44;
-const INK_END = 0.92;
+const INK_END = 0.66;
 /* Each word's window is this multiple of its bare share of the band, so adjacent words overlap
    (≈3 in transit at once) and the line washes in instead of ticking word by word. */
 const OVERLAP = 1.15;

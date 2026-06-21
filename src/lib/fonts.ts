@@ -1,4 +1,4 @@
-import { Bricolage_Grotesque, Hanken_Grotesk } from "next/font/google";
+import { Bricolage_Grotesque, Hanken_Grotesk, Kaushan_Script } from "next/font/google";
 import localFont from "next/font/local";
 
 /**
@@ -39,6 +39,20 @@ export const gambetta = localFont({
     { path: "../fonts/Gambetta/Gambetta-Regular.woff2", weight: "400", style: "normal" },
     { path: "../fonts/Gambetta/Gambetta-Medium.woff2", weight: "500", style: "normal" },
   ],
+});
+
+/**
+ * Hand-lettered brush script (Kaushan Script, Google Fonts, SIL OFL — free for commercial use). The
+ * page's spoken, personal annotations: the "Hi, I'm" greeting that opens the lockup and the oversized
+ * "My" echo set behind the landed PROJECTS. A confident brush calligraphy — gestural and warm — and a
+ * third type category beside Bricolage (display grotesque) and Gambetta (humanist serif), sharing
+ * their hand-tooled warmth. Single weight (400) — Kaushan Script ships one cut.
+ */
+export const kaushanScript = Kaushan_Script({
+  variable: "--font-kaushan",
+  subsets: ["latin"],
+  weight: "400",
+  display: "swap",
 });
 
 export const pierSans = localFont({
