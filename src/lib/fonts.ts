@@ -1,4 +1,4 @@
-import { Bricolage_Grotesque, Hanken_Grotesk, Kaushan_Script } from "next/font/google";
+import { Anton, Bricolage_Grotesque, Hanken_Grotesk, Kaushan_Script } from "next/font/google";
 import localFont from "next/font/local";
 
 /**
@@ -63,4 +63,18 @@ export const pierSans = localFont({
       style: "normal",
     },
   ],
+});
+
+/**
+ * Display face for the big hero THESIS composition ("Turning rough ideas into polished products").
+ * Anton (Google Fonts, SIL OFL — free for commercial use) is a heavy, tall, CONDENSED grotesque —
+ * a poster face. Used at large scale with per-word size variation (see HeroThesis), it fills the
+ * right half as a graphic statement that balances the lower-left PROJECTS. Anton ships a single
+ * cut (400) that is heavy by design.
+ */
+export const anton = Anton({
+  variable: "--font-anton",
+  subsets: ["latin"],
+  weight: "400",
+  display: "swap",
 });

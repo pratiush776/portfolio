@@ -34,13 +34,15 @@ export function NavLogo() {
   }, []);
 
   // Scrubbed reveal tied to the morph window (the hero pin starts at scrollY 0, so plain
-  // scrollY is the same clock). The morph now lands earlier (ROLL_END ≈ 0.46 of a 220vh track ≈
-  // 0.55·vh of scroll), so the wordmark fades in as the name departs and is fully in by then.
+  // scrollY is the same clock). Re-ordered choreography: the thesis leads, so the name now morphs
+  // LATER (ROLL_START ≈ 0.30 → ROLL_END ≈ 0.65 of a 220vh track; progress·1.2 = scrollY/vh). The
+  // wordmark fades in as the name departs (mid-morph) and is fully in by the landing — window
+  // scrollY/vh ∈ [0.50, 0.72] ≈ progress [0.42, 0.60].
   const opacity = useTransform(scrollY, (v) =>
-    Math.min(1, Math.max(0, (v / vh.current - 0.28) / 0.24)),
+    Math.min(1, Math.max(0, (v / vh.current - 0.5) / 0.22)),
   );
   const y = useTransform(scrollY, (v) =>
-    (1 - Math.min(1, Math.max(0, (v / vh.current - 0.28) / 0.24))) * 8,
+    (1 - Math.min(1, Math.max(0, (v / vh.current - 0.5) / 0.22))) * 8,
   );
 
   return (

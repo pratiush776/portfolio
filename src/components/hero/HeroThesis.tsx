@@ -5,81 +5,75 @@ import { cubicBezier, motion, useTransform, type MotionValue } from "motion/reac
 import { INTRO_EASE } from "@/lib/intro";
 
 /**
- * The line that frames the work, revealed beside the LANDED PROJECTS. It anchors in the
- * lower-left — echoing the hero lockup's corner rather than floating level with the title, so
- * the landed frame reads as a composed thirds layout (anchored copy + display + negative space),
- * not an odd two-column split. It inks in word by word as the name brakes into PROJECTS.
+ * The big thesis statement that fills the RIGHT HALF beside the landed PROJECTS — a typographic
+ * composition, not a caption. Set in Anton (a heavy condensed display grotesque) with per-word SIZE
+ * variation so the six words both fit the column and read as a designed, rhythmic stack (small →
+ * LARGE → tiny → LARGEST → medium, with "polished" as the visual payoff). Right-aligned, ink-only —
+ * emphasis comes from scale, not colour.
  *
- * Two layers compose: a block GATE (opacity 0→1 right as the word lands, so the faint ghost
- * never shows over the resting hero) and the per-word ink-in inside it (each word lifts from a
- * faint ghost to full, windows overlapping so the line washes in rather than ticking word by
- * word). The accent word carries the terracotta, tying the copy to PROJECTS.
+ * Two layers compose the reveal: a block GATE (opacity 0→1, so the faint ghost never shows over the
+ * resting hero) and the per-word ink-in inside it — each word is a faint GHOST guide with an INK
+ * layer wiping across it (clip-path), windows overlapping so the statement washes in as one gesture.
+ * Re-ordered choreography: the thesis LEADS — it inks in first (≈0.12–0.34), and the name only morphs
+ * into PROJECTS once this is ~80% formed (MorphName ROLL_START ≈ 0.30), so the pitch reads, then the
+ * word transforms beneath it.
  */
-type Segment = { text: string; accent?: boolean };
+type ThesisWord = { word: string; scale: number };
 
-const SEGMENTS: Segment[] = [
-  { text: "Turning rough ideas into" },
-  { text: "polished", accent: true },
-  { text: "products" },
+/* The composition: each inner array is one right-aligned line; `scale` is a font-size multiplier
+   (em) off the container's base clamp, so the whole block scales together and the rhythm is tunable
+   here by eye. */
+const LINES: ThesisWord[][] = [
+  [{ word: "Turning", scale: 0.6 }],
+  [{ word: "rough", scale: 1 }, { word: "ideas", scale: 1 }],
+  [{ word: "into", scale: 0.46 }],
+  [{ word: "polished", scale: 1.15 }],
+  [{ word: "products", scale: 0.88 }],
 ];
 
-type WordToken = { word: string; accent: boolean };
-
-const TOKENS: WordToken[] = SEGMENTS.flatMap(({ text, accent }) =>
-  text.split(" ").map((word) => ({ word, accent: accent ?? false })),
-);
+// Flatten once for global ink-in ordering (the wipe walks the words in reading order), keeping each
+// word's line grouping for layout.
+let counter = 0;
+const INDEXED_LINES = LINES.map((line) => line.map((tok) => ({ ...tok, index: counter++ })));
+const TOTAL = counter;
 
 const reveal = cubicBezier(...INTRO_EASE);
 
-/* Gate window (fractions of the morph track): opens right as the word brakes into PROJECTS
-   (ROLL_END ≈ 0.44). */
-const GATE_START = 0.38;
-const GATE_END = 0.46;
-/* The per-word ink-in spans this slice — it opens as the word lands and washes in as ONE quick
-   gesture, completing shortly after the landing rather than crawling across the whole back half.
-   The old INK_END (0.92) left the line stuck half-inked for most of the pin: because the wash runs
-   left-to-right across a RIGHT-aligned, ragged-left block, the gutter-terminating word ("products")
-   inks last, so the line's strong right edge sat in faint-ghost form for almost the entire scrub and
-   read as a cut/clipped margin. Completing the wash by ~0.66 means the full statement is formed and
-   holding (not mid-reveal) through the rest of the pin, where PROJECTS holds. */
-const INK_START = 0.44;
-const INK_END = 0.66;
+const GATE_START = 0.08;
+const GATE_END = 0.16;
+/* The per-word ink-in spans this slice — it washes in as ONE quick gesture and COMPLETES (~0.34)
+   well before the morph finishes (~0.65), so the full statement is formed and HOLDING as the name
+   transforms beneath it. The morph begins at ~80% of this window (0.12 + 0.8·0.22 ≈ 0.30). */
+const INK_START = 0.12;
+const INK_END = 0.34;
 /* Each word's window is this multiple of its bare share of the band, so adjacent words overlap
    (≈3 in transit at once) and the line washes in instead of ticking word by word. */
 const OVERLAP = 1.15;
 
 function Word({
   token,
-  index,
-  total,
   progress,
 }: {
-  token: WordToken;
-  index: number;
-  total: number;
+  token: ThesisWord & { index: number };
   progress: MotionValue<number>;
 }) {
-  const slice = (INK_END - INK_START) / total;
-  const center = INK_START + (index + 0.5) * slice;
+  const slice = (INK_END - INK_START) / TOTAL;
+  const center = INK_START + (token.index + 0.5) * slice;
   const start = Math.max(0, center - slice * OVERLAP);
   const end = Math.min(1, center + slice * OVERLAP);
-  // Written-on, not faded-on. Two layers, exactly overlaid: a faint GHOST of the whole word that
-  // is always present (it sets the box and the guide), and an INK layer that wipes across it
-  // left-to-right (clip-path). So the full line is faintly there from the start and each word is
-  // drawn over its guide — never the broken fragments a single clipped layer would show. Windows
-  // overlap (≈3 words in transit) so the statement washes in as one gesture.
+  // Written-on, not faded-on: a faint GHOST of the whole word is always present (sets the box and
+  // the guide), and an INK layer wipes across it left-to-right (clip-path) — so each word is drawn
+  // over its guide rather than showing the broken fragments a single clipped layer would. Windows
+  // overlap so the statement washes in as one gesture.
   const clipPath = useTransform(
     progress,
     [start, end],
     ["inset(0 100% -0.14em 0)", "inset(0 0% -0.14em 0)"],
   );
-  const className = token.accent
-    ? "hero-thesis-v4__word hero-thesis-v4__word--accent"
-    : "hero-thesis-v4__word";
 
   return (
     <>
-      <span className={className}>
+      <span className="hero-thesis-v4__word" style={{ fontSize: `${token.scale}em` }}>
         <span className="hero-thesis-v4__ghost">{token.word}</span>
         <motion.span className="hero-thesis-v4__ink" style={{ clipPath }} aria-hidden>
           {token.word}
@@ -94,8 +88,12 @@ export function HeroThesis({ progress }: { progress: MotionValue<number> }) {
 
   return (
     <motion.p className="hero-thesis-v4" style={{ opacity: gate }} aria-hidden>
-      {TOKENS.map((token, i) => (
-        <Word key={i} token={token} index={i} total={TOKENS.length} progress={progress} />
+      {INDEXED_LINES.map((line, li) => (
+        <span className="hero-thesis-v4__line" key={li}>
+          {line.map((token) => (
+            <Word key={token.index} token={token} progress={progress} />
+          ))}
+        </span>
       ))}
     </motion.p>
   );

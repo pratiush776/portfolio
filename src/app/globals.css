@@ -1156,36 +1156,37 @@ button {
   will-change: transform;
 }
 
-/* The ghosted "My" — an oversized, faint hand-lettered echo (brush script, matching the "Hi, I'm"
-   greeting) parked BEHIND the solid PROJECTS (the reveal block sits at z-index 1). Together they
-   read "My Projects" — the personal word written by hand, the structural word in the grotesque.
-   Toned in ink rather than the accent so it separates from the terracotta word by value (an earlier
-   same-terracotta pass read as inline glyphs); its centre is raised above the cap band and it bleeds
-   off the left edge, so the word occludes only its lower portion and it reads as a tonal echo set
-   back and above — depth, not a label sitting in the word.
-   Opacity is driven by the morph (fades to its faint rest value as the word lands). */
+/* The handwritten "My" — a faint brush-script echo (Kaushan, matching the "Hi, I'm" greeting) set
+   directly ABOVE the landing PROJECTS, so the pair reads top-to-bottom as "My / PROJECTS": the
+   personal word by hand, the structural word in the grotesque. It is lifted CLEAR of the caps
+   (bottom:100% parks its baseline just over the word) rather than interleaved behind them — the old
+   behind-the-glyphs placement read as a grey smudge through "PRO". Now that there's no overlap it
+   is toned in the brand TERRACOTTA (a light tint of the word it echoes) rather than ink, so the two
+   read as one warm phrase, the script clearly the lighter, subordinate note. Opacity + the small
+   rise are driven by the morph (MorphName ghostOpacity/ghostY); this element sets no transform. */
 .hero-name-ghost-v4 {
   position: absolute;
-  /* Bleed a touch off the row's LEFT edge (where PROJECTS now lands) and ride ABOVE the cap band
-     (center raised above the word's), so PROJECTS occludes only the ghost's lower portion — "My"
-     reads as an echo set BEHIND and above the title, never as glyphs interleaved into the word. */
-  left: -0.06em;
-  top: 36%;
-  /* Vertical centring (-50% of own height) AND the rise-in are driven together by MorphName's
-     ghostY motion value, so this element intentionally sets no transform of its own. */
+  /* Anchor the script's bottom just above the name row, sharing the word's left edge (a hair of
+     left bleed). The slight negative margin lets the descender of the "y" dip toward the P so the
+     two words feel bonded as "My Projects" without the letters ever muddying the caps. */
+  left: -0.01em;
+  bottom: 100%;
+  /* A small positive gap so "My" sits clearly ABOVE the caps with breathing room, rather than its
+     descender crashing into the P/R (the 1.25× version read as oversized and overlapping). */
+  margin-bottom: 0.04em;
   font-family: var(--font-kaushan), cursive;
   font-weight: 400;
-  /* Bumped from 1.5× — the brush script's low x-height reads visually smaller than the grotesque at
-     the same px, so it needs more size to keep the oversized-echo presence behind the title. */
-  font-size: calc(var(--name-hero-size) * 1.75);
-  line-height: 0.8;
+  /* Subordinate echo: ~0.7× the name keeps the M roughly half the PROJECTS cap-height — a clear
+     handwritten note above the word, not a competing display element. (Knob — 0.6…0.85.) */
+  font-size: calc(var(--name-hero-size) * 0.7);
+  line-height: 0.85;
   letter-spacing: 0; /* script connects — sentence case "My", no uppercasing, no tracking */
   white-space: nowrap;
-  /* Ink, NOT the accent — a tonal shadow-echo separates fore/background by VALUE, so the
-     occlusion reads as depth. Same-terracotta made the letters read as part of the word. */
+  /* Ink (not the accent): a dark handwritten note sits clearly above the terracotta PROJECTS, so
+     "My / PROJECTS" reads as the personal word over the structural one with clean value contrast. */
   color: var(--v3-text-dark);
   pointer-events: none;
-  will-change: opacity;
+  will-change: opacity, transform;
 }
 
 /* Each slot clips its own glyph roll (old letter up, PROJECTS letter rises from below).
@@ -1267,25 +1268,33 @@ button {
 .hero-thesis-v4 {
   position: absolute;
   right: var(--brand-gutter);
-  /* Golden-ratio upper line (1 − 0.618 ≈ 0.382). PROJECTS lands near the lower golden line
-     (~62%), so the two settle into a golden-section pairing — balanced, not centred, not level. */
-  top: 38.2%;
+  /* Fills the RIGHT HALF: vertically centred so the tall Anton stack spans the column and balances
+     the lower-left PROJECTS as a two-pole composition — clear of the nav up top and the work panel
+     cresting along the bottom (works-v4 margin-top: -30vh). */
+  top: 50%;
   transform: translateY(-50%);
   margin: 0;
-  max-width: min(18ch, 26%);
-  font-family: var(--font-gambetta), Georgia, serif;
-  font-weight: 500;
-  font-size: clamp(1.55rem, 2.3vw, 2.8rem);
-  line-height: 1.12;
-  letter-spacing: -0.008em;
-  font-size-adjust: 0.5; /* match the tagline's x-height normalisation (see .hero-tagline-v4) */
-  /* Right-anchored copy reads cleaner ragged-left: the lines hug the right gutter where the
-     statement now lives, mirroring the lower-left title. */
+  max-width: min(30ch, 48%);
+  /* Anton — a heavy, tall, CONDENSED display grotesque (poster face). Per-word size variation lives
+     in HeroThesis (each word is `<scale>em` off this base), so the whole composition scales together
+     from this one clamp. Condensed metrics let even the large words fit the right column. */
+  font-family: var(--font-anton), "Arial Narrow", Arial, sans-serif;
+  font-weight: 400;
+  font-size: clamp(2.6rem, 5.2vw, 6.5rem);
+  line-height: 0.92; /* tight stack — condensed display reads best set close */
+  letter-spacing: -0.01em;
+  /* Right-anchored, ragged-left — the stack hugs the right gutter, mirroring the lower-left title. */
   text-align: right;
   color: var(--v3-text-dark);
-  text-wrap: balance;
   pointer-events: none;
   will-change: opacity;
+}
+
+/* One composed line of the thesis (see HeroThesis LINES). Block so each defined line stacks;
+   nowrap locks the authored composition (the condensed face fits the right column at these sizes). */
+.hero-thesis-v4__line {
+  display: block;
+  white-space: nowrap;
 }
 
 /* Each word is two exactly-overlaid layers (HeroThesis): a faint GHOST that is always present
@@ -1309,8 +1318,10 @@ button {
   will-change: clip-path;
 }
 
+/* Ink-only treatment: the statement is monochrome (the size carries it, no accent word). The
+   accent hook is kept on "polished" in the markup so the terracotta is a one-line revert away. */
 .hero-thesis-v4__word--accent {
-  color: var(--v3-accent-red);
+  color: inherit;
 }
 
 /* Exit wrappers around the COPY (not the name): full width so the absolute locator keeps
@@ -1338,7 +1349,9 @@ button {
   /* Bricolage (the display grotesque) carries the labels too, so the whole identity block — name
      + greeting + role — speaks in one grotesque, set against the Gambetta serif statement. */
   font-family: var(--font-bricolage), sans-serif;
-  font-size: clamp(0.74rem, 0.78vw, 0.85rem);
+  /* Up one step on the 1.25 scale (was 0.74→0.85rem) so the credential reads a touch more present
+     beneath the name. Tracking/weight unchanged. */
+  font-size: clamp(0.92rem, 0.95vw, 1.05rem);
   font-weight: 700;
   line-height: 1.2;
   letter-spacing: 0.15em; /* longer label takes slightly tighter tracking than the eyebrow */

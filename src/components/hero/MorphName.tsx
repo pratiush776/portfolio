@@ -65,7 +65,11 @@ const TO_OPTICAL_FIT = [0, -0.01, -0.01, -0.01, -0.01, -0.01, -0.01, -0.01];
  * letters are mid-roll at once and the morph reads as one smooth, wavy gesture instead of a relay
  * that waits for each glyph to nearly finish before the next starts. ROLL_END is DERIVED — the
  * moment the last letter finishes — so the landing-keyed effects stay in sync automatically. */
-const ROLL_START = 0.08; // the leader (first CHANGING slot, left) begins its glyph roll
+// Re-ordered choreography: the thesis statement inks in FIRST (HeroThesis, ~0.08–0.34), and the
+// name only begins morphing once that statement is ~80% formed — so the pitch reads "Turning rough
+// ideas into polished products" and THEN the name transforms into PROJECTS beneath it. ROLL_START
+// is therefore pushed back to ~0.30 (≈80% through the thesis ink window). ROLL_END derives to ~0.65.
+const ROLL_START = 0.3; // the leader (first CHANGING slot, left) begins its glyph roll
 const ROLL_DUR = 0.16; // duration of a single letter's glyph roll
 const ROLL_STAGGER = 0.038; // delay between consecutive letters' starts (≪ ROLL_DUR → wavy overlap)
 
@@ -475,21 +479,24 @@ function MorphLetter({
 export function MorphName({ progress }: { progress: MotionValue<number> }) {
   const { foregroundIn, reduce } = useIntro();
 
-  // The ghosted "MY" graphic behind the LANDED word: an oversized, tonal INK echo of the title
-  // (see .hero-name-ghost-v4). It is choreographed to RISE INTO PLACE through the back half of the
-  // morph — entering while the letters are still rolling, not after — so the eye always has a second
-  // event resolving as the word lands. It rises (y) into its centred rest (-50%, the CSS centring is
-  // baked into this value) and inks up to a visible-but-tonal rest opacity. Both ease on INTRO.
+  // The handwritten "My" echo that sits ABOVE the LANDED word so the two read top-to-bottom as
+  // "My / PROJECTS" — the personal word in brush script, the structural word in the grotesque.
+  // It is lifted CLEAR of the caps (CSS bottom:100%), not interleaved behind them: the old
+  // behind-the-glyphs placement read as a grey smudge through PRO rather than a word. It RISES
+  // into place through the back half of the morph (entering while the letters still roll, so the
+  // eye has a second event as the word lands) and inks up to a tonal terracotta rest. Both on INTRO.
   const ghostOpacity = useTransform(
     progress,
     [ROLL_END - 0.18, ROLL_END],
-    [0, 0.2],
+    [0, 0.26],
     { ease: reveal },
   );
+  // Rises from just-below its resting line (y positive = lower) up to 0 — a small lift into place,
+  // measured in fractions of the ghost's own height. No -50% centring now: CSS bottom:100% parks it.
   const ghostY = useTransform(
     progress,
     [ROLL_END - 0.18, ROLL_END + 0.02],
-    ["-34%", "-50%"],
+    ["20%", "0%"],
     { ease: reveal },
   );
 
@@ -510,8 +517,8 @@ export function MorphName({ progress }: { progress: MotionValue<number> }) {
       // the column gap derive from it in CSS, and the roll travel above derives from it in JS.
       style={{ "--roll-gap": `${ROLL_GAP}em` } as CSSProperties}
     >
-      {/* The ghosted "MY" graphic — oversized + faint, parked BEHIND the left-landing PROJECTS
-          (CSS) for depth, fading in as the word lands (see ghostOpacity). */}
+      {/* The handwritten "My" echo — set ABOVE the landing PROJECTS (CSS bottom:100%), rising +
+          inking in as the word lands so the pair reads "My / PROJECTS" (see ghostOpacity/ghostY). */}
       <motion.span
         className="hero-name-ghost-v4"
         style={{ opacity: ghostOpacity, y: ghostY }}
