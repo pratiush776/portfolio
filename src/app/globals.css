@@ -167,8 +167,9 @@ button {
 
 @theme {
   /* Font families */
-  --font-pier: var(--font-pier-sans), sans-serif;
+  --font-pier: var(--font-bricolage), sans-serif;
   --font-hanken: var(--font-hanken-sans), sans-serif;
+  --font-thesis: var(--font-anton), sans-serif;
   /* Editorial display serif — Signature Statement + work titles. Gambetta (Fontshare/ITF), a warm calligraphic serif; swappable for any face that keeps the display-serif traits. */
   --font-editorial: var(--font-gambetta), serif;
 
@@ -187,6 +188,9 @@ button {
   --v3-bg-primary: #F4E3CE;   /* Dusk: warm peach-cream hero (was acid chartreuse) */
   --v3-text-dark: #221E2E;    /* one consistent near-black-plum neutral across all stages */
   --v3-accent-red: #C9542E;   /* THE accent — terracotta, carried through every stage */
+  --hero-ink-strong: var(--v3-text-dark);
+  --hero-ink-voice: color-mix(in srgb, var(--v3-text-dark) 82%, var(--v3-accent-red));
+  --hero-accent: var(--v3-accent-red);
   --v3-accent-green: #4c8577;
   --v3-accent-dark: #4d5c60;
   --v3-white: #ffffff;
@@ -197,8 +201,9 @@ button {
   /* Belt-and-braces re-declaration of the @theme font tokens. If the var chain ever fails
      to resolve, font-family goes invalid and silently inherits the body sans (the manifesto
      once rendered in the fallback because of exactly this). Declared here so they ALWAYS exist. */
-  --font-pier: var(--font-pier-sans), sans-serif;
+  --font-pier: var(--font-bricolage), sans-serif;
   --font-hanken: var(--font-hanken-sans), sans-serif;
+  --font-thesis: var(--font-anton), sans-serif;
   --font-editorial: var(--font-gambetta), "Gambetta", Georgia, serif;
 
   /* The motion voice: hard-landing curves (slow start, violent middle, dead stop).
@@ -1053,25 +1058,17 @@ button {
   white-space: nowrap;
 }
 
-/* The greeting is a hand-lettered spoken lead-in to the name — a warm, personal "hello" written by
-   hand above the big wordmark. Brush script (Kaushan) instead of the prior muted grotesque whisper:
-   a script reads as a genuine human note, so the greeting feels deliberate and warm rather than
-   silent/hesitant. Set in the brand terracotta as a tonal lead-in to the terracotta name it
-   introduces (same family, smaller scale), and at near-full opacity so it has real presence. */
+/* The greeting is the quiet personal voice, set in the same Gambetta serif as the closing statement.
+   It should read as a calm lead-in to the identity, not as a separate decorative script system. */
 .hero-eyebrow-v4 {
-  /* Bonded to the name as one phrase; the negative bottom margin closes the gap to PRATIUSH so the
-     hand-written "Hi, I'm" reads as its opening flourish, not a floating block. Script faces sit on
-     a tighter baseline with a low x-height, so this stays subordinate even at the larger size. */
-  margin: 0 0 -0.1em;
-  font-family: var(--font-kaushan), cursive;
-  /* Scripts read visually smaller than a sans at the same px (low x-height), so it's bumped up from
-     the old ~1rem to carry presence as a confident greeting while staying clearly below the name. */
-  font-size: clamp(1.5rem, 2vw, 2rem);
-  font-weight: 400;
-  line-height: 1.1;
-  letter-spacing: 0; /* brush script connects — no tracking */
-  color: var(--v3-accent-red);
-  opacity: 0.92;
+  margin: 0 0 clamp(0.18rem, 0.42vh, 0.34rem);
+  font-family: var(--font-editorial);
+  font-size: clamp(1.1rem, 1.22vw, 1.38rem);
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: -0.004em;
+  color: var(--hero-ink-voice);
+  opacity: 0.96;
 }
 
 /* The closing statement — the personal voice note that ends the lockup. Editorial serif
@@ -1082,19 +1079,19 @@ button {
      old 2.35rem so PRATIUSH unambiguously dominates and the two stop competing for the eye.
      The cluster reads as two groups — [greeting + name + role] (identity) and [statement] (voice);
      this carries the largest gap in the lockup, the divider between them. */
-  margin: clamp(1.15rem, 2.2vh, 1.75rem) 0 0;
+  margin: clamp(1.05rem, 2.05vh, 1.7rem) 0 0;
   /* Gambetta (self-hosted warm serif); Georgia is the metric fallback. */
   font-family: var(--font-gambetta), Georgia, serif;
   font-weight: 500;
-  font-size: clamp(1.35rem, 1.85vw, 2rem);
-  line-height: 1.1;
-  letter-spacing: -0.006em;
+  font-size: clamp(1.38rem, 1.78vw, 1.95rem);
+  line-height: 1.035;
+  letter-spacing: -0.004em;
   /* x-height harmony: Gambetta (humanist serif) has a smaller x-height than Bricolage at the same
      px, so it would read visually smaller / weaker beside the grotesque. font-size-adjust normalises
      its x-height to ~0.50em — lifting the serif to sit at equal optical size to the labels above —
      and keeps that constant across the Gambetta→Georgia load swap. Tunable knob (Bricolage ≈ 0.52). */
   font-size-adjust: 0.5;
-  color: var(--v3-text-dark);
+  color: var(--hero-ink-voice);
 }
 
 .hero-tagline-v4__line {
@@ -1102,20 +1099,24 @@ button {
   white-space: nowrap;
 }
 
+.hero-tagline-v4__line + .hero-tagline-v4__line {
+  margin-top: 0.035em;
+}
+
 /* ── The hero name (MorphName): real text so the pinned hero can transform it per-letter
    into PROJECTS. The row spans the full lockup width — the word starts at its left edge
    and lands at its right edge (the mirror). ── */
 .hero-name-v4 {
-  position: relative; /* containing block for the "My" eyebrow (.hero-name-eyebrow-v4) */
+  position: relative;
   width: 100%;
   /* "Hi, I'm" + the name are one phrase, so this top gap is the tightest in the lockup — kept
      minimal to bond the greeting to PRATIUSH. Bricolage's caps sit high in a generous line box; the
      negative bottom margin removes only that invisible under-space so the name-to-role gap below
      is the real, tunable one. */
-  margin: clamp(0.05rem, 0.2vh, 0.18rem) 0 -0.1em;
+  margin: 0 0 -0.075em;
   /* next/font defines this variable on <body>; reference it in scope. Bricolage Grotesque Extrabold
      (800) — a contemporary grotesque with deliberate quirk, so the giant wordmark reads confident
-     and characterful rather than squat (Cabinet) or generic (League Spartan). The per-letter morph
+     and characterful rather than squat or generic. The per-letter morph
      re-measures glyph widths at runtime so the family swap re-fits automatically (the optical-fit
      nudges in MorphName are reset to 0). */
   font-family: var(--font-bricolage), sans-serif;
@@ -1128,7 +1129,7 @@ button {
   font-optical-sizing: auto;
   letter-spacing: 0;
   line-height: 1;
-  color: var(--v3-accent-red);
+  color: var(--hero-accent);
   pointer-events: none;
   user-select: none;
 }
@@ -1141,7 +1142,7 @@ button {
 .hero-name-v4__reveal {
   display: block;
   position: relative;
-  z-index: 1; /* the solid letters sit IN FRONT of the ghosted "MY" graphic behind them */
+  z-index: 1;
   width: 100%;
   padding-top: 0.45em;
   margin-top: -0.45em;
@@ -1150,43 +1151,10 @@ button {
 
 .hero-name-v4__run {
   display: inline-flex;
-  /* optical alignment: cancel the P's left side bearing so the name's ink lines up with
-     the eyebrow/tagline above and below (tunable) */
-  margin-left: -0.035em;
+  /* Keep the word's box on the same left edge as the rest of the lockup. The previous optical
+     overhang made PRATIUSH feel slightly off-grid against the greeting, role, and statement. */
+  margin-left: 0;
   will-change: transform;
-}
-
-/* The handwritten "My" — a faint brush-script echo (Kaushan, matching the "Hi, I'm" greeting) set
-   directly ABOVE the landing PROJECTS, so the pair reads top-to-bottom as "My / PROJECTS": the
-   personal word by hand, the structural word in the grotesque. It is lifted CLEAR of the caps
-   (bottom:100% parks its baseline just over the word) rather than interleaved behind them — the old
-   behind-the-glyphs placement read as a grey smudge through "PRO". Now that there's no overlap it
-   is toned in the brand TERRACOTTA (a light tint of the word it echoes) rather than ink, so the two
-   read as one warm phrase, the script clearly the lighter, subordinate note. Opacity + the small
-   rise are driven by the morph (MorphName ghostOpacity/ghostY); this element sets no transform. */
-.hero-name-ghost-v4 {
-  position: absolute;
-  /* Anchor the script's bottom just above the name row, sharing the word's left edge (a hair of
-     left bleed). The slight negative margin lets the descender of the "y" dip toward the P so the
-     two words feel bonded as "My Projects" without the letters ever muddying the caps. */
-  left: -0.01em;
-  bottom: 100%;
-  /* A small positive gap so "My" sits clearly ABOVE the caps with breathing room, rather than its
-     descender crashing into the P/R (the 1.25× version read as oversized and overlapping). */
-  margin-bottom: 0.04em;
-  font-family: var(--font-kaushan), cursive;
-  font-weight: 400;
-  /* Subordinate echo: ~0.7× the name keeps the M roughly half the PROJECTS cap-height — a clear
-     handwritten note above the word, not a competing display element. (Knob — 0.6…0.85.) */
-  font-size: calc(var(--name-hero-size) * 0.7);
-  line-height: 0.85;
-  letter-spacing: 0; /* script connects — sentence case "My", no uppercasing, no tracking */
-  white-space: nowrap;
-  /* Ink (not the accent): a dark handwritten note sits clearly above the terracotta PROJECTS, so
-     "My / PROJECTS" reads as the personal word over the structural one with clean value contrast. */
-  color: var(--v3-text-dark);
-  pointer-events: none;
-  will-change: opacity, transform;
 }
 
 /* Each slot clips its own glyph roll (old letter up, PROJECTS letter rises from below).
@@ -1225,8 +1193,8 @@ button {
 /* Glyphs shrink-wrap to their natural advance so the slot can measure them.
    The halo is the gradient-matched separator: `paint-order: stroke fill` draws a background-toned
    ring BEHIND the terracotta fill (the letterform stays crisp), so it is invisible on the warm
-   field but becomes a clean separating gap wherever a glyph overlaps another glyph mid-morph or
-   the dark ghosted "MY" behind the landed word. The soft same-tone shadow feathers that gap.
+   field but becomes a clean separating gap wherever a glyph overlaps another glyph mid-morph.
+   The soft same-tone shadow feathers that gap.
    The tone is `--halo` — the actual background colour sampled BEHIND each letter (field + gold
    glow, set per-slot by MorphName) so the ring matches the warm gradient at each position instead
    of one flat cream; the base token is the fallback before the sample lands / in reduced motion. */
@@ -1257,44 +1225,37 @@ button {
   white-space: pre;
 }
 
-/* The framing line, revealed as the name morphs in place into PROJECTS. The name holds its LEFT
-   anchor and lands lower-left, leaving the right side open — so the serif statement reveals on the
-   RIGHT, giving the landed frame a counter-anchor instead of an orphaned title. Anchored just
-   ABOVE the vertical centre and to the right gutter, so it sits off-centre against the title — a
-   gentle diagonal (upper-right ↔ lower-left) rather than a level two-column row, clear of both the
-   nav up top and the work panel cresting along the bottom (works-v4 margin-top: -30vh). Hidden at
-   rest (opacity scrubbed from 0); revealed by the morph (gate + per-word ink in HeroThesis); never
-   rendered in reduced motion (no morph → no landed frame). */
+/* The framing line, revealed as the name morphs in place into PROJECTS. Anton gives the phrase
+   the tall cinematic poster force that contrasts the Bricolage wordmark; one terracotta emphasis
+   word ties it back to the landed PROJECTS. */
 .hero-thesis-v4 {
   position: absolute;
   right: var(--brand-gutter);
-  /* Fills the RIGHT HALF: vertically centred so the tall Anton stack spans the column and balances
-     the lower-left PROJECTS as a two-pole composition — clear of the nav up top and the work panel
-     cresting along the bottom (works-v4 margin-top: -30vh). */
-  top: 50%;
+  top: 52%;
   transform: translateY(-50%);
   margin: 0;
-  max-width: min(30ch, 48%);
-  /* Anton — a heavy, tall, CONDENSED display grotesque (poster face). Per-word size variation lives
-     in HeroThesis (each word is `<scale>em` off this base), so the whole composition scales together
-     from this one clamp. Condensed metrics let even the large words fit the right column. */
-  font-family: var(--font-anton), "Arial Narrow", Arial, sans-serif;
+  max-width: min(35rem, 43vw);
+  font-family: var(--font-thesis);
   font-weight: 400;
-  font-size: clamp(2.6rem, 5.2vw, 6.5rem);
-  line-height: 0.92; /* tight stack — condensed display reads best set close */
-  letter-spacing: -0.01em;
+  font-size: clamp(2.65rem, 5.35vw, 6.35rem);
+  line-height: 0.83;
+  letter-spacing: -0.022em;
   /* Right-anchored, ragged-left — the stack hugs the right gutter, mirroring the lower-left title. */
   text-align: right;
-  color: var(--v3-text-dark);
+  color: var(--hero-ink-strong);
   pointer-events: none;
   will-change: opacity;
 }
 
 /* One composed line of the thesis (see HeroThesis LINES). Block so each defined line stacks;
-   nowrap locks the authored composition (the condensed face fits the right column at these sizes). */
+   nowrap locks the authored composition. */
 .hero-thesis-v4__line {
   display: block;
   white-space: nowrap;
+}
+
+.hero-thesis-v4__line:nth-child(3) {
+  margin: 0.06em 0 0.015em;
 }
 
 /* Each word is two exactly-overlaid layers (HeroThesis): a faint GHOST that is always present
@@ -1306,9 +1267,10 @@ button {
   display: inline-block;
 }
 
-/* The guide: the whole word, faintly inked, always visible once the line's gate has opened. */
+/* The guide: the whole word faintly inked as the wipe's guide, then faded to 0 as the word's ink
+   completes (opacity is JS-driven per word in HeroThesis, so nothing pale lingers at rest). */
 .hero-thesis-v4__ghost {
-  opacity: 0.16;
+  opacity: 0;
 }
 
 /* The ink drawn over the guide — same glyphs, exactly overlaid, revealed by the clip wipe. */
@@ -1318,10 +1280,8 @@ button {
   will-change: clip-path;
 }
 
-/* Ink-only treatment: the statement is monochrome (the size carries it, no accent word). The
-   accent hook is kept on "polished" in the markup so the terracotta is a one-line revert away. */
 .hero-thesis-v4__word--accent {
-  color: inherit;
+  color: var(--hero-accent);
 }
 
 /* Exit wrappers around the COPY (not the name): full width so the absolute locator keeps
@@ -1344,26 +1304,22 @@ button {
 .hero-roles-v4 {
   /* The role hugs the name as its quiet credential (intra-group), so this name-to-role gap is
      smaller than the role-to-statement divider below it — they belong to the same identity group. */
-  margin: clamp(0.45rem, 0.95vh, 0.7rem) 0 0;
+  margin: clamp(0.36rem, 0.72vh, 0.56rem) 0 0;
   padding: 0;
-  /* Bricolage (the display grotesque) carries the labels too, so the whole identity block — name
-     + greeting + role — speaks in one grotesque, set against the Gambetta serif statement. */
-  font-family: var(--font-bricolage), sans-serif;
-  /* Up one step on the 1.25 scale (was 0.74→0.85rem) so the credential reads a touch more present
-     beneath the name. Tracking/weight unchanged. */
-  font-size: clamp(0.92rem, 0.95vw, 1.05rem);
-  font-weight: 700;
-  line-height: 1.2;
-  letter-spacing: 0.15em; /* longer label takes slightly tighter tracking than the eyebrow */
+  font-family: var(--font-hanken), sans-serif;
+  font-size: clamp(0.72rem, 0.76vw, 0.84rem);
+  font-weight: 800;
+  line-height: 1.05;
+  letter-spacing: 0.18em;
   text-transform: uppercase;
   /* "case" lifts the · separator and any punctuation to cap-height (it sits on the baseline by
      default, which looks dropped in all-caps); "kern" keeps pair spacing on. opsz → text master. */
   font-feature-settings: "case" 1, "kern" 1;
   font-optical-sizing: auto;
-  color: var(--v3-text-dark);
+  color: var(--hero-ink-strong);
   /* Tracked grotesque caps at sub-1 opacity read perceptually lighter than the raw ratio implies;
-     0.85 keeps the credential firmly legible against the warm field without competing with the name. */
-  opacity: 0.85;
+     0.88 keeps the credential firmly legible against the warm field without competing with the name. */
+  opacity: 0.88;
 }
 
 /* Bottom meta strip (right). Pinned bottom-right as a lone locator that counterweights the
@@ -1375,7 +1331,7 @@ button {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  font-family: var(--font-bricolage), sans-serif;
+  font-family: var(--font-hanken), sans-serif;
   font-size: clamp(0.68rem, 0.78vw, 0.82rem);
   font-weight: 500;
   line-height: 1.2;
@@ -1383,7 +1339,7 @@ button {
   text-transform: uppercase;
   font-feature-settings: "case" 1, "kern" 1;
   font-optical-sizing: auto;
-  color: var(--v3-text-dark);
+  color: var(--hero-ink-strong);
   /* This is the smallest label on the page (down to 0.58rem on mobile) and sits over the peach-
      saturated right side where local contrast dips below the cream-based estimate; 0.78 lifts it to
      a comfortable AA margin without making the locator shout. */
@@ -1400,7 +1356,7 @@ button {
 .nav-logo-v4 {
   display: block;
   width: 100%;
-  color: var(--v3-text-dark);
+  color: var(--hero-ink-strong);
 }
 
 .nav-logo-v4 svg {

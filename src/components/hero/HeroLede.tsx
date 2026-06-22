@@ -16,8 +16,8 @@ import { BEAT, INTRO_EASE, type Beat } from "@/lib/intro";
  *  • ENTRANCE — each copy element rises on the shared FOREGROUND gate, keyed to the master
  *    schedule (BEAT), exactly as before.
  *  • EXIT — the COPY peels away on the SAME pinned-track progress that drives the morph, in a
- *    staggered top-down cascade (eyebrow first), each group lifting + blurring + fading out and
- *    fully CLEARING before the name starts to morph (< ROLL_START 0.14). The name is deliberately
+ *    staggered top-down cascade (eyebrow first). The body lingers just long enough to overlap the
+ *    thesis ink-in, then clears before the name rolls (ROLL_START ≈ 0.26). The name is deliberately
  *    outside the wrappers: it holds dead still as the lockup departs around it, so the move reads
  *    as authored against the anchor rather than two clocks drifting apart.
  */
@@ -26,13 +26,12 @@ const shown = { y: 0, opacity: 1 } as const;
 
 const exitEase = cubicBezier(...INTRO_EASE);
 
-/* Staggered exit windows (fractions of the pinned track). The peel runs from the first scroll and
-   hands straight into the morph (ROLL_START ≈ 0.08) — the tails overlap the leading letters by
-   design, so motion is continuous rather than copy-clears-then-name-moves with a dead beat. */
+/* Staggered exit windows (fractions of the pinned track). The copy no longer disappears before
+   the transition phrase is legible; its tail overlaps the thesis gate, then the morph takes over. */
 const EXIT = {
-  eyebrow: { start: 0.0, end: 0.05, lift: -64 },
-  body: { start: 0.015, end: 0.09, lift: -52 },
-  meta: { start: 0.03, end: 0.11, lift: -44 },
+  eyebrow: { start: 0.0, end: 0.07, lift: -54 },
+  body: { start: 0.025, end: 0.18, lift: -44 },
+  meta: { start: 0.04, end: 0.2, lift: -36 },
 } as const;
 
 function useExit(
@@ -44,7 +43,7 @@ function useExit(
   const filter = useTransform(
     progress,
     [start, end],
-    ["blur(0px)", "blur(6px)"],
+    ["blur(0px)", "blur(4px)"],
     { ease: exitEase },
   );
   return { opacity, y, filter };

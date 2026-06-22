@@ -13,7 +13,7 @@ import { useIntro } from "@/components/intro/IntroProvider";
 import { BEAT, INTRO_EASE } from "@/lib/intro";
 
 /**
- * The hero name — and the landing's one big move. PRATIUSH is real text (Pier bold caps in the
+ * The hero name — and the landing's one big move. PRATIUSH is real text (Bricolage heavy caps in the
  * brand terracotta) so it can transform IN PLACE while the hero is pinned: the name holds its
  * left anchor (the P never moves) and each slot rolls its glyph from the PRATIUSH letter to its
  * PROJECTS replacement, so the word becomes PROJECTS — the section title for the work below —
@@ -45,8 +45,8 @@ const TO = "PROJECTS".split("");
 /*
  * Per-pair optical tracking nudges (in em, applied to the gap BEFORE each letter) to even out the
  * counter-space at wordmark scale; index 0 has no preceding pair. Per-pair signs: + opens the gap,
- * − tightens. Start at 0 for Bricolage Grotesque; re-tune by eye here if a pair reads loose or tight
- * at hero scale (the original League Spartan values were [0,0,0.02,0.025,-0.02,-0.01,0,0]).
+ * − tightens. Start near 0 for Bricolage Grotesque; re-tune by eye here if a pair reads loose or
+ * tight at hero scale.
  */
 // A gentle uniform NEGATIVE tracking (−0.01em per gap) knits the heavy display caps together — big
 // Bricolage caps read better slightly tighter than their text spacing. Index 0 has no preceding gap.
@@ -63,15 +63,14 @@ const TO_OPTICAL_FIT = [0, -0.01, -0.01, -0.01, -0.01, -0.01, -0.01, -0.01];
  * Keeping ROLL_STAGGER well under ROLL_DUR is the whole trick: the next letter kicks off when the
  * previous has only just begun moving up (≈ROLL_STAGGER/ROLL_DUR through it, ~24% here), so several
  * letters are mid-roll at once and the morph reads as one smooth, wavy gesture instead of a relay
- * that waits for each glyph to nearly finish before the next starts. ROLL_END is DERIVED — the
- * moment the last letter finishes — so the landing-keyed effects stay in sync automatically. */
-// Re-ordered choreography: the thesis statement inks in FIRST (HeroThesis, ~0.08–0.34), and the
-// name only begins morphing once that statement is ~80% formed — so the pitch reads "Turning rough
-// ideas into polished products" and THEN the name transforms into PROJECTS beneath it. ROLL_START
-// is therefore pushed back to ~0.30 (≈80% through the thesis ink window). ROLL_END derives to ~0.65.
-const ROLL_START = 0.3; // the leader (first CHANGING slot, left) begins its glyph roll
-const ROLL_DUR = 0.16; // duration of a single letter's glyph roll
-const ROLL_STAGGER = 0.038; // delay between consecutive letters' starts (≪ ROLL_DUR → wavy overlap)
+ * that waits for each glyph to nearly finish before the next starts. */
+// Re-ordered choreography: the thesis statement inks in FIRST (HeroThesis, ~0.10–0.30), and the
+// name begins morphing once that statement is mostly formed — so the pitch reads "Turning rough
+// ideas into polished products" while the name transforms into PROJECTS beneath it. ROLL_START now
+// lands at ~80% through the thesis ink window; the shorter roll prevents a dead in-between hold.
+const ROLL_START = 0.26; // the leader (first CHANGING slot, left) begins its glyph roll
+const ROLL_DUR = 0.145; // duration of a single letter's glyph roll
+const ROLL_STAGGER = 0.034; // delay between consecutive letters' starts (≪ ROLL_DUR → wavy overlap)
 
 /* ── Roll geometry: the gap between the two stacked glyphs (the "make room ahead" trick) ──────
  *
@@ -110,16 +109,12 @@ const INCOMING_ROT = -8; // degrees
  * Roll order, walked LEFT-TO-RIGHT across only the letters that actually change. A slot whose
  * glyph is identical in both words (P at 0, R at 1) gets `null` — it never rolls, it just holds.
  * The changing slots get a 0-based wave position, so the first changing letter (A→O) leads and
- * the last (H→S) lands the word. `ROLL_COUNT` is how many slots are in the wave.
+ * the last (H→S) lands the word.
  */
 let rollSeen = 0;
 const ROLL_ORDER: (number | null)[] = FROM.map((ch, i) =>
   ch === TO[i] ? null : rollSeen++,
 );
-const ROLL_COUNT = rollSeen;
-
-// Derived: the trailing letter's start + its duration — the instant the word has fully landed.
-const ROLL_END = ROLL_START + Math.max(0, ROLL_COUNT - 1) * ROLL_STAGGER + ROLL_DUR;
 
 // Spatial index of the first changing letter (PRATIUSH→PROJECTS: the A at 2). The wave's crest is
 // timed off this so each letter's LIFT peaks as it rolls.
@@ -145,17 +140,17 @@ const FIRST_CHANGE = ROLL_ORDER.findIndex((r) => r !== null);
  *   • HOLD   d ∈ [0, WAVE_HOLD]           : τ = 1   — the stretch lingers at full before releasing.
  *   • SNAP   d ∈ [WAVE_HOLD, +WAVE_SNAP]  : τ = (1−n)²  (fast settle) — the shoot-back.
  * WAVE_BUILD is the REACH of the force: with peaks ROLL_STAGGER apart, ≈ WAVE_BUILD / ROLL_STAGGER
- * letters are loading at once (0.2 / 0.038 ≈ 5). WAVE_SNAP ≪ WAVE_BUILD makes the release a snap; the
+ * letters are loading at once (0.16 / 0.034 ≈ 5). WAVE_SNAP ≪ WAVE_BUILD makes the release a snap; the
  * WAVE_HOLD plateau keeps the stretch up a beat longer before it shoots. Static P & R feel it but are
  * pinned — only WAVE_STATIC_DAMP of the motion (a held tremor). The crest line
  * `peak = ROLL_START + (i − FIRST_CHANGE)·ROLL_STAGGER + ROLL_DUR/2` rides the roll and extrapolates
  * LEFT onto P/R (the force reaches them first). */
-const WAVE_LIFT = 0.28; // em — peak upward lift (rigid bob of the whole slot) at full tension
-const WAVE_STRETCH_Y = 0.34; // peak vertical stretch of the OUTGOING glyph only (scaleY = 1 + this)
-const WAVE_BUILD = 0.2; // progress-width of the tension load (the force's reach)
-const WAVE_HOLD = 0.03; // progress-width the stretch lingers at full before the snap
-const WAVE_SNAP = 0.05; // progress-width of the fast release (≪ WAVE_BUILD → a snap)
-const WAVE_STATIC_DAMP = 0.18; // P & R feel the force but are held to this fraction
+const WAVE_LIFT = 0.22; // em — peak upward lift (rigid bob of the whole slot) at full tension
+const WAVE_STRETCH_Y = 0.24; // peak vertical stretch of the OUTGOING glyph only (scaleY = 1 + this)
+const WAVE_BUILD = 0.16; // progress-width of the tension load (the force's reach)
+const WAVE_HOLD = 0.02; // progress-width the stretch lingers at full before the snap
+const WAVE_SNAP = 0.045; // progress-width of the fast release (≪ WAVE_BUILD → a snap)
+const WAVE_STATIC_DAMP = 0.12; // P & R feel the force but are held to this fraction
 
 // Tension load → hold → release curve for one slot, given its distance from the crest centre.
 function waveTension(d: number): number {
@@ -173,7 +168,7 @@ function waveTension(d: number): number {
 /* ── Per-letter halo colour: sample the hero's warm field at each letter's position ───────────
  *
  * The separating halo (see .hero-name-v4__roll span) must read as "the background showing
- * through" so overlapping glyphs and the dark "MY" ghost get a clean gap. A single flat cream
+ * through" so overlapping glyphs get a clean gap. A single flat cream
  * looked white-ish against the golden glow pooled at the lower-left. Instead each letter samples
  * the colour of the field BEHIND it — the base radial field (.hero-field-v3) PLUS the gold radial
  * glow (.radial-glow-v3) composited over it — so left letters get warm gold and the tone eases to
@@ -479,27 +474,6 @@ function MorphLetter({
 export function MorphName({ progress }: { progress: MotionValue<number> }) {
   const { foregroundIn, reduce } = useIntro();
 
-  // The handwritten "My" echo that sits ABOVE the LANDED word so the two read top-to-bottom as
-  // "My / PROJECTS" — the personal word in brush script, the structural word in the grotesque.
-  // It is lifted CLEAR of the caps (CSS bottom:100%), not interleaved behind them: the old
-  // behind-the-glyphs placement read as a grey smudge through PRO rather than a word. It RISES
-  // into place through the back half of the morph (entering while the letters still roll, so the
-  // eye has a second event as the word lands) and inks up to a tonal terracotta rest. Both on INTRO.
-  const ghostOpacity = useTransform(
-    progress,
-    [ROLL_END - 0.18, ROLL_END],
-    [0, 0.26],
-    { ease: reveal },
-  );
-  // Rises from just-below its resting line (y positive = lower) up to 0 — a small lift into place,
-  // measured in fractions of the ghost's own height. No -50% centring now: CSS bottom:100% parks it.
-  const ghostY = useTransform(
-    progress,
-    [ROLL_END - 0.18, ROLL_END + 0.02],
-    ["20%", "0%"],
-    { ease: reveal },
-  );
-
   // Reduced motion: the name, plainly — no roll (the intro gate settles it).
   if (reduce) {
     return (
@@ -517,15 +491,6 @@ export function MorphName({ progress }: { progress: MotionValue<number> }) {
       // the column gap derive from it in CSS, and the roll travel above derives from it in JS.
       style={{ "--roll-gap": `${ROLL_GAP}em` } as CSSProperties}
     >
-      {/* The handwritten "My" echo — set ABOVE the landing PROJECTS (CSS bottom:100%), rising +
-          inking in as the word lands so the pair reads "My / PROJECTS" (see ghostOpacity/ghostY). */}
-      <motion.span
-        className="hero-name-ghost-v4"
-        style={{ opacity: ghostOpacity, y: ghostY }}
-      >
-        My
-      </motion.span>
-
       {/* Entrance mask: the name rises from behind its baseline on the foreground gate —
           a separate node from the scrubbed letters, so the two never fight. */}
       <span className="hero-name-v4__reveal">

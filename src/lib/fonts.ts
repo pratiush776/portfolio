@@ -1,4 +1,4 @@
-import { Anton, Bricolage_Grotesque, Hanken_Grotesk, Kaushan_Script } from "next/font/google";
+import { Anton, Bricolage_Grotesque, Hanken_Grotesk } from "next/font/google";
 import localFont from "next/font/local";
 
 /**
@@ -13,12 +13,10 @@ export const hankenGrotesk = Hanken_Grotesk({
 });
 
 /**
- * Display + label grotesque (Google Fonts, open source — free for commercial use). Bricolage
- * Grotesque takes a geometric-grotesque skeleton and adds deliberate quirk: confident, contemporary,
- * and characterful rather than neutral. It carries the morphing PRATIUSH / PROJECTS wordmark
- * (Extrabold) and the hero's tracked-caps labels (Medium). Chosen after League Spartan read generic,
- * Cabinet Grotesk read squat at hero scale, and Clash Display felt impersonal. Variable, so the
- * heavy display weight and the lighter label weight come from one file.
+ * Display grotesque (Google Fonts, open source — free for commercial use). Bricolage Grotesque
+ * takes a geometric-grotesque skeleton and adds deliberate quirk: confident, contemporary, and
+ * characterful rather than neutral. It carries the morphing PRATIUSH / PROJECTS wordmark and the
+ * structural display text.
  */
 export const bricolageGrotesque = Bricolage_Grotesque({
   variable: "--font-bricolage",
@@ -27,10 +25,21 @@ export const bricolageGrotesque = Bricolage_Grotesque({
 });
 
 /**
+ * Tall cinematic display face for the transition thesis. Kept deliberately separate from the
+ * PRATIUSH / PROJECTS wordmark: Anton gives the right-side statement the condensed poster force
+ * the brand needs without turning the whole system into one flat grotesque voice.
+ */
+export const anton = Anton({
+  variable: "--font-anton",
+  subsets: ["latin"],
+  weight: "400",
+  display: "swap",
+});
+
+/**
  * Editorial serif (Fontshare, ITF — free for commercial use). The page's human voice: the hero
  * tagline, the scroll manifesto, and the work titles. Gambetta is a warm, calligraphic-rooted serif
- * with real humanist character — distinct from the banned AI-default serifs (Fraunces, Newsreader,
- * Playfair…) and a warmer counterpart to Bricolage's contemporary grotesque.
+ * with real humanist character — a warmer counterpart to Bricolage's contemporary grotesque.
  */
 export const gambetta = localFont({
   variable: "--font-gambetta",
@@ -39,42 +48,4 @@ export const gambetta = localFont({
     { path: "../fonts/Gambetta/Gambetta-Regular.woff2", weight: "400", style: "normal" },
     { path: "../fonts/Gambetta/Gambetta-Medium.woff2", weight: "500", style: "normal" },
   ],
-});
-
-/**
- * Hand-lettered brush script (Kaushan Script, Google Fonts, SIL OFL — free for commercial use). The
- * page's spoken, personal annotations: the "Hi, I'm" greeting that opens the lockup and the oversized
- * "My" echo set behind the landed PROJECTS. A confident brush calligraphy — gestural and warm — and a
- * third type category beside Bricolage (display grotesque) and Gambetta (humanist serif), sharing
- * their hand-tooled warmth. Single weight (400) — Kaushan Script ships one cut.
- */
-export const kaushanScript = Kaushan_Script({
-  variable: "--font-kaushan",
-  subsets: ["latin"],
-  weight: "400",
-  display: "swap",
-});
-
-export const pierSans = localFont({
-  variable: "--font-pier-sans",
-  src: [
-    {
-      path: "../fonts/Pier-Sans/PPPierSans-Bold.otf",
-      style: "normal",
-    },
-  ],
-});
-
-/**
- * Display face for the big hero THESIS composition ("Turning rough ideas into polished products").
- * Anton (Google Fonts, SIL OFL — free for commercial use) is a heavy, tall, CONDENSED grotesque —
- * a poster face. Used at large scale with per-word size variation (see HeroThesis), it fills the
- * right half as a graphic statement that balances the lower-left PROJECTS. Anton ships a single
- * cut (400) that is heavy by design.
- */
-export const anton = Anton({
-  variable: "--font-anton",
-  subsets: ["latin"],
-  weight: "400",
-  display: "swap",
 });

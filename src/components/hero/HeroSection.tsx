@@ -32,10 +32,10 @@ export function HeroSection() {
   // The name morphs in place (left-anchored), so the light no longer chases it across the
   // stage. Instead the warm pool eases gently further left as the word lands, concentrating
   // over the lower-left PROJECTS so the settled title is lit rather than stranded in flat field.
-  // Drifts with the (now later) morph: the thesis leads, then the name rolls into PROJECTS
-  // (ROLL_START ≈ 0.30 → ROLL_END ≈ 0.65), so the warm pool eases left across that window to light
+  // Drifts with the morph: the thesis leads, then the name rolls into PROJECTS
+  // (ROLL_START ≈ 0.26 → ROLL_END ≈ 0.58), so the warm pool eases left across that window to light
   // the lower-left PROJECTS as it lands.
-  const glowX = useTransform(scrollYProgress, [0.3, 0.72], ["0vw", "-5vw"], {
+  const glowX = useTransform(scrollYProgress, [0.24, 0.66], ["0vw", "-5vw"], {
     ease: cubicBezier(...SNAP_EASE),
   });
 
