@@ -15,7 +15,7 @@ import { WorksSection } from "@/components/works/WorksSection";
  */
 export default function Home() {
   return (
-    <main className="page-v4 text-navy">
+    <main className="page-v4">
       {/* One continuous, slowly drifting warm field behind the whole page (the hero's own
           field feather-masks into it, so there is no seam between sections). */}
       <SectionAurora />

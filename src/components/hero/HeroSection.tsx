@@ -12,8 +12,8 @@ import { SNAP_EASE } from "@/lib/intro";
 
 /**
  * The landing is a pinned stage: the section sticks for ~1.2 extra viewports while the
- * opening composition transforms in place — copy dissolves, then the name itself is
- * pulled across the stage and lands as PROJECTS (see MorphName). The atmosphere (glow,
+ * opening composition transforms in place — copy dissolves, then the name itself rolls
+ * in place, holding its left anchor, and lands as PROJECTS (see MorphName). The atmosphere (glow,
  * aurora, smoke, grain) holds underneath the whole move, so the morph happens inside the
  * composition rather than in empty space. One track-level progress drives everything.
  *

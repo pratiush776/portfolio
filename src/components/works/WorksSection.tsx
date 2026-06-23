@@ -10,6 +10,9 @@ import { WorkPanel } from "./WorkPanel";
 export function WorksSection() {
   return (
     <section id="works" className="works-v4" aria-label="Projects">
+      {/* The morphed "PROJECTS" is decorative (aria-hidden); this real heading gives the
+          section a node in the document outline so it doesn't jump h1 → h3. */}
+      <h2 className="visually-hidden">Projects</h2>
       <div className="works-v4__panels">
         {featured.map((work, index) => (
           <WorkPanel key={work.title} work={work} index={index} />

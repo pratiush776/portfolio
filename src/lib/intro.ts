@@ -15,7 +15,7 @@
  * EASE VOICE (site-wide, not just the intro): hard-landing curves — slow start, violent
  * middle, dead stop. Nothing springs or floats; it glides and LANDS.
  *  • INTRO_EASE — every masked rise / fade-up reveal (JS twin of CSS --intro-ease).
- *  • SNAP_EASE — big scrubbed moves (the PROJECTS gravity pull); the hardest stop.
+ *  • SNAP_EASE — big scrubbed moves (the in-place PROJECTS morph); the hardest stop.
  * CSS micro-interactions (underlines, arrows) use --ease-micro, same family.
  */
 export const INTRO_EASE = [0.82, 0, 0.18, 1] as const;

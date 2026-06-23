@@ -1061,9 +1061,17 @@ button {
 /* The greeting is the quiet personal voice, set in the same Gambetta serif as the closing statement.
    It should read as a calm lead-in to the identity, not as a separate decorative script system. */
 .hero-eyebrow-v4 {
-  margin: 0 0 clamp(0.18rem, 0.42vh, 0.34rem);
+  /* eyebrow→name: the tightest gap in the lockup — "Hi, I'm" reads straight into PRATIUSH as one
+     phrase. Nudged up with the larger greeting so it breathes without breaking the bond; still the
+     smallest gap, well under the role→statement divider (guidebook §3). */
+  margin: 0 0 clamp(0.24rem, 0.55vh, 0.44rem);
   font-family: var(--font-editorial);
-  font-size: clamp(1.1rem, 1.22vw, 1.38rem);
+  /* Sized as a fixed fraction of the name (the typography mockup sets the greeting at the SAME
+     optical cap-height as the serif statement below — both Gambetta). Target cap ≈ 0.22 × the
+     name's cap; Gambetta cap = 0.68/em, Bricolage display cap = 0.66/em, so the font-size ratio is
+     0.22 × 0.66/0.68 ≈ 0.214 × --name-hero-size. max() holds a legible floor once the name shrinks
+     below tablet, where strict coupling would make the greeting unreadable. */
+  font-size: max(1.15rem, calc(var(--name-hero-size) * 0.214));
   font-weight: 500;
   line-height: 1;
   letter-spacing: -0.004em;
@@ -1075,15 +1083,19 @@ button {
    (Gambetta) against the Bricolage grotesque name + labels = a considered serif/grotesque
    contrast, not a template. Constrained measure so it wraps to ~2 lines and adds horizontal mass. */
 .hero-tagline-v4 {
-  /* Tier 2 (the voice): the clear second after the name — substantial, but stepped DOWN from the
-     old 2.35rem so PRATIUSH unambiguously dominates and the two stop competing for the eye.
-     The cluster reads as two groups — [greeting + name + role] (identity) and [statement] (voice);
-     this carries the largest gap in the lockup, the divider between them. */
-  margin: clamp(1.05rem, 2.05vh, 1.7rem) 0 0;
+  /* Tier 2 (the voice): the clear second after the name. The cluster reads as two groups —
+     [greeting + name + role] (identity) and [statement] (voice); this carries the largest gap in
+     the lockup, the divider between them. Like the greeting it is now a fixed fraction of the name
+     (the mockup keeps this proportion ≈ what shipped): cap ≈ 0.22 × the name's cap. With
+     font-size-adjust below, Gambetta's effective cap = 0.749/(specified em), so the ratio is
+     0.22 × 0.66/0.749 ≈ 0.195 × --name-hero-size. max() floors it for mobile legibility. */
+  /* The group divider: opened up the most so the [greeting+name+role] identity block and the
+     [statement] voice block read as two breathing groups, not one dense stack (guidebook §2/§3). */
+  margin: clamp(1.5rem, 2.9vh, 2.4rem) 0 0;
   /* Gambetta (self-hosted warm serif); Georgia is the metric fallback. */
   font-family: var(--font-gambetta), Georgia, serif;
   font-weight: 500;
-  font-size: clamp(1.38rem, 1.78vw, 1.95rem);
+  font-size: max(1.38rem, calc(var(--name-hero-size) * 0.195));
   line-height: 1.035;
   letter-spacing: -0.004em;
   /* x-height harmony: Gambetta (humanist serif) has a smaller x-height than Bricolage at the same
@@ -1151,9 +1163,15 @@ button {
 
 .hero-name-v4__run {
   display: inline-flex;
-  /* Keep the word's box on the same left edge as the rest of the lockup. The previous optical
-     overhang made PRATIUSH feel slightly off-grid against the greeting, role, and statement. */
-  margin-left: 0;
+  /* Optical left-alignment (design guidebook §3): big display caps carry a left side-bearing that,
+     at hero scale, becomes ~11px of empty space before the P's ink — so a box-aligned name reads as
+     pushed RIGHT of the greeting/role/statement, whose own bearings are ~1px at their sizes. Cancel
+     it so the P's INK (not its glyph box) sits on the lockup's left line. Bricolage's P bearing is
+     0.069em; the secondary first-glyphs (Gambetta H/G, Hanken S) sit their ink ~0.009em in, so
+     −0.06em lands the P's ink on the same vertical as theirs (within ~0.1px across the clamp range).
+     em-based so it tracks --name-hero-size; the empty bearing it pulls past the reveal's clip is
+     invisible. (Tune here if the P reads a hair left/right of the greeting.) */
+  margin-left: -0.06em;
   will-change: transform;
 }
 
@@ -1303,11 +1321,15 @@ button {
    the quiet credential register between the sentence-case greeting and the serif statement. */
 .hero-roles-v4 {
   /* The role hugs the name as its quiet credential (intra-group), so this name-to-role gap is
-     smaller than the role-to-statement divider below it — they belong to the same identity group. */
-  margin: clamp(0.36rem, 0.72vh, 0.56rem) 0 0;
+     smaller than the role-to-statement divider below it — they belong to the same identity group.
+     Opened a little for breathing room, staying clearly below the divider (guidebook §2 rhythm). */
+  margin: clamp(0.48rem, 0.95vh, 0.74rem) 0 0;
   padding: 0;
   font-family: var(--font-hanken), sans-serif;
-  font-size: clamp(0.72rem, 0.76vw, 0.84rem);
+  /* Also keyed to the name: the mockup sits the credential caps at ≈ 0.11 × the name's cap, roughly
+     half the greeting. Hanken cap = 0.697/em vs Bricolage 0.66/em, so 0.11 × 0.66/0.697 ≈ 0.104
+     × --name-hero-size, floored for the narrow widths where the tracked line would get too tight. */
+  font-size: max(0.74rem, calc(var(--name-hero-size) * 0.104));
   font-weight: 800;
   line-height: 1.05;
   letter-spacing: 0.18em;
@@ -1523,6 +1545,14 @@ button {
   .neon-bg-v3 {
     display: none;
   }
+
+  /* The thesis is the right-hand counter-anchor of the desktop diagonal — it only composes against
+     the radial glow + golden-section layout, both gone here. On narrow widths its right-anchored
+     stack collides with the left-anchored lockup, so hold it for desktop until the pending hero
+     responsive rewrite gives it a real mobile reflow. (Absolute, so hiding it reflows nothing.) */
+  .hero-thesis-v4 {
+    display: none;
+  }
 }
 
 @media (max-width: 640px) {
@@ -1626,6 +1656,9 @@ button {
   width: 100%;
   overflow-x: clip; /* clip (NOT hidden) so the sticky work cards keep working */
   background: var(--v3-bg-primary);
+  /* Warm plum is the inherited default for any copy that doesn't set its own colour
+     (replaces the deprecated cool v2 `text-navy` that used to ride the page root). */
+  color: var(--v3-text-dark);
 }
 
 /* keep all real content above the fixed aurora field (z-index 0) */
@@ -1844,7 +1877,8 @@ button {
   font-size: clamp(0.7rem, 0.85vw, 0.85rem);
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  opacity: 0.55;
+  /* 0.55 dropped this small tracked line to ~3.5:1 on the cream; 0.7 clears WCAG AA (~4.6:1). */
+  opacity: 0.7;
 }
 
 .work-panel-v4__desc {
@@ -1865,7 +1899,8 @@ button {
   font-size: 0.72rem;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  opacity: 0.6;
+  /* Was 0.6 (~4.0:1); 0.7 lifts the stack chips to a comfortable AA margin on the cream. */
+  opacity: 0.7;
 }
 
 .work-panel-v4__stack li:not(:last-child)::after {
