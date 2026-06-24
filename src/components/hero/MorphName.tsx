@@ -13,8 +13,8 @@ import { useIntro } from "@/components/intro/IntroProvider";
 import { BEAT, INTRO_EASE } from "@/lib/intro";
 
 /**
- * The hero name — and the landing's one big move. PRATIUSH is real text (Bricolage heavy caps in the
- * brand terracotta) so it can transform IN PLACE while the hero is pinned: the name holds its
+ * The hero name — and the landing's one big move. PRATIUSH is real text (Bricolage Light/300 caps in
+ * the brand terracotta) so it can transform IN PLACE while the hero is pinned: the name holds its
  * left anchor (the P never moves) and each slot rolls its glyph from the PRATIUSH letter to its
  * PROJECTS replacement, so the word becomes PROJECTS — the section title for the work below —
  * without travelling across the stage. Both words are 8 letters sharing P and R, so this is a
@@ -48,8 +48,10 @@ const TO = "PROJECTS".split("");
  * − tightens. Start near 0 for Bricolage Grotesque; re-tune by eye here if a pair reads loose or
  * tight at hero scale.
  */
-// A gentle uniform NEGATIVE tracking (−0.01em per gap) knits the heavy display caps together — big
-// Bricolage caps read better slightly tighter than their text spacing. Index 0 has no preceding gap.
+// A gentle uniform NEGATIVE tracking (−0.01em per gap). This was tuned for the old heavy (800) caps;
+// now the name is Light (300), which generally wants MORE open tracking (light + spacious is the
+// mockup's premium register) — revisit toward 0 or positive here if the word reads tight at 300.
+// Index 0 has no preceding gap.
 //                                P      R      A      T      I      U      S      H
 const FROM_OPTICAL_FIT = [0, -0.01, -0.01, -0.01, -0.01, -0.01, -0.01, -0.01];
 const TO_OPTICAL_FIT = [0, -0.01, -0.01, -0.01, -0.01, -0.01, -0.01, -0.01];
@@ -205,11 +207,12 @@ function radialAlpha(
 
 // The base field surface (.hero-field-v3): three warm radials over the cream base. Layers are
 // listed BOTTOM-to-TOP (reverse of the CSS background order) for compositing.
-const FIELD_BASE: RGB = [244, 227, 206]; // #F4E3CE
+const FIELD_BASE: RGB = [244, 227, 206]; // #F4E3CE (cream base, under the terracotta tints)
+// Mirrors .hero-field-v3: light terracotta tints (accent mixed into warm ivory #FFF4E2) — globals.css.
 const FIELD_LAYERS: { c: RGB; cx: number; cy: number; rx: number; ry: number; stop: number }[] = [
-  { c: [240, 214, 192], cx: 0.9, cy: 1.0, rx: 0.95, ry: 0.85, stop: 0.58 }, // terracotta, lower-right
-  { c: [247, 231, 205], cx: 0.78, cy: 0.44, rx: 0.72, ry: 0.66, stop: 0.62 }, // ambient, centre-right
-  { c: [250, 235, 204], cx: 0.16, cy: 0.02, rx: 1.15, ry: 1.0, stop: 0.54 }, // key light, upper-left
+  { c: [241, 202, 179], cx: 0.9, cy: 1.0, rx: 0.95, ry: 0.85, stop: 0.58 }, // terracotta 26%, lower-right
+  { c: [247, 220, 199], cx: 0.78, cy: 0.44, rx: 0.72, ry: 0.66, stop: 0.62 }, // terracotta 15%, centre-right
+  { c: [250, 230, 210], cx: 0.16, cy: 0.02, rx: 1.15, ry: 1.0, stop: 0.56 }, // terracotta 9% key, upper-left
 ];
 
 function sampleField(nx: number, ny: number): RGB {
@@ -227,11 +230,12 @@ const GLOW_C_REM = 26;
 const GLOW_CY_REM = 28;
 const GLOW_R_REM = 42;
 const GLOW_OPACITY = 0.9; // breathe rides 0.82→1; rest ~0.9
+// Warm apricot/amber glow (mirrors .radial-glow-v3 — orange-biased terracotta light, not rosy/gold).
 const GLOW_STOPS: { o: number; c: RGB; a: number }[] = [
-  { o: 0.0, c: [252, 230, 178], a: 0.97 },
-  { o: 0.32, c: [250, 224, 170], a: 0.88 },
-  { o: 0.6, c: [248, 226, 182], a: 0.5 },
-  { o: 0.8, c: [248, 232, 190], a: 0.0 },
+  { o: 0.0, c: [250, 212, 168], a: 0.96 },
+  { o: 0.32, c: [247, 203, 160], a: 0.86 },
+  { o: 0.6, c: [244, 198, 158], a: 0.48 },
+  { o: 0.8, c: [244, 202, 165], a: 0.0 },
 ];
 
 function sampleGlow(px: number, py: number, rem: number): { c: RGB; a: number } {

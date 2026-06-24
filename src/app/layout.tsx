@@ -1,7 +1,14 @@
 import type { Metadata } from "next";
 
 import "./globals.css";
-import { anton, bricolageGrotesque, gambetta, hankenGrotesk } from "@/lib/fonts";
+import {
+  styleScript,
+  anton,
+  bricolageGrotesque,
+  sentient,
+  hankenGrotesk,
+  ibmPlexMono,
+} from "@/lib/fonts";
 import { Analytics } from "@vercel/analytics/next";
 import { SiteNav } from "@/components/layout/SiteNav";
 import { SmoothScroll } from "@/components/layout/SmoothScroll";
@@ -23,7 +30,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${hankenGrotesk.variable} ${bricolageGrotesque.variable} ${gambetta.variable} ${anton.variable} antialiased`}
+        className={`${hankenGrotesk.variable} ${bricolageGrotesque.variable} ${sentient.variable} ${anton.variable} ${styleScript.variable} ${ibmPlexMono.variable} antialiased`}
       >
         {/* IntroProvider is the single opening-choreography clock — backdrop, hero copy, name
             and scroll cue all read the same two gates instead of each animating independently. */}

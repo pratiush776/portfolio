@@ -170,8 +170,13 @@ button {
   --font-pier: var(--font-bricolage), sans-serif;
   --font-hanken: var(--font-hanken-sans), sans-serif;
   --font-thesis: var(--font-anton), sans-serif;
-  /* Editorial display serif — Signature Statement + work titles. Gambetta (Fontshare/ITF), a warm calligraphic serif; swappable for any face that keeps the display-serif traits. */
-  --font-editorial: var(--font-gambetta), serif;
+  /* Editorial display serif — Sentient (Fontshare/ITF), a warm old-style humanist serif. Used DIRECTLY
+     as var(--font-sentient) in each rule (the hero-name pattern); no @theme alias — those drop to the
+     fallback face. */
+  /* The hero greeting (Style Script) and role + tagline (IBM Plex Mono / Sentient) reference their
+     next/font variables (--font-style-script / --font-plex-mono / --font-sentient) DIRECTLY in the
+     hero rules — the same pattern as the name's --font-bricolage — so no @theme alias is declared
+     for them here. */
 
   /* Color palette */
   --color-navy: #2f4156;
@@ -191,6 +196,10 @@ button {
   --hero-ink-strong: var(--v3-text-dark);
   --hero-ink-voice: color-mix(in srgb, var(--v3-text-dark) 82%, var(--v3-accent-red));
   --hero-accent: var(--v3-accent-red);
+  /* Secondary-text terracotta — a DEEP shade of the accent (toward the plum ink for depth + AA)
+     for the greeting and role line, so the hero reads as one terracotta family: light terracotta
+     field → full-accent name → deep-terracotta labels. ~5:1 on the warm field. */
+  --hero-ink-terra: color-mix(in srgb, var(--v3-accent-red) 65%, var(--v3-text-dark));
   --v3-accent-green: #4c8577;
   --v3-accent-dark: #4d5c60;
   --v3-white: #ffffff;
@@ -204,7 +213,6 @@ button {
   --font-pier: var(--font-bricolage), sans-serif;
   --font-hanken: var(--font-hanken-sans), sans-serif;
   --font-thesis: var(--font-anton), sans-serif;
-  --font-editorial: var(--font-gambetta), "Gambetta", Georgia, serif;
 
   /* The motion voice: hard-landing curves (slow start, violent middle, dead stop).
      --intro-ease — all masked rises / reveals (JS twin: lib/intro INTRO_EASE).
@@ -332,20 +340,24 @@ button {
   inset: 0;
   z-index: 0;
   pointer-events: none;
+  /* The gradient is built from LIGHTER SHADES OF THE TERRACOTTA ACCENT, so the whole field reads as
+     a soft terracotta wash rather than gold/cream — light pool upper-left, deepening toward the
+     lower-right. The accent is mixed into a WARM IVORY (#FFF4E2), not pure white: plain white tints
+     of terracotta drift rosy/salmon, the warm ivory keeps them on the apricot side, matching the
+     glow. The cream base stays underneath so the feathered bottom still dissolves into the page
+     aurora. (Accent + base unchanged; derived tints, per DESIGN.md "don't re-hue committed values".) */
   background:
+    /* upper-left key light — the lightest terracotta tint (directional light source) */
     radial-gradient(115% 100% at 16% 2%,
-        color-mix(in srgb, #FCEDCB 80%, var(--v3-bg-primary)) 0%,
-        transparent 54%),
-    /* Soft ambient fill in the right-of-centre void — kept well below the upper-left key light
-       (38% vs 80%) so the directional light source survives; it just keeps the resting frame's
-       negative space lit and composed instead of flat cream, and warms the zone PROJECTS lands in. */
+        color-mix(in srgb, var(--v3-accent-red) 9%, #FFF4E2) 0%,
+        transparent 56%),
+    /* centre-right ambient fill — keeps the resting void lit and warms the zone PROJECTS lands in */
     radial-gradient(72% 66% at 78% 44%,
-        color-mix(in srgb, #FCEDCB 38%, var(--v3-bg-primary)) 0%,
+        color-mix(in srgb, var(--v3-accent-red) 15%, #FFF4E2) 0%,
         transparent 62%),
-    /* Lifted into frame (was 90% 110%, mostly off-screen) so the brand terracotta gives the
-       lower-right real presence rather than a sliver clipped at the corner. */
+    /* lower-right — the deepest terracotta tint, giving the corner real warm presence */
     radial-gradient(95% 85% at 90% 100%,
-        color-mix(in srgb, var(--v3-accent-red) 9%, var(--v3-bg-primary)) 0%,
+        color-mix(in srgb, var(--v3-accent-red) 26%, #FFF4E2) 0%,
         transparent 58%),
     var(--v3-bg-primary);
   -webkit-mask-image: linear-gradient(to bottom, #000 72%, transparent 100%);
@@ -415,12 +427,13 @@ button {
   border-radius: 50%;
   /* A deliberate warm light source. Core pulled DOWN from off-screen-top to ~mid-left so it
      pools behind/above the lifted lockup and frames the name, rather than lighting empty space
-     up top. Bright gold core that holds, then a smooth premium fade — one intentional halo. */
+     up top. A luminous WARM APRICOT/AMBER core — biased toward orange (low blue) so it reads as
+     warm terracotta light, sitting between the old yellow-gold and the too-rosy peach it replaces. */
   background: radial-gradient(50% 50% at 50% 50%,
-      rgba(252, 230, 178, 0.97) 0%,
-      rgba(250, 224, 170, 0.88) 32%,
-      rgba(248, 226, 182, 0.5) 60%,
-      rgba(248, 232, 190, 0) 80%);
+      rgba(250, 212, 168, 0.96) 0%,
+      rgba(247, 203, 160, 0.86) 32%,
+      rgba(244, 198, 158, 0.48) 60%,
+      rgba(244, 202, 165, 0) 80%);
   pointer-events: none;
   z-index: 0;
   transform-origin: 38% 36%;
@@ -1058,51 +1071,72 @@ button {
   white-space: nowrap;
 }
 
-/* The greeting is the quiet personal voice, set in the same Gambetta serif as the closing statement.
-   It should read as a calm lead-in to the identity, not as a separate decorative script system. */
+/* The greeting is the quiet personal voice — a fluid brush script (Style Script), the hand-written
+   lead-in to the identity, not a separate decorative system. */
 .hero-eyebrow-v4 {
-  /* eyebrow→name: the tightest gap in the lockup — "Hi, I'm" reads straight into PRATIUSH as one
-     phrase. Nudged up with the larger greeting so it breathes without breaking the bond; still the
-     smallest gap, well under the role→statement divider (guidebook §3). */
-  margin: 0 0 clamp(0.24rem, 0.55vh, 0.44rem);
-  font-family: var(--font-editorial);
-  /* Sized as a fixed fraction of the name (the typography mockup sets the greeting at the SAME
-     optical cap-height as the serif statement below — both Gambetta). Target cap ≈ 0.22 × the
-     name's cap; Gambetta cap = 0.68/em, Bricolage display cap = 0.66/em, so the font-size ratio is
-     0.22 × 0.66/0.68 ≈ 0.214 × --name-hero-size. max() holds a legible floor once the name shrinks
-     below tablet, where strict coupling would make the greeting unreadable. */
-  font-size: max(1.15rem, calc(var(--name-hero-size) * 0.214));
-  font-weight: 500;
+  /* eyebrow→name: pulled tight so the gap MATCHES the name→role gap below — "Hi, I'm" reads straight
+     into PRATIUSH as one phrase. A script sits in a tall em box (small glyph, deep ascender/descender
+     allowance); that empty box space plus the name's own top line-box overhang inflate the visible
+     gap far past the margin value, so this margin goes NEGATIVE to pull the name back up under the
+     greeting — bonding "Hi, I'm" to PRATIUSH as one phrase (the tightest join in the lockup).
+     (TUNE HERE: metric-dependent estimate for Style Script — nudge toward 0 if the greeting ends up
+     too close, more negative if still too far.) */
+  margin: 0 0 clamp(-0.6rem, -1.2vh, -0.95rem);
+  /* Fluid brush calligraphy (Style Script) — full-bodied, confident strokes that read warm and
+     polished, where Allura's uniform thin hairlines read spindly. Reference the next/font variable
+     DIRECTLY — the same pattern the hero name uses (var(--font-bricolage)); an intermediate @theme
+     alias resolved to the fallback face instead of the loaded script. */
+  font-family: var(--font-style-script), "Snell Roundhand", cursive;
+  /* A script's x-height is tiny and most of its presence lives in the caps/ascenders, so it needs
+     more point size than a serif to read at the same visual weight. Style Script sits fuller in the
+     em than the thin copperplate scripts, so this multiplier eases back.
+     (TUNE HERE if the script reads large/small — this multiplier is the knob.) */
+  font-size: max(1.7rem, calc(var(--name-hero-size) * 0.31));
+  /* Style Script ships a single weight; tracking stays normal — letter-spacing would break the
+     connecting strokes of a script. */
+  font-weight: 400;
   line-height: 1;
-  letter-spacing: -0.004em;
-  color: var(--hero-ink-voice);
-  opacity: 0.96;
+  letter-spacing: normal;
+  /* A deep shade of the hero terracotta (not plum) so the greeting reads as one terracotta family
+     with the name above the warm field — see --hero-ink-terra. */
+  color: var(--hero-ink-terra);
+  opacity: 1;
 }
 
-/* The closing statement — the personal voice note that ends the lockup. Editorial serif
-   (Gambetta) against the Bricolage grotesque name + labels = a considered serif/grotesque
-   contrast, not a template. Constrained measure so it wraps to ~2 lines and adds horizontal mass. */
+/* The closing statement — the lockup's human voice, set in the editorial serif (Sentient). The
+   warm, personal counterweight to the mono credential above it; this is where the lockup stops
+   stating facts and speaks. Two authored lines (see HeroLede) for an editorial cadence. */
 .hero-tagline-v4 {
-  /* Tier 2 (the voice): the clear second after the name. The cluster reads as two groups —
-     [greeting + name + role] (identity) and [statement] (voice); this carries the largest gap in
-     the lockup, the divider between them. Like the greeting it is now a fixed fraction of the name
-     (the mockup keeps this proportion ≈ what shipped): cap ≈ 0.22 × the name's cap. With
-     font-size-adjust below, Gambetta's effective cap = 0.749/(specified em), so the ratio is
-     0.22 × 0.66/0.749 ≈ 0.195 × --name-hero-size. max() floors it for mobile legibility. */
-  /* The group divider: opened up the most so the [greeting+name+role] identity block and the
-     [statement] voice block read as two breathing groups, not one dense stack (guidebook §2/§3). */
-  margin: clamp(1.5rem, 2.9vh, 2.4rem) 0 0;
-  /* Gambetta (self-hosted warm serif); Georgia is the metric fallback. */
-  font-family: var(--font-gambetta), Georgia, serif;
+  /* THE divider of the lockup. The cluster reads as two groups — identity [greeting + name + role]
+     and voice [statement] — and this is the seam between them, so it carries the largest gap by far:
+     ≈3.5× the intra-group name→role step, so the two groups breathe as distinct units rather than
+     one dense stack. Opened further on tall viewports for premium air. */
+  margin: clamp(1.85rem, 3.4vh, 3rem) 0 0;
+  /* The human voice — the editorial serif (Sentient), NOT mono: warm and personal, the tonal
+     counterweight to the mono role line above, so the lockup reads as identity block + voice block
+     rather than one stacked monospace tone. Reference the next/font variable DIRECTLY (the
+     hero-name pattern, var(--font-bricolage)) — never the --font-editorial @theme alias, which has
+     dropped to the fallback face before. */
+  font-family: var(--font-sentient), Georgia, serif;
+  /* Medium (500): a substantial, readable statement that holds beside the heavy terracotta name. */
   font-weight: 500;
+  /* Cap ≈ 0.195 × the name's cap (with font-size-adjust normalising x-height below); max() floors
+     it for mobile legibility. (TUNE HERE.) */
   font-size: max(1.38rem, calc(var(--name-hero-size) * 0.195));
-  line-height: 1.035;
-  letter-spacing: -0.004em;
-  /* x-height harmony: Gambetta (humanist serif) has a smaller x-height than Bricolage at the same
-     px, so it would read visually smaller / weaker beside the grotesque. font-size-adjust normalises
-     its x-height to ~0.50em — lifting the serif to sit at equal optical size to the labels above —
-     and keeps that constant across the Gambetta→Georgia load swap. Tunable knob (Bricolage ≈ 0.52). */
+  /* Two-line serif statement needs leading to breathe — 1.05 set the lines almost solid and read
+     cramped. ~1.2 gives the voice a relaxed, confident editorial cadence (the inter-line rule below
+     is zeroed now that line-height carries the gap). */
+  line-height: 1.2;
+  /* Crisp, near-neutral display tracking — a touch tighter knits the serif words without letting
+     them touch (display-serif floor is ≥ -0.04em). */
+  letter-spacing: -0.01em;
+  /* x-height harmony: the humanist serif has a smaller x-height than Bricolage at the same px, so
+     font-size-adjust normalises it to sit at equal optical size beside the labels above (and holds
+     across the Sentient→Georgia load swap). Tunable knob (Bricolage ≈ 0.52, Gambetta ≈ 0.50). */
   font-size-adjust: 0.5;
+  /* Kept the warm-plum voice colour (NOT terracotta) as the lockup's one dark anchor — it grounds
+     the otherwise all-terracotta cluster and guarantees readability. Swap to --hero-ink-terra for a
+     fully monochrome hero if wanted. */
   color: var(--hero-ink-voice);
 }
 
@@ -1112,7 +1146,9 @@ button {
 }
 
 .hero-tagline-v4__line + .hero-tagline-v4__line {
-  margin-top: 0.035em;
+  /* line-height (1.2) now carries the inter-line leading; no extra margin so the two lines sit on
+     an even, predictable rhythm. */
+  margin-top: 0;
 }
 
 /* ── The hero name (MorphName): real text so the pinned hero can transform it per-letter
@@ -1126,13 +1162,14 @@ button {
      negative bottom margin removes only that invisible under-space so the name-to-role gap below
      is the real, tunable one. */
   margin: 0 0 -0.075em;
-  /* next/font defines this variable on <body>; reference it in scope. Bricolage Grotesque Extrabold
-     (800) — a contemporary grotesque with deliberate quirk, so the giant wordmark reads confident
-     and characterful rather than squat or generic. The per-letter morph
-     re-measures glyph widths at runtime so the family swap re-fits automatically (the optical-fit
-     nudges in MorphName are reset to 0). */
+  /* next/font defines this variable on <body>; reference it in scope. Bricolage Grotesque, set
+     LIGHT (300) to match the reference mockup — the thin, airy wordmark reads elegant/expensive
+     rather than heavy, the fashion-display "light + spacious" register. Bricolage is variable
+     (wght 200–800), so the light weight comes from the same loaded file. The per-letter morph
+     re-measures glyph widths at runtime, so the lighter weight re-fits automatically. (TUNE HERE:
+     200 for thinner/more delicate, 400 for a touch more presence.) */
   font-family: var(--font-bricolage), sans-serif;
-  font-weight: 800;
+  font-weight: 300;
   font-size: var(--name-hero-size);
   font-kerning: normal;
   font-feature-settings: "kern" 1;
@@ -1320,28 +1357,31 @@ button {
    statement), so it qualifies the wordmark at a glance. The lockup's one tracked-caps label —
    the quiet credential register between the sentence-case greeting and the serif statement. */
 .hero-roles-v4 {
-  /* The role hugs the name as its quiet credential (intra-group), so this name-to-role gap is
-     smaller than the role-to-statement divider below it — they belong to the same identity group.
-     Opened a little for breathing room, staying clearly below the divider (guidebook §2 rhythm). */
-  margin: clamp(0.48rem, 0.95vh, 0.74rem) 0 0;
+  /* The rhythm's SMALL step: the role hugs the name as its credential, so this intra-group gap stays
+     a fraction of the role→statement divider below (≈3.5× this). The two belong to one identity
+     group; keeping this tight is what makes that group cohere. */
+  margin: clamp(0.55rem, 1.05vh, 0.85rem) 0 0;
   padding: 0;
-  font-family: var(--font-hanken), sans-serif;
-  /* Also keyed to the name: the mockup sits the credential caps at ≈ 0.11 × the name's cap, roughly
-     half the greeting. Hanken cap = 0.697/em vs Bricolage 0.66/em, so 0.11 × 0.66/0.697 ≈ 0.104
-     × --name-hero-size, floored for the narrow widths where the tracked line would get too tight. */
+  /* Editorial monospace (IBM Plex Mono): the credential set as precise, engineered data — the
+     technical register beneath the script greeting. Direct next/font variable (the hero-name
+     pattern, var(--font-bricolage)); the intermediate alias was dropping to the fallback. */
+  font-family: var(--font-plex-mono), ui-monospace, "SFMono-Regular", monospace;
+  /* Size kept keyed to the name (≈ 0.104 × its cap); only the typeface/weight/tracking change here.
+     IBM Plex Mono's cap height (~0.70/em) ≈ Hanken's, so the line holds the same optical size. */
   font-size: max(0.74rem, calc(var(--name-hero-size) * 0.104));
-  font-weight: 800;
+  /* Medium, not the old extra-bold: mono caps read heavy, and the mockup's credential is delicate. */
+  font-weight: 500;
   line-height: 1.05;
-  letter-spacing: 0.18em;
+  /* Mono advances are already wide, so the tracking eases back from the grotesque's 0.18em — still
+     spaced enough to read as a deliberate label, not cramped. */
+  letter-spacing: 0.16em;
   text-transform: uppercase;
-  /* "case" lifts the · separator and any punctuation to cap-height (it sits on the baseline by
-     default, which looks dropped in all-caps); "kern" keeps pair spacing on. opsz → text master. */
-  font-feature-settings: "case" 1, "kern" 1;
-  font-optical-sizing: auto;
-  color: var(--hero-ink-strong);
-  /* Tracked grotesque caps at sub-1 opacity read perceptually lighter than the raw ratio implies;
-     0.88 keeps the credential firmly legible against the warm field without competing with the name. */
-  opacity: 0.88;
+  font-feature-settings: "kern" 1;
+  /* A deep shade of the hero terracotta so the credential reads as the same terracotta family as the
+     greeting and name (see --hero-ink-terra). Full opacity: terracotta caps at this size need it to
+     hold WCAG AA on the warm field (the old 0.88 was for the darker plum ink). */
+  color: var(--hero-ink-terra);
+  opacity: 1;
 }
 
 /* Bottom meta strip (right). Pinned bottom-right as a lone locator that counterweights the
@@ -1824,7 +1864,7 @@ button {
 .work-panel-v4__poster-word {
   position: relative;
   z-index: 1;
-  font-family: var(--font-editorial);
+  font-family: var(--font-sentient), Georgia, serif;
   font-weight: 550;
   font-variation-settings: "wght" 550, "opsz" 144, "SOFT" 0, "WONK" 0;
   font-size: clamp(1.8rem, 11.5cqi, 6rem);
@@ -1852,7 +1892,7 @@ button {
 }
 
 .work-panel-v4__title {
-  font-family: var(--font-editorial);
+  font-family: var(--font-sentient), Georgia, serif;
   font-weight: 600;
   font-size: clamp(2rem, 3.1vw, 3.2rem);
   line-height: 1.05;
@@ -1973,7 +2013,7 @@ button {
 }
 
 .footer-v4__headline {
-  font-family: var(--font-editorial);
+  font-family: var(--font-sentient), Georgia, serif;
   font-weight: 600;
   font-size: clamp(2.5rem, 6.5vw, 5.25rem);
   line-height: 1.04;
@@ -1992,7 +2032,7 @@ button {
 }
 
 .footer-v4__email {
-  font-family: var(--font-editorial);
+  font-family: var(--font-sentient), Georgia, serif;
   font-weight: 550;
   font-variation-settings: "wght" 550, "opsz" 144, "SOFT" 0, "WONK" 0;
   font-size: clamp(1.35rem, 2.6vw, 2.3rem);

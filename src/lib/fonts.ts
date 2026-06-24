@@ -1,4 +1,10 @@
-import { Anton, Bricolage_Grotesque, Hanken_Grotesk } from "next/font/google";
+import {
+  Anton,
+  Bricolage_Grotesque,
+  Hanken_Grotesk,
+  IBM_Plex_Mono,
+  Style_Script,
+} from "next/font/google";
 import localFont from "next/font/local";
 
 /**
@@ -38,14 +44,42 @@ export const anton = Anton({
 
 /**
  * Editorial serif (Fontshare, ITF — free for commercial use). The page's human voice: the hero
- * tagline, the scroll manifesto, and the work titles. Gambetta is a warm, calligraphic-rooted serif
- * with real humanist character — a warmer counterpart to Bricolage's contemporary grotesque.
+ * tagline, the scroll manifesto, and the work titles. Sentient is a warm old-style humanist serif —
+ * soft modulation, calligraphic roots, and a more refined, contemporary elegance at display sizes
+ * than the prior Gambetta, while keeping the same warm editorial register. Regular + Medium mirror
+ * the weights actually used (the 550/600 display rules resolve to Medium, the heaviest face loaded).
  */
-export const gambetta = localFont({
-  variable: "--font-gambetta",
+export const sentient = localFont({
+  variable: "--font-sentient",
   display: "swap",
   src: [
-    { path: "../fonts/Gambetta/Gambetta-Regular.woff2", weight: "400", style: "normal" },
-    { path: "../fonts/Gambetta/Gambetta-Medium.woff2", weight: "500", style: "normal" },
+    { path: "../fonts/Sentient/Sentient-Regular.woff2", weight: "400", style: "normal" },
+    { path: "../fonts/Sentient/Sentient-Medium.woff2", weight: "500", style: "normal" },
   ],
+});
+
+/**
+ * Calligraphy for the hero greeting ("Hi, I'm"). A single hand-written accent that contrasts the
+ * clean caps below — the personal voice note, kept to the greeting only so it reads as a flourish,
+ * never a system. Style Script (Robert Leuschke) is a fluid, full-bodied brush hand: warm and
+ * polished with confident strokes, not the thin spindly hairlines that read rough at this size.
+ * Single weight (400).
+ */
+export const styleScript = Style_Script({
+  variable: "--font-style-script",
+  subsets: ["latin"],
+  weight: "400",
+  display: "swap",
+});
+
+/**
+ * Editorial monospace for the technical role line ("SOFTWARE ENGINEER · PRODUCT & DESIGN"). IBM Plex
+ * Mono reads as precise/engineered without the retro quirk of typewriter monos — the credential set
+ * as data. Static family, so the used weights are loaded explicitly.
+ */
+export const ibmPlexMono = IBM_Plex_Mono({
+  variable: "--font-plex-mono",
+  subsets: ["latin"],
+  weight: ["400", "500"],
+  display: "swap",
 });
