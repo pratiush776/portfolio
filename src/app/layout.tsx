@@ -7,7 +7,6 @@ import {
   bricolageGrotesque,
   sentient,
   hankenGrotesk,
-  ibmPlexMono,
 } from "@/lib/fonts";
 import { Analytics } from "@vercel/analytics/next";
 import { SiteNav } from "@/components/layout/SiteNav";
@@ -30,7 +29,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${hankenGrotesk.variable} ${bricolageGrotesque.variable} ${sentient.variable} ${anton.variable} ${styleScript.variable} ${ibmPlexMono.variable} antialiased`}
+        className={`${hankenGrotesk.variable} ${bricolageGrotesque.variable} ${sentient.variable} ${anton.variable} ${styleScript.variable} antialiased`}
       >
         {/* IntroProvider is the single opening-choreography clock — backdrop, hero copy, name
             and scroll cue all read the same two gates instead of each animating independently. */}

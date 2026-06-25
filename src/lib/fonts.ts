@@ -2,7 +2,6 @@ import {
   Anton,
   Bricolage_Grotesque,
   Hanken_Grotesk,
-  IBM_Plex_Mono,
   Style_Script,
 } from "next/font/google";
 import localFont from "next/font/local";
@@ -69,17 +68,5 @@ export const styleScript = Style_Script({
   variable: "--font-style-script",
   subsets: ["latin"],
   weight: "400",
-  display: "swap",
-});
-
-/**
- * Editorial monospace for the technical role line ("SOFTWARE ENGINEER · PRODUCT & DESIGN"). IBM Plex
- * Mono reads as precise/engineered without the retro quirk of typewriter monos — the credential set
- * as data. Static family, so the used weights are loaded explicitly.
- */
-export const ibmPlexMono = IBM_Plex_Mono({
-  variable: "--font-plex-mono",
-  subsets: ["latin"],
-  weight: ["400", "500"],
   display: "swap",
 });

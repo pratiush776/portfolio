@@ -12,7 +12,7 @@ import {
 } from "motion/react";
 
 import { ArrowUpRight } from "@/components/icons";
-import { INTRO_EASE, SNAP_EASE } from "@/lib/intro";
+import { INTRO_EASE } from "@/lib/intro";
 import type { FeaturedWork } from "@/data/works";
 
 /**
@@ -25,6 +25,11 @@ import type { FeaturedWork } from "@/data/works";
  * Demo videos are honest-weight: preload="none", playing only while the panel is on screen.
  */
 const EASE = INTRO_EASE;
+
+// The lead panel's reveal lift rides this instead of the site's hard SNAP: a soft cubic ease-OUT —
+// quick off the bottom, then a long graceful settle — so the first card glides up into the frame as a
+// deliberate, premium move rather than snapping. Tune the curve here.
+const PREMIUM_LIFT_EASE = [0.16, 1, 0.3, 1] as const;
 
 const bodyStagger: Variants = {
   hidden: {},
@@ -78,14 +83,15 @@ export function WorkPanel({ work, index }: { work: FeaturedWork; index: number }
   );
   const mediaY = useTransform(scrollYProgress, [0, 1], ["-7%", "7%"]);
 
-  // The lead panel crests as the continuation of the landing beat: the hero pulls it up under
-  // its hold (works-v4 margin-top: -30vh), so as the reader scrolls past the landed PROJECTS
-  // this first panel rises into the frame on the scrubbed hard-landing ease — the morph's gravity
-  // carries straight into the work, rather than the panel popping in on its own observer. Only
-  // the lead gets it (a singular beat, not a per-panel reflex); reduced motion holds it still.
+  // The lead panel crests as the continuation of the landing beat: the hero pulls it up under its hold
+  // (works-v4 margin-top), so as the reader scrolls past the landed PROJECTS this first panel LIFTS
+  // into the frame — a deliberate premium glide (soft cubic ease-out over a longer window, not the old
+  // hard snap), so the reveal reads as intentional. The whole gap above it is tightened in CSS (the
+  // card now crests higher), so this lift lands the card close under the title rather than stranded in
+  // empty field. Only the lead gets it (a singular beat); reduced motion holds it still.
   const isLead = index === 0;
-  const crestY = useTransform(scrollYProgress, [0, 0.4], ["9vh", "0vh"], {
-    ease: cubicBezier(...SNAP_EASE),
+  const crestY = useTransform(scrollYProgress, [0, 0.45], ["11vh", "0vh"], {
+    ease: cubicBezier(...PREMIUM_LIFT_EASE),
   });
 
   // Play the demo only while it's actually being looked at (also defers the download).

@@ -16,10 +16,10 @@ import { BEAT, INTRO_EASE, type Beat } from "@/lib/intro";
  *  • ENTRANCE — each copy element rises on the shared FOREGROUND gate, keyed to the master
  *    schedule (BEAT), exactly as before.
  *  • EXIT — the COPY peels away on the SAME pinned-track progress that drives the morph, in a
- *    staggered top-down cascade (eyebrow first). The body lingers just long enough to overlap the
- *    thesis ink-in, then clears before the name rolls (ROLL_START ≈ 0.26). The name is deliberately
- *    outside the wrappers: it holds dead still as the lockup departs around it, so the move reads
- *    as authored against the anchor rather than two clocks drifting apart.
+ *    staggered top-down cascade (eyebrow first). The morph begins EARLY and OVERLAPS this exit
+ *    (ROLL_START ≈ 0.08): the name starts rolling into PROJECTS while the copy is still clearing, a
+ *    deliberate premium overlap. The name sits outside the exit wrappers so the copy departs around
+ *    it — the morph is authored against the left anchor rather than two clocks drifting apart.
  */
 const hidden = (beat: Beat) => ({ y: beat.y, opacity: 0 });
 const shown = { y: 0, opacity: 1 } as const;

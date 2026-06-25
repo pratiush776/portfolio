@@ -1,6 +1,6 @@
 "use client";
 
-import { type CSSProperties, useLayoutEffect, useRef, useState } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 import {
   cubicBezier,
   motion,
@@ -10,7 +10,7 @@ import {
 } from "motion/react";
 
 import { useIntro } from "@/components/intro/IntroProvider";
-import { BEAT, INTRO_EASE } from "@/lib/intro";
+import { BEAT, easedScrollStart, INTRO_EASE } from "@/lib/intro";
 
 /**
  * The hero name — and the landing's one big move. PRATIUSH is real text (Bricolage Light/300 caps in
@@ -66,13 +66,16 @@ const TO_OPTICAL_FIT = [0, -0.01, -0.01, -0.01, -0.01, -0.01, -0.01, -0.01];
  * previous has only just begun moving up (≈ROLL_STAGGER/ROLL_DUR through it, ~24% here), so several
  * letters are mid-roll at once and the morph reads as one smooth, wavy gesture instead of a relay
  * that waits for each glyph to nearly finish before the next starts. */
-// Re-ordered choreography: the thesis statement inks in FIRST (HeroThesis, ~0.10–0.30), and the
-// name begins morphing once that statement is mostly formed — so the pitch reads "Turning rough
-// ideas into polished products" while the name transforms into PROJECTS beneath it. ROLL_START now
-// lands at ~80% through the thesis ink window; the shorter roll prevents a dead in-between hold.
-const ROLL_START = 0.26; // the leader (first CHANGING slot, left) begins its glyph roll
-const ROLL_DUR = 0.145; // duration of a single letter's glyph roll
-const ROLL_STAGGER = 0.034; // delay between consecutive letters' starts (≪ ROLL_DUR → wavy overlap)
+// Choreography: the morph begins EARLY, overlapping the copy's scroll-out — the elastic force loads on
+// the word from the top of the scroll and the first real letter (A→O) starts rolling at ROLL_START. The
+// thesis writes itself on in sync (HeroThesis INK_START = ROLL_START), then scrolls off; the name lands
+// as PROJECTS (~0.33), then DRIFTS slowly UP as the heaviest parallax layer (see TITLE_DRIFT) while the
+// thesis scrolls off fast and the first work panel crests up from below (works enters ≈0.50, as the
+// thesis nears the top) — three layers at three speeds. Tune with ROLL_START (when the wave starts /
+// how much it overlaps the copy-out) and ROLL_DUR/STAGGER (how fast it resolves — both cut ~20%).
+const ROLL_START = 0.08; // first CHANGING slot (A→O) begins its roll, overlapping the copy-out; lands ~0.33
+const ROLL_DUR = 0.116; // duration of a single letter's glyph roll (~20% quicker than before)
+const ROLL_STAGGER = 0.027; // delay between consecutive letters' starts (≪ ROLL_DUR → wavy overlap)
 
 /* ── Roll geometry: the gap between the two stacked glyphs (the "make room ahead" trick) ──────
  *
@@ -89,6 +92,32 @@ const ROLL_GAP = 0.3;
 // The column is (2 + gap) em tall and the swap slides it by (1 + gap) em, so the roll travels
 // this fraction of the column — derived so the incoming glyph lands dead-centre in the clip box.
 const ROLL_TRAVEL = ((1 + ROLL_GAP) / (2 + ROLL_GAP)) * 100; // %
+
+// The shared anchor letters (P & R — the slots that never roll) stand slightly TALLER than the
+// changing glyphs: a subtle accent that weights the word's left edge. Vertical stretch only, grown
+// from the baseline so the letters keep their horizontal fit and the bottom line stays dead level.
+const STATIC_STRETCH = 1.05;
+
+// PARALLAX: once the word has LANDED as PROJECTS it drifts slowly UP across the rest of the pin. This
+// is the heaviest, SLOWEST layer of the section handoff — the big title trails well behind the thesis
+// (which scrolls off ~83vh near scroll-rate) and the first card (full scroll-rate rising from below),
+// so the title leads up gently and opens breathing space beneath it before the card arrives (physics:
+// bigger = slower). TITLE_DRIFT_START sits just past ROLL_END so the drift never fights the roll; the
+// move settles to a constant (linear) parallax rate but launches with a soft CUBIC ease-in over the
+// first TITLE_DRIFT_RAMP, so the title accelerates into the drift instead of snapping from held-still
+// to full speed. Tune the separation with TITLE_DRIFT.
+const TITLE_DRIFT_START = 0.35;
+const TITLE_DRIFT = "-40vh";
+const TITLE_DRIFT_RAMP = 0.12; // fraction of the drift spent easing IN before it settles to its rate
+
+// The script "Featured" eyebrow that reveals above the landing PROJECTS — the section title's quiet
+// lead-in, in the SAME hand (Style Script) as the hero's "Hi, I'm" greeting, so the work reads
+// "Featured Projects" exactly as the hero reads "Hi, I'm Pratiush". It rides the title's parallax drift
+// (it lives inside the drifting root) and appears TOGETHER with the thesis statement — its reveal is
+// synced to the thesis ink-in (HeroThesis INK_START) / the morph's start (ROLL_START ≈ 0.08), so the
+// eyebrow and the pitch wash in as one beat while the name rolls. Reveal window, in progress:
+const FEATURED_IN_START = 0.08;
+const FEATURED_IN_END = 0.2;
 
 // A smooth, premium ease-in-out cubic for width/kerning + the incoming rotation — gentler than the
 // site's hard-landing INTRO_EASE so those glide rather than snap.
@@ -209,7 +238,14 @@ function radialAlpha(
 // listed BOTTOM-to-TOP (reverse of the CSS background order) for compositing.
 const FIELD_BASE: RGB = [244, 227, 206]; // #F4E3CE (cream base, under the terracotta tints)
 // Mirrors .hero-field-v3: light terracotta tints (accent mixed into warm ivory #FFF4E2) — globals.css.
-const FIELD_LAYERS: { c: RGB; cx: number; cy: number; rx: number; ry: number; stop: number }[] = [
+const FIELD_LAYERS: {
+  c: RGB;
+  cx: number;
+  cy: number;
+  rx: number;
+  ry: number;
+  stop: number;
+}[] = [
   { c: [241, 202, 179], cx: 0.9, cy: 1.0, rx: 0.95, ry: 0.85, stop: 0.58 }, // terracotta 26%, lower-right
   { c: [247, 220, 199], cx: 0.78, cy: 0.44, rx: 0.72, ry: 0.66, stop: 0.62 }, // terracotta 15%, centre-right
   { c: [250, 230, 210], cx: 0.16, cy: 0.02, rx: 1.15, ry: 1.0, stop: 0.56 }, // terracotta 9% key, upper-left
@@ -238,13 +274,18 @@ const GLOW_STOPS: { o: number; c: RGB; a: number }[] = [
   { o: 0.8, c: [244, 202, 165], a: 0.0 },
 ];
 
-function sampleGlow(px: number, py: number, rem: number): { c: RGB; a: number } {
+function sampleGlow(
+  px: number,
+  py: number,
+  rem: number,
+): { c: RGB; a: number } {
   const cx = GLOW_C_REM * rem;
   const cy = GLOW_CY_REM * rem;
   const r = GLOW_R_REM * rem;
   const f = Math.sqrt((px - cx) ** 2 + (py - cy) ** 2) / r;
   const last = GLOW_STOPS[GLOW_STOPS.length - 1];
-  if (f <= GLOW_STOPS[0].o) return { c: GLOW_STOPS[0].c, a: GLOW_STOPS[0].a * GLOW_OPACITY };
+  if (f <= GLOW_STOPS[0].o)
+    return { c: GLOW_STOPS[0].c, a: GLOW_STOPS[0].a * GLOW_OPACITY };
   if (f >= last.o) return { c: last.c, a: 0 };
   for (let i = 0; i < GLOW_STOPS.length - 1; i++) {
     const s = GLOW_STOPS[i];
@@ -262,7 +303,13 @@ function sampleGlow(px: number, py: number, rem: number): { c: RGB; a: number } 
 }
 
 // The composited background colour at a viewport point — field + gold glow over it.
-function sampleHalo(px: number, py: number, viewW: number, viewH: number, rem: number): string {
+function sampleHalo(
+  px: number,
+  py: number,
+  viewW: number,
+  viewH: number,
+  rem: number,
+): string {
   const field = sampleField(px / viewW, py / viewH);
   const glow = sampleGlow(px, py, rem);
   const [r, g, b] = over(field, glow.c, glow.a);
@@ -300,11 +347,15 @@ function MorphLetter({
 
   // The travelling ELASTIC wave — tension loads as the crest nears this slot, then snaps back. One
   // τ scalar (damped on the held P/R) drives the lift, the vertical stretch, and the volume squeeze.
-  const peak = ROLL_START + (index - FIRST_CHANGE) * ROLL_STAGGER + ROLL_DUR / 2;
+  const peak =
+    ROLL_START + (index - FIRST_CHANGE) * ROLL_STAGGER + ROLL_DUR / 2;
   const damp = isStatic ? WAVE_STATIC_DAMP : 1;
   const tension = useTransform(progress, (p) => waveTension(p - peak) * damp);
   // The whole slot bobs up (rigid translate — no deformation).
-  const liftY = useTransform(tension, (t) => `${(-t * WAVE_LIFT).toFixed(4)}em`);
+  const liftY = useTransform(
+    tension,
+    (t) => `${(-t * WAVE_LIFT).toFixed(4)}em`,
+  );
   // ONLY the outgoing glyph stretches, from its centre, so it elongates cleanly as it leaves.
   const outgoingScaleY = useTransform(tension, (t) => 1 + t * WAVE_STRETCH_Y);
   // Raise the active letter above its neighbours so it's never occluded while it lifts/tilts —
@@ -380,8 +431,17 @@ function MorphLetter({
         const nameRect = nameEl.getBoundingClientRect();
         const px = nameRect.left + slot.offsetLeft + slot.offsetWidth / 2;
         const py = nameRect.top + slot.offsetTop + slot.offsetHeight / 2;
-        const rem = Number.parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
-        const next = sampleHalo(px, py, window.innerWidth, window.innerHeight, rem);
+        const rem =
+          Number.parseFloat(
+            getComputedStyle(document.documentElement).fontSize,
+          ) || 16;
+        const next = sampleHalo(
+          px,
+          py,
+          window.innerWidth,
+          window.innerHeight,
+          rem,
+        );
         setHalo((current) => (current === next ? current : next));
       }
     };
@@ -409,9 +469,14 @@ function MorphLetter({
     ease: outgoingEase,
   });
   // The incoming glyph enters tilted and rotates to 0° (aligned) over the same window.
-  const incomingRotate = useTransform(progress, [start, end], [INCOMING_ROT, 0], {
-    ease: reveal,
-  });
+  const incomingRotate = useTransform(
+    progress,
+    [start, end],
+    [INCOMING_ROT, 0],
+    {
+      ease: reveal,
+    },
+  );
   const width = useTransform(
     progress,
     [start, end],
@@ -440,9 +505,17 @@ function MorphLetter({
       }
     >
       {isStatic ? (
-        // Shared glyph (P / R): one static letter, no roll stack, no transform — dead still.
+        // Shared glyph (P / R): one static letter, no roll stack — held dead still, but stood 5%
+        // taller (from the baseline) so the anchor letters carry a touch more presence.
         <span className="hero-name-v4__roll hero-name-v4__roll--static">
-          <span>{from}</span>
+          <span
+            style={{
+              transform: `scaleY(${STATIC_STRETCH})`,
+              transformOrigin: "50% 100%",
+            }}
+          >
+            {from}
+          </span>
         </span>
       ) : (
         <motion.span className="hero-name-v4__roll" style={{ y }}>
@@ -452,7 +525,9 @@ function MorphLetter({
           <motion.span style={{ scaleY: outgoingScaleY }}>{from}</motion.span>
           {/* INCOMING glyph: never scaled — enters tilted, rotates to aligned as it lands. Pivots
               from the top so the tilt swings into the descender room, clear of the mask's clip. */}
-          <motion.span style={{ rotate: incomingRotate, transformOrigin: "50% 0%" }}>
+          <motion.span
+            style={{ rotate: incomingRotate, transformOrigin: "50% 0%" }}
+          >
             {to}
           </motion.span>
         </motion.span>
@@ -478,6 +553,21 @@ function MorphLetter({
 export function MorphName({ progress }: { progress: MotionValue<number> }) {
   const { foregroundIn, reduce } = useIntro();
 
+  // The slow parallax drift of the landed title (see TITLE_DRIFT). Hook runs unconditionally; the
+  // reduced-motion branch below simply never reads it.
+  const titleDrift = useTransform(progress, [TITLE_DRIFT_START, 1], ["0vh", TITLE_DRIFT], {
+    ease: easedScrollStart(TITLE_DRIFT_RAMP),
+  });
+
+  // The "Featured" script eyebrow inks in (rise + fade) as the morph resolves into PROJECTS. Hooks run
+  // unconditionally; the reduced-motion branch (PRATIUSH, no PROJECTS title) simply never renders it.
+  const featuredOpacity = useTransform(progress, [FEATURED_IN_START, FEATURED_IN_END], [0, 1], {
+    ease: cubicBezier(...INTRO_EASE),
+  });
+  const featuredRise = useTransform(progress, [FEATURED_IN_START, FEATURED_IN_END], ["0.5em", "0em"], {
+    ease: cubicBezier(...INTRO_EASE),
+  });
+
   // Reduced motion: the name, plainly — no roll (the intro gate settles it).
   if (reduce) {
     return (
@@ -488,20 +578,32 @@ export function MorphName({ progress }: { progress: MotionValue<number> }) {
   }
 
   return (
-    <p
+    <motion.p
       className="hero-name-v4"
       aria-hidden
-      // Single source of truth for the roll's vertical gap (see ROLL_GAP): the slot headroom and
-      // the column gap derive from it in CSS, and the roll travel above derives from it in JS.
-      style={{ "--roll-gap": `${ROLL_GAP}em` } as CSSProperties}
+      // --roll-gap is the single source of truth for the roll's vertical gap (see ROLL_GAP): the slot
+      // headroom and column gap derive from it in CSS, the roll travel from it in JS. `y` is the slow
+      // post-landing parallax drift (TITLE_DRIFT) — applied to the whole title so it rides up as one.
+      style={{ "--roll-gap": `${ROLL_GAP}em`, y: titleDrift } as MotionStyle}
     >
+      {/* The "Featured" script eyebrow — same hand as the hero greeting, anchored ABOVE the word and
+          inside this drifting root so it parallaxes with PROJECTS. Inks in as the morph resolves. */}
+      <motion.span
+        className="hero-name-v4__eyebrow hero-eyebrow-v4"
+        style={{ opacity: featuredOpacity, y: featuredRise }}
+        aria-hidden
+      >
+        Featured
+      </motion.span>
       {/* Entrance mask: the name rises from behind its baseline on the foreground gate —
           a separate node from the scrubbed letters, so the two never fight. */}
       <span className="hero-name-v4__reveal">
         <motion.span
           className="hero-name-v4__run"
           initial={{ y: "104%", opacity: 0 }}
-          animate={foregroundIn ? { y: "0%", opacity: 1 } : { y: "104%", opacity: 0 }}
+          animate={
+            foregroundIn ? { y: "0%", opacity: 1 } : { y: "104%", opacity: 0 }
+          }
           transition={{
             duration: BEAT.wordmark.duration,
             ease: INTRO_EASE,
@@ -524,6 +626,6 @@ export function MorphName({ progress }: { progress: MotionValue<number> }) {
           ))}
         </motion.span>
       </span>
-    </p>
+    </motion.p>
   );
 }

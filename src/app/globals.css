@@ -173,10 +173,10 @@ button {
   /* Editorial display serif — Sentient (Fontshare/ITF), a warm old-style humanist serif. Used DIRECTLY
      as var(--font-sentient) in each rule (the hero-name pattern); no @theme alias — those drop to the
      fallback face. */
-  /* The hero greeting (Style Script) and role + tagline (IBM Plex Mono / Sentient) reference their
-     next/font variables (--font-style-script / --font-plex-mono / --font-sentient) DIRECTLY in the
-     hero rules — the same pattern as the name's --font-bricolage — so no @theme alias is declared
-     for them here. */
+  /* The hero greeting (Style Script), role credential (Hanken) and serif statement (Sentient)
+     reference their next/font variables (--font-style-script / --font-hanken / --font-sentient)
+     DIRECTLY in the hero rules — the same pattern as the name's --font-bricolage — so no @theme
+     alias is declared for them here. */
 
   /* Color palette */
   --color-navy: #2f4156;
@@ -200,12 +200,14 @@ button {
      for the greeting and role line, so the hero reads as one terracotta family: light terracotta
      field → full-accent name → deep-terracotta labels. ~5:1 on the warm field. */
   --hero-ink-terra: color-mix(in srgb, var(--v3-accent-red) 65%, var(--v3-text-dark));
-  --v3-accent-green: #4c8577;
-  --v3-accent-dark: #4d5c60;
   --v3-white: #ffffff;
 
-  /* Warm gold accent — hero / nav-contact hover glow (was acid lime). */
-  --v3-accent-lime: #E3B98A;
+  /* Warm gold — the terracotta accent's tonal sibling for the DARK footer surface. The terracotta
+     only reaches ~3.7:1 on the plum curtain; this lighter warm tone holds ~9:1 there, so it carries
+     the footer email while staying in the one warm family. (The cool v3 accents — teal #4c8577 and
+     slate #4d5c60 — were removed: the v4 identity is a single warm terracotta system and those
+     tokens were unused.) */
+  --v3-accent-gold: #E3B98A;
 
   /* Belt-and-braces re-declaration of the @theme font tokens. If the var chain ever fails
      to resolve, font-family goes invalid and silently inherits the body sans (the manifesto
@@ -1074,14 +1076,17 @@ button {
 /* The greeting is the quiet personal voice — a fluid brush script (Style Script), the hand-written
    lead-in to the identity, not a separate decorative system. */
 .hero-eyebrow-v4 {
-  /* eyebrow→name: pulled tight so the gap MATCHES the name→role gap below — "Hi, I'm" reads straight
-     into PRATIUSH as one phrase. A script sits in a tall em box (small glyph, deep ascender/descender
-     allowance); that empty box space plus the name's own top line-box overhang inflate the visible
-     gap far past the margin value, so this margin goes NEGATIVE to pull the name back up under the
-     greeting — bonding "Hi, I'm" to PRATIUSH as one phrase (the tightest join in the lockup).
-     (TUNE HERE: metric-dependent estimate for Style Script — nudge toward 0 if the greeting ends up
-     too close, more negative if still too far.) */
-  margin: 0 0 clamp(-0.6rem, -1.2vh, -0.95rem);
+  /* eyebrow→name: tuned so the VISIBLE gap matches the name→role gap below — greeting, name and role
+     sit on ONE even rhythm. A script sits in a tall em box (small glyph, deep ascender/descender
+     allowance); that box space plus the name's top line-box overhang inflate the visible gap past the
+     margin value, so this stays NEGATIVE to cancel that overhang down to the shared target gap.
+     (TUNE HERE: metric-dependent — toward 0 if the greeting sits too close to the name, more negative
+     if too far. Must track the name→role cap below, currently ~1.3rem.) */
+  margin: 0 0 clamp(-0.35rem, -0.7vh, -0.5rem) -0.16em;
+  /* background-clip:text paints only INSIDE the box, so Style Script's left entry stroke was getting
+     clipped at the box edge. This pad widens the paint box leftward to cover the swash; the matching
+     negative margin-left above cancels it, so the visual left edge (on the name's P-ink line) holds. */
+  padding-left: 0.16em;
   /* Fluid brush calligraphy (Style Script) — full-bodied, confident strokes that read warm and
      polished, where Allura's uniform thin hairlines read spindly. Reference the next/font variable
      DIRECTLY — the same pattern the hero name uses (var(--font-bricolage)); an intermediate @theme
@@ -1097,9 +1102,23 @@ button {
   font-weight: 400;
   line-height: 1;
   letter-spacing: normal;
-  /* A deep shade of the hero terracotta (not plum) so the greeting reads as one terracotta family
-     with the name above the warm field — see --hero-ink-terra. */
+  /* The greeting's colour FLOWS into the name, kept SUBTLE: a tight single-hue band — a gentle
+     deepening at the very top easing to the name's EXACT full accent by ~two-thirds down, so the
+     lower part already sits on the colour PRATIUSH is painted in (they read as connected) and the
+     script reads as clean terracotta with just a breath of depth up top. The top stop is mostly
+     accent with only a touch of the deep shade mixed in — NOT the full plum-tinged ink-terra, which
+     made the top read muddy. (The name stays solid: a background-clip:text gradient can't coexist
+     with its stroke halo — see .hero-name-v4__roll span.) `color` is the solid fallback where
+     background-clip:text is unsupported. */
   color: var(--hero-ink-terra);
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--hero-accent) 78%, var(--hero-ink-terra)) 0%,
+    var(--hero-accent) 68%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
   opacity: 1;
 }
 
@@ -1107,19 +1126,20 @@ button {
    warm, personal counterweight to the mono credential above it; this is where the lockup stops
    stating facts and speaks. Two authored lines (see HeroLede) for an editorial cadence. */
 .hero-tagline-v4 {
-  /* THE divider of the lockup. The cluster reads as two groups — identity [greeting + name + role]
-     and voice [statement] — and this is the seam between them, so it carries the largest gap by far:
-     ≈3.5× the intra-group name→role step, so the two groups breathe as distinct units rather than
-     one dense stack. Opened further on tall viewports for premium air. */
-  margin: clamp(1.85rem, 3.4vh, 3rem) 0 0;
+  /* A hair more than the even identity-block gap above (~6px at desktop) — a subtle breath before the
+     voice, marking the role and statement as separate thoughts without breaking the lockup's even
+     rhythm. (They share the plum colour, so even this small step does visible separating work.) */
+  margin: clamp(1.3rem, 2.1vh, 1.7rem) 0 0;
   /* The human voice — the editorial serif (Sentient), NOT mono: warm and personal, the tonal
      counterweight to the mono role line above, so the lockup reads as identity block + voice block
      rather than one stacked monospace tone. Reference the next/font variable DIRECTLY (the
      hero-name pattern, var(--font-bricolage)) — never the --font-editorial @theme alias, which has
      dropped to the fallback face before. */
   font-family: var(--font-sentient), Georgia, serif;
-  /* Medium (500): a substantial, readable statement that holds beside the heavy terracotta name. */
-  font-weight: 500;
+  /* Regular (400): the name is Light 300, so a Regular serif harmonises with it rather than sitting
+     heavier than the display above — the classic light-display + regular-serif editorial pairing.
+     (Medium 500 read chunky against the airy name.) */
+  font-weight: 400;
   /* Cap ≈ 0.195 × the name's cap (with font-size-adjust normalising x-height below); max() floors
      it for mobile legibility. (TUNE HERE.) */
   font-size: max(1.38rem, calc(var(--name-hero-size) * 0.195));
@@ -1181,6 +1201,28 @@ button {
   color: var(--hero-accent);
   pointer-events: none;
   user-select: none;
+}
+
+/* The "Featured" script eyebrow above the landed PROJECTS — .hero-eyebrow-v4 supplies the face,
+   colour, SIZE and swash treatment (literally the same hand as the hero's "Hi, I'm"); this only
+   re-anchors it ABOVE the word and inside the name's drifting root, so it rides the title parallax and
+   never adds height to the name box (the word's position is unchanged).
+   To match the greeting, the bottom margin mirrors .hero-eyebrow-v4 verbatim — that negative value,
+   paired with bottom:100% (the name's cap line), drops the script onto the word at the identical offset
+   the greeting sits above PRATIUSH (cancelling the name's top line-box overhang). The LEFT is the
+   greeting's −0.16em swash-cancel PLUS a small per-glyph optical nudge: the greeting's value was tuned
+   for its first letter "H", but "Featured" leads with "F" (different left bearing), so it read a hair
+   right of the P — the extra −0.25em (the script F carries a wide left entry swash) lands the F's ink
+   on the P's ink line. TUNE that nudge by eye. Width is left to shrink-to-fit, as the greeting's is. */
+.hero-name-v4__eyebrow {
+  position: absolute;
+  left: 0;
+  bottom: 100%;
+  display: block;
+  margin: 0 0 clamp(-0.35rem, -0.7vh, -0.5rem) calc(-0.16em - 0.25em);
+  transform-origin: left bottom;
+  will-change: transform, opacity;
+  pointer-events: none;
 }
 
 /* Entrance mask (the name rises from behind its baseline). Full row width + hidden
@@ -1261,6 +1303,11 @@ button {
   paint-order: stroke fill;
   -webkit-text-stroke: 0.06em var(--halo, var(--v3-bg-primary));
   text-shadow: 0 0 0.04em var(--halo, var(--v3-bg-primary));
+  /* Solid fill (inherited --hero-accent). NOTE: do NOT add a background-clip:text gradient here — it
+     is incompatible with the -webkit-text-stroke halo above (the browser then paints only the stroke
+     and the glyphs go hollow). The greeting carries the visible colour flow; the name is its solid
+     bright terminus. A real per-glyph name gradient would require replacing this stroke halo with a
+     text-shadow ring, which touches the morph's glyph separation. */
 }
 
 /* Offscreen pair samples let MorphName recover the kerning that is normally lost when a word
@@ -1287,7 +1334,6 @@ button {
   position: absolute;
   right: var(--brand-gutter);
   top: 52%;
-  transform: translateY(-50%);
   margin: 0;
   max-width: min(35rem, 43vw);
   font-family: var(--font-thesis);
@@ -1299,7 +1345,10 @@ button {
   text-align: right;
   color: var(--hero-ink-strong);
   pointer-events: none;
-  will-change: opacity;
+  /* Vertically centred on the right; --thesis-lift (JS-driven in HeroThesis) stacks the scroll-up
+     exit ON TOP of that centring, so the statement rises away once it's read. */
+  transform: translateY(calc(-50% + var(--thesis-lift, 0px)));
+  will-change: opacity, transform;
 }
 
 /* One composed line of the thesis (see HeroThesis LINES). Block so each defined line stacks;
@@ -1331,7 +1380,14 @@ button {
 /* The ink drawn over the guide — same glyphs, exactly overlaid, revealed by the clip wipe. */
 .hero-thesis-v4__ink {
   position: absolute;
-  inset: 0;
+  /* clip-path:inset (the wipe) clips to THIS layer's box. At line-height 0.83 that box is shorter
+     than Anton's tall glyphs, so a zero-inset clip shaved the letter tops/bottoms. Enlarge the box
+     vertically (negative top/bottom inset) and push the text back down by the same amount with
+     padding-top, so the ink still exactly overlays the ghost while the clip box now encloses the full
+     glyph. NB: the BOX is enlarged, not the clip-path's vertical insets — over-shooting those is what
+     leaked the faint ghost before, so the wipe values in HeroThesis stay at 0 top/bottom. */
+  inset: -0.2em 0;
+  padding-top: 0.2em;
   will-change: clip-path;
 }
 
@@ -1354,33 +1410,40 @@ button {
 }
 
 /* Role / credential. Sits directly beneath the name as its descriptor (name → role →
-   statement), so it qualifies the wordmark at a glance. The lockup's one tracked-caps label —
-   the quiet credential register between the sentence-case greeting and the serif statement. */
+   statement), so it qualifies the wordmark at a glance. Set in the workhorse grotesque (Hanken) as
+   tracked caps — the SAME face/register as the bottom locator, so the lockup's two labels share one
+   "credential voice" instead of the role being a lone monospace. Dropping the mono also removes a
+   reflex-default face and the "mono = developer" costume, tightening the hero to four typefaces. */
 .hero-roles-v4 {
-  /* The rhythm's SMALL step: the role hugs the name as its credential, so this intra-group gap stays
-     a fraction of the role→statement divider below (≈3.5× this). The two belong to one identity
-     group; keeping this tight is what makes that group cohere. */
-  margin: clamp(0.55rem, 1.05vh, 0.85rem) 0 0;
+  /* The identity block's EVEN step: greeting→name and name→role share this one gap, so the three sit
+     on a single rhythm (the greeting's negative margin above is tuned to match this visible gap). The
+     role rides in the name's orbit as its credential; still clearly less than the role→statement step
+     below. (Colour and spacing cross-cut: plum colour, name's orbit.) */
+  margin: clamp(0.9rem, 1.7vh, 1.3rem) 0 0;
   padding: 0;
-  /* Editorial monospace (IBM Plex Mono): the credential set as precise, engineered data — the
-     technical register beneath the script greeting. Direct next/font variable (the hero-name
-     pattern, var(--font-bricolage)); the intermediate alias was dropping to the fallback. */
-  font-family: var(--font-plex-mono), ui-monospace, "SFMono-Regular", monospace;
-  /* Size kept keyed to the name (≈ 0.104 × its cap); only the typeface/weight/tracking change here.
-     IBM Plex Mono's cap height (~0.70/em) ≈ Hanken's, so the line holds the same optical size. */
+  /* Hanken Grotesk (the body workhorse) as a tracked-caps credential — a clean, contemporary label,
+     not a monospace costume. Reference the next/font variable DIRECTLY (the hero-name pattern,
+     var(--font-bricolage)); the intermediate @theme alias dropped to the fallback face. */
+  font-family: var(--font-hanken), sans-serif;
+  /* Size keyed to the name (≈ 0.104 × its cap). Hanken's cap height ≈ the prior mono's, so the line
+     holds the same optical size through the swap. */
   font-size: max(0.74rem, calc(var(--name-hero-size) * 0.104));
-  /* Medium, not the old extra-bold: mono caps read heavy, and the mockup's credential is delicate. */
+  /* Medium: caps need a little body to read as a deliberate label without shouting. */
   font-weight: 500;
   line-height: 1.05;
-  /* Mono advances are already wide, so the tracking eases back from the grotesque's 0.18em — still
-     spaced enough to read as a deliberate label, not cramped. */
-  letter-spacing: 0.16em;
+  /* Proportional sans caps need MORE tracking than the mono did (mono advances are already wide, so
+     0.16em sufficed there). 0.2em opens it into a confident label and relates it to the locator's
+     0.18em — the two credential labels share one tracked-caps language. */
+  letter-spacing: 0.2em;
   text-transform: uppercase;
-  font-feature-settings: "kern" 1;
-  /* A deep shade of the hero terracotta so the credential reads as the same terracotta family as the
-     greeting and name (see --hero-ink-terra). Full opacity: terracotta caps at this size need it to
-     hold WCAG AA on the warm field (the old 0.88 was for the darker plum ink). */
-  color: var(--hero-ink-terra);
+  /* "case" centres the · separator to cap height (it sat on the baseline before); "kern" pairs. */
+  font-feature-settings: "case" 1, "kern" 1;
+  /* Plum voice ink — NOT terracotta. The role is structural content (a credential), so it belongs
+     to the plum family with the statement and the locator, not to the warm "Hi, I'm + name" identity.
+     This reserves terracotta for the name as the single warm signature (so it reads as the figure),
+     matches the locator — the lockup's other tracked-caps label — in colour, and keeps the hero on
+     the page's plum-ink/terracotta-accent strategy. Plum on the warm field clears AA comfortably. */
+  color: var(--hero-ink-voice);
   opacity: 1;
 }
 
@@ -1631,7 +1694,7 @@ button {
     max-width: 13rem;
     font-size: 0.62rem;
     line-height: 1.4;
-    letter-spacing: 0.16em;
+    letter-spacing: 0.2em;
   }
 
   .hero-meta-v4 {
@@ -1769,11 +1832,14 @@ button {
    ========================================================= */
 .works-v4 {
   padding: 0 var(--brand-gutter);
-  /* The handoff: pull the section up under the hero's hold, so the first panel crests
-     through the feathered bottom of the stage WHILE the landed PROJECTS is still pinned —
-     the title is never stranded alone in an empty frame. (Same z-index as the hero track;
-     later in the DOM, so the panel paints over the feather.) */
-  margin-top: -30vh;
+  /* The handoff is a 3-layer parallax: the landed PROJECTS title drifts slowly UP (MorphName
+     TITLE_DRIFT), the thesis scrolls off fast, and this section crests up from below to meet the
+     space the rising title opens. The deeper negative margin reveals the first card EARLIER — around
+     when the thesis nears the top — so the section transition stays alive rather than holding on a lone
+     title. Pulled ~20% deeper so the first card crests HIGHER into the frame: the gap below the drifted
+     title is tightened to read as intentional breathing room, not stranded empty field. Push toward 0
+     to reveal later / open the gap, more negative to reveal sooner / tighten it. */
+  margin-top: -70vh;
   scroll-margin-top: 0;
   color: var(--v3-text-dark);
 }
@@ -1847,7 +1913,7 @@ button {
   content: "";
   position: absolute;
   inset: 0;
-  background: radial-gradient(85% 95% at 16% 6%, rgba(227, 185, 138, 0.22) 0%, transparent 62%);
+  background: radial-gradient(85% 95% at 16% 6%, color-mix(in srgb, var(--v3-accent-gold) 22%, transparent) 0%, transparent 62%);
 }
 
 .work-panel-v4__poster::after {
@@ -2037,8 +2103,8 @@ button {
   font-variation-settings: "wght" 550, "opsz" 144, "SOFT" 0, "WONK" 0;
   font-size: clamp(1.35rem, 2.6vw, 2.3rem);
   letter-spacing: -0.01em;
-  color: var(--v3-accent-lime);
-  border-bottom: 1px solid color-mix(in srgb, var(--v3-accent-lime) 45%, transparent);
+  color: var(--v3-accent-gold);
+  border-bottom: 1px solid color-mix(in srgb, var(--v3-accent-gold) 45%, transparent);
   padding-bottom: 0.12em;
   transition: color 0.5s var(--ease-micro), border-color 0.5s var(--ease-micro);
 }
