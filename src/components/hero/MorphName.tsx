@@ -100,14 +100,17 @@ const STATIC_STRETCH = 1.05;
 
 // PARALLAX: once the word has LANDED as PROJECTS it drifts slowly UP across the rest of the pin. This
 // is the heaviest, SLOWEST layer of the section handoff — the big title trails well behind the thesis
-// (which scrolls off ~83vh near scroll-rate) and the first card (full scroll-rate rising from below),
+// (which scrolls off ~58vh near scroll-rate) and the first card (full scroll-rate rising from below),
 // so the title leads up gently and opens breathing space beneath it before the card arrives (physics:
 // bigger = slower). TITLE_DRIFT_START sits just past ROLL_END so the drift never fights the roll; the
 // move settles to a constant (linear) parallax rate but launches with a soft CUBIC ease-in over the
 // first TITLE_DRIFT_RAMP, so the title accelerates into the drift instead of snapping from held-still
 // to full speed. Tune the separation with TITLE_DRIFT.
 const TITLE_DRIFT_START = 0.35;
-const TITLE_DRIFT = "-40vh";
+// A SLIGHT upward parallax only — the title separates gently from the faster-scrolling thesis as the
+// hero exits, then leaves with the section naturally. (No shrink, no fade: the projects gallery below
+// carries the section identity on its own rotated PROJECTS spine.) Tune the differential here.
+const TITLE_DRIFT = "-16vh";
 const TITLE_DRIFT_RAMP = 0.12; // fraction of the drift spent easing IN before it settles to its rate
 
 // The script "Featured" eyebrow that reveals above the landing PROJECTS — the section title's quiet
@@ -118,6 +121,17 @@ const TITLE_DRIFT_RAMP = 0.12; // fraction of the drift spent easing IN before i
 // eyebrow and the pitch wash in as one beat while the name rolls. Reveal window, in progress:
 const FEATURED_IN_START = 0.08;
 const FEATURED_IN_END = 0.2;
+
+// THE HANDOFF EXIT. Once the morph has landed, PROJECTS is no longer the panels' title — each
+// project carries its own. So the word cedes the stage: it fades (with a touch of blur) as it drifts
+// up, clearing before the first project's title reads, so the two big titles never collide. The
+// "Featured" eyebrow leads the exit a beat earlier (it's the secondary mark). Tuned so the whole
+// hero stage is clear by ~p_hero 0.50 (≈90vh page-scroll), before ProjectFeature's title window.
+const FEATURED_OUT_START = 0.3;
+const FEATURED_OUT_END = 0.44;
+const PROJECTS_FADE_START = 0.36;
+const PROJECTS_FADE_END = 0.5;
+const PROJECTS_FADE_BLUR = 3; // px of blur at full fade
 
 // A smooth, premium ease-in-out cubic for width/kerning + the incoming rotation — gentler than the
 // site's hard-landing INTRO_EASE so those glide rather than snap.
@@ -196,126 +210,6 @@ function waveTension(d: number): number {
   return k * k; // fast release, settling into rest
 }
 
-/* ── Per-letter halo colour: sample the hero's warm field at each letter's position ───────────
- *
- * The separating halo (see .hero-name-v4__roll span) must read as "the background showing
- * through" so overlapping glyphs get a clean gap. A single flat cream
- * looked white-ish against the golden glow pooled at the lower-left. Instead each letter samples
- * the colour of the field BEHIND it — the base radial field (.hero-field-v3) PLUS the gold radial
- * glow (.radial-glow-v3) composited over it — so left letters get warm gold and the tone eases to
- * cream toward the right, matching the real background at every letter. (The slow breathe/aurora
- * are diffuse and animated; we approximate with their resting state — close enough to read as bg.)
- */
-type RGB = [number, number, number];
-
-// "source over" composite of `src` (alpha `a`) onto opaque `dst`.
-function over(dst: RGB, src: RGB, a: number): RGB {
-  return [
-    src[0] * a + dst[0] * (1 - a),
-    src[1] * a + dst[1] * (1 - a),
-    src[2] * a + dst[2] * (1 - a),
-  ];
-}
-
-// Alpha of one radial-gradient stack layer at a normalised point, given centre/radii (in the same
-// fraction units as the point) and the stop fraction at which it reaches transparent.
-function radialAlpha(
-  nx: number,
-  ny: number,
-  cx: number,
-  cy: number,
-  rx: number,
-  ry: number,
-  stop: number,
-): number {
-  const dx = (nx - cx) / rx;
-  const dy = (ny - cy) / ry;
-  const r = Math.sqrt(dx * dx + dy * dy);
-  return Math.max(0, Math.min(1, 1 - r / stop));
-}
-
-// The base field surface (.hero-field-v3): three warm radials over the cream base. Layers are
-// listed BOTTOM-to-TOP (reverse of the CSS background order) for compositing.
-const FIELD_BASE: RGB = [244, 227, 206]; // #F4E3CE (cream base, under the terracotta tints)
-// Mirrors .hero-field-v3: light terracotta tints (accent mixed into warm ivory #FFF4E2) — globals.css.
-const FIELD_LAYERS: {
-  c: RGB;
-  cx: number;
-  cy: number;
-  rx: number;
-  ry: number;
-  stop: number;
-}[] = [
-  { c: [241, 202, 179], cx: 0.9, cy: 1.0, rx: 0.95, ry: 0.85, stop: 0.58 }, // terracotta 26%, lower-right
-  { c: [247, 220, 199], cx: 0.78, cy: 0.44, rx: 0.72, ry: 0.66, stop: 0.62 }, // terracotta 15%, centre-right
-  { c: [250, 230, 210], cx: 0.16, cy: 0.02, rx: 1.15, ry: 1.0, stop: 0.56 }, // terracotta 9% key, upper-left
-];
-
-function sampleField(nx: number, ny: number): RGB {
-  let col = FIELD_BASE;
-  for (const L of FIELD_LAYERS) {
-    col = over(col, L.c, radialAlpha(nx, ny, L.cx, L.cy, L.rx, L.ry, L.stop));
-  }
-  return col;
-}
-
-// The gold glow (.radial-glow-v3): an 84rem circle parked at left:-16rem top:-14rem, so its centre
-// sits at (26rem, 28rem) with a 42rem radius. Sampled in viewport px (needs the root rem). The
-// breathe animation is approximated at a resting opacity.
-const GLOW_C_REM = 26;
-const GLOW_CY_REM = 28;
-const GLOW_R_REM = 42;
-const GLOW_OPACITY = 0.9; // breathe rides 0.82→1; rest ~0.9
-// Warm apricot/amber glow (mirrors .radial-glow-v3 — orange-biased terracotta light, not rosy/gold).
-const GLOW_STOPS: { o: number; c: RGB; a: number }[] = [
-  { o: 0.0, c: [250, 212, 168], a: 0.96 },
-  { o: 0.32, c: [247, 203, 160], a: 0.86 },
-  { o: 0.6, c: [244, 198, 158], a: 0.48 },
-  { o: 0.8, c: [244, 202, 165], a: 0.0 },
-];
-
-function sampleGlow(
-  px: number,
-  py: number,
-  rem: number,
-): { c: RGB; a: number } {
-  const cx = GLOW_C_REM * rem;
-  const cy = GLOW_CY_REM * rem;
-  const r = GLOW_R_REM * rem;
-  const f = Math.sqrt((px - cx) ** 2 + (py - cy) ** 2) / r;
-  const last = GLOW_STOPS[GLOW_STOPS.length - 1];
-  if (f <= GLOW_STOPS[0].o)
-    return { c: GLOW_STOPS[0].c, a: GLOW_STOPS[0].a * GLOW_OPACITY };
-  if (f >= last.o) return { c: last.c, a: 0 };
-  for (let i = 0; i < GLOW_STOPS.length - 1; i++) {
-    const s = GLOW_STOPS[i];
-    const n = GLOW_STOPS[i + 1];
-    if (f >= s.o && f <= n.o) {
-      const t = (f - s.o) / (n.o - s.o);
-      const lerp = (a: number, b: number) => a + (b - a) * t;
-      return {
-        c: [lerp(s.c[0], n.c[0]), lerp(s.c[1], n.c[1]), lerp(s.c[2], n.c[2])],
-        a: lerp(s.a, n.a) * GLOW_OPACITY,
-      };
-    }
-  }
-  return { c: last.c, a: 0 };
-}
-
-// The composited background colour at a viewport point — field + gold glow over it.
-function sampleHalo(
-  px: number,
-  py: number,
-  viewW: number,
-  viewH: number,
-  rem: number,
-): string {
-  const field = sampleField(px / viewW, py / viewH);
-  const glow = sampleGlow(px, py, rem);
-  const [r, g, b] = over(field, glow.c, glow.a);
-  return `rgb(${Math.round(r)}, ${Math.round(g)}, ${Math.round(b)})`;
-}
-
 function MorphLetter({
   from,
   to,
@@ -370,16 +264,12 @@ function MorphLetter({
   const toCurrentRef = useRef<HTMLSpanElement>(null);
   const fromPairRef = useRef<HTMLSpanElement>(null);
   const toPairRef = useRef<HTMLSpanElement>(null);
-  const letterRef = useRef<HTMLSpanElement>(null);
   const [metrics, setMetrics] = useState<{
     fromWidth: number;
     toWidth: number;
     fromKern: number;
     toKern: number;
   } | null>(null);
-  // The background colour sampled at this letter's resting position (field + gold glow), used as
-  // the separating halo so it reads as the real background rather than a flat cream.
-  const [halo, setHalo] = useState<string | null>(null);
 
   useLayoutEffect(() => {
     const visualWidth = (node: HTMLSpanElement | null) =>
@@ -422,28 +312,6 @@ function MorphLetter({
         return next;
       });
 
-      // Sample the field colour behind this slot at its RESTING position. offsetLeft/offsetTop are
-      // layout coords (independent of the run's entrance/scrub transforms), measured against the
-      // untransformed .hero-name-v4 container — so the sample point is stable through the morph.
-      const slot = letterRef.current;
-      const nameEl = slot?.closest(".hero-name-v4") as HTMLElement | null;
-      if (slot && nameEl) {
-        const nameRect = nameEl.getBoundingClientRect();
-        const px = nameRect.left + slot.offsetLeft + slot.offsetWidth / 2;
-        const py = nameRect.top + slot.offsetTop + slot.offsetHeight / 2;
-        const rem =
-          Number.parseFloat(
-            getComputedStyle(document.documentElement).fontSize,
-          ) || 16;
-        const next = sampleHalo(
-          px,
-          py,
-          window.innerWidth,
-          window.innerHeight,
-          rem,
-        );
-        setHalo((current) => (current === next ? current : next));
-      }
     };
     measure();
     window.addEventListener("resize", measure);
@@ -492,7 +360,6 @@ function MorphLetter({
 
   return (
     <motion.span
-      ref={letterRef}
       className="hero-name-v4__letter"
       style={
         {
@@ -500,7 +367,6 @@ function MorphLetter({
           marginLeft: metrics ? marginLeft : undefined,
           y: liftY,
           zIndex: zLift,
-          "--halo": halo ?? undefined,
         } as MotionStyle
       }
     >
@@ -561,12 +427,28 @@ export function MorphName({ progress }: { progress: MotionValue<number> }) {
 
   // The "Featured" script eyebrow inks in (rise + fade) as the morph resolves into PROJECTS. Hooks run
   // unconditionally; the reduced-motion branch (PRATIUSH, no PROJECTS title) simply never renders it.
-  const featuredOpacity = useTransform(progress, [FEATURED_IN_START, FEATURED_IN_END], [0, 1], {
-    ease: cubicBezier(...INTRO_EASE),
-  });
+  const featuredOpacity = useTransform(
+    progress,
+    [FEATURED_IN_START, FEATURED_IN_END, FEATURED_OUT_START, FEATURED_OUT_END],
+    [0, 1, 1, 0],
+    { ease: cubicBezier(...INTRO_EASE) },
+  );
   const featuredRise = useTransform(progress, [FEATURED_IN_START, FEATURED_IN_END], ["0.5em", "0em"], {
     ease: cubicBezier(...INTRO_EASE),
   });
+
+  // The landed PROJECTS word fades + softly blurs out as it drifts up, ceding the stage to the first
+  // project's title (no collision). Applied to the reveal wrapper so it never fights the entrance
+  // mask on the inner run.
+  const projectsOpacity = useTransform(progress, [PROJECTS_FADE_START, PROJECTS_FADE_END], [1, 0], {
+    ease: cubicBezier(...INTRO_EASE),
+  });
+  const projectsBlur = useTransform(
+    progress,
+    [PROJECTS_FADE_START, PROJECTS_FADE_END],
+    [0, PROJECTS_FADE_BLUR],
+  );
+  const projectsFilter = useTransform(projectsBlur, (b) => `blur(${b}px)`);
 
   // Reduced motion: the name, plainly — no roll (the intro gate settles it).
   if (reduce) {
@@ -596,8 +478,12 @@ export function MorphName({ progress }: { progress: MotionValue<number> }) {
         Featured
       </motion.span>
       {/* Entrance mask: the name rises from behind its baseline on the foreground gate —
-          a separate node from the scrubbed letters, so the two never fight. */}
-      <span className="hero-name-v4__reveal">
+          a separate node from the scrubbed letters, so the two never fight. The reveal wrapper also
+          carries the handoff EXIT (fade + blur) so the landed PROJECTS clears before NILINK reads. */}
+      <motion.span
+        className="hero-name-v4__reveal"
+        style={{ opacity: projectsOpacity, filter: projectsFilter }}
+      >
         <motion.span
           className="hero-name-v4__run"
           initial={{ y: "104%", opacity: 0 }}
@@ -625,7 +511,7 @@ export function MorphName({ progress }: { progress: MotionValue<number> }) {
             />
           ))}
         </motion.span>
-      </span>
+      </motion.span>
     </motion.p>
   );
 }

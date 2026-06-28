@@ -1,11 +1,12 @@
 "use client";
 
-import { cubicBezier, motion, useTransform, type MotionValue } from "motion/react";
+import { motion, type MotionValue } from "motion/react";
 
 import { HeroThesis } from "@/components/hero/HeroThesis";
 import { MorphName } from "@/components/hero/MorphName";
 import { useIntro } from "@/components/intro/IntroProvider";
 import { BEAT, INTRO_EASE, type Beat } from "@/lib/intro";
+import { useScrubReveal } from "@/lib/reveal";
 
 /**
  * The left-aligned hero lockup: eyebrow → name → role → statement, plus the bottom-right
@@ -24,37 +25,21 @@ import { BEAT, INTRO_EASE, type Beat } from "@/lib/intro";
 const hidden = (beat: Beat) => ({ y: beat.y, opacity: 0 });
 const shown = { y: 0, opacity: 1 } as const;
 
-const exitEase = cubicBezier(...INTRO_EASE);
-
 /* Staggered exit windows (fractions of the pinned track). The copy no longer disappears before
-   the transition phrase is legible; its tail overlaps the thesis gate, then the morph takes over. */
+   the transition phrase is legible; its tail overlaps the thesis gate, then the morph takes over.
+   Each peels away on the shared scrub reveal (fade + lift + a touch of blur). */
 const EXIT = {
-  eyebrow: { start: 0.0, end: 0.07, lift: -54 },
-  body: { start: 0.025, end: 0.18, lift: -44 },
-  meta: { start: 0.04, end: 0.2, lift: -36 },
+  eyebrow: { window: [0.0, 0.07], lift: -54 },
+  body: { window: [0.025, 0.18], lift: -44 },
+  meta: { window: [0.04, 0.2], lift: -36 },
 } as const;
-
-function useExit(
-  progress: MotionValue<number>,
-  { start, end, lift }: { start: number; end: number; lift: number },
-) {
-  const opacity = useTransform(progress, [start, end], [1, 0], { ease: exitEase });
-  const y = useTransform(progress, [start, end], [0, lift], { ease: exitEase });
-  const filter = useTransform(
-    progress,
-    [start, end],
-    ["blur(0px)", "blur(4px)"],
-    { ease: exitEase },
-  );
-  return { opacity, y, filter };
-}
 
 export function HeroLede({ progress }: { progress: MotionValue<number> }) {
   const { foregroundIn, reduce } = useIntro();
 
-  const eyebrowExit = useExit(progress, EXIT.eyebrow);
-  const bodyExit = useExit(progress, EXIT.body);
-  const metaExit = useExit(progress, EXIT.meta);
+  const eyebrowExit = useScrubReveal(progress, EXIT.eyebrow.window, { y: EXIT.eyebrow.lift, blur: 4, dir: "out" });
+  const bodyExit = useScrubReveal(progress, EXIT.body.window, { y: EXIT.body.lift, blur: 4, dir: "out" });
+  const metaExit = useScrubReveal(progress, EXIT.meta.window, { y: EXIT.meta.lift, blur: 4, dir: "out" });
 
   // One entrance recipe for every copy element: rise + fade on the foreground gate, on the
   // shared schedule. Reduced motion settles to the final state with no transform/transition.

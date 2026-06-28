@@ -5,6 +5,7 @@ import {
   styleScript,
   anton,
   bricolageGrotesque,
+  fraunces,
   sentient,
   hankenGrotesk,
 } from "@/lib/fonts";
@@ -29,7 +30,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${hankenGrotesk.variable} ${bricolageGrotesque.variable} ${sentient.variable} ${anton.variable} ${styleScript.variable} antialiased`}
+        className={`${hankenGrotesk.variable} ${bricolageGrotesque.variable} ${sentient.variable} ${fraunces.variable} ${anton.variable} ${styleScript.variable} antialiased`}
       >
         {/* IntroProvider is the single opening-choreography clock — backdrop, hero copy, name
             and scroll cue all read the same two gates instead of each animating independently. */}

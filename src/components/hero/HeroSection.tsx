@@ -11,7 +11,7 @@ import { useIntro } from "@/components/intro/IntroProvider";
 import { SNAP_EASE } from "@/lib/intro";
 
 /**
- * The landing is a pinned stage: the section sticks for ~1.2 extra viewports while the
+ * The landing is a pinned stage: the section sticks for ~0.8 extra viewports while the
  * opening composition transforms in place — copy dissolves, then the name itself rolls
  * in place, holding its left anchor, and lands as PROJECTS (see MorphName). The atmosphere (glow,
  * aurora, smoke, grain) holds underneath the whole move, so the morph happens inside the
@@ -46,9 +46,9 @@ export function HeroSection() {
         data-backdrop={backdropIn ? "in" : "out"}
         data-foreground={foregroundIn ? "in" : "out"}
       >
-        {/* The hero's warm field, feather-masked at the bottom so the section dissolves into
-            the page's continuous aurora instead of cutting off on a hard seam. */}
-        <div className="hero-field-v3" aria-hidden />
+        {/* No hero-specific base field — the page-wide SectionAurora shows through as the single
+            continuous background. The hero only layers its warm atmosphere (aurora / glow / smoke /
+            grain) on top, each feather-masked at the bottom so it dissolves into the scroll. */}
         <HeroAurora />
         <motion.div className="hero-glow-drift-v4" style={{ x: glowX }} aria-hidden>
           <RadialGlow />

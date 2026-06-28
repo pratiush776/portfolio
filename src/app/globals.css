@@ -312,11 +312,12 @@ button {
 /* =========================================================
    V3 HOMEPAGE HERO
    ========================================================= */
-/* The pin: the track buys ~1.2 extra viewports of scroll; the hero sticks inside it while
-   the morph plays (copy exits → the name is pulled across → PROJECTS lands → short hold). */
+/* The pin: the track buys ~0.8 extra viewports of scroll; the hero sticks inside it while
+   the morph plays (copy exits → the name is pulled across → PROJECTS lands → short hold). Lower
+   than before so the PROJECTS handoff is SNAPPIER — the hero clears faster into the first card. */
 .hero-track-v4 {
   position: relative;
-  height: 220vh;
+  height: 180vh;
 }
 
 .hero-root-v3 {
@@ -325,48 +326,15 @@ button {
   min-height: 100svh;
   height: 100svh;
   padding: 0;
-  /* NO background here. The hero's field lives on .hero-field-v3 below, feather-masked at
-     the bottom, so the hero dissolves into the page's continuous aurora field instead of
-     ending on a hard full-width seam (the old visible "cut" into the next section). */
+  /* NO background here — the page-wide SectionAurora (fixed, behind everything) is the SINGLE
+     continuous field for the whole page. The hero just layers its warm atmosphere (glow / smoke /
+     aurora / grain) on top, each feather-masked at the bottom so there's no seam into the scroll. */
   background: transparent;
   overflow: hidden;
   isolation: isolate;
 }
 
-/* The hero's directional field: warm light pools from the upper-left (a deliberate light
-   source, reinforced by .radial-glow-v3), falling to faint terracotta warmth lower-right.
-   The mask feathers the bottom ~quarter so the fixed SectionAurora behind shows through —
-   the hero and the rest of the page read as ONE continuous surface. */
-.hero-field-v3 {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  /* The gradient is built from LIGHTER SHADES OF THE TERRACOTTA ACCENT, so the whole field reads as
-     a soft terracotta wash rather than gold/cream — light pool upper-left, deepening toward the
-     lower-right. The accent is mixed into a WARM IVORY (#FFF4E2), not pure white: plain white tints
-     of terracotta drift rosy/salmon, the warm ivory keeps them on the apricot side, matching the
-     glow. The cream base stays underneath so the feathered bottom still dissolves into the page
-     aurora. (Accent + base unchanged; derived tints, per DESIGN.md "don't re-hue committed values".) */
-  background:
-    /* upper-left key light — the lightest terracotta tint (directional light source) */
-    radial-gradient(115% 100% at 16% 2%,
-        color-mix(in srgb, var(--v3-accent-red) 9%, #FFF4E2) 0%,
-        transparent 56%),
-    /* centre-right ambient fill — keeps the resting void lit and warms the zone PROJECTS lands in */
-    radial-gradient(72% 66% at 78% 44%,
-        color-mix(in srgb, var(--v3-accent-red) 15%, #FFF4E2) 0%,
-        transparent 62%),
-    /* lower-right — the deepest terracotta tint, giving the corner real warm presence */
-    radial-gradient(95% 85% at 90% 100%,
-        color-mix(in srgb, var(--v3-accent-red) 26%, #FFF4E2) 0%,
-        transparent 58%),
-    var(--v3-bg-primary);
-  -webkit-mask-image: linear-gradient(to bottom, #000 72%, transparent 100%);
-  mask-image: linear-gradient(to bottom, #000 72%, transparent 100%);
-}
-
-/* Every hero-scoped decor layer feathers out with the field — otherwise the grain/aurora
+/* Every hero-scoped decor layer feathers out at the bottom — otherwise the grain/aurora
    would stamp their own hard edge where the section ends. */
 .hero-root-v3 .hero-aurora-v3,
 .hero-root-v3 .radial-glow-wrap-v3,
@@ -1107,8 +1075,8 @@ button {
      lower part already sits on the colour PRATIUSH is painted in (they read as connected) and the
      script reads as clean terracotta with just a breath of depth up top. The top stop is mostly
      accent with only a touch of the deep shade mixed in — NOT the full plum-tinged ink-terra, which
-     made the top read muddy. (The name stays solid: a background-clip:text gradient can't coexist
-     with its stroke halo — see .hero-name-v4__roll span.) `color` is the solid fallback where
+     made the top read muddy. (The name itself stays SOLID terracotta — the greeting carries the
+     colour flow; the name is its bright terminus.) `color` is the solid fallback where
      background-clip:text is unsupported. */
   color: var(--hero-ink-terra);
   background: linear-gradient(
@@ -1269,9 +1237,9 @@ button {
   margin: calc(var(--roll-gap, 0px) / -2) 0;
   /* Clip the VERTICAL axis ONLY — that masks the glyph roll (old up / new from below). The slot's
      width is the glyph's ADVANCE width, so a full `overflow: hidden` also clips the X axis, which
-     shaved the halo stroke (and the ink itself on tight-bearing glyphs — e.g. PROJECTS' E sits
-     0.004em off its right edge) off the landed word. Nothing ever moves horizontally inside a slot,
-     so X must stay visible; `clip` on Y keeps the `visible` X from coercing to `auto` (no scroll). */
+     shaved the ink off tight-bearing glyphs (e.g. PROJECTS' E sits 0.004em off its right edge) on the
+     landed word. Nothing ever moves horizontally inside a slot, so X must stay visible; `clip` on Y
+     keeps the `visible` X from coercing to `auto` (no scroll). */
   overflow: visible clip;
   will-change: transform;
 }
@@ -1287,27 +1255,16 @@ button {
   will-change: transform;
 }
 
-/* Glyphs shrink-wrap to their natural advance so the slot can measure them.
-   The halo is the gradient-matched separator: `paint-order: stroke fill` draws a background-toned
-   ring BEHIND the terracotta fill (the letterform stays crisp), so it is invisible on the warm
-   field but becomes a clean separating gap wherever a glyph overlaps another glyph mid-morph.
-   The soft same-tone shadow feathers that gap.
-   The tone is `--halo` — the actual background colour sampled BEHIND each letter (field + gold
-   glow, set per-slot by MorphName) so the ring matches the warm gradient at each position instead
-   of one flat cream; the base token is the fallback before the sample lands / in reduced motion. */
+/* Glyphs shrink-wrap to their natural advance so the slot can measure them. No background-toned
+   stroke/shadow "halo": against the unified, grain-textured field a single flat ring couldn't stay
+   invisible (it read as a pale outline at rest and around the static landed PROJECTS). The roll gap
+   (var(--roll-gap)) already keeps the two stacked glyphs apart through the morph, so the letters
+   stay clean on their own — solid terracotta fill (inherited --hero-accent), no ring. */
 .hero-name-v4__roll span {
   display: inline-block;
   height: 1em;
   line-height: 1;
   white-space: pre;
-  paint-order: stroke fill;
-  -webkit-text-stroke: 0.06em var(--halo, var(--v3-bg-primary));
-  text-shadow: 0 0 0.04em var(--halo, var(--v3-bg-primary));
-  /* Solid fill (inherited --hero-accent). NOTE: do NOT add a background-clip:text gradient here — it
-     is incompatible with the -webkit-text-stroke halo above (the browser then paints only the stroke
-     and the glyphs go hollow). The greeting carries the visible colour flow; the name is its solid
-     bright terminus. A real per-glyph name gradient would require replacing this stroke halo with a
-     text-shadow ring, which touches the morph's glyph separation. */
 }
 
 /* Offscreen pair samples let MorphName recover the kerning that is normally lost when a word
@@ -1766,7 +1723,6 @@ button {
 
 /* keep all real content above the fixed aurora field (z-index 0) */
 .page-v4 > .hero-track-v4,
-.works-v4,
 .footer-v4 {
   position: relative;
   z-index: 1;
@@ -1827,232 +1783,6 @@ button {
   100% { transform: translate3d(0%, 0%, 0) scale(1.08); }
 }
 
-/* =========================================================
-   V4 — PROJECTS (editorial case panels; the hero lands as the title)
-   ========================================================= */
-.works-v4 {
-  padding: 0 var(--brand-gutter);
-  /* The handoff is a 3-layer parallax: the landed PROJECTS title drifts slowly UP (MorphName
-     TITLE_DRIFT), the thesis scrolls off fast, and this section crests up from below to meet the
-     space the rising title opens. The deeper negative margin reveals the first card EARLIER — around
-     when the thesis nears the top — so the section transition stays alive rather than holding on a lone
-     title. Pulled ~20% deeper so the first card crests HIGHER into the frame: the gap below the drifted
-     title is tightened to read as intentional breathing room, not stranded empty field. Push toward 0
-     to reveal later / open the gap, more negative to reveal sooner / tighten it. */
-  margin-top: -70vh;
-  scroll-margin-top: 0;
-  color: var(--v3-text-dark);
-}
-
-.works-v4__panels {
-  display: flex;
-  flex-direction: column;
-  gap: clamp(5rem, 13vh, 10rem);
-  padding-top: 0;
-}
-
-/* ---- one case panel ---- */
-.work-panel-v4__grid {
-  display: grid;
-  grid-template-columns: 7fr 5fr;
-  gap: clamp(2.5rem, 5vw, 5.5rem);
-  align-items: center;
-}
-
-.work-panel-v4--flip .work-panel-v4__grid {
-  grid-template-columns: 5fr 7fr;
-}
-
-.work-panel-v4--flip .work-panel-v4__media {
-  order: 2;
-}
-
-.work-panel-v4--flip .work-panel-v4__body {
-  order: 1;
-}
-
-/* The frame the clip-path reveal opens onto. border-radius matches the settled clip rounding
-   so the resting state and the scrubbed state agree. */
-.work-panel-v4__media {
-  position: relative;
-  aspect-ratio: 16 / 10;
-  overflow: hidden;
-  border-radius: 28px;
-  background: color-mix(in srgb, var(--v3-text-dark) 8%, var(--v3-bg-primary));
-  box-shadow: var(--v3-shadow-soft);
-}
-
-/* Vertical bleed (±10%) gives the parallax drift (±7% of this layer) room — the media edge
-   can never enter the frame. */
-.work-panel-v4__media-inner {
-  position: absolute;
-  inset: -10% 0;
-  will-change: transform;
-}
-
-.work-panel-v4__video {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-/* Typographic poster — the honest stand-in where the only screenshots are rough captures.
-   A flat tinted field, one big serif word, a caps caption, soft top-light + grain. */
-.work-panel-v4__poster {
-  position: absolute;
-  inset: 0;
-  container-type: inline-size;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  gap: 0.85rem;
-  padding: clamp(1.5rem, 7cqi, 3.25rem);
-}
-
-.work-panel-v4__poster::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(85% 95% at 16% 6%, color-mix(in srgb, var(--v3-accent-gold) 22%, transparent) 0%, transparent 62%);
-}
-
-.work-panel-v4__poster::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background-image: var(--grain-url);
-  background-repeat: repeat;
-  background-size: var(--grain-scale) var(--grain-scale);
-  opacity: 0.28;
-  mix-blend-mode: overlay;
-}
-
-.work-panel-v4__poster-word {
-  position: relative;
-  z-index: 1;
-  font-family: var(--font-sentient), Georgia, serif;
-  font-weight: 550;
-  font-variation-settings: "wght" 550, "opsz" 144, "SOFT" 0, "WONK" 0;
-  font-size: clamp(1.8rem, 11.5cqi, 6rem);
-  line-height: 1.04;
-  letter-spacing: -0.02em;
-  color: var(--v3-bg-primary);
-}
-
-.work-panel-v4__poster-caption {
-  position: relative;
-  z-index: 1;
-  font-family: var(--font-pier);
-  font-size: clamp(0.62rem, 2.2cqi, 0.8rem);
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-  color: color-mix(in srgb, var(--v3-bg-primary) 72%, transparent);
-}
-
-/* ---- panel copy ---- */
-.work-panel-v4__body {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: clamp(0.9rem, 1.9vh, 1.4rem);
-}
-
-.work-panel-v4__title {
-  font-family: var(--font-sentient), Georgia, serif;
-  font-weight: 600;
-  font-size: clamp(2rem, 3.1vw, 3.2rem);
-  line-height: 1.05;
-  letter-spacing: -0.02em;
-}
-
-.work-panel-v4__title-mask {
-  display: block;
-  overflow: hidden;
-  padding-bottom: 0.1em; /* keep serif descenders clear of the mask */
-}
-
-.work-panel-v4__title-inner {
-  display: block;
-  will-change: transform;
-}
-
-/* The one quiet context line (year · role) — content, not a label. */
-.work-panel-v4__meta {
-  margin: 0;
-  font-family: var(--font-pier);
-  font-size: clamp(0.7rem, 0.85vw, 0.85rem);
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  /* 0.55 dropped this small tracked line to ~3.5:1 on the cream; 0.7 clears WCAG AA (~4.6:1). */
-  opacity: 0.7;
-}
-
-.work-panel-v4__desc {
-  margin: 0;
-  max-width: 44ch;
-  font-size: clamp(1rem, 1.1vw, 1.125rem);
-  line-height: 1.65;
-  opacity: 0.88;
-}
-
-.work-panel-v4__stack {
-  display: flex;
-  flex-wrap: wrap;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  font-family: var(--font-pier);
-  font-size: 0.72rem;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  /* Was 0.6 (~4.0:1); 0.7 lifts the stack chips to a comfortable AA margin on the cream. */
-  opacity: 0.7;
-}
-
-.work-panel-v4__stack li:not(:last-child)::after {
-  content: "·";
-  margin: 0 0.6em;
-}
-
-.work-panel-v4__links {
-  display: flex;
-  gap: clamp(1.25rem, 2vw, 2rem);
-  margin-top: 0.25rem;
-}
-
-.work-panel-v4__link {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  font-family: var(--font-pier);
-  font-size: clamp(0.74rem, 0.9vw, 0.88rem);
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: var(--v3-text-dark);
-  border-bottom: 1px solid currentColor;
-  padding-bottom: 0.25em;
-  transition: color 0.5s var(--ease-micro);
-}
-
-.work-panel-v4__link:hover {
-  color: var(--v3-accent-red);
-}
-
-.work-panel-v4__link-icon {
-  display: inline-flex;
-  width: 0.8em;
-  height: 0.8em;
-  transition: transform 0.6s var(--ease-micro);
-}
-
-.work-panel-v4__link-icon svg {
-  width: 100%;
-  height: 100%;
-}
-
-.work-panel-v4__link:hover .work-panel-v4__link-icon {
-  transform: translate(2px, -2px);
-}
 
 /* =========================================================
    V4 — 03 · The ask (dark contact finale)
@@ -2183,32 +1913,8 @@ button {
   mix-blend-mode: overlay;
 }
 
-/* =========================================================
-   V4 — responsive (≤1100px: panels stack, morph rescales)
-   ========================================================= */
-@media (max-width: 1100px) {
-  .work-panel-v4__grid,
-  .work-panel-v4--flip .work-panel-v4__grid {
-    grid-template-columns: 1fr;
-    gap: clamp(1.5rem, 4vh, 2.5rem);
-  }
-
-  /* media always leads on small screens, whichever side it sat on desktop */
-  .work-panel-v4--flip .work-panel-v4__media {
-    order: 0;
-  }
-
-  .work-panel-v4--flip .work-panel-v4__body {
-    order: 0;
-  }
-}
 
 @media (max-width: 640px) {
-  .work-panel-v4__media {
-    aspect-ratio: 4 / 3;
-    border-radius: 20px;
-  }
-
   .footer-v4__meta {
     flex-direction: column;
     align-items: flex-start;
@@ -2229,20 +1935,517 @@ button {
     position: relative;
   }
 
-  /* no pinned hold to crest under — the section flows normally */
-  .works-v4 {
-    margin-top: 0;
-  }
-
-  .works-v4__panels {
-    padding-top: clamp(3rem, 9vh, 7rem);
-  }
-
-  .work-panel-v4__link,
-  .work-panel-v4__link-icon,
   .footer-v4__email,
   .footer-v4__link,
   .footer-v4__link-icon {
     transition: none;
+  }
+}
+
+/* =========================================================
+   V4 — PROJECTS (art-book of full-bleed editorial spreads)
+   One continuous cream surface — the fixed SectionAurora shows through, no card, no two-tone seam.
+   Each project is a full-viewport spread: a huge serif name + ghost echo, marginalia, and a fitted
+   demo container. The lead spread rises fastest then irises open (JS-driven); no pin, no scroll-away.
+   ========================================================= */
+.projects-gallery-v4 {
+  position: relative;
+  z-index: 1;
+  color: var(--v3-text-dark);
+  overflow-x: clip; /* clip the ghost-echo bleed without creating a scroll container (sticky safe) */
+}
+
+.projects-gallery-v4__spreads {
+  display: flex;
+  flex-direction: column;
+}
+
+/* ---- one project card (a pinned stage that overlaps the previous one / the hero) ---- */
+.project-spread-v4 {
+  position: relative;
+  /* Pinned budget: rise (tiny) + beat + expand + a LONG hold. The hold is deliberately long so the
+     full card sits with its content alone for a while before the next tiny card rises in. */
+  height: 400vh;
+  /* Overlap the PREVIOUS card. With a 400vh track this nets ~160vh between cards — the next stays
+     hidden until well into this card's hold, then rises in and covers before this one unpins.
+     Toward 0 = a bigger gap between cards (more solo time); more negative = they come quicker. */
+  margin-top: -240vh;
+}
+
+/* The FIRST card overlaps the HERO instead — tuned so it begins rising right as the PROJECTS title
+   starts lifting, so the hero handoff has no dead beat. The hero track is now 180vh; -150vh ⇒ its
+   pin engages ~30vh in (the title lift begins ~28vh), so the card is already visibly rising as
+   PROJECTS leaves. Nudge THIS alone for the first card's timing without touching the stack
+   (more negative = the card engages even earlier / overlaps the hero more). */
+.project-spread-v4:first-child {
+  margin-top: -150vh;
+}
+
+.project-spread-v4__pin {
+  position: sticky;
+  top: 0;
+  height: 100svh;
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+}
+
+
+/* =========================================================
+   V4 — LEAD PROJECT FEATURE (the recomposed editorial NILINK spread)
+   A calm, full-bleed scene: oversized serif title + short copy on the left, the photographed
+   product still bleeding off the right, over the page's own warm field. No box expands; the parts
+   settle in (motion owned by ProjectFeature). Lives inside the shared `.project-spread-v4` pin.
+   ========================================================= */
+.project-feature-v4 {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  /* asymmetric top padding biases the centered copy block slightly BELOW dead-centre, for a more
+     intentional editorial rhythm (the oversized title shouldn't sit hard against the top) */
+  padding: clamp(3vh, 6vh, 8vh) var(--brand-gutter) 0;
+  overflow: hidden;
+}
+
+/* the photographed scene, anchored right and bleeding off the edge; its left edge feathers into
+   the page cream so the product photo's own surround never reads as a hard seam */
+.project-feature-v4__scene {
+  position: absolute;
+  /* the full product scene, anchored bottom-right (laptop sits low, airy space above — the mockup's
+     framing). It bleeds below the fold so the slow upward parallax has headroom and never opens a
+     gap at the base of the pedestal. */
+  right: 0;
+  bottom: -3rem;
+  /* a touch larger than before (~+10%) so the laptop reads as a real, detailed proof object rather
+     than distant decoration — still anchored right so it never overpowers the title */
+  width: clamp(55%, 62vw, 68%);
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+  /* feather the LEFT and TOP edges into the cream so the photo's own boundaries dissolve instead of
+     cutting off — a short, eased left taper (toward the copy) intersected with a soft top fade
+     (where the airy top of the scene meets the page). Two mask layers, multiplied. */
+  -webkit-mask-image:
+    linear-gradient(to right, transparent 0%, rgba(0, 0, 0, 0.2) 3%, rgba(0, 0, 0, 0.6) 5.5%, #000 8%, #000 100%),
+    linear-gradient(to bottom, transparent 0%, rgba(0, 0, 0, 0.35) 7%, #000 16%, #000 100%);
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-size: 100% 100%;
+  -webkit-mask-composite: source-in;
+  mask-image:
+    linear-gradient(to right, transparent 0%, rgba(0, 0, 0, 0.2) 3%, rgba(0, 0, 0, 0.6) 5.5%, #000 8%, #000 100%),
+    linear-gradient(to bottom, transparent 0%, rgba(0, 0, 0, 0.35) 7%, #000 16%, #000 100%);
+  mask-repeat: no-repeat;
+  mask-size: 100% 100%;
+  mask-composite: intersect;
+}
+
+.project-feature-v4__image {
+  display: block;
+  width: 100%;
+  height: auto;
+  will-change: transform, opacity, filter;
+}
+
+.project-feature-v4__body {
+  position: relative;
+  z-index: 1;
+  max-width: min(44rem, 56%);
+  /* a touch of left breathing so the oversized title doesn't crowd the edge */
+  margin-left: clamp(0.5rem, 1.5vw, 1.5rem);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: clamp(1.3rem, 3vh, 2.2rem);
+}
+
+.project-feature-v4__title {
+  margin: 0;
+  font-family: var(--font-fraunces), Georgia, serif;
+  font-weight: 340;
+  /* push Fraunces to its display optical size for the thin hairlines + thick stems of a Didone */
+  font-variation-settings: "opsz" 144, "SOFT" 0, "WONK" 0;
+  font-size: clamp(3.5rem, 12vw, 11rem);
+  line-height: 0.9;
+  letter-spacing: 0.005em;
+  color: var(--v3-text-dark);
+  will-change: transform, opacity, filter;
+}
+
+.project-feature-v4__desc {
+  margin: 0;
+  max-width: 27rem;
+  /* bumped for effortless recruiter skimming — it shouldn't read tiny beside the huge title */
+  font-size: clamp(1rem, 1.1vw, 1.2rem);
+  line-height: 1.55;
+  color: color-mix(in srgb, var(--v3-text-dark) 82%, transparent);
+}
+
+.project-feature-v4__cta {
+  margin-top: clamp(1.25rem, 3.5vh, 2.75rem);
+}
+
+/* the one interactive flourish — terracotta serif link; the word nudges, the arrow nudges further,
+   a hairline underline draws in from the left */
+.project-feature-v4__case {
+  display: inline-flex;
+  align-items: center;
+  gap: 16px;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-family: var(--font-sentient), Georgia, serif;
+  font-size: clamp(1.05rem, 1.3vw, 1.35rem);
+  color: var(--v3-accent-red);
+  transition: transform 0.3s var(--ease-micro);
+}
+
+.project-feature-v4__case-label {
+  position: relative;
+}
+
+.project-feature-v4__case-label::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -0.16em;
+  width: 100%;
+  height: 1px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.4s var(--ease-micro);
+}
+
+.project-feature-v4__case-arrow {
+  display: inline-flex;
+  width: 1.7em;
+  transition: transform 0.3s var(--ease-micro);
+}
+
+.project-feature-v4__case-arrow svg {
+  width: 100%;
+  height: auto;
+}
+
+.project-feature-v4__case:hover {
+  transform: translateX(4px);
+}
+
+.project-feature-v4__case:hover .project-feature-v4__case-label::after {
+  transform: scaleX(1);
+}
+
+.project-feature-v4__case:hover .project-feature-v4__case-arrow {
+  transform: translateX(8px);
+}
+
+/* =========================================================
+   V4 — PROJECT DETAIL OVERLAY (the "View details" full case study)
+   ========================================================= */
+.project-overlay-v4 {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(1rem, 4vw, 3rem);
+  background: color-mix(in srgb, var(--v3-text-dark) 60%, transparent);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.project-overlay-v4__panel {
+  position: relative;
+  width: min(1080px, 100%);
+  max-height: min(88vh, 920px);
+  overflow: auto;
+  border-radius: var(--v3-radius-lg);
+  background: color-mix(in srgb, var(--v3-bg-primary) 52%, #fff);
+  box-shadow: 0 50px 120px -40px rgba(34, 30, 46, 0.6);
+  isolation: isolate;
+}
+
+.project-overlay-v4__grain {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image: var(--grain-url);
+  background-repeat: repeat;
+  background-size: var(--grain-scale) var(--grain-scale);
+  opacity: calc(var(--grain-opacity) * 0.5);
+  mix-blend-mode: overlay;
+}
+
+.project-overlay-v4__close {
+  position: absolute;
+  top: clamp(0.75rem, 1.5vw, 1.25rem);
+  right: clamp(0.75rem, 1.5vw, 1.25rem);
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  font-size: 1.5rem;
+  line-height: 1;
+  color: var(--v3-text-dark);
+  background: color-mix(in srgb, var(--v3-text-dark) 8%, transparent);
+  border: none;
+  border-radius: var(--v3-radius-pill);
+  cursor: pointer;
+  transition: background 0.5s var(--ease-micro), color 0.5s var(--ease-micro);
+}
+
+.project-overlay-v4__close:hover {
+  background: var(--v3-text-dark);
+  color: var(--v3-bg-primary);
+}
+
+.project-overlay-v4__grid {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: 0.95fr 1.05fr;
+  align-items: stretch;
+}
+
+.project-overlay-v4__media {
+  position: relative;
+  overflow: hidden;
+  min-height: 100%;
+  background: color-mix(in srgb, var(--v3-text-dark) 8%, var(--v3-bg-primary));
+  container-type: inline-size;
+}
+
+.project-overlay-v4__video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.project-overlay-v4__plate {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.9rem;
+  padding: clamp(1.5rem, 7cqi, 3rem);
+  text-align: center;
+}
+
+.project-overlay-v4__plate::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: var(--grain-url);
+  background-repeat: repeat;
+  background-size: var(--grain-scale) var(--grain-scale);
+  opacity: 0.28;
+  mix-blend-mode: overlay;
+}
+
+.project-overlay-v4__plate-word {
+  position: relative;
+  z-index: 1;
+  font-family: var(--font-bricolage), sans-serif;
+  font-weight: 600;
+  font-size: clamp(2rem, 14cqi, 4.5rem);
+  letter-spacing: 0.04em;
+  color: var(--v3-bg-primary);
+}
+
+.project-overlay-v4__plate-caption {
+  position: relative;
+  z-index: 1;
+  font-family: var(--font-pier);
+  font-size: clamp(0.62rem, 2.4cqi, 0.82rem);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--v3-bg-primary) 72%, transparent);
+}
+
+.project-overlay-v4__body {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: clamp(0.85rem, 1.8vh, 1.3rem);
+  padding: clamp(2rem, 4vw, 3.5rem);
+}
+
+.project-overlay-v4__meta {
+  margin: 0;
+  font-family: var(--font-pier);
+  font-size: clamp(0.7rem, 0.85vw, 0.85rem);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  opacity: 0.7;
+}
+
+.project-overlay-v4__title {
+  margin: 0;
+  font-family: var(--font-sentient), Georgia, serif;
+  font-weight: 600;
+  font-size: clamp(2rem, 4vw, 3.25rem);
+  line-height: 1.04;
+  letter-spacing: -0.025em;
+}
+
+.project-overlay-v4__desc {
+  margin: 0;
+  max-width: 52ch;
+  font-size: clamp(1rem, 1.1vw, 1.125rem);
+  line-height: 1.65;
+  opacity: 0.88;
+}
+
+.project-overlay-v4__stack {
+  display: flex;
+  flex-wrap: wrap;
+  margin: 0.25rem 0 0;
+  padding: 0;
+  list-style: none;
+  font-family: var(--font-pier);
+  font-size: 0.72rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  opacity: 0.7;
+}
+
+.project-overlay-v4__stack li:not(:last-child)::after {
+  content: "·";
+  margin: 0 0.6em;
+}
+
+.project-overlay-v4__links {
+  display: flex;
+  gap: clamp(1.25rem, 2vw, 2rem);
+  margin-top: 0.5rem;
+}
+
+.project-overlay-v4__link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-family: var(--font-pier);
+  font-size: clamp(0.74rem, 0.9vw, 0.88rem);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--v3-text-dark);
+  border-bottom: 1px solid currentColor;
+  padding-bottom: 0.25em;
+  transition: color 0.5s var(--ease-micro);
+}
+
+.project-overlay-v4__link:hover {
+  color: var(--v3-accent-red);
+}
+
+.project-overlay-v4__link-icon {
+  display: inline-flex;
+  width: 0.8em;
+  height: 0.8em;
+  transition: transform 0.6s var(--ease-micro);
+}
+
+.project-overlay-v4__link-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.project-overlay-v4__link:hover .project-overlay-v4__link-icon {
+  transform: translate(2px, -2px);
+}
+
+/* =========================================================
+   V4 — projects gallery: responsive + reduced motion
+   ========================================================= */
+@media (max-width: 1000px) {
+  /* Below the two-column threshold, unpin the lead and let it flow. The descendant selector
+     outranks `.project-spread-v4:first-child` so the lead resets too. */
+  .projects-gallery-v4 .project-spread-v4 {
+    height: auto;
+    margin-top: 0;
+  }
+
+  .project-spread-v4__pin {
+    position: relative;
+    height: auto;
+    min-height: 78vh;
+  }
+
+  /* lead feature: stack the scene under the copy and drop the off-screen bleed */
+  .project-feature-v4 {
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    gap: clamp(2rem, 5vh, 3rem);
+    padding: clamp(3rem, 8vh, 5rem) var(--brand-gutter);
+  }
+
+  .project-feature-v4__body {
+    max-width: 100%;
+  }
+
+  .project-feature-v4__scene {
+    position: relative;
+    top: auto;
+    bottom: auto;
+    right: auto;
+    transform: none;
+    width: 100%;
+    overflow: visible;
+    -webkit-mask-image: none;
+    mask-image: none;
+  }
+
+  .project-overlay-v4__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .project-overlay-v4__media {
+    min-height: 38vh;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* No rise, no expand — the lead feature simply flows full-size. The descendant selector
+     outranks `.project-spread-v4:first-child` so the lead resets too. */
+  .projects-gallery-v4 .project-spread-v4 {
+    height: auto;
+    margin-top: 0;
+  }
+
+  .project-spread-v4__pin {
+    position: relative;
+    height: auto;
+    min-height: 88vh;
+  }
+
+  /* lead feature flows full-size and stacked (no pin -> no absolute bleed) */
+  .project-feature-v4 {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: clamp(2rem, 5vh, 3rem);
+    padding: clamp(3rem, 8vh, 5rem) var(--brand-gutter);
+    height: auto;
+  }
+
+  .project-feature-v4__scene {
+    position: relative;
+    top: auto;
+    bottom: auto;
+    right: auto;
+    transform: none;
+    width: 100%;
+    overflow: visible;
+    -webkit-mask-image: none;
+    mask-image: none;
   }
 }

@@ -1,7 +1,7 @@
 import { SectionAurora } from "@/components/decor/SectionAurora";
 import { SiteFooter } from "@/components/footer/SiteFooter";
 import { HeroSection } from "@/components/hero/HeroSection";
-import { WorksSection } from "@/components/works/WorksSection";
+import { ProjectsGallery } from "@/components/works/ProjectsGallery";
 
 /**
  * The landing reads as one pitch, shown not told (no section labels anywhere):
@@ -20,7 +20,9 @@ export default function Home() {
           field feather-masks into it, so there is no seam between sections). */}
       <SectionAurora />
       <HeroSection />
-      <WorksSection />
+      {/* Projects — an art-book of full-bleed editorial spreads on the continuous cream surface.
+          The lead spread carries the parallax-then-iris entry out of the hero. */}
+      <ProjectsGallery />
       <SiteFooter />
     </main>
   );

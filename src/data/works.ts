@@ -28,8 +28,17 @@ export type FeaturedWork = {
   title: string;
   year: string;
   role: string;
+  /** Short editorial category for the cinematic stage's rotated label (e.g. "NIL Marketplace").
+      Optional — the stage falls back to the role line when absent. */
+  kicker?: string;
+  /** A short, definition-style gloss shown under the project name (Serendipity DNA). Optional. */
+  tagline?: string;
   /** First-person, concrete. This is the human voice of the section. */
   description: string;
+  /** A photographed product still shown as the editorial spread's bleed image (the laptop scene
+      on the lead spread). The demo `media` still drives the play-in-place / detail-overlay video.
+      Optional — only the recomposed editorial spreads use it. */
+  cover?: string;
   stack: string[];
   media: WorkMedia;
   links: { label: string; href: string }[];
@@ -47,14 +56,16 @@ export const featured: FeaturedWork[] = [
     title: "NILINK",
     year: "2025",
     role: "Capstone · Software Engineer",
+    kicker: "NIL Marketplace",
+    tagline: "Athletes on one side. Brands on the other.",
     description:
-      "A two-sided NIL marketplace where college athletes find brand deals and brands run campaigns, offers, contracts, and payouts. Built as my capstone MVP under real deadlines: role-aware dashboards on both sides, plus all the unglamorous glue that keeps a marketplace honest.",
+      "NIL deals were scattered and informal — NILINK turns them into one marketplace for campaigns, contracts, and payouts. Built as my capstone MVP under real deadlines: role-aware dashboards on both sides, plus the unglamorous glue that keeps a marketplace honest.",
+    cover: "/projects_assets/NILINK/NILINK_product_img.png",
     stack: ["Next.js", "TypeScript", "Supabase", "SWR", "Vitest"],
     media: {
-      kind: "poster",
-      word: "NILINK",
-      caption: "Athletes on one side. Brands on the other.",
-      tint: "#221E2E",
+      kind: "video",
+      src: "/projects_assets/NILINK/demo.mp4",
+      poster: "/projects_assets/NILINK/poster.jpg",
     },
     links: [{ label: "Visit live", href: "https://mvp-inky-eta.vercel.app/" }],
   },

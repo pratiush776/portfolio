@@ -34,9 +34,10 @@ export function NavLogo() {
   }, []);
 
   // Scrubbed reveal tied to the morph window (the hero pin starts at scrollY 0, so plain
-  // scrollY is the same clock). The morph now runs around progress 0.26→0.58 of a 220vh track
-  // (progress·1.2 = scrollY/vh), so the logo returns during the word's departure and is settled
-  // before PROJECTS fully lands.
+  // scrollY is the same clock). The hero track is 180vh (pin = 80vh), so progress·0.8 = scrollY/vh
+  // and the morph runs ~6→26vh of scroll (progress 0.08→0.33). This reveal is keyed in ABSOLUTE
+  // viewport-heights (~0.42→0.66vh below), so the logo returns as the big name departs/fades. Re-tune
+  // the 0.42/0.24 thresholds by eye if it should track the morph window more tightly.
   const reveal = (v: number) => Math.min(1, Math.max(0, (v / vh.current - 0.42) / 0.24));
   const opacity = useTransform(scrollY, (v) =>
     reveal(v),

@@ -1,6 +1,7 @@
 import {
   Anton,
   Bricolage_Grotesque,
+  Fraunces,
   Hanken_Grotesk,
   Style_Script,
 } from "next/font/google";
@@ -55,6 +56,21 @@ export const sentient = localFont({
     { path: "../fonts/Sentient/Sentient-Regular.woff2", weight: "400", style: "normal" },
     { path: "../fonts/Sentient/Sentient-Medium.woff2", weight: "500", style: "normal" },
   ],
+});
+
+/**
+ * High-contrast editorial display serif (Google Fonts, open source — free for commercial use).
+ * Fraunces is a variable old-style face with a soft/wonk character and an optical-size axis: pushed
+ * to its display optical size (`opsz` 144) at a light weight it gains the thin hairlines + thick
+ * stems of a Didone without reading as a generic template face. Scoped to the recomposed project
+ * spread's title (the oversized NILINK). The `opsz`/`SOFT`/`WONK` axes are tuned in `globals.css`
+ * via `font-variation-settings`.
+ */
+export const fraunces = Fraunces({
+  variable: "--font-fraunces",
+  subsets: ["latin"],
+  display: "swap",
+  axes: ["opsz", "SOFT", "WONK"],
 });
 
 /**

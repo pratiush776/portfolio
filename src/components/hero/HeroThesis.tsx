@@ -62,13 +62,18 @@ const INK_END = 0.3;
 
 /* The thesis writes on, then SCROLLS normally up and off the top the instant it's read (~0.27) — not a
    designed drift, just a plain scroll-rate lift, so it reads as ordinary content scrolling away while
-   the name morphs on the left and the first work panel crests. The pin spans ~120vh of scroll (track
-   220vh − 100vh sticky) = 1.0 of progress, so a slope of ~120vh per progress matches the true scroll
+   the name morphs on the left and the first work panel crests. The pin spans ~80vh of scroll (track
+   180vh − 100vh sticky) = 1.0 of progress, so a slope of ~80vh per progress matches the true scroll
    rate. The lift rides a CSS var so the box keeps its translateY(-50%) centring (.hero-thesis-v4) and
    the scroll stacks on top of it. */
 const SCROLL_START = 0.27; // begins the instant the ink is done
-const SCROLL_LIFT = "-82.8vh"; // (1 − SCROLL_START) × ~120vh pin → tracks scroll 1:1 out to progress 1.0
+const SCROLL_LIFT = "-58.4vh"; // (1 − SCROLL_START) × ~80vh pin → tracks scroll 1:1 out to progress 1.0
 const SCROLL_EASE_RAMP = 0.12; // fraction of the move spent easing IN before it settles to scroll-rate
+/* The thesis also FADES out as it lifts (it used to scroll off at full opacity and linger into the
+   first project). Clearing it by ~0.48 — together with the PROJECTS word + "Featured" eyebrow — wipes
+   the hero stage before NILINK reads, so nothing from the intro fights the first project. */
+const FADE_OUT_START = 0.34;
+const FADE_OUT_END = 0.48;
 /* Each word's window is this multiple of its bare share of the band, so adjacent words overlap
    (≈3 in transit at once) and the line washes in instead of ticking word by word. */
 const OVERLAP = 1.2;
@@ -126,11 +131,13 @@ function Word({
 }
 
 export function HeroThesis({ progress }: { progress: MotionValue<number> }) {
-  // Entrance gate only — no exit fade; the statement scrolls off the top at full opacity like normal
-  // content (the hero's overflow:hidden clips it as it leaves).
-  const opacity = useTransform(progress, [GATE_START, GATE_END], [0, 1], {
-    ease: reveal,
-  });
+  // Gate in, then fade out as it lifts — so the thesis is gone before the first project's title reads.
+  const opacity = useTransform(
+    progress,
+    [GATE_START, GATE_END, FADE_OUT_START, FADE_OUT_END],
+    [0, 1, 1, 0],
+    { ease: reveal },
+  );
   // Tracks the scroll ~1:1 (ordinary scroll-away), but with a soft CUBIC launch easing into that rate
   // over the first SCROLL_EASE_RAMP of the move — so it accelerates into the scroll instead of snapping
   // from held-still to full speed the instant SCROLL_START is crossed.
