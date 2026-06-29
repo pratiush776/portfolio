@@ -39,6 +39,9 @@ export type FeaturedWork = {
       on the lead spread). The demo `media` still drives the play-in-place / detail-overlay video.
       Optional — only the recomposed editorial spreads use it. */
   cover?: string;
+  /** Voiced alt text for the cover still — describes the actual scene, not "Title product".
+      Falls back to a generic label when absent. */
+  coverAlt?: string;
   stack: string[];
   media: WorkMedia;
   links: { label: string; href: string }[];
@@ -55,13 +58,16 @@ export const featured: FeaturedWork[] = [
   {
     title: "NILINK",
     year: "2025",
-    role: "Capstone · Software Engineer",
+    role: "Software Engineer",
     kicker: "NIL Marketplace",
     tagline: "Athletes on one side. Brands on the other.",
     description:
-      "NIL deals were scattered and informal — NILINK turns them into one marketplace for campaigns, contracts, and payouts. Built as my capstone MVP under real deadlines: role-aware dashboards on both sides, plus the unglamorous glue that keeps a marketplace honest.",
+      "A platform centralizing NIL deals end-to-end for college athletes and local brands.",
     cover: "/projects_assets/NILINK/NILINK_product_img.png",
-    stack: ["Next.js", "TypeScript", "Supabase", "SWR", "Vitest"],
+    coverAlt:
+      "The NILINK marketplace open on a laptop, showing athlete and brand deal listings side by side.",
+    // Headline tech first — the spread meta shows the first two as "Next.js / Supabase".
+    stack: ["Next.js", "Supabase", "TypeScript", "SWR", "Vitest"],
     media: {
       kind: "video",
       src: "/projects_assets/NILINK/demo.mp4",
@@ -116,7 +122,10 @@ export const featured: FeaturedWork[] = [
       poster: "/projects_assets/WhiskItAll/poster.jpg",
     },
     links: [
-      { label: "Visit live", href: "https://whisk-it-all-official.onrender.com/" },
+      {
+        label: "Visit live",
+        href: "https://whisk-it-all-official.onrender.com/",
+      },
     ],
   },
 ];

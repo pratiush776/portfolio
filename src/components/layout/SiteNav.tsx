@@ -11,6 +11,7 @@ export function SiteNav() {
       <Link href="/" className="site-nav-v3__brand" aria-label="Pratiush — home">
         <NavLogo />
       </Link>
+
       <div className="site-nav-v3__links">
         <Link href="/#works" className="site-nav-v3__link">
           Works
@@ -27,7 +28,8 @@ export function SiteNav() {
             ↗
           </span>
         </Link>
-        <Link href="/#contact" className="site-nav-v3__contact">
+        {/* Plain text, same as the other links — more editorial than a SaaS-style pill. */}
+        <Link href="/#contact" className="site-nav-v3__link">
           Connect
         </Link>
       </div>

@@ -57,11 +57,20 @@ export function HeroSection() {
           <FluidSmoke
             color="#FFF4E6"
             className="fluid-smoke-v3"
-            curl={1.5}
+            // Elegance pass — tuned for natural smoke over a smooth fluid blob:
+            // • curl (vorticity) lifted 1.5 → 2.5 so the field grows fine curling tendrils/filaments
+            //   like real smoke, while staying restrained (default is 8, which reads turbulent).
+            curl={2.5}
             splatForce={500}
-            densityDissipation={0.2}
-            velocityDissipation={0.35}
-            dyeRadius={0.0022}
+            // • Dye fades on roughly the motion's timescale so wisps disperse WHILE still drifting,
+            //   never parking as a static cloud (the old 0.2 lingered ~10–15s and froze into a puff).
+            densityDissipation={0.8}
+            // • Velocity decays a touch slower (0.35 → 0.30) so the smoke keeps gently drifting and
+            //   settles softly instead of stopping — and motion now outlasts the dye fade, so it
+            //   always clears while in motion. Lower = drifts longer; higher = settles sooner.
+            velocityDissipation={0.3}
+            // • Finer dye radius (0.0022 → 0.0020) for more delicate wisps.
+            dyeRadius={0.002}
           />
         </div>
         <div className="canvas-v3 canvas-v3--hero">

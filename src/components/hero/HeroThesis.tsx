@@ -17,13 +17,12 @@ import { easedScrollStart, INTRO_EASE } from "@/lib/intro";
  * column and read as a designed, rhythmic stack (small → LARGE → tiny → LARGEST → medium). Right-
  * aligned, mostly ink-only, with "polished" carrying the terracotta payoff.
  *
- * Two layers compose the reveal: a block GATE (opacity 0→1, so the faint ghost never shows over the
- * resting hero) and the per-word ink-in inside it — each word is a faint GHOST guide with an INK
- * layer wiping across it (clip-path), windows overlapping so the statement washes in as one gesture.
- * Choreography: the thesis inks in the INSTANT the name's first real letter changes (A→O) — INK_START
- * is synced to MorphName ROLL_START — so the statement writes itself on AS the morph rolls. It then
- * SCROLLS normally up and off the top at scroll rate once read (~0.27), so the pitch reads in full,
- * then scrolls away like ordinary content while PROJECTS settles and the first work panel later crests.
+ * The entrance is a SCROLL, not a fade: the block rises into place from below as you scroll (hidden
+ * off-screen at rest), settles to read, then continues up and off the top — one continuous scrubbed
+ * translate, so the scroll keeps moving the content the way the eye expects. Riding that rise, the
+ * per-word ink-in WRITES the statement on (each word a faint GHOST guide with an INK layer wiping
+ * across it via clip-path, windows overlapping so the line washes in as one gesture), synced to the
+ * morph roll (INK_START = MorphName ROLL_START) so the words resolve as the name rolls into PROJECTS.
  */
 type ThesisWord = { word: string; scale: number; tone?: "accent" };
 
@@ -31,13 +30,14 @@ type ThesisWord = { word: string; scale: number; tone?: "accent" };
    (em) off the container's base clamp, so the whole block scales together and the rhythm is tunable
    here by eye. */
 const LINES: ThesisWord[][] = [
-  [{ word: "Turning", scale: 0.6 }],
+  [{ word: "Turning", scale: 0.62 }],
   [
     { word: "rough", scale: 1 },
     { word: "ideas", scale: 1 },
   ],
-  [{ word: "into", scale: 0.46 }],
-  [{ word: "polished", scale: 1.15, tone: "accent" }],
+  // "into" lifted off its old runt size (0.46) so the dip reads as designed rhythm, not an accident.
+  [{ word: "into", scale: 0.64 }],
+  [{ word: "polished", scale: 1.12, tone: "accent" }],
   [{ word: "products", scale: 0.88 }],
 ];
 
@@ -51,31 +51,23 @@ const TOTAL = counter;
 
 const reveal = cubicBezier(...INTRO_EASE);
 
-const GATE_START = 0.07;
-const GATE_END = 0.12;
-/* The per-word ink-in begins the instant the name's first real letter changes (INK_START =
-   MorphName ROLL_START) and washes in as ONE quick gesture. As it completes the statement SCROLLS up
-   and off the top (see SCROLL below): the pitch reads, then scrolls away while the name finishes
-   morphing into PROJECTS. */
-const INK_START = 0.08; // = MorphName ROLL_START — the thesis writes on the instant A→O begins to roll
-const INK_END = 0.3;
+/* The statement SCROLLS into place from below as you scroll — a positional, scrubbed entrance, NOT a
+   fade — so the scroll keeps moving the content the way the eye expects, then carries it back off the
+   top. One continuous translate (see HeroThesis): rise in → hold to read → continue up and off. */
+const ENTER_FROM = 70; // vh below the resting spot at scroll 0 — far enough to sit OFF-screen at rest
+const ENTER_END = 0.22; // rises and settles into its resting, readable position by here
+const SCROLL_START = 0.3; // after a short readable hold, it continues up and off the top
+// A touch FASTER than 1:1 so it clears the frame (into the cluster's top feather mask) before the
+// title→nav handoff; the rising NILINK card covers whatever is still on screen at the seam.
+const SCROLL_LIFT = -78; // vh
+const SCROLL_EASE_RAMP = 0.12; // fraction of the EXIT spent easing IN before it settles to scroll-rate
 
-/* The thesis writes on, then SCROLLS normally up and off the top the instant it's read (~0.27) — not a
-   designed drift, just a plain scroll-rate lift, so it reads as ordinary content scrolling away while
-   the name morphs on the left and the first work panel crests. The pin spans ~80vh of scroll (track
-   180vh − 100vh sticky) = 1.0 of progress, so a slope of ~80vh per progress matches the true scroll
-   rate. The lift rides a CSS var so the box keeps its translateY(-50%) centring (.hero-thesis-v4) and
-   the scroll stacks on top of it. */
-const SCROLL_START = 0.27; // begins the instant the ink is done
-const SCROLL_LIFT = "-58.4vh"; // (1 − SCROLL_START) × ~80vh pin → tracks scroll 1:1 out to progress 1.0
-const SCROLL_EASE_RAMP = 0.12; // fraction of the move spent easing IN before it settles to scroll-rate
-/* The thesis also FADES out as it lifts (it used to scroll off at full opacity and linger into the
-   first project). Clearing it by ~0.48 — together with the PROJECTS word + "Featured" eyebrow — wipes
-   the hero stage before NILINK reads, so nothing from the intro fights the first project. */
-const FADE_OUT_START = 0.34;
-const FADE_OUT_END = 0.48;
-/* Each word's window is this multiple of its bare share of the band, so adjacent words overlap
-   (≈3 in transit at once) and the line washes in instead of ticking word by word. */
+/* The per-word ink-on still WRITES the statement as it rises — kept synced to the morph roll
+   (INK_START = MorphName ROLL_START) so the words resolve as the name rolls and the block settles.
+   Each word's window is OVERLAP× its bare share of the band, so adjacent words overlap (≈3 in transit
+   at once) and the line washes in instead of ticking word by word. */
+const INK_START = 0.08;
+const INK_END = 0.22; // fully inked as it lands in its readable position
 const OVERLAP = 1.2;
 
 function Word({
@@ -102,7 +94,7 @@ function Word({
   const ghostOpacity = useTransform(
     progress,
     [Math.max(0, end - 0.035), end],
-    [0.1, 0],
+    [0.045, 0],
   );
   const className =
     token.tone === "accent"
@@ -131,33 +123,38 @@ function Word({
 }
 
 export function HeroThesis({ progress }: { progress: MotionValue<number> }) {
-  // Gate in, then fade out as it lifts — so the thesis is gone before the first project's title reads.
-  const opacity = useTransform(
+  // ONE continuous, scroll-linked translate — the entrance IS the movement, no opacity fade:
+  //  • rise in from ENTER_FROM (below, off-screen at rest) and settle into place by ENTER_END,
+  //  • hold at rest through the short read,
+  //  • then continue up and off the top to SCROLL_LIFT (easing into scroll-rate over SCROLL_EASE_RAMP).
+  const liftVh = useTransform(
     progress,
-    [GATE_START, GATE_END, FADE_OUT_START, FADE_OUT_END],
-    [0, 1, 1, 0],
-    { ease: reveal },
+    [0, ENTER_END, SCROLL_START, 1],
+    [ENTER_FROM, 0, 0, SCROLL_LIFT],
+    { ease: [reveal, (t) => t, easedScrollStart(SCROLL_EASE_RAMP)] },
   );
-  // Tracks the scroll ~1:1 (ordinary scroll-away), but with a soft CUBIC launch easing into that rate
-  // over the first SCROLL_EASE_RAMP of the move — so it accelerates into the scroll instead of snapping
-  // from held-still to full speed the instant SCROLL_START is crossed.
-  const lift = useTransform(progress, [SCROLL_START, 1], ["0vh", SCROLL_LIFT], {
-    ease: easedScrollStart(SCROLL_EASE_RAMP),
-  });
+  const lift = useTransform(liftVh, (v) => `${v}vh`);
 
   return (
     <motion.p
       className="hero-thesis-v4"
-      style={{ opacity, "--thesis-lift": lift } as MotionStyle}
-      aria-hidden
+      style={{ "--thesis-lift": lift } as MotionStyle}
     >
+      {/* The decorative ghost/ink word split is for the eye only — hide it from AT so the sentence
+          isn't read word-by-word or doubled. The real value-prop sentence is exposed once below,
+          so screen readers and SEO get the pitch (PRODUCT.md: real text exists even where the
+          visible type is decorative). Appended LAST (it's position:absolute) so the
+          .hero-thesis-v4__line:nth-child(3) "into" rule still targets the right line. */}
       {INDEXED_LINES.map((line, li) => (
-        <span className="hero-thesis-v4__line" key={li}>
+        <span className="hero-thesis-v4__line" key={li} aria-hidden>
           {line.map((token) => (
             <Word key={token.index} token={token} progress={progress} />
           ))}
         </span>
       ))}
+      <span className="visually-hidden">
+        Turning rough ideas into polished products.
+      </span>
     </motion.p>
   );
 }

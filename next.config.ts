@@ -8,6 +8,9 @@ const nextConfig: NextConfig = {
   experimental: {
     viewTransition: true,
   },
+  // Hide the dev-only "N" indicator badge (it never shipped to prod, but it clutters the landing
+  // while developing / screenshotting).
+  devIndicators: false,
 };
 
 export default nextConfig;

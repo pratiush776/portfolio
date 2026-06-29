@@ -69,9 +69,9 @@ const TO_OPTICAL_FIT = [0, -0.01, -0.01, -0.01, -0.01, -0.01, -0.01, -0.01];
 // Choreography: the morph begins EARLY, overlapping the copy's scroll-out — the elastic force loads on
 // the word from the top of the scroll and the first real letter (A→O) starts rolling at ROLL_START. The
 // thesis writes itself on in sync (HeroThesis INK_START = ROLL_START), then scrolls off; the name lands
-// as PROJECTS (~0.33), then DRIFTS slowly UP as the heaviest parallax layer (see TITLE_DRIFT) while the
-// thesis scrolls off fast and the first work panel crests up from below (works enters ≈0.50, as the
-// thesis nears the top) — three layers at three speeds. Tune with ROLL_START (when the wave starts /
+// as PROJECTS (~0.33), then travels UP WITH the thesis as a parallax pair (see TITLE_DRIFT) — the
+// title slightly behind the thesis for depth — while the first work panel crests up from below (works
+// enters ≈0.50, as the thesis nears the top). Tune with ROLL_START (when the wave starts /
 // how much it overlaps the copy-out) and ROLL_DUR/STAGGER (how fast it resolves — both cut ~20%).
 const ROLL_START = 0.08; // first CHANGING slot (A→O) begins its roll, overlapping the copy-out; lands ~0.33
 const ROLL_DUR = 0.116; // duration of a single letter's glyph roll (~20% quicker than before)
@@ -96,41 +96,45 @@ const ROLL_TRAVEL = ((1 + ROLL_GAP) / (2 + ROLL_GAP)) * 100; // %
 // The shared anchor letters (P & R — the slots that never roll) stand slightly TALLER than the
 // changing glyphs: a subtle accent that weights the word's left edge. Vertical stretch only, grown
 // from the baseline so the letters keep their horizontal fit and the bottom line stays dead level.
-const STATIC_STRETCH = 1.05;
+const STATIC_STRETCH = 1.02;
 
-// PARALLAX: once the word has LANDED as PROJECTS it drifts slowly UP across the rest of the pin. This
-// is the heaviest, SLOWEST layer of the section handoff — the big title trails well behind the thesis
-// (which scrolls off ~58vh near scroll-rate) and the first card (full scroll-rate rising from below),
-// so the title leads up gently and opens breathing space beneath it before the card arrives (physics:
-// bigger = slower). TITLE_DRIFT_START sits just past ROLL_END so the drift never fights the roll; the
-// move settles to a constant (linear) parallax rate but launches with a soft CUBIC ease-in over the
-// first TITLE_DRIFT_RAMP, so the title accelerates into the drift instead of snapping from held-still
-// to full speed. Tune the separation with TITLE_DRIFT.
-const TITLE_DRIFT_START = 0.35;
-// A SLIGHT upward parallax only — the title separates gently from the faster-scrolling thesis as the
-// hero exits, then leaves with the section naturally. (No shrink, no fade: the projects gallery below
-// carries the section identity on its own rotated PROJECTS spine.) Tune the differential here.
-const TITLE_DRIFT = "-16vh";
+// PARALLAX PAIR: once the word has LANDED as PROJECTS it travels UP together with the thesis as the
+// hero exits — the two leave the stage as one diagonal gesture. The title moves a touch SLOWER than
+// the thesis (which scrolls off ~58vh near scroll-rate) so it keeps a gentle depth lag (physics:
+// bigger = slower), but it now clearly rides up WITH the thesis rather than holding near-still and
+// dissolving in place. TITLE_DRIFT_START sits just past ROLL_END so the drift never fights the roll;
+// the move settles to a constant (linear) rate but launches with a soft CUBIC ease-in over the first
+// TITLE_DRIFT_RAMP, so the title accelerates into the drift instead of snapping from held-still to
+// full speed. As it rides up it also softens/fades out (no nav marker — it simply leaves the stage as
+// the NILINK laptop bridges in). Tune the lag with TITLE_DRIFT.
+const TITLE_DRIFT_START = 0.34;
+// Upward travel of the landed title as it leaves with the thesis. Kept WELL under the thesis's ~58vh so
+// the two read as a clear PARALLAX PAIR — the big title lags noticeably behind the faster thesis for
+// real depth (bigger = slower), rather than the two moving as one. Tune the differential by eye.
+const TITLE_DRIFT = "-30vh";
 const TITLE_DRIFT_RAMP = 0.12; // fraction of the drift spent easing IN before it settles to its rate
 
-// The script "Featured" eyebrow that reveals above the landing PROJECTS — the section title's quiet
-// lead-in, in the SAME hand (Style Script) as the hero's "Hi, I'm" greeting, so the work reads
-// "Featured Projects" exactly as the hero reads "Hi, I'm Pratiush". It rides the title's parallax drift
-// (it lives inside the drifting root) and appears TOGETHER with the thesis statement — its reveal is
-// synced to the thesis ink-in (HeroThesis INK_START) / the morph's start (ROLL_START ≈ 0.08), so the
-// eyebrow and the pitch wash in as one beat while the name rolls. Reveal window, in progress:
-const FEATURED_IN_START = 0.08;
-const FEATURED_IN_END = 0.2;
+// The script "Featured" eyebrow that reveals above PROJECTS — the section title's quiet lead-in, in
+// the SAME hand (Style Script) as the hero's "Hi, I'm" greeting. It enters RIGHT AFTER the role +
+// tagline copy has cleared (the hero-cluster bodyExit completes at progress 0.18, see HeroLede EXIT.body):
+// the eyebrow fills the space the departing copy leaves rather than waiting for the morph to fully
+// land. It starts inking over the TAIL of that fade — the bodyExit ease is mostly spent by ~0.13, so
+// the copy is visually near-gone there — and finishes well before the word lands as PROJECTS
+// (ROLL lands ~0.33), so it leads cleanly into the landed title. Reveal window, in progress:
+const FEATURED_IN_START = 0.14;
+const FEATURED_IN_END = 0.26;
 
-// THE HANDOFF EXIT. Once the morph has landed, PROJECTS is no longer the panels' title — each
-// project carries its own. So the word cedes the stage: it fades (with a touch of blur) as it drifts
-// up, clearing before the first project's title reads, so the two big titles never collide. The
-// "Featured" eyebrow leads the exit a beat earlier (it's the secondary mark). Tuned so the whole
-// hero stage is clear by ~p_hero 0.50 (≈90vh page-scroll), before ProjectFeature's title window.
-const FEATURED_OUT_START = 0.3;
-const FEATURED_OUT_END = 0.44;
-const PROJECTS_FADE_START = 0.36;
-const PROJECTS_FADE_END = 0.5;
+// THE EXIT. The title holds and owns the frame while it drifts up, then cedes the stage as the NILINK
+// laptop bridges in. The image fades in over the card's progress ~0.12→0.24, which maps to p_hero
+// ≈ 0.78→1.0 (hero pins over 80vh; the first card sits at doc-Y 30vh over a 300vh scrub). PROJECTS
+// begins fading at ~0.73 (as the laptop starts appearing) and is clear by ~0.90, BEFORE the laptop is
+// fully legible, so nothing old lingers under it — then NILINK's own title/copy enter (ProjectFeature).
+// The "Featured" eyebrow and the PROJECTS word fade on the SAME window, so the two-part lockup leaves
+// as one unit (no leading/lagging between them).
+const FEATURED_OUT_START = 0.73;
+const FEATURED_OUT_END = 0.9;
+const PROJECTS_FADE_START = 0.73;
+const PROJECTS_FADE_END = 0.9; // gone a touch sooner so it doesn't linger under the arriving laptop
 const PROJECTS_FADE_BLUR = 3; // px of blur at full fade
 
 // A smooth, premium ease-in-out cubic for width/kerning + the incoming rotation — gentler than the
@@ -148,7 +152,7 @@ const outgoingEase = cubicBezier(...OUTGOING_EASE);
 // descender room below, so a top pivot swings the letter DOWN into that room instead of up past the
 // roll mask's clip edge — which is what was slicing the tops off. Keep the angle modest for the same
 // reason (the slot must stay overflow-clipped to mask the two stacked glyphs).
-const INCOMING_ROT = -8; // degrees
+const INCOMING_ROT = -3; // degrees — a gentle tilt, not a showy swing (premium-subtle)
 
 /*
  * Roll order, walked LEFT-TO-RIGHT across only the letters that actually change. A slot whose
@@ -190,12 +194,15 @@ const FIRST_CHANGE = ROLL_ORDER.findIndex((r) => r !== null);
  * pinned — only WAVE_STATIC_DAMP of the motion (a held tremor). The crest line
  * `peak = ROLL_START + (i − FIRST_CHANGE)·ROLL_STAGGER + ROLL_DUR/2` rides the roll and extrapolates
  * LEFT onto P/R (the force reaches them first). */
-const WAVE_LIFT = 0.22; // em — peak upward lift (rigid bob of the whole slot) at full tension
-const WAVE_STRETCH_Y = 0.24; // peak vertical stretch of the OUTGOING glyph only (scaleY = 1 + this)
+// Premium-subtle wave: the elastic force is dialled WAY back from its original showy values (lift
+// 0.22→0.08, stretch 0.24→0.08) so the morph reads as an elegant settle, not letters crashing/
+// stretching. The release is softened (longer SNAP) so it eases home rather than cracking.
+const WAVE_LIFT = 0.08; // em — peak upward lift (rigid bob of the whole slot) at full tension
+const WAVE_STRETCH_Y = 0.08; // peak vertical stretch of the OUTGOING glyph only (scaleY = 1 + this)
 const WAVE_BUILD = 0.16; // progress-width of the tension load (the force's reach)
 const WAVE_HOLD = 0.02; // progress-width the stretch lingers at full before the snap
-const WAVE_SNAP = 0.045; // progress-width of the fast release (≪ WAVE_BUILD → a snap)
-const WAVE_STATIC_DAMP = 0.12; // P & R feel the force but are held to this fraction
+const WAVE_SNAP = 0.07; // progress-width of the release — softened so it settles, doesn't crack
+const WAVE_STATIC_DAMP = 0.1; // P & R feel the force but are held to this small fraction
 
 // Tension load → hold → release curve for one slot, given its distance from the crest centre.
 function waveTension(d: number): number {

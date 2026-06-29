@@ -36,10 +36,14 @@ const ease = cubicBezier(...INTRO_EASE);
 // Scrub windows over the pinned stage. Entrance is pushed LATE so the title only reads AFTER the
 // hero's PROJECTS has faded out (≈p_hero 0.50 ≈ 90vh page-scroll) — no title collision. The image
 // comes in earlier and fast to BRIDGE that gap. The long stretch to EXIT is NILINK's settled hold.
-const TITLE_IN = [0.15, 0.3] as const;
-const DESC_IN = [0.2, 0.34] as const;
-const CASE_IN = [0.24, 0.38] as const;
-const IMAGE_IN = [0.1, 0.2]; // one window: fast opacity + x/scale settle + a short, shallow de-blur
+// Sequential entry — each beat clears before the next, and ALL of them land after the hero's PROJECTS
+// has faded (≈card 0.16), so the project never reads while intro text is still on screen:
+// laptop bridges in → title → brief → meta → CTA.
+const IMAGE_IN = [0.12, 0.24]; // laptop bridges in first (after PROJECTS starts softening)
+const TITLE_IN = [0.2, 0.34] as const;
+const DESC_IN = [0.26, 0.4] as const;
+const META_IN = [0.3, 0.44] as const; // year · role · stack, a beat behind the brief
+const CASE_IN = [0.34, 0.48] as const;
 const EXIT = [0.86, 0.97] as const; // body lifts+fades, image fades+re-blurs (page-turn, not a wipe)
 
 export function ProjectFeature({
@@ -60,11 +64,18 @@ export function ProjectFeature({
   });
 
   // Title (with a shallow de-blur), then copy on a soft stagger — each as ONE object.
-  const titleStyle = useScrubReveal(scrollYProgress, TITLE_IN, { y: 20, blur: 4 });
+  const titleStyle = useScrubReveal(scrollYProgress, TITLE_IN, {
+    y: 20,
+    blur: 4,
+  });
   const descStyle = useScrubReveal(scrollYProgress, DESC_IN, { y: 14 });
+  const metaStyle = useScrubReveal(scrollYProgress, META_IN, { y: 14 });
   const caseStyle = useScrubReveal(scrollYProgress, CASE_IN, { y: 14 });
   // The body (title + copy) lifts and fades as one on the EXIT — the crossfade out.
-  const bodyExitStyle = useScrubReveal(scrollYProgress, EXIT, { y: -40, dir: "out" });
+  const bodyExitStyle = useScrubReveal(scrollYProgress, EXIT, {
+    y: -40,
+    dir: "out",
+  });
 
   // The spread shows only the opening line — the calm, lead-with-the-idea register of the mockup;
   // the full write-up and stack live in the View Case overlay.
@@ -78,11 +89,14 @@ export function ProjectFeature({
     [0, 1, 1, 0],
   );
   const imageX = useTransform(scrollYProgress, IMAGE_IN, [24, 0], { ease });
-  const imageScaleIn = useTransform(scrollYProgress, IMAGE_IN, [1.03, 1], { ease });
+  const imageScaleIn = useTransform(scrollYProgress, IMAGE_IN, [1.03, 1], {
+    ease,
+  });
+  // Enters near-crisp (just a whisper of blur, not "through fog"), re-blurs only on the EXIT.
   const imageBlur = useTransform(
     scrollYProgress,
     [IMAGE_IN[0], IMAGE_IN[1], EXIT[0], EXIT[1]],
-    [4, 0, 0, 4],
+    [1, 0, 0, 3],
   );
   // A whisper of grade lifts the staged photo off the blended cream so it reads as a solid proof
   // object (depth), not a background. Kept tiny — the warm tone is already right.
@@ -105,7 +119,11 @@ export function ProjectFeature({
   return (
     <article
       ref={trackRef}
-      className={index % 2 ? "project-spread-v4 project-spread-v4--flip" : "project-spread-v4"}
+      className={
+        index % 2
+          ? "project-spread-v4 project-spread-v4--flip"
+          : "project-spread-v4"
+      }
       style={{ zIndex: index + 1 }}
     >
       <div className="project-spread-v4__pin">
@@ -121,6 +139,14 @@ export function ProjectFeature({
               {work.title}
             </motion.h3>
 
+            {/* One quiet line of facts — year · role · the two headline techs — so a hiring manager
+                gets the gist at a glance without it reading as a résumé dump. */}
+            <motion.p
+              className="project-feature-v4__meta"
+              style={reduce ? undefined : metaStyle}
+            >
+              {work.year} · {work.role} · {work.stack.slice(0, 2).join(" · ")}
+            </motion.p>
             <motion.p
               className="project-feature-v4__desc"
               style={reduce ? undefined : descStyle}
@@ -140,7 +166,9 @@ export function ProjectFeature({
                 className="project-feature-v4__case"
                 onClick={onViewDetails}
               >
-                <span className="project-feature-v4__case-label">View Case</span>
+                <span className="project-feature-v4__case-label">
+                  View Case
+                </span>
                 <span className="project-feature-v4__case-arrow" aria-hidden>
                   <ArrowRight />
                 </span>
@@ -153,7 +181,7 @@ export function ProjectFeature({
               <motion.img
                 className="project-feature-v4__image"
                 src={work.cover}
-                alt={`${work.title} product`}
+                alt={work.coverAlt ?? `${work.title} product`}
                 style={imageStyle}
                 draggable={false}
               />

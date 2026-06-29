@@ -585,7 +585,12 @@ void main(){
         }
         resume();
       },
-      { rootMargin: '120px' },
+      // Keep the sim running until the canvas is a FULL viewport clear of the edge, not a tight 120px.
+      // The hero→NILINK handoff is still visually in progress just past the edge; pausing there froze
+      // the last frame mid-dissipation (a static puff that read as a bug). With a viewport of margin
+      // the smoke keeps dissipating naturally while it can still be seen, only freezes once well out of
+      // sight, and resumes BEFORE it scrolls back into view on the way up.
+      { rootMargin: '100% 0px 100% 0px' },
     );
     io.observe(canvas);
 
@@ -593,7 +598,12 @@ void main(){
     let raf = 0;
     function tick(now: number) {
       if (paused) return;
-      const dt = Math.min((now - last) / 1000, 0.016);
+      // Advance by REAL elapsed time so the sim stays time-accurate when frames drop. During scroll
+      // the main thread is busy (Lenis + the scrubbed morph/exit motion), so this rAF can fall to
+      // ~30fps; capping the step at 16ms made the sim crawl at ~half speed then snap back, which read
+      // as a pause/stutter. Cap at ~1/30s instead — enough headroom to stay real-time down to 30fps
+      // while still bounding the step for stability (these gentle params are safe at this dt).
+      const dt = Math.min((now - last) / 1000, 1 / 30);
       last = now;
       const cfg = cfgRef.current;
 

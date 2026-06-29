@@ -964,43 +964,6 @@ button {
   transform: translate(0.1em, -0.1em);
 }
 
-.site-nav-v3__contact {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-height: clamp(2.4rem, 2.55vw, 2.65rem);
-  gap: 0.4rem;
-  padding: 0 clamp(1rem, 1.1vw, 1.3rem);
-  border-radius: var(--v3-radius-pill);
-  background: var(--v3-text-dark);
-  color: var(--v3-bg-primary);
-  font-weight: 600;
-  font-size: clamp(0.88rem, 0.92vw, 0.98rem);
-  letter-spacing: 0.01em;
-  line-height: 1;
-  transition: background-color 0.5s var(--ease-micro), transform 0.5s var(--ease-micro);
-}
-
-.site-nav-v3__contact:hover {
-  background: var(--v3-accent-red);
-  transform: translateY(-1px);
-}
-
-/* Press feedback — settles from the lifted hover back to the baseline so the click reads. */
-.site-nav-v3__contact:active {
-  transform: translateY(0);
-}
-
-.site-nav-v3__contact-icon {
-  width: 1rem;
-  height: 1rem;
-}
-
-.site-nav-v3__contact-icon svg {
-  width: 100%;
-  height: 100%;
-}
-
 /* =========================================================
    V4 — Left-aligned hero cluster + morphing brand wordmark
    (supersedes the centered .hero-composition-v3 lockup above)
@@ -1025,6 +988,14 @@ button {
   padding: var(--v3-nav-height) var(--brand-gutter) clamp(8rem, 22svh, 14rem);
   text-align: left;
   will-change: transform, opacity;
+  /* Top feather: anything scrolling UP (the thesis, then the drifting title) DISSOLVES into the top
+     edge before it reaches the fixed nav — so the exit reads as content scrolling cleanly away
+     instead of piling into / colliding with the nav links. The nav and its centre "Featured
+     Projects" marker live OUTSIDE this cluster, so they stay crisp on top. The lockup + locator sit
+     well below the feather (opaque from ~19% down), so the resting hero is untouched. Tune the band
+     if text dissolves too early/late. */
+  -webkit-mask-image: linear-gradient(to bottom, transparent 8%, #000 19%);
+  mask-image: linear-gradient(to bottom, transparent 8%, #000 19%);
 }
 
 /* Visually hidden but available to assistive tech (real <h1>). */
@@ -1292,13 +1263,17 @@ button {
   right: var(--brand-gutter);
   top: 52%;
   margin: 0;
-  max-width: min(35rem, 43vw);
+  /* a tighter block so it reads as a counterpoint caption, not a second full-width poster */
+  max-width: min(24rem, 30vw);
   font-family: var(--font-thesis);
   font-weight: 400;
-  font-size: clamp(2.65rem, 5.35vw, 6.35rem);
-  line-height: 0.83;
-  letter-spacing: -0.022em;
-  /* Right-anchored, ragged-left — the stack hugs the right gutter, mirroring the lower-left title. */
+  /* CLEARLY SECONDARY to the PROJECTS anchor — dropped ~40% so only ONE typographic hero dominates.
+     The per-word `scale` rhythm (HeroThesis LINES) is preserved; only this base size shrinks. */
+  font-size: clamp(1.7rem, 3.3vw, 3.9rem);
+  line-height: 0.9;
+  letter-spacing: -0.018em;
+  /* Right-anchored, ragged-left — the stack hugs the right gutter, the counterpoint to the lower-left
+     PROJECTS anchor (one diagonal composition, not two competing posters). */
   text-align: right;
   color: var(--hero-ink-strong);
   pointer-events: none;
@@ -1496,13 +1471,6 @@ button {
     font-size: 1rem;
   }
 
-  .site-nav-v3__contact {
-    min-height: 44px;
-    min-width: auto;
-    font-size: 0.875rem;
-    padding: 0 var(--v3-space-4);
-  }
-
   .hero-composition-v3 {
     top: calc(var(--v3-nav-top) + var(--v3-nav-height) + var(--v3-space-4));
     bottom: 5.7rem;
@@ -1637,12 +1605,6 @@ button {
     font-size: 0.875rem;
   }
 
-  .site-nav-v3__contact {
-    min-height: 2.5rem;
-    padding: 0 0.75rem;
-    font-size: 0.8125rem;
-  }
-
   .site-nav-v3__location {
     display: none;
   }
@@ -1678,7 +1640,6 @@ button {
 
   .works-cta-v3,
   .works-cta-v3__icon,
-  .site-nav-v3__contact,
   .site-nav-v3__link,
   .site-nav-v3__link::after {
     transition: none;
@@ -1979,6 +1940,12 @@ button {
    (more negative = the card engages even earlier / overlaps the hero more). */
 .project-spread-v4:first-child {
   margin-top: -150vh;
+  /* Single-card budget: while only NILINK renders, the base 400vh stack hold leaves ~150vh of
+     STATIC scroll after the content settles (~0.48) before the EXIT (~0.86) — dead air for a
+     time-poor recruiter. Trim the lead's pinned travel so it settles, holds a beat, then hands to
+     the footer. Restore to the base 400vh when the card stack returns and the next card rises in
+     during the hold. */
+  height: 260vh;
 }
 
 .project-spread-v4__pin {
@@ -2016,11 +1983,13 @@ button {
   /* the full product scene, anchored bottom-right (laptop sits low, airy space above — the mockup's
      framing). It bleeds below the fold so the slow upward parallax has headroom and never opens a
      gap at the base of the pedestal. */
-  right: 0;
+  /* Pushed DECISIVELY off the right so the prop clutter (vase + bowl) crops cleanly into the bleed
+     instead of hovering half-in. Width eased back a touch so the laptop is confident but not
+     overpowering — the composition breathes. Nudge `right` toward 0 to show more props / more
+     negative to crop harder; `width` down to let the laptop breathe more. */
+  right: clamp(-9.5rem, -5.5vw, -5rem);
   bottom: -3rem;
-  /* a touch larger than before (~+10%) so the laptop reads as a real, detailed proof object rather
-     than distant decoration — still anchored right so it never overpowers the title */
-  width: clamp(55%, 62vw, 68%);
+  width: clamp(56%, 63vw, 69%);
   overflow: hidden;
   pointer-events: none;
   z-index: 0;
@@ -2057,7 +2026,9 @@ button {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: clamp(1.3rem, 3vh, 2.2rem);
+  /* Vertical rhythm is set per-element below (margin-top), NOT a uniform gap — so the column reads as
+     grouped: the title + its pitch sit as one unit, the quiet facts cluster (role/year + stack) sits
+     a beat below, then a clear break opens before the action. */
 }
 
 .project-feature-v4__title {
@@ -2074,16 +2045,34 @@ button {
 }
 
 .project-feature-v4__desc {
-  margin: 0;
+  /* title → pitch: a generous gap so the small copy clears the huge serif's baseline cleanly */
+  margin: clamp(1.5rem, 3.2vh, 2.4rem) 0 0;
   max-width: 27rem;
   /* bumped for effortless recruiter skimming — it shouldn't read tiny beside the huge title */
   font-size: clamp(1rem, 1.1vw, 1.2rem);
   line-height: 1.55;
-  color: color-mix(in srgb, var(--v3-text-dark) 82%, transparent);
+  /* near-solid ink for confident legibility over the textured cream — the one paragraph that sells
+     the work shouldn't read faint */
+  color: color-mix(in srgb, var(--v3-text-dark) 92%, transparent);
+}
+
+/* One quiet line of facts under the brief — year · role · headline stack. No accent ("View Case" is
+   the page's one accent); muted ink, sitting close to the brief as part of the same cluster. */
+.project-feature-v4__meta {
+  /* pitch → facts: tight, so the brief and its facts read as a single grouped block */
+  margin: clamp(0.95rem, 2vh, 1.5rem) 0 0;
+  font-family: var(--font-pier);
+  font-size: clamp(0.74rem, 0.86vw, 0.88rem);
+  letter-spacing: 0.06em;
+  /* The recruiter-facing credibility line (year · role · stack) — quiet, but it must stay legible.
+     70% plum-ink on the cream clears WCAG AA (~5.4:1) at this small size; 58% read sub-AA (~3.8:1)
+     and washed out, the exact "muted text on tinted cream" risk the palette doc flags. */
+  color: color-mix(in srgb, var(--v3-text-dark) 70%, transparent);
 }
 
 .project-feature-v4__cta {
-  margin-top: clamp(1.25rem, 3.5vh, 2.75rem);
+  /* facts → action: the largest break in the column, so "View Case" reads as a distinct affordance */
+  margin-top: clamp(2.1rem, 4.6vh, 3.4rem);
 }
 
 /* the one interactive flourish — terracotta serif link; the word nudges, the arrow nudges further,
