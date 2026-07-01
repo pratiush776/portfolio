@@ -32,6 +32,11 @@ export default function RootLayout({
       <body
         className={`${hankenGrotesk.variable} ${bricolageGrotesque.variable} ${sentient.variable} ${fraunces.variable} ${anton.variable} ${styleScript.variable} antialiased`}
       >
+        {/* Keyboard skip link — hidden until focused, so the visual default is unchanged. Lets AT /
+            keyboard users jump past the long pinned hero straight to the work. */}
+        <a href="#works" className="skip-link">
+          Skip to projects
+        </a>
         {/* IntroProvider is the single opening-choreography clock — backdrop, hero copy, name
             and scroll cue all read the same two gates instead of each animating independently. */}
         <IntroProvider>

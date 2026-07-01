@@ -29,13 +29,32 @@ export function HeroSection() {
     offset: ["start start", "end end"],
   });
 
+  // SMOOTH PIN RELEASE (exitY). Through the morph the title is sticky-HELD — its screen velocity is 0 —
+  // then the pin unpins and it scrolls at full speed. That 0 → full-speed STEP is what reads as a jolt
+  // ("abrupt") the instant the roll settles. The post-landing window (morph lands ≈0.85, pin ends at
+  // 1.0) is otherwise a FROZEN hold, which only makes the jump more obvious.
+  //
+  // So we spend that window easing the title UP by a hair, VELOCITY-MATCHED: an ease-in ramp that starts
+  // from rest (slope 0, matching the held state) and reaches scroll speed exactly at the unpin, so the
+  // title is already moving at 1:1 when the pin lets go — the handoff is continuous, no step. It's tiny
+  // (~RELEASE_LIFT) and slope-matched, so it removes the jolt rather than reading as a visible lift; and
+  // it's UPWARD, so it never trips the overflow:hidden bottom-edge clip that forbids a downward lag here.
+  // Tune RELEASE_LIFT by eye: too little and a faint step remains; too much and the pre-roll gets visible.
+  const RELEASE_LIFT = "-2.5vh";
+  const titleLag = useTransform(scrollYProgress, [0.85, 1], ["0vh", RELEASE_LIFT], {
+    ease: cubicBezier(0.4, 0, 1, 1),
+  });
+
   // The name morphs in place (left-anchored), so the light no longer chases it across the
   // stage. Instead the warm pool eases gently further left as the word lands, concentrating
   // over the lower-left PROJECTS so the settled title is lit rather than stranded in flat field.
   // Drifts with the morph: the name rolls into PROJECTS across ROLL_START ≈ 0.08 → ROLL_END ≈ 0.33
   // (running as the copy exits and the thesis writes on), so the warm pool eases left over that same
   // window to light the lower-left PROJECTS as it lands.
-  const glowX = useTransform(scrollYProgress, [0.1, 0.35], ["0vw", "-5vw"], {
+  // Eases the warm pool LEFT as the word lands as PROJECTS. The pin is now short and the morph lands
+  // near heroProgress ≈0.85 (MorphName MORPH_SCALE), so this window is pushed later to land the glow
+  // move WITH the word rather than well before it.
+  const glowX = useTransform(scrollYProgress, [0.3, 0.85], ["0vw", "-5vw"], {
     ease: cubicBezier(...SNAP_EASE),
   });
 
@@ -75,7 +94,7 @@ export function HeroSection() {
         </div>
         <div className="canvas-v3 canvas-v3--hero">
           <div className="hero-stage-v3">
-            <HeroLede progress={scrollYProgress} />
+            <HeroLede progress={scrollYProgress} titleLag={titleLag} />
           </div>
         </div>
         <div className="hero-grain-v3" aria-hidden />

@@ -180,7 +180,6 @@ void main(){
   vB=vUv-vec2(0.,ts.y);
   gl_Position=vec4(aP,0.,1.);
 }`;
-    const COPY = `precision mediump float;precision mediump sampler2D;varying highp vec2 vUv;uniform sampler2D u;void main(){gl_FragColor=texture2D(u,vUv);}`;
     const CLEAR = `precision mediump float;precision mediump sampler2D;varying highp vec2 vUv;uniform sampler2D u;uniform float v;void main(){gl_FragColor=v*texture2D(u,vUv);}`;
     const DISP = `#define SHADING
 precision highp float;precision highp sampler2D;
@@ -316,7 +315,6 @@ void main(){
       };
     }
 
-    const pCopy = mkP(BV, COPY);
     const pClear = mkP(BV, CLEAR);
     const pDisp = mkP(BV, DISP);
     const pSplat = mkP(BV, SPLAT);
@@ -326,7 +324,6 @@ void main(){
     const pVort = mkP(BV, VORT);
     const pPres = mkP(BV, PRES);
     const pGsub = mkP(BV, GSUB);
-    void pCopy;
 
     const vb = gl.createBuffer()!;
     gl.bindBuffer(gl.ARRAY_BUFFER, vb);

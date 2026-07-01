@@ -81,6 +81,9 @@ export const featured: FeaturedWork[] = [
     role: "Founder",
     description:
       "A focus app that composes its audio in real time instead of looping a playlist. The engine paces every session through an entry, anchor, sustain, and re-focus arc, so the sound shifts with your attention rather than against it.",
+    cover: "/projects_assets/LucidTone/lucidTone_product_img.png",
+    coverAlt:
+      "The Lucid Tone focus app open mid-session, its real-time audio arc on screen.",
     stack: ["React", "TypeScript", "Python", "FastAPI"],
     media: {
       kind: "video",

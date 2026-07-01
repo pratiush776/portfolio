@@ -1,11 +1,12 @@
 "use client";
 
-import { motion, type MotionValue } from "motion/react";
+import { useRef } from "react";
+import { motion, type MotionStyle, type MotionValue } from "motion/react";
 
-import { HeroThesis } from "@/components/hero/HeroThesis";
 import { MorphName } from "@/components/hero/MorphName";
 import { useIntro } from "@/components/intro/IntroProvider";
 import { BEAT, INTRO_EASE, type Beat } from "@/lib/intro";
+import { useNavDissolveMask } from "@/lib/navDissolve";
 import { useScrubReveal } from "@/lib/reveal";
 
 /**
@@ -28,14 +29,31 @@ const shown = { y: 0, opacity: 1 } as const;
 /* Staggered exit windows (fractions of the pinned track). The copy no longer disappears before
    the transition phrase is legible; its tail overlaps the thesis gate, then the morph takes over.
    Each peels away on the shared scrub reveal (fade + lift + a touch of blur). */
+// Windows are in raw hero progress. The hero pin was shortened (see .hero-track-v4 / MorphName
+// MORPH_SCALE), so these are stretched ~2.3× from their old values to keep the copy clearing over a
+// similar SCROLL distance as the morph rolls (the morph now rolls over heroProgress ≈0.2–0.85).
 const EXIT = {
-  eyebrow: { window: [0.0, 0.07], lift: -54 },
-  body: { window: [0.025, 0.18], lift: -44 },
-  meta: { window: [0.04, 0.2], lift: -36 },
+  eyebrow: { window: [0.0, 0.16], lift: -54 },
+  body: { window: [0.06, 0.42], lift: -44 },
+  meta: { window: [0.1, 0.46], lift: -36 },
 } as const;
 
-export function HeroLede({ progress }: { progress: MotionValue<number> }) {
+export function HeroLede({
+  progress,
+  titleLag,
+}: {
+  progress: MotionValue<number>;
+  titleLag: MotionValue<string>;
+}) {
   const { foregroundIn, reduce } = useIntro();
+
+  // EXIT DISSOLVE — owned here at the CLUSTER level so the whole lockup (the "Featured" eyebrow + the
+  // landed PROJECTS word + any copy still in frame) melts into the fixed band just below the nav as a
+  // SINGLE unit, the same viewport-anchored top feather the thesis uses. Reading the cluster's real top
+  // each frame keeps the band pinned at the nav line through the pin AND the exit (the static CSS mask
+  // only stayed anchored while pinned, which let the unpinning title wipe/​hard-cut under the nav).
+  const clusterRef = useRef<HTMLDivElement>(null);
+  const dissolveMask = useNavDissolveMask(clusterRef);
 
   const eyebrowExit = useScrubReveal(progress, EXIT.eyebrow.window, { y: EXIT.eyebrow.lift, blur: 4, dir: "out" });
   const bodyExit = useScrubReveal(progress, EXIT.body.window, { y: EXIT.body.lift, blur: 4, dir: "out" });
@@ -52,7 +70,15 @@ export function HeroLede({ progress }: { progress: MotionValue<number> }) {
   });
 
   return (
-    <div className="hero-cluster-v4">
+    <motion.div
+      ref={clusterRef}
+      className="hero-cluster-v4"
+      style={
+        reduce
+          ? undefined
+          : ({ WebkitMaskImage: dissolveMask, maskImage: dissolveMask } as MotionStyle)
+      }
+    >
       {/* The page's real heading for a11y/SEO — the visible name is decorative text. */}
       <h1 className="visually-hidden">
         Pratiush — Software Engineer, Product &amp; Design
@@ -68,8 +94,9 @@ export function HeroLede({ progress }: { progress: MotionValue<number> }) {
         </motion.p>
       </motion.div>
 
-      {/* The name — NOT inside an exit wrapper; it holds dead still as the copy peels away. */}
-      <MorphName progress={progress} />
+      {/* The name — NOT inside an exit wrapper; it holds still as the copy peels away, then rides up
+          with a parallax LAG (exitY) once the hero scrolls out, slower than the thesis. */}
+      <MorphName progress={progress} exitY={titleLag} />
 
       <motion.div className="hero-exit-v4" style={reduce ? undefined : bodyExit}>
         {/* Role — the credential, set directly beneath the name so it qualifies it at a glance. */}
@@ -97,11 +124,9 @@ export function HeroLede({ progress }: { progress: MotionValue<number> }) {
         </motion.span>
       </motion.div>
 
-      {/* The line that frames the work, anchored upper-left — a diagonal thirds composition with
-          the landed PROJECTS (mid-right), leaving the lower band free for the first work panel to
-          crest into. It inks in as the name brakes into PROJECTS. Only on the morph path: reduced
-          motion keeps the name as PRATIUSH, so there is no landed frame to caption. */}
-      {!reduce && <HeroThesis progress={progress} />}
-    </div>
+      {/* The thesis statement no longer lives in the pinned hero — it crests in as its OWN scrolling
+          beat (<HeroThesisBeat/>, rendered after the hero in page.tsx) so its entrance is real
+          document scroll rather than a scripted move inside the pin. */}
+    </motion.div>
   );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useLayoutEffect, useRef, useState } from "react";
+import { memo, useLayoutEffect, useRef, useState } from "react";
 import {
   cubicBezier,
   motion,
@@ -10,7 +10,7 @@ import {
 } from "motion/react";
 
 import { useIntro } from "@/components/intro/IntroProvider";
-import { BEAT, easedScrollStart, INTRO_EASE } from "@/lib/intro";
+import { BEAT, INTRO_EASE } from "@/lib/intro";
 
 /**
  * The hero name — and the landing's one big move. PRATIUSH is real text (Bricolage Light/300 caps in
@@ -68,11 +68,10 @@ const TO_OPTICAL_FIT = [0, -0.01, -0.01, -0.01, -0.01, -0.01, -0.01, -0.01];
  * that waits for each glyph to nearly finish before the next starts. */
 // Choreography: the morph begins EARLY, overlapping the copy's scroll-out — the elastic force loads on
 // the word from the top of the scroll and the first real letter (A→O) starts rolling at ROLL_START. The
-// thesis writes itself on in sync (HeroThesis INK_START = ROLL_START), then scrolls off; the name lands
-// as PROJECTS (~0.33), then travels UP WITH the thesis as a parallax pair (see TITLE_DRIFT) — the
-// title slightly behind the thesis for depth — while the first work panel crests up from below (works
-// enters ≈0.50, as the thesis nears the top). Tune with ROLL_START (when the wave starts /
-// how much it overlaps the copy-out) and ROLL_DUR/STAGGER (how fast it resolves — both cut ~20%).
+// name lands as PROJECTS (~0.33), then drifts UP (see TITLE_DRIFT) as the thesis beat crests in beside
+// it (HeroThesisBeat — now its OWN scrolling section, no longer synced to this morph) and the first
+// work panel later crests up from below. Tune with ROLL_START (when the wave starts / how much it
+// overlaps the copy-out) and ROLL_DUR/STAGGER (how fast it resolves — both cut ~20%).
 const ROLL_START = 0.08; // first CHANGING slot (A→O) begins its roll, overlapping the copy-out; lands ~0.33
 const ROLL_DUR = 0.116; // duration of a single letter's glyph roll (~20% quicker than before)
 const ROLL_STAGGER = 0.027; // delay between consecutive letters' starts (≪ ROLL_DUR → wavy overlap)
@@ -98,21 +97,13 @@ const ROLL_TRAVEL = ((1 + ROLL_GAP) / (2 + ROLL_GAP)) * 100; // %
 // from the baseline so the letters keep their horizontal fit and the bottom line stays dead level.
 const STATIC_STRETCH = 1.02;
 
-// PARALLAX PAIR: once the word has LANDED as PROJECTS it travels UP together with the thesis as the
-// hero exits — the two leave the stage as one diagonal gesture. The title moves a touch SLOWER than
-// the thesis (which scrolls off ~58vh near scroll-rate) so it keeps a gentle depth lag (physics:
-// bigger = slower), but it now clearly rides up WITH the thesis rather than holding near-still and
-// dissolving in place. TITLE_DRIFT_START sits just past ROLL_END so the drift never fights the roll;
-// the move settles to a constant (linear) rate but launches with a soft CUBIC ease-in over the first
-// TITLE_DRIFT_RAMP, so the title accelerates into the drift instead of snapping from held-still to
-// full speed. As it rides up it also softens/fades out (no nav marker — it simply leaves the stage as
-// the NILINK laptop bridges in). Tune the lag with TITLE_DRIFT.
-const TITLE_DRIFT_START = 0.34;
-// Upward travel of the landed title as it leaves with the thesis. Kept WELL under the thesis's ~58vh so
-// the two read as a clear PARALLAX PAIR — the big title lags noticeably behind the faster thesis for
-// real depth (bigger = slower), rather than the two moving as one. Tune the differential by eye.
-const TITLE_DRIFT = "-30vh";
-const TITLE_DRIFT_RAMP = 0.12; // fraction of the drift spent easing IN before it settles to its rate
+// PARALLAX PAIR: once the word lands as PROJECTS, it and the thesis both scroll UP and off as the hero
+// exits. The title is the STEADIER element — it rides up at scroll speed (1:1) and dissolves into the
+// nav band — while the thesis LEADS (rides up faster), so the thesis clears first and the two separate
+// cleanly before NILINK. The title can't ride up SLOWER (a lag) because the hero is an overflow:hidden
+// sticky box whose rising bottom edge would clip it. `exitY` is a small VELOCITY-MATCHED release ramp
+// (HeroSection RELEASE_LIFT) that eases the title out of the pin so it doesn't jolt from held to
+// scrolling — applied to the whole title so it moves as one.
 
 // The script "Featured" eyebrow that reveals above PROJECTS — the section title's quiet lead-in, in
 // the SAME hand (Style Script) as the hero's "Hi, I'm" greeting. It enters RIGHT AFTER the role +
@@ -217,7 +208,10 @@ function waveTension(d: number): number {
   return k * k; // fast release, settling into rest
 }
 
-function MorphLetter({
+// Memoized: every prop is a primitive derived from the constant FROM/TO arrays or the identity-stable
+// `progress` MotionValue, so MorphLetter never needs to re-render once mounted — the scrubbed motion
+// values update through the compositor, not React. memo keeps a stray parent render from cascading.
+const MorphLetter = memo(function MorphLetter({
   from,
   to,
   previousFrom,
@@ -321,17 +315,21 @@ function MorphLetter({
 
     };
     measure();
-    window.addEventListener("resize", measure);
-    document.fonts?.ready.then(measure).catch(() => {});
 
     // Re-measure the instant the web font swaps in. `document.fonts.ready` can resolve BEFORE a
     // cold-loaded `font-display: swap` face actually paints, so the slot widths/kerns stay pinned to
     // the fallback font's metrics while the visible glyphs are the real face — a mismatch that splits
     // the word (e.g. "PRA TIUSH"). A ResizeObserver on the hidden metric samples fires exactly when
     // their advance widths change (fallback → real glyph), guaranteeing the fit uses real metrics.
+    // Attach it BEFORE awaiting fonts.ready so a swap that lands during the wait can't slip through the
+    // gap between fonts.ready resolving and ro.observe().
     const ro = new ResizeObserver(measure);
     if (fromCurrentRef.current) ro.observe(fromCurrentRef.current);
     if (toCurrentRef.current) ro.observe(toCurrentRef.current);
+
+    window.addEventListener("resize", measure);
+    document.fonts?.ready.then(measure).catch(() => {});
+
     return () => {
       window.removeEventListener("resize", measure);
       ro.disconnect();
@@ -421,37 +419,49 @@ function MorphLetter({
       </span>
     </motion.span>
   );
-}
+});
 
-export function MorphName({ progress }: { progress: MotionValue<number> }) {
+// The hero pin is now SHORT — it releases right after PROJECTS lands (see .hero-track-v4 height). We
+// feed the morph a slowed-down progress (mp = progress × MORPH_SCALE) so the IDENTICAL morph fills the
+// shorter pin and lands at heroProgress ≈ ROLL land ÷ MORPH_SCALE (near the pin's end). Side effect, by
+// design: mp never exceeds MORPH_SCALE, so the post-landing TITLE_DRIFT barely moves and the
+// PROJECTS_FADE / FEATURED_OUT windows (≥0.73 of mp) never fire — PROJECTS stays lit and simply scrolls
+// AWAY when the pin releases (no scripted fade). Tune MORPH_SCALE together with the track height.
+const MORPH_SCALE = 0.39;
+
+export function MorphName({
+  progress,
+  exitY,
+}: {
+  progress: MotionValue<number>;
+  // Parallax lag for the landed title as the hero scrolls OUT (driven off the hero's EXIT scroll in
+  // HeroSection, so it's 0 during the pin and only lags once the pin releases). The title rides up
+  // with the page minus this offset, so it scrolls SLOWER than the thesis — the parallax pair.
+  exitY: MotionValue<string>;
+}) {
   const { foregroundIn, reduce } = useIntro();
-
-  // The slow parallax drift of the landed title (see TITLE_DRIFT). Hook runs unconditionally; the
-  // reduced-motion branch below simply never reads it.
-  const titleDrift = useTransform(progress, [TITLE_DRIFT_START, 1], ["0vh", TITLE_DRIFT], {
-    ease: easedScrollStart(TITLE_DRIFT_RAMP),
-  });
+  const mp = useTransform(progress, (v) => v * MORPH_SCALE);
 
   // The "Featured" script eyebrow inks in (rise + fade) as the morph resolves into PROJECTS. Hooks run
   // unconditionally; the reduced-motion branch (PRATIUSH, no PROJECTS title) simply never renders it.
   const featuredOpacity = useTransform(
-    progress,
+    mp,
     [FEATURED_IN_START, FEATURED_IN_END, FEATURED_OUT_START, FEATURED_OUT_END],
     [0, 1, 1, 0],
     { ease: cubicBezier(...INTRO_EASE) },
   );
-  const featuredRise = useTransform(progress, [FEATURED_IN_START, FEATURED_IN_END], ["0.5em", "0em"], {
+  const featuredRise = useTransform(mp, [FEATURED_IN_START, FEATURED_IN_END], ["0.5em", "0em"], {
     ease: cubicBezier(...INTRO_EASE),
   });
 
   // The landed PROJECTS word fades + softly blurs out as it drifts up, ceding the stage to the first
   // project's title (no collision). Applied to the reveal wrapper so it never fights the entrance
   // mask on the inner run.
-  const projectsOpacity = useTransform(progress, [PROJECTS_FADE_START, PROJECTS_FADE_END], [1, 0], {
+  const projectsOpacity = useTransform(mp, [PROJECTS_FADE_START, PROJECTS_FADE_END], [1, 0], {
     ease: cubicBezier(...INTRO_EASE),
   });
   const projectsBlur = useTransform(
-    progress,
+    mp,
     [PROJECTS_FADE_START, PROJECTS_FADE_END],
     [0, PROJECTS_FADE_BLUR],
   );
@@ -471,9 +481,11 @@ export function MorphName({ progress }: { progress: MotionValue<number> }) {
       className="hero-name-v4"
       aria-hidden
       // --roll-gap is the single source of truth for the roll's vertical gap (see ROLL_GAP): the slot
-      // headroom and column gap derive from it in CSS, the roll travel from it in JS. `y` is the slow
-      // post-landing parallax drift (TITLE_DRIFT) — applied to the whole title so it rides up as one.
-      style={{ "--roll-gap": `${ROLL_GAP}em`, y: titleDrift } as MotionStyle}
+      // headroom and column gap derive from it in CSS, the roll travel from it in JS. `y` is the title's
+      // velocity-matched release ramp (exitY; see HeroSection RELEASE_LIFT) that eases it out of the pin.
+      // The EXIT dissolve into the nav band is owned at the cluster level (HeroLede), so the whole lockup
+      // — eyebrow + word — melts uniformly rather than the eyebrow hard-cutting against a per-name mask.
+      style={{ "--roll-gap": `${ROLL_GAP}em`, y: exitY } as MotionStyle}
     >
       {/* The "Featured" script eyebrow — same hand as the hero greeting, anchored ABOVE the word and
           inside this drifting root so it parallaxes with PROJECTS. Inks in as the morph resolves. */}
@@ -514,7 +526,7 @@ export function MorphName({ progress }: { progress: MotionValue<number> }) {
               toOpticalFit={TO_OPTICAL_FIT[i]}
               index={i}
               roll={ROLL_ORDER[i]}
-              progress={progress}
+              progress={mp}
             />
           ))}
         </motion.span>

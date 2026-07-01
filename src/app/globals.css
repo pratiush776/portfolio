@@ -1,12 +1,10 @@
 @import "tailwindcss";
-@plugin "daisyui";
 
 :root {
   --background: #ffffff;
   --foreground: #171717;
 }
 
-.container,
 main {
   -ms-overflow-style: none;
   /* Internet Explorer 10+ */
@@ -55,7 +53,7 @@ textarea:focus-visible {
 }
 
 .title {
-  @apply text-[32px] leading-[36px] tracking-[1.25px] font-semibold text-navy md:leading-[40px] md:text-[40px] md:tracking-[1px] mb-[8px];
+  @apply text-[32px] leading-[36px] tracking-[1.25px] font-semibold md:leading-[40px] md:text-[40px] md:tracking-[1px] mb-[8px];
 }
 
 .h3 {
@@ -64,19 +62,6 @@ textarea:focus-visible {
 
 .h3-desktop {
   @apply text-[28px] leading-[32px] tracking-[0.25px];
-}
-
-.full-nav-btn:hover {
-  background-color: #f5efeb;
-  color: #2f4156;
-  transition: all 0.1s ease-out;
-}
-
-.full-nav-btn2:hover {
-  background-color: #2f4156;
-  color: #f5efeb;
-  transition: all 0.2s ease-out;
-  transform: scale(0.9);
 }
 
 button {
@@ -93,58 +78,6 @@ button {
 
 .btn-icon {
   @apply h-[15px];
-}
-
-.hero {
-  background: rgb(61, 78, 98);
-  background: -moz-radial-gradient(circle,
-      rgba(61, 78, 98, 1) 0%,
-      rgba(47, 65, 86, 1) 34%);
-  background: -webkit-radial-gradient(circle,
-      rgba(61, 78, 98, 1) 0%,
-      rgba(47, 65, 86, 1) 34%);
-  background: radial-gradient(circle,
-      rgba(61, 78, 98, 1) 0%,
-      rgba(47, 65, 86, 1) 34%);
-  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr="#3d4e62", endColorstr="#2f4156", GradientType=1);
-  @apply relative min-h-[100vh] p-[32px] min-w-[100vw] shadow-2xl rounded-b-[20px] px-[32px];
-}
-
-.container {
-  @apply relative min-h-[100vh] p-[32px] bg-beige min-w-[100vw] shadow-2xl rounded-b-[20px] px-[32px];
-}
-
-@keyframes float {
-
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-
-  50% {
-    transform: translateY(8px);
-  }
-}
-
-@keyframes float-shadow {
-
-  0%,
-  100% {
-    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
-  }
-
-  50% {
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
-  }
-}
-
-/* Utility classes for the animations */
-.float-animation {
-  animation: float 3s ease-in-out infinite;
-}
-
-.float-shadow {
-  animation: float-shadow 3s ease-in-out infinite;
 }
 
 @keyframes fadeAnimation {
@@ -177,29 +110,30 @@ button {
      reference their next/font variables (--font-style-script / --font-hanken / --font-sentient)
      DIRECTLY in the hero rules — the same pattern as the name's --font-bricolage — so no @theme
      alias is declared for them here. */
-
-  /* Color palette */
-  --color-navy: #2f4156;
-  --color-beige: #f5efeb;
-  --color-orange: #e2a47e;
-  --color-teal: #567c8d;
-  --color-sky: #c8d9e6;
 }
 
 /* =========================================================
    V3-INSPIRED TOKENS + SURFACES
    ========================================================= */
 :root {
-  --v3-bg-primary: #F4E3CE;   /* Dusk: warm peach-cream hero (was acid chartreuse) */
-  --v3-text-dark: #221E2E;    /* one consistent near-black-plum neutral across all stages */
-  --v3-accent-red: #C9542E;   /* THE accent — terracotta, carried through every stage */
+  --v3-bg-primary: #f4e3ce; /* Dusk: warm peach-cream hero (was acid chartreuse) */
+  --v3-text-dark: #221e2e; /* one consistent near-black-plum neutral across all stages */
+  --v3-accent-red: #c9542e; /* THE accent — terracotta, carried through every stage */
   --hero-ink-strong: var(--v3-text-dark);
-  --hero-ink-voice: color-mix(in srgb, var(--v3-text-dark) 82%, var(--v3-accent-red));
+  --hero-ink-voice: color-mix(
+    in srgb,
+    var(--v3-text-dark) 82%,
+    var(--v3-accent-red)
+  );
   --hero-accent: var(--v3-accent-red);
   /* Secondary-text terracotta — a DEEP shade of the accent (toward the plum ink for depth + AA)
      for the greeting and role line, so the hero reads as one terracotta family: light terracotta
      field → full-accent name → deep-terracotta labels. ~5:1 on the warm field. */
-  --hero-ink-terra: color-mix(in srgb, var(--v3-accent-red) 65%, var(--v3-text-dark));
+  --hero-ink-terra: color-mix(
+    in srgb,
+    var(--v3-accent-red) 65%,
+    var(--v3-text-dark)
+  );
   --v3-white: #ffffff;
 
   /* Warm gold — the terracotta accent's tonal sibling for the DARK footer surface. The terracotta
@@ -207,7 +141,7 @@ button {
      the footer email while staying in the one warm family. (The cool v3 accents — teal #4c8577 and
      slate #4d5c60 — were removed: the v4 identity is a single warm terracotta system and those
      tokens were unused.) */
-  --v3-accent-gold: #E3B98A;
+  --v3-accent-gold: #e3b98a;
 
   /* Belt-and-braces re-declaration of the @theme font tokens. If the var chain ever fails
      to resolve, font-family goes invalid and silently inherits the body sans (the manifesto
@@ -246,7 +180,7 @@ button {
      8 glyphs at this size span ≈ the old SVG hero width (~46vw). */
   --brand-gutter: clamp(1.5rem, 3.5vw, 3.5rem);
   --name-hero-size: clamp(3.2rem, 9.2vw, 10rem);
-  --brand-nav-w: clamp(7rem, 8.5vw, 9rem);   /* logo size in the nav */
+  --brand-nav-w: clamp(7rem, 8.5vw, 9rem); /* logo size in the nav */
   --v3-outline-top: clamp(2.5rem, 5.581svh, 5rem);
   --v3-outline-right: clamp(2rem, 2.93vw, 3.75rem);
   --v3-outline-bottom: clamp(2.5rem, 5.505svh, 5rem);
@@ -260,46 +194,86 @@ button {
   --v3-hairline: 1px solid rgba(56, 56, 56, 0.64);
 
   /* --- Dusk / Pastel-Pop palette (translated from portfolio_v3_draft) --- */
-  --v3-blush:  #F4DAD2;
-  --v3-lilac:  #DCD9F2;
-  --v3-mint:   #D2E8D6;
-  --v3-butter: #F6EECB;
-  --v3-cherry: #C9542E;   /* unified to the terracotta accent */
-  --v3-citron: #C7D24E;
+  --v3-blush: #f4dad2;
+  --v3-lilac: #dcd9f2;
+  --v3-mint: #d2e8d6;
+  --v3-butter: #f6eecb;
+  --v3-cherry: #c9542e; /* unified to the terracotta accent */
+  --v3-citron: #c7d24e;
   /* Mono-lavender card tints — one hue stepped by value */
-  --v3-card-1: #E6E2F5;
-  --v3-card-2: #D7D2EE;
-  --v3-card-3: #C7C0E6;
-  --v3-card-4: #B7AEDD;
+  --v3-card-1: #e6e2f5;
+  --v3-card-2: #d7d2ee;
+  --v3-card-3: #c7c0e6;
+  --v3-card-4: #b7aedd;
   /* Twilight key */
-  --v3-twilight:        #9D9AD6;
-  --v3-twilight-deep:   #6F6CB0;
-  --v3-twilight-text:   #221E2E;   /* same neutral as --v3-text-dark */
-  --v3-twilight-accent: #C9542E;   /* = the carried terracotta accent */
+  --v3-twilight: #9d9ad6;
+  --v3-twilight-deep: #6f6cb0;
+  --v3-twilight-text: #221e2e; /* same neutral as --v3-text-dark */
+  --v3-twilight-accent: #c9542e; /* = the carried terracotta accent */
   /* Settled "sky" — lighter lavender than twilight, soft vignette edge */
-  --v3-sky-field:       #CBC6EC;
-  --v3-sky-edge:        #A9A3D6;
+  --v3-sky-field: #cbc6ec;
+  --v3-sky-edge: #a9a3d6;
   /* Soft warm ink for text on pastels */
-  --v3-ink: #2A2730;
+  --v3-ink: #2a2730;
   /* Mesh-gradient presets (full background-image values) */
-  --mesh-lilac: radial-gradient(60% 70% at 22% 28%, var(--v3-lilac) 0%, transparent 60%),
-                radial-gradient(55% 65% at 80% 22%, var(--v3-blush) 0%, transparent 58%),
-                radial-gradient(70% 75% at 72% 82%, var(--v3-mint) 0%, transparent 62%),
-                radial-gradient(60% 60% at 30% 85%, var(--v3-butter) 0%, transparent 60%),
-                var(--v3-bg-primary);
-  --mesh-twilight: radial-gradient(65% 75% at 28% 24%, color-mix(in srgb, var(--v3-lilac) 78%, var(--v3-sky-field)) 0%, transparent 62%),
-                   radial-gradient(60% 70% at 82% 30%, color-mix(in srgb, var(--v3-blush) 60%, var(--v3-sky-field)) 0%, transparent 60%),
-                   radial-gradient(75% 80% at 68% 86%, color-mix(in srgb, var(--v3-sky-edge) 70%, transparent) 0%, transparent 64%),
-                   var(--v3-sky-field);
+  --mesh-lilac:
+    radial-gradient(60% 70% at 22% 28%, var(--v3-lilac) 0%, transparent 60%),
+    radial-gradient(55% 65% at 80% 22%, var(--v3-blush) 0%, transparent 58%),
+    radial-gradient(70% 75% at 72% 82%, var(--v3-mint) 0%, transparent 62%),
+    radial-gradient(60% 60% at 30% 85%, var(--v3-butter) 0%, transparent 60%),
+    var(--v3-bg-primary);
+  --mesh-twilight:
+    radial-gradient(
+      65% 75% at 28% 24%,
+      color-mix(in srgb, var(--v3-lilac) 78%, var(--v3-sky-field)) 0%,
+      transparent 62%
+    ),
+    radial-gradient(
+      60% 70% at 82% 30%,
+      color-mix(in srgb, var(--v3-blush) 60%, var(--v3-sky-field)) 0%,
+      transparent 60%
+    ),
+    radial-gradient(
+      75% 80% at 68% 86%,
+      color-mix(in srgb, var(--v3-sky-edge) 70%, transparent) 0%,
+      transparent 64%
+    ),
+    var(--v3-sky-field);
   /* Warm "aurora" mesh — two drifting layers of soft blobs over the cream hero.
      Kept warm & low-opacity so it adds atmospheric depth without fighting the
      photo + wordmark. Layer A warms the empty right/lower; B fills the bottom. */
-  --mesh-aurora-a: radial-gradient(46% 56% at 82% 24%, rgba(227, 185, 138, 0.55) 0%, transparent 60%),
-                   radial-gradient(54% 62% at 96% 74%, rgba(201, 84, 46, 0.16) 0%, transparent 62%),
-                   radial-gradient(40% 50% at 66% 54%, rgba(232, 196, 170, 0.30) 0%, transparent 60%);
-  --mesh-aurora-b: radial-gradient(56% 64% at 56% 98%, rgba(246, 238, 203, 0.62) 0%, transparent 60%),
-                   radial-gradient(44% 54% at 16% 88%, rgba(244, 218, 210, 0.50) 0%, transparent 58%),
-                   radial-gradient(40% 48% at 88% 40%, rgba(227, 185, 138, 0.30) 0%, transparent 58%);
+  --mesh-aurora-a:
+    radial-gradient(
+      46% 56% at 82% 24%,
+      rgba(227, 185, 138, 0.55) 0%,
+      transparent 60%
+    ),
+    radial-gradient(
+      54% 62% at 96% 74%,
+      rgba(201, 84, 46, 0.16) 0%,
+      transparent 62%
+    ),
+    radial-gradient(
+      40% 50% at 66% 54%,
+      rgba(232, 196, 170, 0.3) 0%,
+      transparent 60%
+    );
+  --mesh-aurora-b:
+    radial-gradient(
+      56% 64% at 56% 98%,
+      rgba(246, 238, 203, 0.62) 0%,
+      transparent 60%
+    ),
+    radial-gradient(
+      44% 54% at 16% 88%,
+      rgba(244, 218, 210, 0.5) 0%,
+      transparent 58%
+    ),
+    radial-gradient(
+      40% 48% at 88% 40%,
+      rgba(227, 185, 138, 0.3) 0%,
+      transparent 58%
+    );
   /* Natural film grain: opaque mid-grey fractal noise (feColorMatrix desaturates to
      luminance and forces alpha=1). Blended with `overlay` it modulates the image
      both lighter AND darker around mid-tone — like real grain, not dark speckle.
@@ -317,7 +291,11 @@ button {
    than before so the PROJECTS handoff is SNAPPIER — the hero clears faster into the first card. */
 .hero-track-v4 {
   position: relative;
-  height: 180vh;
+  /* SHORT pin: pins for (height − 100vh) of scroll. Sized so the morph (fed a scaled progress, see
+     MorphName MORPH_SCALE) lands near the END of the pin, then the hero UNPINS and PROJECTS + the
+     thesis beat scroll up together on real scroll. Was 180vh (a long post-landing hold). Tune in
+     tandem with MORPH_SCALE: shorter pin or larger scale = morph resolves sooner. */
+  height: 135vh;
 }
 
 .hero-root-v3 {
@@ -399,11 +377,13 @@ button {
      pools behind/above the lifted lockup and frames the name, rather than lighting empty space
      up top. A luminous WARM APRICOT/AMBER core — biased toward orange (low blue) so it reads as
      warm terracotta light, sitting between the old yellow-gold and the too-rosy peach it replaces. */
-  background: radial-gradient(50% 50% at 50% 50%,
-      rgba(250, 212, 168, 0.96) 0%,
-      rgba(247, 203, 160, 0.86) 32%,
-      rgba(244, 198, 158, 0.48) 60%,
-      rgba(244, 202, 165, 0) 80%);
+  background: radial-gradient(
+    50% 50% at 50% 50%,
+    rgba(250, 212, 168, 0.96) 0%,
+    rgba(247, 203, 160, 0.86) 32%,
+    rgba(244, 198, 158, 0.48) 60%,
+    rgba(244, 202, 165, 0) 80%
+  );
   pointer-events: none;
   z-index: 0;
   transform-origin: 38% 36%;
@@ -413,7 +393,8 @@ button {
 
 /* Slow, premium "breathing" — barely-there scale + brightness pulse. */
 @keyframes radial-glow-breathe {
-  0%, 100% {
+  0%,
+  100% {
     transform: scale(1);
     opacity: 0.82;
   }
@@ -754,10 +735,12 @@ button {
   height: 27.72cqi;
   transform: translateX(-50%);
   border-radius: 50%;
-  background: radial-gradient(circle at 50% 47%,
-      #efc488 0%,
-      #d27a39 60%,
-      rgba(199, 84, 46, 0) 83%);
+  background: radial-gradient(
+    circle at 50% 47%,
+    #efc488 0%,
+    #d27a39 60%,
+    rgba(199, 84, 46, 0) 83%
+  );
   /* Receded from 0.9 → 0.8 (and the transparent stop pulled 88% → 83%) so the disc reads as
      a soft warm anchor BEHIND the figure, not the heaviest solid mass on screen — keeps the
      wordmark the unambiguous primary focal element (§4). Don't go below ~0.7 or the disc
@@ -788,7 +771,8 @@ button {
 .hero-portrait-img {
   object-fit: cover;
   object-position: center top;
-  filter: contrast(0.9) brightness(1.03) sepia(0.32) saturate(1.2) hue-rotate(-12deg);
+  filter: contrast(0.9) brightness(1.03) sepia(0.32) saturate(1.2)
+    hue-rotate(-12deg);
   /* Mask radius + circle centre-y are in cqi (absolute % of box width), so they must scale
      with the frame. WEAVE FIX: centre-y dropped 18.75 → 20.5cqi to extend the visible torso
      DOWN past the wordmark baseline (so the figure stands THROUGH the type, not above it).
@@ -827,7 +811,9 @@ button {
   text-transform: uppercase;
   line-height: 1;
   white-space: nowrap;
-  transition: transform 0.25s ease, background-color 0.25s ease;
+  transition:
+    transform 0.25s ease,
+    background-color 0.25s ease;
   z-index: 6;
 }
 
@@ -987,15 +973,14 @@ button {
   gap: 0; /* rhythm is controlled per-element below, not by a uniform gap */
   padding: var(--v3-nav-height) var(--brand-gutter) clamp(8rem, 22svh, 14rem);
   text-align: left;
-  will-change: transform, opacity;
-  /* Top feather: anything scrolling UP (the thesis, then the drifting title) DISSOLVES into the top
-     edge before it reaches the fixed nav — so the exit reads as content scrolling cleanly away
-     instead of piling into / colliding with the nav links. The nav and its centre "Featured
-     Projects" marker live OUTSIDE this cluster, so they stay crisp on top. The lockup + locator sit
-     well below the feather (opaque from ~19% down), so the resting hero is untouched. Tune the band
-     if text dissolves too early/late. */
-  -webkit-mask-image: linear-gradient(to bottom, transparent 8%, #000 19%);
-  mask-image: linear-gradient(to bottom, transparent 8%, #000 19%);
+  will-change: transform, opacity, mask;
+  /* Top feather: anything scrolling UP (the landed title + its "Featured" eyebrow, then the copy)
+     DISSOLVES into a band just below the fixed nav so the exit reads as content melting cleanly away
+     instead of piling into / colliding with the nav links. The band is the SAME feather the thesis
+     uses (8%→19% of viewport), but it must stay anchored to the nav line through the pin AND the exit
+     — so it's driven in JS from the cluster's live position (HeroLede useNavDissolveMask / navDissolve),
+     not a static CSS gradient (which only stayed put while pinned, letting the unpinning title wipe).
+     The nav lives OUTSIDE this cluster, so it stays crisp on top. */
 }
 
 /* Visually hidden but available to assistive tech (real <h1>). */
@@ -1010,6 +995,31 @@ button {
   clip: rect(0 0 0 0);
   clip-path: inset(50%);
   white-space: nowrap;
+}
+
+/* Keyboard skip link — off-screen until focused, so the visual default is untouched; on Tab it slides
+   in at the top-left, above the nav (z 100), and lands focus on the #works section. */
+.skip-link {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 110;
+  margin: 0.75rem;
+  padding: 0.6rem 1rem;
+  border-radius: 10px;
+  background: var(--v3-text-dark);
+  color: var(--v3-bg-primary);
+  font-family: var(--font-hanken), sans-serif;
+  font-size: 0.9rem;
+  letter-spacing: 0.01em;
+  transform: translateY(-200%);
+  transition: transform 0.25s var(--ease-micro);
+}
+
+.skip-link:focus-visible {
+  transform: translateY(0);
+  outline: 2px solid var(--v3-text-dark);
+  outline-offset: 3px;
 }
 
 /* The greeting is the quiet personal voice — a fluid brush script (Style Script), the hand-written
@@ -1258,29 +1268,54 @@ button {
 /* The framing line, revealed as the name morphs in place into PROJECTS. Anton gives the phrase
    the tall cinematic poster force that contrasts the Bricolage wordmark; one terracotta emphasis
    word ties it back to the landed PROJECTS. */
+/* The thesis BEAT — a normal-flow section that scrolls the statement THROUGH the viewport on real
+   document scroll (no scripted translate), cresting up through the still-pinned hero via a negative
+   margin (the same overlap the first project card uses). The per-word ink-on is GSAP-scrubbed
+   (HeroThesisBeat). z-index 1 = the same band as the hero track / projects gallery, over the fixed
+   SectionAurora. pointer-events:none — decorative; the SR sentence carries the meaning. */
+.thesis-beat-v4 {
+  position: relative;
+  z-index: 1;
+  /* Crests up so the statement ENTERS right as the morph finishes, then rides up the viewport on real
+     scroll FASTER than the parallax-lagging PROJECTS title (MorphName exitY), the two clearing the top
+     together before NILINK. TUNE by eye in tandem with HeroSection TITLE_LAG and the NILINK margin:
+     more negative = the thesis enters earlier / sits higher. */
+  margin-top: -70vh;
+  min-height: 110vh; /* room to travel through the viewport as the page scrolls */
+  display: flex;
+  align-items: center;
+  justify-content: flex-end; /* right-anchored — the diagonal counterpoint to the lower-left PROJECTS */
+  /* A dedicated, larger RIGHT safe-area (not the ~3.5rem brand gutter) so the right-anchored statement
+     reads as intentionally placed rather than clipped against the viewport edge — legibility over the
+     motion moment. Left stays on the gutter so the diagonal to lower-left PROJECTS holds. */
+  padding: 0 clamp(3rem, 6vw, 6.5rem) 0 var(--brand-gutter);
+  pointer-events: none;
+}
+
+/* The statement block — static within the beat (the flex parent right-anchors it); the section's real
+   scroll carries it through. A tighter column so it reads as a counterpoint, not a second full poster. */
 .hero-thesis-v4 {
-  position: absolute;
-  right: var(--brand-gutter);
-  top: 52%;
   margin: 0;
-  /* a tighter block so it reads as a counterpoint caption, not a second full-width poster */
   max-width: min(24rem, 30vw);
   font-family: var(--font-thesis);
   font-weight: 400;
-  /* CLEARLY SECONDARY to the PROJECTS anchor — dropped ~40% so only ONE typographic hero dominates.
-     The per-word `scale` rhythm (HeroThesis LINES) is preserved; only this base size shrinks. */
-  font-size: clamp(1.7rem, 3.3vw, 3.9rem);
+  /* Max eased down (3.9rem → 3.5rem) so the widest words ("polished"/"products") aren't so large they
+     crowd the new right safe-area — the statement gets air and stays fully legible as it scrolls past. */
+  font-size: clamp(1.7rem, 3vw, 3.5rem);
   line-height: 0.9;
   letter-spacing: -0.018em;
-  /* Right-anchored, ragged-left — the stack hugs the right gutter, the counterpoint to the lower-left
-     PROJECTS anchor (one diagonal composition, not two competing posters). */
   text-align: right;
   color: var(--hero-ink-strong);
-  pointer-events: none;
-  /* Vertically centred on the right; --thesis-lift (JS-driven in HeroThesis) stacks the scroll-up
-     exit ON TOP of that centring, so the statement rises away once it's read. */
-  transform: translateY(calc(-50% + var(--thesis-lift, 0px)));
-  will-change: opacity, transform;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* No crest — the beat flows after the (unpinned) hero; the GSAP ink-on is skipped, so the ink stays
+     at its revealed default and the statement reads in full, static. */
+  .thesis-beat-v4 {
+    margin-top: 0;
+    min-height: auto;
+    padding-block: clamp(3rem, 10vh, 7rem);
+  }
 }
 
 /* One composed line of the thesis (see HeroThesis LINES). Block so each defined line stacks;
@@ -1369,7 +1404,9 @@ button {
   letter-spacing: 0.2em;
   text-transform: uppercase;
   /* "case" centres the · separator to cap height (it sat on the baseline before); "kern" pairs. */
-  font-feature-settings: "case" 1, "kern" 1;
+  font-feature-settings:
+    "case" 1,
+    "kern" 1;
   /* Plum voice ink — NOT terracotta. The role is structural content (a credential), so it belongs
      to the plum family with the statement and the locator, not to the warm "Hi, I'm + name" identity.
      This reserves terracotta for the name as the single warm signature (so it reads as the figure),
@@ -1394,7 +1431,9 @@ button {
   line-height: 1.2;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  font-feature-settings: "case" 1, "kern" 1;
+  font-feature-settings:
+    "case" 1,
+    "kern" 1;
   font-optical-sizing: auto;
   color: var(--hero-ink-strong);
   /* This is the smallest label on the page (down to 0.58rem on mobile) and sits over the peach-
@@ -1423,9 +1462,10 @@ button {
 }
 
 @media (max-width: 1100px) {
-  /* the pin needs a fixed-height stage — the text-only lockup fits 100svh on small screens */
+  /* the pin needs a fixed-height stage — the text-only lockup fits 100svh on small screens. Mirrors
+     the shortened desktop pin (+10vh tablet buffer). */
   .hero-track-v4 {
-    height: 190vh;
+    height: 145vh;
   }
 
   .hero-root-v3 {
@@ -1557,9 +1597,7 @@ button {
   .hero-cluster-v4 {
     justify-content: flex-end;
     gap: 0;
-    padding:
-      calc(var(--v3-nav-height) + 1.5rem)
-      var(--brand-gutter)
+    padding: calc(var(--v3-nav-height) + 1.5rem) var(--brand-gutter)
       clamp(6.5rem, 14svh, 8rem);
   }
 
@@ -1574,11 +1612,11 @@ button {
     display: none;
   }
 
-  /* The thesis is the right-hand counter-anchor of the desktop diagonal — it only composes against
-     the radial glow + golden-section layout, both gone here. On narrow widths its right-anchored
-     stack collides with the left-anchored lockup, so hold it for desktop until the pending hero
-     responsive rewrite gives it a real mobile reflow. (Absolute, so hiding it reflows nothing.) */
-  .hero-thesis-v4 {
+  /* The thesis beat is the right-hand counter-anchor of the desktop diagonal — it only composes
+     against the desktop golden-section layout. On narrow widths its right-anchored stack would need a
+     real reflow, so hold the whole beat for desktop until the pending hero responsive rewrite gives it
+     one. Hiding the section removes it from flow cleanly (its crest math no longer applies ≤1100). */
+  .thesis-beat-v4 {
     display: none;
   }
 }
@@ -1637,7 +1675,6 @@ button {
 }
 
 @media (prefers-reduced-motion: reduce) {
-
   .works-cta-v3,
   .works-cta-v3__icon,
   .site-nav-v3__link,
@@ -1665,7 +1702,6 @@ button {
     opacity: var(--grain-opacity) !important;
     transition: none !important;
   }
-
 }
 
 /* =========================================================
@@ -1729,21 +1765,40 @@ button {
 
 /* Slow figure-eight drift — calmer than the hero so it reads as quiet atmosphere. */
 @keyframes section-aurora-drift-a {
-  0%   { transform: translate3d(0%, 0%, 0) scale(1.05); }
-  25%  { transform: translate3d(5%, -3%, 0) scale(1.08); }
-  50%  { transform: translate3d(7%, 4%, 0) scale(1.06); }
-  75%  { transform: translate3d(3%, 6%, 0) scale(1.09); }
-  100% { transform: translate3d(0%, 0%, 0) scale(1.05); }
+  0% {
+    transform: translate3d(0%, 0%, 0) scale(1.05);
+  }
+  25% {
+    transform: translate3d(5%, -3%, 0) scale(1.08);
+  }
+  50% {
+    transform: translate3d(7%, 4%, 0) scale(1.06);
+  }
+  75% {
+    transform: translate3d(3%, 6%, 0) scale(1.09);
+  }
+  100% {
+    transform: translate3d(0%, 0%, 0) scale(1.05);
+  }
 }
 
 @keyframes section-aurora-drift-b {
-  0%   { transform: translate3d(0%, 0%, 0) scale(1.08); }
-  25%  { transform: translate3d(-6%, 4%, 0) scale(1.04); }
-  50%  { transform: translate3d(-8%, -3%, 0) scale(1.07); }
-  75%  { transform: translate3d(-3%, -6%, 0) scale(1.03); }
-  100% { transform: translate3d(0%, 0%, 0) scale(1.08); }
+  0% {
+    transform: translate3d(0%, 0%, 0) scale(1.08);
+  }
+  25% {
+    transform: translate3d(-6%, 4%, 0) scale(1.04);
+  }
+  50% {
+    transform: translate3d(-8%, -3%, 0) scale(1.07);
+  }
+  75% {
+    transform: translate3d(-3%, -6%, 0) scale(1.03);
+  }
+  100% {
+    transform: translate3d(0%, 0%, 0) scale(1.08);
+  }
 }
-
 
 /* =========================================================
    V4 — 03 · The ask (dark contact finale)
@@ -1755,7 +1810,8 @@ button {
   background: var(--v3-text-dark);
   color: var(--v3-bg-primary);
   border-radius: var(--v3-radius-stage) var(--v3-radius-stage) 0 0;
-  padding: clamp(5rem, 13vh, 9rem) var(--brand-gutter) clamp(1.75rem, 4vh, 2.75rem);
+  padding: clamp(5rem, 13vh, 9rem) var(--brand-gutter)
+    clamp(1.75rem, 4vh, 2.75rem);
   overflow: hidden;
   isolation: isolate;
 }
@@ -1791,13 +1847,20 @@ button {
 .footer-v4__email {
   font-family: var(--font-sentient), Georgia, serif;
   font-weight: 550;
-  font-variation-settings: "wght" 550, "opsz" 144, "SOFT" 0, "WONK" 0;
+  font-variation-settings:
+    "wght" 550,
+    "opsz" 144,
+    "SOFT" 0,
+    "WONK" 0;
   font-size: clamp(1.35rem, 2.6vw, 2.3rem);
   letter-spacing: -0.01em;
   color: var(--v3-accent-gold);
-  border-bottom: 1px solid color-mix(in srgb, var(--v3-accent-gold) 45%, transparent);
+  border-bottom: 1px solid
+    color-mix(in srgb, var(--v3-accent-gold) 45%, transparent);
   padding-bottom: 0.12em;
-  transition: color 0.5s var(--ease-micro), border-color 0.5s var(--ease-micro);
+  transition:
+    color 0.5s var(--ease-micro),
+    border-color 0.5s var(--ease-micro);
 }
 
 .footer-v4__email:hover {
@@ -1809,7 +1872,8 @@ button {
   width: 100%;
   margin-top: clamp(2rem, 6vh, 4rem);
   padding-top: clamp(1.1rem, 2.5vh, 1.5rem);
-  border-top: 1px solid color-mix(in srgb, var(--v3-bg-primary) 18%, transparent);
+  border-top: 1px solid
+    color-mix(in srgb, var(--v3-bg-primary) 18%, transparent);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -1874,7 +1938,6 @@ button {
   mix-blend-mode: overlay;
 }
 
-
 @media (max-width: 640px) {
   .footer-v4__meta {
     flex-direction: column;
@@ -1924,27 +1987,38 @@ button {
 /* ---- one project card (a pinned stage that overlaps the previous one / the hero) ---- */
 .project-spread-v4 {
   position: relative;
-  /* Pinned budget: rise (tiny) + beat + expand + a LONG hold. The hold is deliberately long so the
-     full card sits with its content alone for a while before the next tiny card rises in. */
+  /* Per-card pinned budget: entrance → read/hold → page-turn EXIT (windows in ProjectFeature). The
+     hold is where the NEXT card crests through and crossfades in, so it isn't dead time. */
   height: 400vh;
-  /* Overlap the PREVIOUS card. With a 400vh track this nets ~160vh between cards — the next stays
-     hidden until well into this card's hold, then rises in and covers before this one unpins.
-     Toward 0 = a bigger gap between cards (more solo time); more negative = they come quicker. */
-  margin-top: -240vh;
+  /* Overlap the PREVIOUS card: the next spread is pulled up so its entrance (image → copy) crossfades
+     over it (higher z-index) before that one unpins. THE crossfade knob — toward 0 = a bigger gap /
+     more solo time; more negative = the next arrives sooner. Tuned so the incoming entrance
+     (ProjectFeature IMAGE_IN/BODY_IN, ~0.06–0.32 of the next card's own track) lands inside the
+     OUTGOING card's EXIT window (~0.86–0.97), so the two titles cross ~50/50 and are never both solid
+     in the same column — a true crossfade, not a stack. At -240vh the next card reached full opacity
+     during the previous card's HOLD (both titles solid at once → the "NILINK/Lucid Tone" collision);
+     ~-140vh aligns arrival with the exit. Uniform across cards, so a new middle card inherits it. */
+  margin-top: -140vh;
 }
 
-/* The FIRST card overlaps the HERO instead — tuned so it begins rising right as the PROJECTS title
-   starts lifting, so the hero handoff has no dead beat. The hero track is now 180vh; -150vh ⇒ its
-   pin engages ~30vh in (the title lift begins ~28vh), so the card is already visibly rising as
-   PROJECTS leaves. Nudge THIS alone for the first card's timing without touching the stack
-   (more negative = the card engages even earlier / overlaps the hero more). */
+/* The FIRST card crests as the parallax pair clears — the thesis intro and the dissolving PROJECTS
+   title are both leaving at the TOP (they exit upward), so NILINK can rise in from below to fill the
+   frame at the SAME time rather than leaving a long blank cream gap after the title goes. Pulled up so
+   the crest lands around the title-dissolve moment; it doesn't cover the title because the title is
+   exiting upward while the card rises from the bottom. Nudge THIS for when the work arrives: more
+   negative = NILINK crests EARLIER / less blank (back off toward -55vh if it starts covering the title
+   while it's still landing). */
 .project-spread-v4:first-child {
-  margin-top: -150vh;
-  /* Single-card budget: while only NILINK renders, the base 400vh stack hold leaves ~150vh of
-     STATIC scroll after the content settles (~0.48) before the EXIT (~0.86) — dead air for a
-     time-poor recruiter. Trim the lead's pinned travel so it settles, holds a beat, then hands to
-     the footer. Restore to the base 400vh when the card stack returns and the next card rises in
-     during the hold. */
+  /* Only the crest changes for the lead — it uses the base 400vh hold (NOT a trimmed one), because the
+     next card now rises during that hold, so the stretch is a crossfade, not dead air. */
+  margin-top: -125vh;
+}
+
+/* The LAST card has no successor to cover it, so its hold would be the dead air the critique flagged
+   (P1). Trim its track so it settles, holds a beat, then hands cleanly to the footer. With ≥2 cards
+   this lands on the finale; middle cards keep the base 400vh crossfade budget, so the sequence stays
+   repeatable — a new card in the middle just inherits the base. */
+.project-spread-v4:last-child {
   height: 260vh;
 }
 
@@ -1956,7 +2030,6 @@ button {
   align-items: stretch;
   justify-content: center;
 }
-
 
 /* =========================================================
    V4 — LEAD PROJECT FEATURE (the recomposed editorial NILINK spread)
@@ -1997,14 +2070,40 @@ button {
      cutting off — a short, eased left taper (toward the copy) intersected with a soft top fade
      (where the airy top of the scene meets the page). Two mask layers, multiplied. */
   -webkit-mask-image:
-    linear-gradient(to right, transparent 0%, rgba(0, 0, 0, 0.2) 3%, rgba(0, 0, 0, 0.6) 5.5%, #000 8%, #000 100%),
-    linear-gradient(to bottom, transparent 0%, rgba(0, 0, 0, 0.35) 7%, #000 16%, #000 100%);
+    linear-gradient(
+      to right,
+      transparent 0%,
+      rgba(0, 0, 0, 0.2) 3%,
+      rgba(0, 0, 0, 0.6) 5.5%,
+      #000 8%,
+      #000 100%
+    ),
+    linear-gradient(
+      to bottom,
+      transparent 0%,
+      rgba(0, 0, 0, 0.35) 7%,
+      #000 16%,
+      #000 100%
+    );
   -webkit-mask-repeat: no-repeat;
   -webkit-mask-size: 100% 100%;
   -webkit-mask-composite: source-in;
   mask-image:
-    linear-gradient(to right, transparent 0%, rgba(0, 0, 0, 0.2) 3%, rgba(0, 0, 0, 0.6) 5.5%, #000 8%, #000 100%),
-    linear-gradient(to bottom, transparent 0%, rgba(0, 0, 0, 0.35) 7%, #000 16%, #000 100%);
+    linear-gradient(
+      to right,
+      transparent 0%,
+      rgba(0, 0, 0, 0.2) 3%,
+      rgba(0, 0, 0, 0.6) 5.5%,
+      #000 8%,
+      #000 100%
+    ),
+    linear-gradient(
+      to bottom,
+      transparent 0%,
+      rgba(0, 0, 0, 0.35) 7%,
+      #000 16%,
+      #000 100%
+    );
   mask-repeat: no-repeat;
   mask-size: 100% 100%;
   mask-composite: intersect;
@@ -2032,14 +2131,23 @@ button {
 }
 
 .project-feature-v4__title {
-  margin: 0;
+  /* Optical left-alignment: an all-caps Didone N carries a left side-bearing that, at this scale,
+     pushes its ink a few px right of the brief/meta below — so the column reads mis-aligned. A small
+     negative pull lands the N's stem on the same vertical as the copy. Tune by eye if it over/undershoots. */
+  margin: 0 0 0 -0.03em;
   font-family: var(--font-fraunces), Georgia, serif;
   font-weight: 340;
   /* push Fraunces to its display optical size for the thin hairlines + thick stems of a Didone */
-  font-variation-settings: "opsz" 144, "SOFT" 0, "WONK" 0;
+  font-variation-settings:
+    "opsz" 144,
+    "SOFT" 0,
+    "WONK" 0;
   font-size: clamp(3.5rem, 12vw, 11rem);
   line-height: 0.9;
-  letter-spacing: 0.005em;
+  /* All-caps has no designed kerning for tight setting; a hair of positive tracking evens the
+     letter colour across N-I-L-I-N-K (the two I's otherwise clump) without floating the thin Didone
+     stems apart. Stays well inside the −0.04em display floor. */
+  letter-spacing: 0.018em;
   color: var(--v3-text-dark);
   will-change: transform, opacity, filter;
 }
@@ -2047,10 +2155,15 @@ button {
 .project-feature-v4__desc {
   /* title → pitch: a generous gap so the small copy clears the huge serif's baseline cleanly */
   margin: clamp(1.5rem, 3.2vh, 2.4rem) 0 0;
-  max-width: 27rem;
-  /* bumped for effortless recruiter skimming — it shouldn't read tiny beside the huge title */
-  font-size: clamp(1rem, 1.1vw, 1.2rem);
+  max-width: 30rem; /* ~42ch at the larger lead size — inside the 65–75ch measure ceiling */
+  /* The one selling sentence reads as a LEAD, not a caption — it's the evidence, not decoration, so it
+     carries real authority against the oversized title. The floor is lifted (1.05rem → 1.18rem) because
+     on a typical laptop the vw term is tiny, so the copy was effectively rendering ~1.05rem next to an
+     11rem title. Stays Hanken (inherited body), the single support voice, so it never competes with the
+     Fraunces title or the Sentient link. */
+  font-size: clamp(1.18rem, 1.25vw, 1.4rem);
   line-height: 1.55;
+  text-wrap: pretty; /* even rag, no orphan on the last line */
   /* near-solid ink for confident legibility over the textured cream — the one paragraph that sells
      the work shouldn't read faint */
   color: color-mix(in srgb, var(--v3-text-dark) 92%, transparent);
@@ -2061,9 +2174,14 @@ button {
 .project-feature-v4__meta {
   /* pitch → facts: tight, so the brief and its facts read as a single grouped block */
   margin: clamp(0.95rem, 2vh, 1.5rem) 0 0;
-  font-family: var(--font-pier);
-  font-size: clamp(0.74rem, 0.86vw, 0.88rem);
-  letter-spacing: 0.06em;
+  /* Hanken — the SAME support face as the brief, so the column has one quiet voice (the title and the
+     "View Case" link are the only display/accent faces). Was Bricolage, which paired two near-identical
+     grotesques for the support text and leaned on the over-used --font-pier alias. */
+  font-family: var(--font-hanken), sans-serif;
+  font-size: clamp(0.78rem, 0.86vw, 0.88rem);
+  /* Light tracking only — these are mixed-case quiet facts, not tracked caps; the old 0.06em spaced the
+     lowercase out and read as a label. */
+  letter-spacing: 0.015em;
   /* The recruiter-facing credibility line (year · role · stack) — quiet, but it must stay legible.
      70% plum-ink on the cream clears WCAG AA (~5.4:1) at this small size; 58% read sub-AA (~3.8:1)
      and washed out, the exact "muted text on tinted cream" risk the palette doc flags. */
@@ -2086,7 +2204,11 @@ button {
   background: none;
   cursor: pointer;
   font-family: var(--font-sentient), Georgia, serif;
-  font-size: clamp(1.05rem, 1.3vw, 1.35rem);
+  /* Min held at the LARGE-text band (≥1.17rem): terracotta on the cream computes to ~3.5:1, which
+     clears WCAG AA for large text (≥3:1) but not for normal text (4.5:1). Sizing it large keeps the
+     one accent link legible WITHOUT re-hueing the committed --v3-accent-red. The bump also reads as a
+     more confident affordance beside the lead. */
+  font-size: clamp(1.2rem, 1.3vw, 1.4rem);
   color: var(--v3-accent-red);
   transition: transform 0.3s var(--ease-micro);
 }
@@ -2187,7 +2309,9 @@ button {
   border: none;
   border-radius: var(--v3-radius-pill);
   cursor: pointer;
-  transition: background 0.5s var(--ease-micro), color 0.5s var(--ease-micro);
+  transition:
+    background 0.5s var(--ease-micro),
+    color 0.5s var(--ease-micro);
 }
 
 .project-overlay-v4__close:hover {
