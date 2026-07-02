@@ -64,12 +64,20 @@ export function SmoothScroll({ children }: { children: React.ReactNode }) {
   if (prefersReducedMotion) return <>{children}</>;
 
   return (
-    // lerp 0.05 (lower = MORE smoothing): the scroll position eases toward the target rather than
-    // tracking the wheel 1:1, so the pinned folds glide instead of stepping. autoRaf:false because
-    // GSAP's ticker drives the RAF (see the effect above).
+    // Duration+easing mode (live-up.co.jp feel, softened): setting `duration` overrides lerp — each
+    // wheel input becomes one fixed animation instead of an exponential drift. easeOutQuad over 1.2s
+    // (vs live-up's easeOutCubic/1s) launches at ~1.7x average speed instead of 3x, so a quick flick
+    // doesn't fly through the scrubbed folds. autoRaf:false — GSAP's ticker drives the RAF (above).
     <ReactLenis
       root
-      options={{ lerp: 0.05, smoothWheel: true, autoRaf: false }}
+      options={{
+        duration: 1.2,
+        easing: (t: number) => 1 - Math.pow(1 - t, 2),
+        smoothWheel: true,
+        wheelMultiplier: 1,
+        touchMultiplier: 2,
+        autoRaf: false,
+      }}
       ref={lenisRef}
     >
       {children}

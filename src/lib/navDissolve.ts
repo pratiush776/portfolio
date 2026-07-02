@@ -9,10 +9,9 @@ import { useMotionValue, useMotionValueEvent, useScroll } from "motion/react";
  * WHY a live-rect read and not a static CSS mask: a mask on a SCROLLING element is anchored to the
  * element's own box, so its band travels with the element and never sits at the nav line. Reading the
  * element's real `getBoundingClientRect().top` each scroll frame — which already includes whatever
- * parallax transform the element carries (the title's exit LAG, the thesis's exit LEAD) — lets us place
- * the feather band at the SAME viewport line no matter how fast the element is moving. That is what makes
- * the title and the thesis exit CONSISTENTLY: identical band, identical anchor; only their parallax
- * VELOCITY differs (by purpose — see HeroSection TITLE_LAG / HeroThesisBeat THESIS_LEAD).
+ * transform the element carries (e.g. the title's release ramp) — lets us place the feather band at
+ * the SAME viewport line no matter how fast the element is moving. The hero cluster (which now hosts
+ * the whole composed frame — title, note, thesis) rides out through this one band.
  *
  * The band is expressed as viewport fractions and matches the `.hero-cluster-v4` mask exactly:
  *   • above CLEAR  (8% of vh)  → fully transparent (already gone, under the nav)

@@ -17,6 +17,11 @@ export function NavLogo() {
   // top); pages without a hero correct themselves a frame later (hidden → shown).
   const [hasHero, setHasHero] = useState(true);
   const vh = useRef(800);
+  // The hero pin's scroll length (track − viewport). Measured, not hardcoded: the track height is
+  // the chain's master pacing knob (and differs across breakpoints / reduced motion), and keying
+  // the reveal off a stale assumption is exactly what would fade the wordmark in while the big
+  // word is still pinned mid-chain — two identities on screen at once.
+  const pin = useRef(0);
 
   useEffect(() => {
     const raf = requestAnimationFrame(() => {
@@ -24,6 +29,8 @@ export function NavLogo() {
     });
     const set = () => {
       vh.current = Math.max(1, window.innerHeight);
+      const track = document.querySelector<HTMLElement>(".hero-track-v4");
+      pin.current = track ? Math.max(0, track.offsetHeight - vh.current) : 0;
     };
     set();
     window.addEventListener("resize", set);
@@ -33,12 +40,12 @@ export function NavLogo() {
     };
   }, []);
 
-  // Scrubbed reveal tied to the morph window (the hero pin starts at scrollY 0, so plain
-  // scrollY is the same clock). The hero track is 180vh (pin = 80vh), so progress·0.8 = scrollY/vh
-  // and the morph runs ~6→26vh of scroll (progress 0.08→0.33). This reveal is keyed in ABSOLUTE
-  // viewport-heights (~0.42→0.66vh below), so the logo returns as the big name departs/fades. Re-tune
-  // the 0.42/0.24 thresholds by eye if it should track the morph window more tightly.
-  const reveal = (v: number) => Math.min(1, Math.max(0, (v / vh.current - 0.42) / 0.24));
+  // Scrubbed reveal keyed to the UNPIN (the hero pin starts at scrollY 0, so scrollY − pin is
+  // scroll travelled since release): the landed title starts riding up at the unpin, and the logo
+  // returns over the ~7→31vh of scroll it takes the departing name to clear the nav band — the
+  // same absolute feel the short pin had. Re-tune the 0.07/0.24 thresholds by eye.
+  const reveal = (v: number) =>
+    Math.min(1, Math.max(0, ((v - pin.current) / vh.current - 0.07) / 0.24));
   const opacity = useTransform(scrollY, (v) =>
     reveal(v),
   );

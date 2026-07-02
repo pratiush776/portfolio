@@ -286,16 +286,15 @@ button {
 /* =========================================================
    V3 HOMEPAGE HERO
    ========================================================= */
-/* The pin: the track buys ~0.8 extra viewports of scroll; the hero sticks inside it while
-   the morph plays (copy exits → the name is pulled across → PROJECTS lands → short hold). Lower
-   than before so the PROJECTS handoff is SNAPPIER — the hero clears faster into the first card. */
+/* The pin: the track buys the scroll that the landing's whole CHAIN plays inside — the hero sticks
+   while the word rolls PRATIUSH → PERSONA (the persona beat: character note + tech-DNA helix hold
+   beside the pinned word) → PROJECTS, then the thesis crests in and the pin releases into NILINK. */
 .hero-track-v4 {
   position: relative;
-  /* SHORT pin: pins for (height − 100vh) of scroll. Sized so the morph (fed a scaled progress, see
-     MorphName MORPH_SCALE) lands near the END of the pin, then the hero UNPINS and PROJECTS + the
-     thesis beat scroll up together on real scroll. Was 180vh (a long post-landing hold). Tune in
-     tandem with MORPH_SCALE: shorter pin or larger scale = morph resolves sooner. */
-  height: 135vh;
+  /* Pins for (height − 100vh) = ~240vh of scroll. Every beat is a FRACTION of that pinned progress,
+     scheduled in ONE place — src/components/hero/heroTimeline.ts (the beat sheet). Tune the overall
+     pacing here (taller = more scroll per beat) and the beat boundaries there. */
+  height: 340vh;
 }
 
 .hero-root-v3 {
@@ -1265,35 +1264,25 @@ button {
   white-space: pre;
 }
 
-/* The framing line, revealed as the name morphs in place into PROJECTS. Anton gives the phrase
+/* The framing line, inked in beside the word as it lands as PROJECTS. Anton gives the phrase
    the tall cinematic poster force that contrasts the Bricolage wordmark; one terracotta emphasis
    word ties it back to the landed PROJECTS. */
-/* The thesis BEAT — a normal-flow section that scrolls the statement THROUGH the viewport on real
-   document scroll (no scripted translate), cresting up through the still-pinned hero via a negative
-   margin (the same overlap the first project card uses). The per-word ink-on is GSAP-scrubbed
-   (HeroThesisBeat). z-index 1 = the same band as the hero track / projects gallery, over the fixed
-   SectionAurora. pointer-events:none — decorative; the SR sentence carries the meaning. */
-.thesis-beat-v4 {
-  position: relative;
-  z-index: 1;
-  /* Crests up so the statement ENTERS right as the morph finishes, then rides up the viewport on real
-     scroll FASTER than the parallax-lagging PROJECTS title (MorphName exitY), the two clearing the top
-     together before NILINK. TUNE by eye in tandem with HeroSection TITLE_LAG and the NILINK margin:
-     more negative = the thesis enters earlier / sits higher. */
-  margin-top: -70vh;
-  min-height: 110vh; /* room to travel through the viewport as the page scrolls */
-  display: flex;
-  align-items: center;
-  justify-content: flex-end; /* right-anchored — the diagonal counterpoint to the lower-left PROJECTS */
-  /* A dedicated, larger RIGHT safe-area (not the ~3.5rem brand gutter) so the right-anchored statement
-     reads as intentionally placed rather than clipped against the viewport edge — legibility over the
-     motion moment. Left stays on the gutter so the diagonal to lower-left PROJECTS holds. */
-  padding: 0 clamp(3rem, 6vw, 6.5rem) 0 var(--brand-gutter);
+/* The thesis LAYER — part of the pinned hero stage (inside .hero-cluster-v4, so it shares the nav
+   dissolve feather and rides out with the composed frame). Anchored upper-right: the diagonal
+   counterpoint to the lower-left word. The per-word ink-on is scrubbed off the hero's pinned
+   progress (HeroThesis + heroTimeline THESIS_IN) — timed to write on AS the word lands, then REST
+   beside it (its old life as a scrolling section could never rest: real scroll carried it through
+   the viewport and its ink landed after the unpin, leaving a vacuum beside PROJECTS). The RIGHT
+   safe-area is larger than the brand gutter so the right-anchored statement reads as intentionally
+   placed rather than clipped against the viewport edge. */
+.hero-thesis-layer-v4 {
+  position: absolute;
+  top: clamp(5rem, 22svh, 13rem);
+  right: clamp(3rem, 6vw, 6.5rem);
   pointer-events: none;
 }
 
-/* The statement block — static within the beat (the flex parent right-anchors it); the section's real
-   scroll carries it through. A tighter column so it reads as a counterpoint, not a second full poster. */
+/* The statement block — a tighter column so it reads as a counterpoint, not a second full poster. */
 .hero-thesis-v4 {
   margin: 0;
   max-width: min(24rem, 30vw);
@@ -1309,12 +1298,11 @@ button {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  /* No crest — the beat flows after the (unpinned) hero; the GSAP ink-on is skipped, so the ink stays
-     at its revealed default and the statement reads in full, static. */
-  .thesis-beat-v4 {
-    margin-top: 0;
-    min-height: auto;
-    padding-block: clamp(3rem, 10vh, 7rem);
+  /* The static hero frame is already fully composed (lockup + note + DNA); the decorative poster
+     would overlay it, so it's hidden — its visually-hidden SIBLING sentence (see HeroThesis) still
+     carries the value prop to AT/SEO. */
+  .hero-thesis-layer-v4 .hero-thesis-v4 {
+    display: none;
   }
 }
 
@@ -1462,10 +1450,18 @@ button {
 }
 
 @media (max-width: 1100px) {
-  /* the pin needs a fixed-height stage — the text-only lockup fits 100svh on small screens. Mirrors
-     the shortened desktop pin (+10vh tablet buffer). */
+  /* the pin needs a fixed-height stage — the text-only lockup fits 100svh on small screens. A
+     shorter pin than desktop (the chain compresses proportionally — heroTimeline fractions), held
+     until the pending hero responsive rewrite gives the beats a real mobile pass. */
   .hero-track-v4 {
-    height: 145vh;
+    height: 240vh;
+  }
+
+  /* The DNA composes against the desktop diagonal (word lower-left, helix right void); on narrow
+     widths there is no right void, so hold it for desktop until the responsive rewrite. The persona
+     NOTE still plays — it lives in the lockup's own flow. */
+  .hero-persona-dna-v4 {
+    display: none;
   }
 
   .hero-root-v3 {
@@ -1612,11 +1608,11 @@ button {
     display: none;
   }
 
-  /* The thesis beat is the right-hand counter-anchor of the desktop diagonal — it only composes
-     against the desktop golden-section layout. On narrow widths its right-anchored stack would need a
-     real reflow, so hold the whole beat for desktop until the pending hero responsive rewrite gives it
-     one. Hiding the section removes it from flow cleanly (its crest math no longer applies ≤1100). */
-  .thesis-beat-v4 {
+  /* The thesis is the right-hand counter-anchor of the desktop diagonal — it only composes against
+     the desktop golden-section layout. On narrow widths its right-anchored stack would need a real
+     reflow, so hold the whole layer for desktop until the pending hero responsive rewrite gives it
+     one (same deal as the DNA above). */
+  .hero-thesis-layer-v4 {
     display: none;
   }
 }
@@ -1967,6 +1963,132 @@ button {
 }
 
 /* =========================================================
+   V4 — PERSONA BEAT (a chapter of the pinned hero, not a section)
+   The "what I'm made of" breath between the name and the work. The hero's pinned stage holds while
+   the word rolls PRATIUSH → PERSONA (MorphName), the character note fades into the slot the
+   role/tagline vacated, and the stack renders as a living tech-DNA helix in the right-side void —
+   then both clear and the word rolls on into PROJECTS. Timing: heroTimeline.ts.
+   ========================================================= */
+
+/* The role/tagline block and the persona note occupy the same SLOT under the name at different
+   beats (the copy exits, then the note fades in where it stood). The copy stays in flow — it alone
+   sizes the slot, so the name's resting position is EXACTLY what it was before the persona beat
+   existed — and the note overlays absolutely from the slot's top, free to run a line longer into
+   the cluster's deep bottom padding. Stretched so the note isn't width-trapped by the copy's
+   shrink-to-fit box. */
+.hero-swap-v4 {
+  position: relative;
+  align-self: stretch;
+}
+
+.hero-swap-v4__note {
+  position: absolute;
+  inset: 0 auto auto 0;
+  width: max-content;
+  max-width: 100%;
+}
+
+/* The character note — the beat's human voice, set in the SAME editorial serif treatment as the
+   tagline whose place it takes (face referenced DIRECTLY per the Fonts rule, same warm-plum voice
+   colour, same x-height normalisation), so the swap reads as the lockup continuing to speak rather
+   than a new type system arriving. */
+.hero-persona-note-v4 {
+  /* Mirrors the tagline's step below the name so the note lands on the identical rhythm line. */
+  margin: clamp(1.3rem, 2.1vh, 1.7rem) 0 0;
+  max-width: 38ch;
+  font-family: var(--font-sentient), Georgia, serif;
+  font-weight: 400;
+  /* A touch below the tagline's scale — this is a read, not a declaration. */
+  font-size: max(1.22rem, calc(var(--name-hero-size) * 0.165));
+  line-height: 1.45;
+  letter-spacing: -0.005em;
+  font-size-adjust: 0.5;
+  color: var(--hero-ink-voice);
+  text-wrap: pretty;
+}
+
+/* The DNA's home: the hero's right-side void — the diagonal counterpoint to the lower-left word
+   (the same copy-left / visual-right grammar as the project spread). Placed by INSET, not by
+   transform, because the two motion wrappers need the transform channel free for their scrub
+   reveal. z 4 keeps it beneath the copy cluster (z 5) and above the atmosphere. */
+.hero-persona-dna-v4 {
+  position: absolute;
+  z-index: 4;
+  top: calc(var(--v3-nav-height) + 2svh);
+  bottom: 10svh;
+  right: calc(var(--brand-gutter) + 1vw);
+  width: min(38vw, 32rem);
+  pointer-events: none;
+  will-change: transform, opacity, filter;
+}
+
+.hero-persona-dna-v4__inner {
+  width: 100%;
+  height: 100%;
+  will-change: transform, opacity;
+}
+
+.tech-dna-v4 {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+/* One logo node — positioned & styled every frame by the rAF loop (transform/opacity/filter only).
+   MUST anchor at the container's origin (left/top 0): the loop's translate(x, y) is the node's
+   FULL position within the root, so any CSS offset here shears every logo off its strand (the
+   original left:50% is exactly what detached the logos from the helix).
+   Every node is a UNIFORM CIRCULAR CHIP — a warm paper disc with a hairline terracotta ring — so
+   the raw brand marks (squares, wide wordmarks, circles…) all present as one consistent bead on
+   the strand instead of a jumble of silhouettes. The depth filter grades the whole chip, so back
+   chips warm-mono/soften along with their logos. */
+.tech-dna-v4__node {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: clamp(2.2rem, 3vw, 3rem);
+  height: clamp(2.2rem, 3vw, 3rem);
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: #fffaf2; /* warm paper, a step lighter than the field so the bead reads as an object */
+  border: 1px solid rgba(201, 84, 46, 0.18);
+  box-shadow: 0 2px 12px rgba(64, 38, 26, 0.08);
+  opacity: 0; /* the draw-on brings each in */
+  transform-origin: center;
+  will-change: transform, opacity, filter;
+  pointer-events: none;
+}
+
+.tech-dna-v4__logo {
+  width: 58%; /* the mark sits inside the chip with even air all round */
+  height: 58%;
+  object-fit: contain;
+  display: block;
+  user-select: none;
+}
+
+/* The backbone strands + base-pair rungs are painted on this canvas, behind the logo nodes. */
+.tech-dna-v4__canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+/* Reduced motion — kept HERE (after the base rules it overrides; the main reduced-motion block sits
+   earlier in the sheet and would lose the cascade): with no beats to swap between, the character
+   note re-enters normal flow and simply reads after the tagline, and TechDNA renders its static
+   fully-drawn pose in the right void. */
+@media (prefers-reduced-motion: reduce) {
+  .hero-swap-v4__note {
+    position: static;
+    width: auto;
+  }
+}
+
+/* =========================================================
    V4 — PROJECTS (art-book of full-bleed editorial spreads)
    One continuous cream surface — the fixed SectionAurora shows through, no card, no two-tone seam.
    Each project is a full-viewport spread: a huge serif name + ghost echo, marginalia, and a fitted
@@ -2010,8 +2132,11 @@ button {
    while it's still landing). */
 .project-spread-v4:first-child {
   /* Only the crest changes for the lead — it uses the base 400vh hold (NOT a trimmed one), because the
-     next card now rises during that hold, so the stretch is a crossfade, not dead air. */
-  margin-top: -125vh;
+     next card now rises during that hold, so the stretch is a crossfade, not dead air.
+     (Was -125vh when the thesis was its own 40vh-of-flow section between the hero track and the
+     gallery; the thesis now lives INSIDE the pinned hero, so this backed off by that 40vh to keep
+     NILINK cresting at the same moment of the hero's ride-out.) */
+  margin-top: -85vh;
 }
 
 /* The LAST card has no successor to cover it, so its hold would be the dead air the critique flagged
