@@ -1,29 +1,16 @@
 "use client";
 
-import { useRef, useState } from "react";
-import {
-  cubicBezier,
-  motion,
-  useMotionValueEvent,
-  useScroll,
-  useTransform,
-} from "motion/react";
+import { useRef } from "react";
+import { cubicBezier, motion, useScroll, useTransform } from "motion/react";
 
 import { FluidSmoke } from "@/components/decor/FluidSmoke";
 import { HeroAurora } from "@/components/decor/HeroAurora";
 import { RadialGlow } from "@/components/decor/RadialGlow";
 import { HeroLede } from "@/components/hero/HeroLede";
-import {
-  DNA_CUE,
-  GLOW_DRIFT,
-  PERSONA_IN,
-  PERSONA_OUT,
-  RELEASE,
-} from "@/components/hero/heroTimeline";
+import { GLOW_DRIFT, GLOW_PERSONA, RELEASE } from "@/components/hero/heroTimeline";
 import { useIntro } from "@/components/intro/IntroProvider";
 import { TechDNA } from "@/components/persona/TechDNA";
 import { SNAP_EASE } from "@/lib/intro";
-import { useScrubReveal } from "@/lib/reveal";
 
 /**
  * The landing is a pinned stage: the section sticks while the opening composition transforms in
@@ -38,7 +25,7 @@ import { useScrubReveal } from "@/lib/reveal";
  *   • data-foreground — gates the copy + name entrance and the scroll cue.
  */
 export function HeroSection() {
-  const { backdropIn, foregroundIn, reduce } = useIntro();
+  const { backdropIn, foregroundIn } = useIntro();
   const trackRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({
     target: trackRef,
@@ -57,30 +44,25 @@ export function HeroSection() {
     ease: cubicBezier(0.4, 0, 1, 1),
   });
 
-  // The name morphs in place (left-anchored), so the light never chases it across the stage.
-  // The warm pool eases gently further left as the word lands as PROJECTS (heroTimeline
-  // GLOW_DRIFT — timed to MORPH 2), concentrating over the settled lower-left title so it's lit
-  // rather than stranded in flat field. It holds centred through the persona beat, lighting both
-  // the held word and the DNA.
-  const glowX = useTransform(scrollYProgress, [...GLOW_DRIFT], ["0vw", "-5vw"], {
-    ease: cubicBezier(...SNAP_EASE),
-  });
-
-  // THE PERSONA BEAT'S RIGHT COLUMN — the tech-DNA helix, a layer of the pinned stage (not its own
-  // section): it scrub-reveals in after MORPH 1 lands and clears before MORPH 2 rolls. The helix's
-  // own draw-on is time-based (connect-the-dots, then it comes alive), so it's TRIGGERED (play)
-  // just before the layer becomes visible rather than scrubbed.
-  // The draw-on is CUED once the layer is essentially opaque (DNA_CUE sits near the end of
-  // PERSONA_IN), so the connect-the-dots inking performs entirely in full view — cueing it during
-  // the fade washed the draw out behind low opacity. Lazy init covers a mid-page mount that already
-  // sits past the cue (scroll restoration); the change subscription covers the normal ride in.
-  // Once true it never resets — the draw plays once.
-  const [dnaPlay, setDnaPlay] = useState(() => scrollYProgress.get() >= DNA_CUE);
-  useMotionValueEvent(scrollYProgress, "change", (v) => {
-    if (v >= DNA_CUE) setDnaPlay(true);
-  });
-  const dnaIn = useScrubReveal(scrollYProgress, PERSONA_IN, { y: 30, dir: "in" });
-  const dnaOut = useScrubReveal(scrollYProgress, PERSONA_OUT, { y: -40, blur: 3, dir: "out" });
+  // The name morphs in place (left-anchored), so the light never chases it across the stage — but
+  // the warm pool DOES move with the narrative, in two eased sweeps with a flat rest between:
+  //   1. GLOW_PERSONA — it eases RIGHT (→ 7vw) to sit BETWEEN the note (left) and the enlarged
+  //      helix (right) through the persona beat, heating the cold middle band and bridging the two
+  //      halves into one composition.
+  //   2. hold — it RESTS at 7vw from GLOW_PERSONA[1] to GLOW_DRIFT[0] (identity ease on that flat
+  //      segment so the value doesn't drift).
+  //   3. GLOW_DRIFT — it sweeps back LEFT (→ −5vw) as the word lands as PROJECTS, concentrating
+  //      over the settled lower-left title so it's lit rather than stranded in flat field.
+  // A per-segment ease array (snap / hold / snap) drives one keyframed transform over both windows.
+  // (Sanity: GLOW_PERSONA[1] < GLOW_DRIFT[0], so the keyframe inputs are strictly increasing.)
+  const snap = cubicBezier(...SNAP_EASE);
+  const hold = (v: number) => v; // identity — the flat middle rest segment
+  const glowX = useTransform(
+    scrollYProgress,
+    [GLOW_PERSONA[0], GLOW_PERSONA[1], GLOW_DRIFT[0], GLOW_DRIFT[1]],
+    ["0vw", "7vw", "7vw", "-5vw"],
+    { ease: [snap, hold, snap] },
+  );
 
   return (
     <div ref={trackRef} className="hero-track-v4">
@@ -118,22 +100,14 @@ export function HeroSection() {
         </div>
         <div className="canvas-v3 canvas-v3--hero">
           <div className="hero-stage-v3">
-            {/* The DNA sits in the hero's right-side void — the diagonal counterpoint to the
-                lower-left word — BELOW the copy cluster in z. Outer wrapper carries the exit,
-                inner the entrance, so the two scrubs compose instead of fighting. Reduced motion:
-                no wrappers' motion (styles undefined) — TechDNA renders its static drawn pose. */}
-            <motion.div
-              className="hero-persona-dna-v4"
-              style={reduce ? undefined : dnaOut}
-              aria-hidden
-            >
-              <motion.div
-                className="hero-persona-dna-v4__inner"
-                style={reduce ? undefined : dnaIn}
-              >
-                <TechDNA play={dnaPlay} />
-              </motion.div>
-            </motion.div>
+            {/* The DNA is a PERMANENT fixture of the pinned stage — the diagonal counterpoint to
+                the lower-left word, in the right-side void, BELOW the copy cluster in z. It's no
+                longer faded in/out with the persona beat: TechDNA reads the hero gates itself and
+                inks its bare SKELETON on during the intro, then the icons FLOW THROUGH it (pouring
+                in / draining off the base) and it dims to a watermark, all keyed off `progress`. */}
+            <div className="hero-persona-dna-v4" aria-hidden>
+              <TechDNA progress={scrollYProgress} />
+            </div>
             <HeroLede progress={scrollYProgress} titleLag={titleLag} />
           </div>
         </div>

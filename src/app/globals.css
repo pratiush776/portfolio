@@ -1173,6 +1173,23 @@ button {
   pointer-events: none;
 }
 
+/* The "My" eyebrow (over PERSONA during the persona beat — "My Persona", same hand, same anchor
+   and treatment as the greeting/"Featured"). WHY it was clipping: the base .hero-eyebrow-v4 paints
+   through background-clip:text, which stops ink at the padding-box edge — Style Script's capital M
+   swings its entry stroke LEFT past the base 0.16em apron, and the y's descender loop swings below
+   the box, so both were getting sliced. The other eyebrows dodge this per-glyph with tuned aprons;
+   "My" simply doesn't need the gradient at all (on a two-glyph script the single-hue band is
+   imperceptible), so it paints as SOLID accent ink — identical to the eye, and solid ink cannot
+   clip on any side. margin-left nets the M's ink onto the P's ink line (−0.26 + base 0.16em pad
+   = −0.10em); the extra −margin-bottom hugs the cap like "Hi, I'm" over PRATIUSH. TUNE by eye. */
+.hero-name-v4__eyebrow--my {
+  margin-left: -0.26em;
+  margin-bottom: clamp(-0.45rem, -0.9vh, -0.62rem);
+  background: none;
+  -webkit-text-fill-color: var(--hero-accent);
+  color: var(--hero-accent);
+}
+
 /* Entrance mask (the name rises from behind its baseline). Full row width + hidden
    overflow: vertical for the entrance, horizontal is moot (letters never leave the row).
    The entrance only needs to clip the BOTTOM (name rising from below), but the travelling-wave
@@ -1988,44 +2005,46 @@ button {
   max-width: 100%;
 }
 
-/* The character note — the beat's human voice, set in the SAME editorial serif treatment as the
-   tagline whose place it takes (face referenced DIRECTLY per the Fonts rule, same warm-plum voice
-   colour, same x-height normalisation), so the swap reads as the lockup continuing to speak rather
-   than a new type system arriving. */
+/* The character note — MINIMAL BODY, not a tagline (user-directed): it sets in the SAME register
+   as the site's other quiet informational copy, the project brief (.project-feature-v4__desc) —
+   Hanken (the body workhorse, referenced DIRECTLY per the Fonts rule), modest size, relaxed
+   leading, solid plum ink. The serif voice stays reserved for the hero tagline; here a plain,
+   grounded paragraph reads as a statement, not a pull-quote. The hierarchy triplet is script "My"
+   (eyebrow) → PERSONA (display) → this (body) — nothing between (a serif tagline treatment and a
+   large-lede split were both tried and cut). */
 .hero-persona-note-v4 {
   /* Mirrors the tagline's step below the name so the note lands on the identical rhythm line. */
-  margin: clamp(1.3rem, 2.1vh, 1.7rem) 0 0;
-  max-width: 38ch;
-  font-family: var(--font-sentient), Georgia, serif;
+  margin: clamp(1.4rem, 2.4vh, 1.9rem) 0 0;
+  max-width: 44ch;
+  font-family: var(--font-hanken), sans-serif;
   font-weight: 400;
-  /* A touch below the tagline's scale — this is a read, not a declaration. */
-  font-size: max(1.22rem, calc(var(--name-hero-size) * 0.165));
-  line-height: 1.45;
-  letter-spacing: -0.005em;
-  font-size-adjust: 0.5;
-  color: var(--hero-ink-voice);
+  font-size: clamp(1.05rem, 1.15vw, 1.28rem);
+  line-height: 1.6;
+  letter-spacing: 0;
+  color: var(--v3-text-dark);
   text-wrap: pretty;
 }
 
 /* The DNA's home: the hero's right-side void — the diagonal counterpoint to the lower-left word
    (the same copy-left / visual-right grammar as the project spread). Placed by INSET, not by
-   transform, because the two motion wrappers need the transform channel free for their scrub
-   reveal. z 4 keeps it beneath the copy cluster (z 5) and above the atmosphere. */
+   transform. It's a PERMANENT fixture of the pinned stage: the bare skeleton inks on during the
+   intro (frame one), the tech icons FLOW THROUGH it at the persona beat (pouring in top→bottom,
+   then draining off the base), and it dims to a faint watermark under the arriving thesis — all
+   driven inside TechDNA's rAF loop (no wrapper motion here). The layer stays pointer-events:none.
+   z 4 keeps it beneath the copy cluster (z 5) and above the atmosphere.
+   MASS (guidebook §5: weight = area × darkness × saturation × complexity): the helix is the
+   frame's TRUE COUNTERWEIGHT now, not a faint corner motif — enlarged and pulled fully to the
+   gutter so its chip swing reaches ~65% of the viewport. The remaining left gap is the DESIGNED
+   breathing gutter, filled by the warm glow pool as it eases right for the persona beat (see
+   GLOW_PERSONA in heroTimeline) — so the middle band isn't dead, it's lit. */
 .hero-persona-dna-v4 {
   position: absolute;
   z-index: 4;
-  top: calc(var(--v3-nav-height) + 2svh);
+  top: calc(var(--v3-nav-height) + 4svh);
   bottom: 10svh;
-  right: calc(var(--brand-gutter) + 1vw);
-  width: min(38vw, 32rem);
+  right: var(--brand-gutter);
+  width: min(46vw, 46rem);
   pointer-events: none;
-  will-change: transform, opacity, filter;
-}
-
-.hero-persona-dna-v4__inner {
-  width: 100%;
-  height: 100%;
-  will-change: transform, opacity;
 }
 
 .tech-dna-v4 {
@@ -2040,14 +2059,15 @@ button {
    original left:50% is exactly what detached the logos from the helix).
    Every node is a UNIFORM CIRCULAR CHIP — a warm paper disc with a hairline terracotta ring — so
    the raw brand marks (squares, wide wordmarks, circles…) all present as one consistent bead on
-   the strand instead of a jumble of silhouettes. The depth filter grades the whole chip, so back
-   chips warm-mono/soften along with their logos. */
+   the strand instead of a jumble of silhouettes. Logos keep their TRUE colour (content, not
+   chrome); depth is told by scale/opacity, and the far side morphs into terracotta beads — the
+   rAF loop drives transform/opacity plus the disc/ring paint, never a colour filter. */
 .tech-dna-v4__node {
   position: absolute;
   left: 0;
   top: 0;
-  width: clamp(2.2rem, 3vw, 3rem);
-  height: clamp(2.2rem, 3vw, 3rem);
+  width: clamp(2.4rem, 3.2vw, 3.4rem);
+  height: clamp(2.4rem, 3.2vw, 3.4rem);
   display: grid;
   place-items: center;
   border-radius: 50%;
@@ -2056,7 +2076,7 @@ button {
   box-shadow: 0 2px 12px rgba(64, 38, 26, 0.08);
   opacity: 0; /* the draw-on brings each in */
   transform-origin: center;
-  will-change: transform, opacity, filter;
+  will-change: transform, opacity;
   pointer-events: none;
 }
 

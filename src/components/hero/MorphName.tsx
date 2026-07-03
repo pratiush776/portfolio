@@ -9,7 +9,13 @@ import {
   type MotionValue,
 } from "motion/react";
 
-import { FEATURED_IN, STAGE0, STAGE1 } from "@/components/hero/heroTimeline";
+import {
+  FEATURED_IN,
+  MY_IN,
+  MY_OUT,
+  STAGE0,
+  STAGE1,
+} from "@/components/hero/heroTimeline";
 import { useIntro } from "@/components/intro/IntroProvider";
 import { BEAT, INTRO_EASE } from "@/lib/intro";
 
@@ -488,10 +494,22 @@ export function MorphName({
 }) {
   const { foregroundIn, reduce } = useIntro();
 
-  // The "Featured" script eyebrow — the section title's quiet lead-in, in the SAME hand
-  // (Style Script) as the hero's "Hi, I'm" greeting — inks in (rise + fade) only AFTER the word
-  // has landed as PROJECTS (heroTimeline FEATURED_IN), so nothing floats over the rolling letters.
-  // It never fades back out: it simply rides up and away with the title when the pin releases.
+  // The two script eyebrows — BOTH in the SAME hand (Style Script) as the hero's "Hi, I'm"
+  // greeting, and both obeying the same rule: they only ever sit over a LANDED word, never over
+  // rolling letters. They share one anchor above the word and never overlap in time:
+  //   • "My" — over PERSONA through the persona beat ("My Persona": it answers whose persona this
+  //     is in the title's own voice, not a label). In after MORPH 1 lands, out into MORPH 2.
+  //   • "Featured" — over the landed PROJECTS ("Featured Projects"). In after MORPH 2 lands; it
+  //     never fades back out — it simply rides up and away with the title when the pin releases.
+  const myOpacity = useTransform(
+    progress,
+    [MY_IN[0], MY_IN[1], MY_OUT[0], MY_OUT[1]],
+    [0, 1, 1, 0],
+    { ease: cubicBezier(...INTRO_EASE) },
+  );
+  const myRise = useTransform(progress, [...MY_IN], ["0.5em", "0em"], {
+    ease: cubicBezier(...INTRO_EASE),
+  });
   const featuredOpacity = useTransform(progress, [...FEATURED_IN], [0, 1], {
     ease: cubicBezier(...INTRO_EASE),
   });
@@ -523,8 +541,16 @@ export function MorphName({
       // mask.
       style={{ "--roll-gap": `${ROLL_GAP}em`, y: exitY } as MotionStyle}
     >
-      {/* The "Featured" script eyebrow — anchored ABOVE the word and inside this drifting root so
-          it rides with the landed title. */}
+      {/* The script eyebrows — anchored ABOVE the word and inside this drifting root so they ride
+          with the title. Same spot, disjoint windows: "My" owns the persona hold, "Featured" the
+          landed PROJECTS. The --my modifier re-tunes the left swash-cancel for the M's bearing. */}
+      <motion.span
+        className="hero-name-v4__eyebrow hero-name-v4__eyebrow--my hero-eyebrow-v4"
+        style={{ opacity: myOpacity, y: myRise }}
+        aria-hidden
+      >
+        My
+      </motion.span>
       <motion.span
         className="hero-name-v4__eyebrow hero-eyebrow-v4"
         style={{ opacity: featuredOpacity, y: featuredRise }}

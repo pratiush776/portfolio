@@ -75,8 +75,16 @@ export function HeroLede({
 
   // The persona note's own beat: in under MORPH 1's settling letters, out into MORPH 2's wind-up
   // (heroTimeline). Entrance on the inner node, exit on the outer, so the two scrubs compose.
-  const noteIn = useScrubReveal(progress, PERSONA_IN, { y: 28, blur: 3, dir: "in" });
-  const noteOut = useScrubReveal(progress, PERSONA_OUT, { y: -36, blur: 4, dir: "out" });
+  const noteIn = useScrubReveal(progress, PERSONA_IN, {
+    y: 28,
+    blur: 3,
+    dir: "in",
+  });
+  const noteOut = useScrubReveal(progress, PERSONA_OUT, {
+    y: -36,
+    blur: 4,
+    dir: "out",
+  });
 
   // The thesis layer's small crest — a gentle rise under the per-word ink wash (HeroThesis owns the
   // wipe itself), so the statement still arrives from below without the old full viewport travel.
@@ -101,7 +109,10 @@ export function HeroLede({
       style={
         reduce
           ? undefined
-          : ({ WebkitMaskImage: dissolveMask, maskImage: dissolveMask } as MotionStyle)
+          : ({
+              WebkitMaskImage: dissolveMask,
+              maskImage: dissolveMask,
+            } as MotionStyle)
       }
     >
       {/* The page's real heading for a11y/SEO — the visible name is decorative text. */}
@@ -109,7 +120,10 @@ export function HeroLede({
         Pratiush — Software Engineer, Product &amp; Design
       </h1>
 
-      <motion.div className="hero-exit-v4" style={reduce ? undefined : eyebrowExit}>
+      <motion.div
+        className="hero-exit-v4"
+        style={reduce ? undefined : eyebrowExit}
+      >
         <motion.p
           className="hero-eyebrow-v4"
           aria-hidden
@@ -129,7 +143,10 @@ export function HeroLede({
           resting position untouched) peels away, then the note fades in overlaid where it stood.
           Under reduced motion the note re-enters flow and reads after the tagline (see CSS). */}
       <div className="hero-swap-v4">
-        <motion.div className="hero-exit-v4" style={reduce ? undefined : bodyExit}>
+        <motion.div
+          className="hero-exit-v4"
+          style={reduce ? undefined : bodyExit}
+        >
           {/* Role — the credential, set directly beneath the name so it qualifies it at a glance. */}
           <motion.p className="hero-roles-v4" {...entrance(BEAT.roles)}>
             Software Engineer · Product &amp; Design
@@ -137,19 +154,33 @@ export function HeroLede({
 
           {/* The serif statement closes the lockup — the lingering, personal voice note. */}
           <motion.p className="hero-tagline-v4" {...entrance(BEAT.tagline)}>
-            <span className="hero-tagline-v4__line">Good products feel obvious.</span>
-            <span className="hero-tagline-v4__line">Getting there isn&apos;t.</span>
+            <span className="hero-tagline-v4__line">
+              Good products feel obvious.
+            </span>
+            <span className="hero-tagline-v4__line">
+              Getting there isn&apos;t.
+            </span>
           </motion.p>
         </motion.div>
 
-        {/* The persona beat's voice — the user's own words (grammar-fixed only), in the same
-            editorial serif as the tagline it replaces, so the beat reads as the lockup speaking. */}
-        <motion.div className="hero-swap-v4__note" style={reduce ? undefined : noteOut}>
+        {/* The persona beat's voice — set MINIMAL (Hanken body, the same quiet register as the
+            project brief), not as a serif tagline: a grounded statement, not a pull-quote. The
+            copy SHOWS the traits instead of naming them (curiosity, resilience, unseen problems —
+            kept from the user's original, but proven rather than claimed), and "feels obvious"
+            deliberately echoes the hero tagline's "Good products feel obvious." */}
+        <motion.div
+          className="hero-swap-v4__note"
+          style={reduce ? undefined : noteOut}
+        >
           <motion.div style={reduce ? undefined : noteIn}>
+            {/* ONE quiet paragraph. A large-lede split was tried and cut: at lede scale the first
+                sentence wrapped into a second headline competing with PERSONA, and the note became
+                a six-line poem stack. The intermediate hierarchy step is the script "My" eyebrow —
+                the classic eyebrow → title → body triplet needs nothing more. */}
             <p className="hero-persona-note-v4">
-              A curious person, hungry for growth and driven by intellect. A resilient
-              individual, ready to face problems never seen before and persevere through them
-              intellectually.
+              I live where design taste meets engineering logic. Unfamiliar
+              problems are the fun part — I sit with them, pull them apart, and
+              stay until the answer feels obvious.
             </p>
           </motion.div>
         </motion.div>
@@ -158,7 +189,10 @@ export function HeroLede({
       {/* The locator is absolutely positioned, so it rides its own full-inset exit wrapper
           (a transformed wrapper becomes the containing block — this keeps its coordinates
           anchored to the cluster, not to the copy column). */}
-      <motion.div className="hero-exit-abs-v4" style={reduce ? undefined : metaExit}>
+      <motion.div
+        className="hero-exit-abs-v4"
+        style={reduce ? undefined : metaExit}
+      >
         <motion.span
           className="hero-meta-v4"
           aria-label="Based in USA"
