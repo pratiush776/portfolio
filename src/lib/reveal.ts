@@ -15,8 +15,8 @@ const ease = cubicBezier(...INTRO_EASE);
  * exits (opacity 1→0, 0→y). This replaces the near-identical `useTransform` recipes that were
  * copy-pasted across the hero copy exit and the project reveals — one move, expressed once.
  *
- * For reveals that also need an EXIT tail or extra filter grade (e.g. ProjectFeature's image), keep
- * the transforms bespoke; this covers the common single-window enter/exit only.
+ * For reveals that also need an EXIT tail or extra filter grade, keep the transforms bespoke; this
+ * covers the common single-window enter/exit only.
  */
 export function useScrubReveal(
   progress: MotionValue<number>,

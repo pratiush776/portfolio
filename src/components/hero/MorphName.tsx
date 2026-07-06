@@ -20,8 +20,8 @@ import { useIntro } from "@/components/intro/IntroProvider";
 import { BEAT, INTRO_EASE } from "@/lib/intro";
 
 /**
- * The hero name — and the landing's one big move, now a CHAIN. PRATIUSH is real text (Bricolage
- * Light/300 caps in the brand terracotta) so it can transform IN PLACE while the hero is pinned:
+ * The hero name — and the landing's one big move, now a CHAIN. PRATIUSH is real text (Fraunces
+ * display caps in the brand terracotta) so it can transform IN PLACE while the hero is pinned:
  * the word holds its left anchor (the P never moves) and rolls per-letter through the landing's
  * whole story — PRATIUSH → PERSONA (the "what I'm made of" beat) → PROJECTS (the title for the
  * work below) — without ever travelling across the stage. The two morphs are scheduled on the
@@ -60,14 +60,13 @@ const GLYPHS: string[][] = WORDS.map((w) =>
 
 /*
  * Per-pair optical tracking nudges (in em, applied to the gap BEFORE each letter) to even out the
- * counter-space at wordmark scale. A gentle uniform NEGATIVE tracking (−0.01em per gap), tuned for
- * the old heavy caps; the name is Light (300) now, which generally wants MORE open tracking —
- * revisit toward 0 or positive if a word reads tight at 300. Index 0 has no preceding gap, and an
- * empty (collapsed) slot carries none.
+ * counter-space at wordmark scale — ON TOP of the real pair kerning the metrics row already
+ * recovers. Fraunces is a high-contrast display serif whose natural metrics already fit the caps
+ * well at this scale, so the manual nudge starts at 0 (let the measured widths + kerns rule).
+ * (TUNE HERE per pair if a word reads tight/loose in Fraunces.) Index 0 has no preceding gap, and
+ * an empty (collapsed) slot carries none.
  */
-const OPTICAL_FIT: number[][] = GLYPHS.map((glyphs) =>
-  glyphs.map((ch, i) => (i === 0 || !ch ? 0 : -0.01)),
-);
+const OPTICAL_FIT: number[][] = GLYPHS.map((glyphs) => glyphs.map(() => 0));
 
 /* ── The chain's two stages, from the shared beat sheet ─────────────────────────────────────── */
 const STAGES = [STAGE0, STAGE1] as const;
@@ -484,13 +483,8 @@ const MorphLetter = memo(function MorphLetter({
 
 export function MorphName({
   progress,
-  exitY,
 }: {
   progress: MotionValue<number>;
-  // Velocity-matched release ramp for the landed title as the pin lets go (HeroSection
-  // RELEASE_LIFT): 0 through the whole pinned chain, easing the title up to scroll speed at the
-  // unpin so it never jolts from held to scrolling.
-  exitY: MotionValue<string>;
 }) {
   const { foregroundIn, reduce } = useIntro();
 
@@ -533,13 +527,11 @@ export function MorphName({
     <motion.p
       className="hero-name-v4"
       aria-hidden
-      // --roll-gap is the single source of truth for the roll's vertical gap (see ROLL_GAP): the
-      // slot headroom and column gap derive from it in CSS, the roll travel from it in JS. `y` is
-      // the title's velocity-matched release ramp (exitY; see HeroSection RELEASE_LIFT). The EXIT
-      // dissolve into the nav band is owned at the cluster level (HeroLede), so the whole lockup —
-      // eyebrow + word — melts uniformly rather than the eyebrow hard-cutting against a per-name
-      // mask.
-      style={{ "--roll-gap": `${ROLL_GAP}em`, y: exitY } as MotionStyle}
+      // --roll-gap is the single source of truth for the roll's vertical gap (see ROLL_GAP): the slot
+      // headroom and column gap derive from it in CSS, the roll travel from it in JS. The title's EXIT
+      // (lift + fade at the stage's end) and the nav-band dissolve are BOTH owned at the title level
+      // (NarrativeSection), so the whole lockup — eyebrow + word — melts uniformly.
+      style={{ "--roll-gap": `${ROLL_GAP}em` } as MotionStyle}
     >
       {/* The script eyebrows — anchored ABOVE the word and inside this drifting root so they ride
           with the title. Same spot, disjoint windows: "My" owns the persona hold, "Featured" the

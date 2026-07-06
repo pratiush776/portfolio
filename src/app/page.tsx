@@ -1,30 +1,26 @@
 import { SectionAurora } from "@/components/decor/SectionAurora";
 import { SiteFooter } from "@/components/footer/SiteFooter";
-import { HeroSection } from "@/components/hero/HeroSection";
-import { ProjectsGallery } from "@/components/works/ProjectsGallery";
+import { NarrativeSection } from "@/components/hero/NarrativeSection";
 
 /**
  * The landing reads as one pitch, shown not told (no section labels anywhere):
- *   hero (the whole chain) → PROJECTS case panels (the work) → dark footer (the ask).
- * The hero's pinned stage tells the entire opening in place — the word rolls
- * PRATIUSH → PERSONA (the "what I'm made of" beat: character note + tech-DNA helix hold beside the
- * pinned word) → PROJECTS, with the Anton thesis inking in beside the landing word to compose the
- * projects frame (all beats + rest states scheduled in heroTimeline.ts, the beat sheet). At the
- * unpin the composed frame rides up as one and NILINK crests through the hero's feathered bottom.
- * TEMP (layout rework): portrait + "See my works" CTA removed for now. Re-enable by re-adding
- * <HeroPortrait/> / <WorksBadge/> inside HeroSection (they'll need re-fitting to the
- * left-aligned layout).
+ *   persistent-title track (the whole opening + the projects grid) → dark footer (the ask).
+ * The narrative track scrolls the hero name UP to a dock near the top and holds it as the PERSISTENT
+ * section title while every chapter flows beneath it: the name rolls PRATIUSH → PERSONA (the persona
+ * manifesto + the compact capability spine hold below it) → PROJECTS, then the Anton thesis parallaxes
+ * up as the transitional statement, and the PROJECTS title STAYS DOCKED while the magazine grid scrolls
+ * up under it (the grid lives INSIDE the track now — no blank gap). All beats + rest states are
+ * scheduled in heroTimeline.ts (the beat sheet). The title releases only at the track's bottom, before
+ * the footer.
  */
 export default function Home() {
   return (
     <main className="page-v4">
-      {/* One continuous, slowly drifting warm field behind the whole page (the hero's own
-          field feather-masks into it, so there is no seam between sections). */}
+      {/* One continuous, slowly drifting warm field behind the whole page (the narrative track's own
+          atmosphere feather-masks into it, so there is no seam between sections). It is also the single
+          continuous field behind the projects grid once the stage's own atmosphere has ended. */}
       <SectionAurora />
-      <HeroSection />
-      {/* Projects — an art-book of full-bleed editorial spreads on the continuous cream surface.
-          The lead spread carries the parallax-then-iris entry out of the hero. */}
-      <ProjectsGallery />
+      <NarrativeSection />
       <SiteFooter />
     </main>
   );

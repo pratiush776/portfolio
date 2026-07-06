@@ -1,14 +1,7 @@
 import type { Metadata } from "next";
 
 import "./globals.css";
-import {
-  styleScript,
-  anton,
-  bricolageGrotesque,
-  fraunces,
-  sentient,
-  hankenGrotesk,
-} from "@/lib/fonts";
+import { styleScript, fraunces, hankenGrotesk } from "@/lib/fonts";
 import { Analytics } from "@vercel/analytics/next";
 import { SiteNav } from "@/components/layout/SiteNav";
 import { SmoothScroll } from "@/components/layout/SmoothScroll";
@@ -30,7 +23,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${hankenGrotesk.variable} ${bricolageGrotesque.variable} ${sentient.variable} ${fraunces.variable} ${anton.variable} ${styleScript.variable} antialiased`}
+        className={`${hankenGrotesk.variable} ${fraunces.variable} ${styleScript.variable} antialiased`}
       >
         {/* Keyboard skip link — hidden until focused, so the visual default is unchanged. Lets AT /
             keyboard users jump past the long pinned hero straight to the work. */}

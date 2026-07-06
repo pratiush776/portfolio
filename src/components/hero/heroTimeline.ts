@@ -1,107 +1,146 @@
 /**
- * THE HERO BEAT SHEET — the single scroll timeline for the landing's pinned stage.
+ * THE NARRATIVE BEAT SHEET — the single scroll timeline for the landing's persistent-title track.
  *
- * The hero track (`.hero-track-v4`, 340vh) pins its stage for (track − 100vh) ≈ 240vh of scroll;
- * every number here is a FRACTION of that pinned progress (HeroSection's useScroll).
+ * The landing is a PERSISTENT-TITLE track: the hero name scrolls UP to a dock near the top (CSS
+ * `position: sticky`), morphs PRATIUSH → PERSONA → PROJECTS, and STAYS docked as the section title
+ * while every chapter — INCLUDING the projects grid — scrolls beneath it. Two containers make that work
+ * (see NarrativeSection + globals.css, and keep the coupling comments loud):
  *
- * CHOREOGRAPHY RULES (user-directed): the beats are grouped into COMPONENTS that move as units, every
- * transition DOVETAILS (one group's exit overlaps the next group's entrance, so something is always
- * happening and the frame is never a vacuum), and each chapter lands in a REST STATE — a fully
- * composed, motionless frame the reader can stop on and know "this is a section" before scrolling on.
+ *   • `.narrative-stage-v4` — the SCRUBBED STAGE, a fixed height (PINNED_VH + 100svh). ONE
+ *     `useScroll({target: stageRef, offset:["start start","end end"]})` over it is the MASTER progress;
+ *     every window below is a slice of it. Because the stage is a fixed height (the projects grid lives
+ *     OUTSIDE it), the beat-sheet fractions stay stable no matter how tall the projects grid grows.
+ *   • `.narrative-title-rail-v4` — the sticky DOCKED TITLE, whose containing block is the OUTER track,
+ *     so it stays docked over BOTH the stage AND the projects grid, releasing only at the track's bottom
+ *     (just before the footer). The stage drives the morph; the outer track owns the release.
  *
- *   GROUPS: A opening copy (greeting/role/tagline/locator) · B the word (the one permanent anchor —
- *   it never moves, only its glyphs roll) · C persona content (character note + tech-DNA) ·
- *   D featured lockup (script eyebrow) + thesis (they compose the projects frame TOGETHER).
+ * THE STORY, chapter by chapter (each CHAPTER is a budget in stage-scroll vh, summed into PINNED_VH):
  *
- *   0.00–0.03   REST 0 — the opening lockup (a scroll-intent buffer before anything moves)
- *   0.03–0.15   A exits in a top-down cascade (HERO_EXIT) …
- *   0.08–0.24   … dovetailing MORPH 1: PRATIUSH → PERSONA (STAGE0)
- *   —           THE DNA SKELETON is a PERMANENT fixture of the stage, present from frame one: its
- *               strands + rungs (no icons) ink on ONCE during the intro (right after the hero name
- *               rises — TechDNA's SKELETON_DELAY_MS, not a scroll beat), then simply stay for the pin.
- *   0.20–0.32   the warm glow pool eases RIGHT (GLOW_PERSONA) to sit between the note and the helix,
- *               heating the middle band — then RESTS there until GLOW_DRIFT sweeps it left again
- *   0.22–0.30   C's character note enters under the settling letters (PERSONA_IN) …
- *   0.22–0.36   … and the tech-icons POUR IN through the skeleton, top→bottom (DNA_ICONS_IN): each
- *               bead spirals down its strand to its seat, the top rungs seating first — a waterfall
- *   0.30–0.52   REST 1 — the persona frame (word + note + fully-seated helix holding; the helix's
- *               idle rotation is the frame's life, not a transition)
- *   0.52–0.60   C's note exits (PERSONA_OUT) …
- *   0.52–0.64   … and the icons DRAIN off the bottom (DNA_ICONS_OUT) — they flow THROUGH the DNA and
- *               out the base, dovetailing MORPH 2 so the skeleton is emptying as the word rewinds
- *   0.56–0.72   MORPH 2: PERSONA → PROJECTS (STAGE1) — the wave's tension visibly loads on the word
- *               while the icons are still draining
- *   0.62–0.74   the emptied skeleton DIMS to a faint watermark (DNA_DIM, presence 1 → DIM_LEVEL)
- *               behind the arriving thesis, and rides out with the stage at the unpin
- *   0.70–0.82   D enters ON the landing: the thesis inks in beside the settling word (THESIS_IN —
- *               a scrub layer of this stage now, NOT a separate scrolling section, so the right side
- *               fills the moment PROJECTS lands instead of leaving a vacuum) and the script
- *               "Featured" eyebrow completes the lockup (FEATURED_IN)
- *   0.82–0.975  REST 2 — the projects frame (PROJECTS + Featured + thesis, the composed diagonal)
- *   0.975–1.00  velocity-matched release ramp (RELEASE); the whole composed frame rides up as one
- *               and NILINK crests through the hero's feathered bottom on the ride-out
+ *   C0  HERO travel   the full hero lockup (greeting / name / role / tagline / locator) rides UP at page
+ *                     speed; the name docks near the top WITHOUT scaling (it stays full --name-hero-size);
+ *                     the copy scrub-fades away over the second half so nothing legible crosses the dock.
+ *   C1  PERSONA       MORPH 1 (PRATIUSH → PERSONA) rolls in the docked title early, the script "My"
+ *                     eyebrow inks in ("My Persona"), the manifesto paragraph writes on word-by-word
+ *                     (ScrollInk) and then HOLDS fully visible (it is the persona statement — no fade),
+ *                     and the COMPACT capability spine walks its four domains over the back ~4/5 of C1.
+ *                     The DNA's first icon set pours in as domain 0 becomes active; later sets flow
+ *                     through per domain.
+ *   C2  TRANSITION    MORPH 2 (PERSONA → PROJECTS); the manifesto + capabilities scroll away naturally
+ *                     (the nav-dissolve feather); the DNA drains and DNA_EXIT fades the skeleton to 0;
+ *                     the Anton THESIS parallaxes UP from below the fold toward the top as the
+ *                     transitional statement between persona and projects. Progress reaches 1 as PROJECTS
+ *                     is docked and the thesis has risen — then the projects grid scrolls in immediately
+ *                     (no trailing rest, so no blank gap at the stage → projects seam).
  *
- * The beats live HERE, in one file, so re-timing one can't silently collide with its neighbours.
+ * CHOREOGRAPHY RULES (user-directed) still hold: beats group into COMPONENTS that move as units, every
+ * transition DOVETAILS, and each chapter lands on a REST STATE. The beats live HERE, in one file, so
+ * re-timing one can't silently collide with its neighbours. All windows are expressed via `vhWindow`
+ * over cumulative chapter offsets — no magic decimals in the components.
  */
 
 export type Window = readonly [number, number];
 
-/** MORPH 1 — PRATIUSH → PERSONA. Left-anchored: the P never moves; the tail slot collapses (H→∅). */
-export const STAGE0 = { start: 0.08, end: 0.24 } as const;
+/* ── The chapter table, in STAGE-scroll vh ───────────────────────────────────────────────────────
+ * TRAVEL_VH is C0 — the title's natural travel to the dock. It MUST equal the CSS travel geometry:
+ * `.narrative-title-rail-v4`'s padding-top spacer is `TRAVEL_VH svh`, so the sticky title travels
+ * exactly this much scroll at page speed before it docks (see globals.css — the two move together). */
+export const TRAVEL_VH = 40;
 
-/** MORPH 2 — PERSONA → PROJECTS. The collapsed tail slot re-opens (∅→S) to land the 8th letter.
- *  Starts INSIDE the persona exit window — the dovetail — so the stage never sits empty. */
-export const STAGE1 = { start: 0.56, end: 0.72 } as const;
-
-/** Persona content: the character NOTE enters under MORPH 1's settling letters, exits into MORPH 2's
- *  wind-up. (The DNA skeleton is NOT gated by these — it's permanent; only the note rides them.) */
-export const PERSONA_IN: Window = [0.22, 0.3];
-export const PERSONA_OUT: Window = [0.52, 0.6];
-
-/** THE ICONS POUR IN — the tech beads flow into the ever-present skeleton, top→bottom (a staggered
- *  waterfall down the strands to their seats). Opens under MORPH 1's landing, alongside the note. */
-export const DNA_ICONS_IN: Window = [0.22, 0.36];
-
-/** THE ICONS DRAIN OUT — mirrored, all continuing DOWNWARD off the base: the beads flow THROUGH the
- *  DNA and out the bottom, dovetailing MORPH 2 so the skeleton empties as the word rewinds. */
-export const DNA_ICONS_OUT: Window = [0.52, 0.64];
-
-/** THE SKELETON DIMS — once the icons have drained and the word rolls to PROJECTS, the bare strands
- *  fade to a faint living watermark (presence 1 → DIM_LEVEL) behind the arriving thesis. */
-export const DNA_DIM: Window = [0.62, 0.74];
-
-/** The opening copy's staggered exit (eyebrow first), after a small scroll-intent buffer (REST 0),
- *  overlapping MORPH 1's first rolls — the same deliberate premium overlap as before. */
-export const HERO_EXIT = {
-  eyebrow: { window: [0.03, 0.09] as Window, lift: -54 },
-  body: { window: [0.05, 0.14] as Window, lift: -44 },
-  meta: { window: [0.06, 0.15] as Window, lift: -36 },
+export const CHAPTERS = {
+  travel: TRAVEL_VH, // C0: hero lockup rides up, name docks (no scale), copy scrub-fades away
+  persona: 300, // C1: MORPH 1, "My", manifesto ink+HOLD, the compact capability spine (four dwells)
+  transition: 130, // C2: MORPH 2, manifesto/caps scroll away, DNA drains, thesis parallaxes up
 } as const;
 
-/** The script "My" eyebrow over PERSONA — the SAME hand as the greeting, so the beat reads as
- *  title voice: "My Persona" (it answers "whose persona?" without a label). In after MORPH 1
- *  lands (nothing ever floats over rolling letters), out just as MORPH 2 begins. */
-export const MY_IN: Window = [0.25, 0.31];
-export const MY_OUT: Window = [0.5, 0.56];
+/** Total stage-scroll vh — the sum of all chapters. The stage's CSS height is PINNED_VH + 100svh
+ *  (the trailing viewport that lets the last chapter play before the stage ends; kept minimal so the
+ *  projects grid scrolls in right after the thesis rises, with no blank gap). */
+export const PINNED_VH =
+  CHAPTERS.travel + CHAPTERS.persona + CHAPTERS.transition; // 470
 
-/** The thesis ink-on — per-word wipe staggered across this window, timed to START as MORPH 2's
- *  last letters are landing so the diagonal composes immediately (no vacuum beside PROJECTS). */
-export const THESIS_IN: Window = [0.7, 0.82];
+/* Cumulative chapter START offsets (absolute vh from the stage's top). Defined ONCE so every window
+   below reads `C{n} + [local...]` and a chapter re-budget shifts everything downstream automatically. */
+const C0 = 0;
+const C1 = C0 + CHAPTERS.travel; // 40
+const C2 = C1 + CHAPTERS.persona; // 340
 
-/** The script "Featured" eyebrow — inks in with the thesis wash, completing the projects lockup. */
-export const FEATURED_IN: Window = [0.74, 0.82];
+/**
+ * Convert an absolute vh span (from the stage's top) into a fraction-of-PINNED_VH window — the shape
+ * the scrubbed `useTransform` calls consume off the master progress. Because the master progress runs
+ * `["start start", "end end"]` over a stage of height (PINNED_VH + 100svh), progress 1 corresponds to
+ * PINNED_VH of scroll past the start; every beat therefore divides by PINNED_VH.
+ */
+export function vhWindow(startVh: number, endVh: number): Window {
+  return [startVh / PINNED_VH, endVh / PINNED_VH] as const;
+}
 
-/** The warm glow pool eases RIGHT for the persona beat — it slides off centre to sit BETWEEN the
- *  character note (left) and the enlarged helix (right) through the persona frame, heating the cold
- *  middle band the review flagged and tying the two halves into one composition. It then RESTS there
- *  (a flat hold from GLOW_PERSONA[1] to GLOW_DRIFT[0]) before GLOW_DRIFT sweeps it back LEFT as the
- *  word lands. The light thus FOLLOWS the narrative: name → persona → landed PROJECTS. */
-export const GLOW_PERSONA: Window = [0.2, 0.32];
+/** MORPH 1 — PRATIUSH → PERSONA, in the docked title. Left-anchored: the P never moves; the tail slot
+ *  collapses (H→∅). MorphName consumes the `{ start, end }` shape. Fires EARLY in C1, right after the
+ *  name has finished docking, so the persona chapter opens on PERSONA. */
+const [S0S, S0E] = vhWindow(C1 + 0, C1 + 55);
+export const STAGE0 = { start: S0S, end: S0E } as const;
 
-/** The warm glow pool eases LEFT with MORPH 2 so the settling lower-left title is lit. */
-export const GLOW_DRIFT: Window = [0.56, 0.84];
+/** MORPH 2 — PERSONA → PROJECTS. The collapsed tail slot re-opens (∅→S) to land the 8th letter. */
+const [S1S, S1E] = vhWindow(C2 + 10, C2 + 60);
+export const STAGE1 = { start: S1S, end: S1E } as const;
 
-/** The velocity-matched release ramp (HeroSection RELEASE_LIFT): an ease-in that starts from rest
- *  and reaches scroll speed exactly at the unpin, so the held frame never jolts into scrolling.
- *  The window is sized so the ramp covers ~6vh of scroll (same absolute feel as the short pin). */
-export const RELEASE: Window = [0.975, 1];
+/** The script "My" eyebrow over PERSONA ("My Persona" — title voice, whose persona). In after MORPH 1
+ *  lands (nothing floats over rolling letters); out as MORPH 2 begins. */
+export const MY_IN: Window = vhWindow(C1 + 60, C1 + 80);
+export const MY_OUT: Window = vhWindow(C2 + 5, C2 + 25);
+
+/** The script "Featured" eyebrow — inks in with the thesis rise, completing the projects lockup. */
+export const FEATURED_IN: Window = vhWindow(C2 + 75, C2 + 100);
+
+/** The manifesto paragraph writes on WORD-BY-WORD below the docked title, then HOLDS fully visible for
+ *  the rest of the persona beat (it is the persona statement — no fade after landing; it only scrolls
+ *  away naturally in C2 with the nav-dissolve feather). The ink window sits early in C1 so the reader
+ *  has read it before the capability spine starts walking. */
+export const MANIFESTO_IN: Window = vhWindow(C1 + 30, C1 + 120);
+
+/* ── Capabilities (C2 chapter's content lives inside C1's back stretch) ───────────────────────────
+ * FOUR COMPACT capability dwells across the back ~4/5 of C1 — a subsection under the docked title, not
+ * four full screens. CAP_DWELL[i] is the whole dwell; the per-domain DNA windows key TechDNA's multi-set
+ * flow off the SAME dwells so the two never drift. Compact dwells: 45vh each, walking from C1+75 to
+ * C1+255 (well before C2's MORPH 2). */
+const CAP_START = C1 + 75; // the spine starts once "My Persona" + the manifesto have settled
+const CAP_DWELL_VH = 45; // compact per-domain dwell (was 95 — the subsection shrink)
+export const CAP_DWELL: Window[] = [0, 1, 2, 3].map((i) =>
+  vhWindow(CAP_START + i * CAP_DWELL_VH, CAP_START + (i + 1) * CAP_DWELL_VH),
+);
+
+/** Per-domain icon-set IN windows — set i pours in over the first stretch of its dwell. Set 0 is
+ *  aligned to domain 0's ACTIVE window (it pours as the first capability line inks to voice), so the
+ *  helix dresses exactly as the persona/capabilities content settles — not before, not laggily after. */
+export const DNA_SET_IN: Window[] = [0, 1, 2, 3].map((i) =>
+  vhWindow(CAP_START + i * CAP_DWELL_VH + 2, CAP_START + i * CAP_DWELL_VH + 22),
+);
+
+/** Per-domain icon-set OUT windows — set i drains over the tail of its dwell, EXCEPT the last set,
+ *  which drains at the START of C2 (the final flow-through as the projects frame arrives). */
+export const DNA_SET_OUT: Window[] = [0, 1, 2, 3].map((i) =>
+  i < 3
+    ? vhWindow(CAP_START + i * CAP_DWELL_VH + 32, CAP_START + i * CAP_DWELL_VH + 45)
+    : vhWindow(C2 + 0, C2 + 20),
+);
+
+/** The bare skeleton's presence fades 1 → 0 as the projects frame arrives (after DNA_EXIT the canvas
+ *  draws nothing and the nodes are hidden — the projects grid owns the void). */
+export const DNA_EXIT: Window = vhWindow(C2 + 20, C2 + 60);
+
+/** The thesis PARALLAX rise — the statement travels UP from below the fold toward the top as the
+ *  transitional statement between persona and projects (HeroThesis owns the `y` parallax + the fade).
+ *  Runs across the back half of C2 so it crests as PROJECTS lands and the projects grid scrolls in. */
+export const THESIS_IN: Window = vhWindow(C2 + 45, C2 + 100);
+
+/** The warm glow pool eases RIGHT for the persona beat (to sit between the manifesto and the helix),
+ *  then RESTS through C1 until GLOW_DRIFT sweeps it left as PROJECTS lands. */
+export const GLOW_PERSONA: Window = vhWindow(C1 + 0, C1 + 40);
+
+/** The warm glow pool sweeps back LEFT with MORPH 2 so the settling lower-left title is lit. */
+export const GLOW_DRIFT: Window = vhWindow(C2 + 10, C2 + 80);
+
+/* NB: the title's velocity-matched RELEASE ramp is NOT scheduled here anymore — it keys off scroll
+   relative to the OUTER track (where the sticky title actually unpins, before the footer), not the
+   fixed-height stage's master progress (which reaches 1 far earlier). NarrativeSection owns it via a
+   second `useScroll` on the track (offset ["end end","end start"]) with a tiny inline ramp. */

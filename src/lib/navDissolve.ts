@@ -3,17 +3,17 @@ import { useMotionValue, useMotionValueEvent, useScroll } from "motion/react";
 
 /**
  * The site's single EXIT mechanic for anything that scrolls UP and off the top: a viewport-anchored
- * top-to-bottom dissolve that mirrors the `.hero-cluster-v4` top feather, so content melts away into a
- * fixed band right below the (fixed, transparent) nav instead of sliding under and colliding with it.
+ * top-to-bottom dissolve, so content melts away into a fixed band right below the (fixed, transparent)
+ * nav instead of sliding under and colliding with it. Applied to the docked title and the chapter flow
+ * column of the narrative track (NarrativeSection).
  *
  * WHY a live-rect read and not a static CSS mask: a mask on a SCROLLING element is anchored to the
  * element's own box, so its band travels with the element and never sits at the nav line. Reading the
  * element's real `getBoundingClientRect().top` each scroll frame — which already includes whatever
  * transform the element carries (e.g. the title's release ramp) — lets us place the feather band at
- * the SAME viewport line no matter how fast the element is moving. The hero cluster (which now hosts
- * the whole composed frame — title, note, thesis) rides out through this one band.
+ * the SAME viewport line no matter how fast the element is moving.
  *
- * The band is expressed as viewport fractions and matches the `.hero-cluster-v4` mask exactly:
+ * The band is expressed as viewport fractions:
  *   • above CLEAR  (8% of vh)  → fully transparent (already gone, under the nav)
  *   • CLEAR→OPAQUE (8%→19%)    → the feather, sitting just under the nav
  *   • below OPAQUE (19% of vh) → fully opaque (the live content, untouched)

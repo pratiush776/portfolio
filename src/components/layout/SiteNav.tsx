@@ -5,9 +5,9 @@ import { NavLogo } from "./NavLogo";
 export function SiteNav() {
   return (
     <nav className="site-nav-v3" aria-label="Primary">
-      {/* The wordmark SVG lives here as the persistent identity anchor. On the landing it
-          stays hidden while the big hero name owns the stage, then reveals as the name
-          morphs into PROJECTS (see NavLogo). */}
+      {/* The wordmark SVG lives here as the persistent identity anchor. On the landing it stays
+          hidden while the big hero name owns the identity, then reveals as MORPH 1 begins (the word
+          stops being "Pratiush"); on routes with no narrative track it's simply visible (see NavLogo). */}
       <Link href="/" className="site-nav-v3__brand" aria-label="Pratiush — home">
         <NavLogo />
       </Link>
