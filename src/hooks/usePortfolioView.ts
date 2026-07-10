@@ -1,22 +1,17 @@
 import { useEffect } from "react";
+import { submitToWeb3Forms } from "@/lib/web3forms";
 
 export function usePortfolioView() {
   useEffect(() => {
-    const notifyPortfolioView = async () => {
-      try {
-        const response = await fetch("/api/notify-portfolio-view", {
-          method: "POST",
-        });
-
-        const result = await response.json();
-        if (result.success) {
-          console.log("Portfolio view notification sent");
-        }
-      } catch (error) {
-        console.error("Failed to send portfolio view notification:", error);
+    submitToWeb3Forms({
+      subject: "Portfolio View Notification",
+      from_name: "Portfolio Viewer",
+      message: `Someone visited your portfolio at EST ${new Date().toLocaleString("en-US", { timeZone: "America/New_York" })}`,
+      from_email: "portfolio-view@notification.com",
+    }).then((sent) => {
+      if (sent) {
+        console.log("Portfolio view notification sent");
       }
-    };
-
-    notifyPortfolioView();
+    });
   }, []);
 }

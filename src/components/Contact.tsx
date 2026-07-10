@@ -6,6 +6,7 @@ import Email from "./Email";
 import { motion } from "framer-motion";
 import { AnimatePresence } from "motion/react";
 import { pierSans } from "@/lib/fonts";
+import { submitToWeb3Forms } from "@/lib/web3forms";
 
 interface ContactProps {
   className?: string;
@@ -26,19 +27,8 @@ const Contact: React.FC<ContactProps> = ({ className }) => {
     if (status === "loading") return;
     setStatus("loading");
     setTimeout(async () => {
-      const object = Object.fromEntries(formData);
-      const json = JSON.stringify(object);
-
-      const response = await fetch("/api/send-contact", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-        },
-        body: json,
-      });
-      const result = await response.json();
-      if (result.success) {
+      const sent = await submitToWeb3Forms(Object.fromEntries(formData));
+      if (sent) {
         setStatus("success");
         setTimeout(() => {
           setStatus("default");
