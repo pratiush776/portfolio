@@ -22,7 +22,9 @@ export const projects = [
     ],
     logo: "/projects_assets/NILINK/logo.png",
     url: "https://mvp-inky-eta.vercel.app/",
+    videos: ["/projects_assets/NILINK/demo.mp4"],
     imgs: [
+      "/projects_assets/NILINK/NILINK_product_img.png",
       "/projects_assets/NILINK/dashboard_brand.webp",
       "/projects_assets/NILINK/explore.webp",
       "/projects_assets/NILINK/explore_brand.webp",
@@ -40,6 +42,7 @@ export const projects = [
     logo: "/projects_assets/LucidTone/logo.svg",
     url: "",
     videos: ["/projects_assets/LucidTone/demo.mp4"],
+    imgs: ["/projects_assets/LucidTone/lucidTone_product_img.png"],
   },
   {
     id: 0,
