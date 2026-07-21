@@ -47,8 +47,10 @@ import { BEAT, INTRO_EASE } from "@/lib/intro";
  *  • SEQUENCED — a LEFT-TO-RIGHT stagger walks the roll across the changing letters, so each
  *    morph reads as one continuous wave settling into the next word.
  *
- * The intro entrance (mask-rise on the foreground gate, BEAT.wordmark) lives on a wrapper node,
- * so it never fights the scrub on the letters.
+ * The intro entrance lives on a wrapper node so it never fights the scrub on the letters, and it
+ * uses the SAME rise + fade recipe as every other C0 element (BEAT.wordmark) — the old full-height
+ * mask-rise was the one entrance that moved differently from the rest of the lockup and broke the
+ * cascade's coherence (user-flagged). No entrance mask = one less clip surface on the glyphs, too.
  */
 const WORDS = ["PRATIUSH", "PERSONA", "PROJECTS"] as const;
 const SLOTS = Math.max(...WORDS.map((w) => w.length)); // 8
@@ -95,9 +97,12 @@ const FIRST_CHANGES = ROLL_ORDERS.map((order) =>
  *   • dur     — how long ONE letter takes to roll its glyph (its start→finish window).
  *   • stagger — the slight delay between consecutive letters' STARTS.
  * Keeping stagger well under dur is the whole trick: the next letter kicks off when the previous
- * has only just begun moving up (STAGGER_PER_DUR ≈ 24% through it), so several letters are mid-roll
- * at once and each morph reads as one smooth, wavy gesture instead of a letter-at-a-time relay. */
-const STAGGER_PER_DUR = 0.24;
+ * has only just begun moving up (STAGGER_PER_DUR ≈ 15% through it), so several letters are mid-roll
+ * at once and each morph reads as one smooth, wavy gesture instead of a letter-at-a-time relay.
+ * TIGHT on purpose: a looser stagger left the word in a half-old/half-new state ("PERTIUSH") long
+ * enough to read as corrupted type — the whole wave now passes through the word quickly, and the
+ * readable endpoints hold longest. */
+const STAGGER_PER_DUR = 0.15;
 const PACES = STAGES.map((win, s) => {
   const width = win.end - win.start;
   const dur =
@@ -112,8 +117,13 @@ const PACES = STAGES.map((win, s) => {
  * hard clip edge — no sliced glyph tops. To stop that headroom from revealing a NEIGHBOUR glyph at
  * rest, the glyphs are separated by an equal vertical gap. ROLL_GAP is the single source of truth:
  * it is pushed to CSS as `--roll-gap` (the column's `gap` AND the slot's padding/margin derive from
- * it) and the roll travel below is computed from it, so the two can never desync. In em. */
-const ROLL_GAP = 0.3;
+ * it) and the roll travel below is computed from it, so the two can never desync. In em.
+ * 0.5 (was 0.3): the 0.15em bottom apron the old gap yielded was shallower than Fraunces' deepest
+ * ink below the baseline (PROJECTS' J descender ≈0.25em), so the docked word clipped at the bottom
+ * (user-flagged). Half the gap = 0.25em now clears it, and the neighbour glyph still hides behind
+ * the other half. Bottom/side APRONS (--roll-apron-*) extend the clip paint box without shifting
+ * the 1em content window rollY() centres on. */
+const ROLL_GAP = 0.55;
 // The column is (3 + 2·gap) em tall and showing word w means sliding it by w·(1 + gap) em — so each
 // step lands the next glyph dead-centre in the clip box. As a percentage of the column's height:
 const rollY = (w: number) =>
@@ -143,6 +153,11 @@ const hold = (v: number) => v;
 // room below, so a top pivot swings the letter DOWN into that room instead of up past the roll
 // mask's clip edge. Keep the angle modest for the same reason.
 const INCOMING_ROT = -3; // degrees — a gentle tilt, not a showy swing (premium-subtle)
+
+// MID-ROLL CROSSFADE: each changing slot's ink dips at the centre of its own roll — the exact frame
+// where two half-glyphs share the clip box (the "corrupted type" frame) — and returns to full by
+// the landing. The readable endpoints keep full ink; the ugly middle passes as a soft crossfade.
+const ROLL_DIP = 0.45;
 
 /* ── Travelling ELASTIC wave (the "force") ───────────────────────────────────────────────────
  *
@@ -367,6 +382,15 @@ const MorphLetter = memo(function MorphLetter({
     [rollY(0), rollY(pos1), rollY(pos1), rollY(pos2)],
     { ease: [outgoingEase, hold, outgoingEase] },
   );
+  // The mid-roll ink dip (see ROLL_DIP): full at both endpoints of each roll, softest dead-centre —
+  // only for stages where this slot actually changes (a held stage keeps full ink throughout).
+  const dip0 = roll0 !== null ? ROLL_DIP : 1;
+  const dip1 = roll1 !== null ? ROLL_DIP : 1;
+  const rollOpacity = useTransform(
+    progress,
+    [a0, (a0 + b0) / 2, b0, a1, (a1 + b1) / 2, b1],
+    [1, dip0, 1, 1, dip1, 1],
+  );
   // Each incoming glyph enters tilted and rotates to 0° (aligned) over its own stage's window.
   const incomingRotate1 = useTransform(progress, [a0, b0], [INCOMING_ROT, 0], {
     ease: reveal,
@@ -423,7 +447,10 @@ const MorphLetter = memo(function MorphLetter({
           </span>
         </span>
       ) : (
-        <motion.span className="hero-name-v4__roll" style={{ y }}>
+        <motion.span
+          className="hero-name-v4__roll"
+          style={{ y, opacity: rollOpacity }}
+        >
           {/* Word-0 glyph (PRATIUSH): the OUTGOING glyph of MORPH 1 — stretches (centre origin)
               as it rolls up and out. The slot's vertical headroom (the gap padding in CSS) gives
               that stretch room on both sides so it never clips. */}
@@ -531,7 +558,13 @@ export function MorphName({
       // headroom and column gap derive from it in CSS, the roll travel from it in JS. The title's EXIT
       // (lift + fade at the stage's end) and the nav-band dissolve are BOTH owned at the title level
       // (NarrativeSection), so the whole lockup — eyebrow + word — melts uniformly.
-      style={{ "--roll-gap": `${ROLL_GAP}em` } as MotionStyle}
+      style={
+        {
+          "--roll-gap": `${ROLL_GAP}em`,
+          "--roll-apron-bottom": "0.22em",
+          "--roll-apron-x": "0.06em",
+        } as MotionStyle
+      }
     >
       {/* The script eyebrows — anchored ABOVE the word and inside this drifting root so they ride
           with the title. Same spot, disjoint windows: "My" owns the persona hold, "Featured" the
@@ -550,14 +583,18 @@ export function MorphName({
       >
         Featured
       </motion.span>
-      {/* Entrance mask: the name rises from behind its baseline on the foreground gate —
-          a separate node from the scrubbed letters, so the two never fight. */}
+      {/* Entrance: the SAME rise + fade recipe as every other C0 element (BEAT.wordmark carries the
+          y offset), on a separate node from the scrubbed letters so the two never fight. The old
+          full-height mask-rise moved on a different mechanic from its siblings and read as a break
+          in the cascade; it also needed a clipping wrapper that shaved descenders. */}
       <span className="hero-name-v4__reveal">
         <motion.span
           className="hero-name-v4__run"
-          initial={{ y: "104%", opacity: 0 }}
+          initial={{ y: BEAT.wordmark.y, opacity: 0 }}
           animate={
-            foregroundIn ? { y: "0%", opacity: 1 } : { y: "104%", opacity: 0 }
+            foregroundIn
+              ? { y: 0, opacity: 1 }
+              : { y: BEAT.wordmark.y, opacity: 0 }
           }
           transition={{
             duration: BEAT.wordmark.duration,

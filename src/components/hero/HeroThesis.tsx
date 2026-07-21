@@ -3,94 +3,98 @@
 import {
   cubicBezier,
   motion,
+  useReducedMotion,
   useTransform,
   type MotionValue,
 } from "motion/react";
 
-import { THESIS_IN } from "@/components/hero/heroTimeline";
+import { THESIS_IN, THESIS_OUT, THESIS_RISE } from "@/components/hero/heroTimeline";
 import { INTRO_EASE } from "@/lib/intro";
 
 /**
- * The thesis statement — the transitional line between persona and projects, "Turning rough ideas into
- * polished products." It is a real typographic composition (Anton poster treatment) that PARALLAXES UP
- * from below the fold toward the top as the section transitions PERSONA → PROJECTS, then rides out with
- * the frame. The rise is a genuine parallax (a large `y` travel at a rate different from raw scroll,
- * INTRO_EASE) owned by NarrativeSection (the `y` on the wrapping layer); this component owns the poster
- * type and a simple fade-IN so the statement inks up as it climbs. The old per-word clip-path ink-wipe
- * is gone — the statement is legible whole, arriving by MOVEMENT, not by a wipe.
+ * The thesis statement — "Turning rough ideas into polished products." — the BRIDGE CHAPTER between
+ * PERSONA and PROJECTS, staged as a PASSING statement carried by the scroll (user-directed, replaces
+ * the old held left-anchored frame): CENTERED in the viewport (its sticky rail centres it), it rides
+ * UP from below the fold toward dead centre over THESIS_RISE — a LINEAR y, so the climb feels like
+ * the page's own scroll, not an animation — inking IN over THESIS_IN as it climbs, and dissolving
+ * over THESIS_OUT exactly as it reaches the centre. Gone with a breath to spare before MORPH 2. The
+ * persona block has released and the DNA has exited by the time it arrives — the bridge owns the
+ * stage alone.
  *
- * Set in Anton so the statement keeps a tall, cinematic poster force, with per-word SIZE variation so
- * the words read as a designed, rhythmic stack (small → LARGE → tiny → LARGEST → medium). Right-aligned,
- * mostly ink-only, with "polished" carrying the terracotta payoff.
+ * Set in the ONE display serif (Fraunces) as a centered editorial statement with a restrained
+ * per-line size rhythm; "polished" carries the terracotta accent.
  *
- * A visually-hidden real sentence carries the value prop to screen readers / SEO; the decorative lines
- * are aria-hidden so the sentence isn't read word-by-word or doubled. Reduced motion: the decorative
- * poster is hidden entirely (the static hero frame is already full) and the sentence remains for AT —
- * see the reduced-motion rule in globals.css.
+ * A visually-hidden real sentence carries the value prop to screen readers / SEO; the decorative
+ * lines are aria-hidden so the sentence isn't read word-by-word or doubled. Reduced motion renders
+ * the statement statically (full opacity, no scrub) so the motionless page still reads complete.
  */
 type ThesisWord = { word: string; scale: number; tone?: "accent" };
 
-/* The composition: each inner array is one right-aligned line; `scale` is a font-size multiplier (em)
-   off the container's base clamp, so the whole block scales together and the rhythm is tunable here. */
+/* The composition: each inner array is one line; `scale` is a font-size multiplier (em) off the
+   container's base clamp, so the whole block scales together and the rhythm is tunable here. */
 const LINES: ThesisWord[][] = [
   [{ word: "Turning", scale: 0.62 }],
   [
     { word: "rough", scale: 1 },
     { word: "ideas", scale: 1 },
   ],
-  // "into" lifted off its old runt size (0.46) so the dip reads as designed rhythm, not an accident.
-  [{ word: "into", scale: 0.64 }],
-  [{ word: "polished", scale: 1.12, tone: "accent" }],
-  [{ word: "products", scale: 0.88 }],
+  [{ word: "into", scale: 0.62 }],
+  [
+    { word: "polished", scale: 1, tone: "accent" },
+    { word: "products", scale: 1 },
+  ],
 ];
 
 const ease = cubicBezier(...INTRO_EASE);
 
 export function HeroThesis({ progress }: { progress: MotionValue<number> }) {
-  // A fade IN then OUT across the parallax rise: the statement inks up as it climbs (lit by ~40% of the
-  // window), holds, then CLEARS as it crests toward the top (gone by the window's end). This is what
-  // makes it a PASSING transitional statement — it rises from below, is read mid-climb, and is gone by
-  // the time the projects grid scrolls in under the docked title. Without the fade-out it would stay
-  // stuck at full opacity in the upper-right over the whole projects section, colliding with the cards.
-  // The `y` parallax travel is owned by the wrapping layer in NarrativeSection (THESIS_IN + a large
-  // rise); the two combine into one rising, arriving, departing gesture. INTRO_EASE, the site's curve.
-  const span = THESIS_IN[1] - THESIS_IN[0];
+  const reduce = useReducedMotion() ?? false;
+
+  // Ink IN over THESIS_IN while it climbs, read through the middle, dissolve over THESIS_OUT just
+  // as it arrives at the viewport's centre — a passing statement, never a parked one.
   const opacity = useTransform(
     progress,
-    [
-      THESIS_IN[0],
-      THESIS_IN[0] + span * 0.4,
-      THESIS_IN[0] + span * 0.72,
-      THESIS_IN[1],
-    ],
+    [THESIS_IN[0], THESIS_IN[1], THESIS_OUT[0], THESIS_OUT[1]],
     [0, 1, 1, 0],
     { ease },
   );
+  // The RIDE: from below the fold up to dead centre — LINEAR so it reads as scroll carrying the
+  // statement, not a separate animation. y starts with the cluster's bottom near the viewport foot.
+  const y = useTransform(progress, [...THESIS_RISE], ["72vh", "0vh"]);
 
   return (
     <>
-      <motion.p className="hero-thesis-v4" aria-hidden style={{ opacity }}>
+      <motion.p
+        className="hero-thesis-v4"
+        aria-hidden
+        style={reduce ? undefined : { opacity, y }}
+      >
         {LINES.map((line, li) => (
           <span className="hero-thesis-v4__line" key={li}>
             {line.map((token, wi) => (
-              <span
-                key={wi}
-                className={
-                  token.tone === "accent"
-                    ? "hero-thesis-v4__word hero-thesis-v4__word--accent"
-                    : "hero-thesis-v4__word"
-                }
-                style={{ fontSize: `${token.scale}em` }}
-              >
-                {token.word}
+              // The words are inline-block spans (so the per-line size rhythm composes), which
+              // makes them ignore adjacent JSX whitespace — a REAL space text node must be emitted
+              // BETWEEN them or multi-word lines collapse ("roughideas"). The space lives at the
+              // line's base size, so the gap scales with the composition.
+              <span key={wi}>
+                {wi > 0 ? " " : null}
+                <span
+                  className={
+                    token.tone === "accent"
+                      ? "hero-thesis-v4__word hero-thesis-v4__word--accent"
+                      : "hero-thesis-v4__word"
+                  }
+                  style={{ fontSize: `${token.scale}em` }}
+                >
+                  {token.word}
+                </span>
               </span>
-            ))}{" "}
+            ))}
           </span>
         ))}
       </motion.p>
-      {/* The real value-prop sentence, exposed once for AT/SEO (PRODUCT.md: real text exists even
-          where the visible type is decorative). A SIBLING of the decorative <p> so hiding the
-          poster (reduced motion) never hides the sentence. */}
+      {/* The real value-prop sentence, exposed once for AT/SEO. A SIBLING of the decorative <p> so
+          the decorative treatment never hides the sentence from assistive tech. */}
       <span className="visually-hidden">
         Turning rough ideas into polished products.
       </span>

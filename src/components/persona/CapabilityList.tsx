@@ -9,7 +9,7 @@ import {
   type MotionValue,
 } from "motion/react";
 
-import { CAP_DWELL, type Window } from "@/components/hero/heroTimeline";
+import { CAP_DWELL, CAPS_IN, type Window } from "@/components/hero/heroTimeline";
 import { capabilities } from "@/data/capabilities";
 import { INTRO_EASE } from "@/lib/intro";
 
@@ -22,9 +22,9 @@ import { INTRO_EASE } from "@/lib/intro";
  * (TechDNA reads the same CAP_DWELL windows).
  *
  * COMPACT (user-directed): the type is a subsection scale (not a full-screen-per-domain headline) and
- * the row gaps are tight, so all four lines + the active sub-caption + the manifesto above them fit as
- * ONE block under the docked title within a single viewport. The per-domain scroll dwells are short too
- * (CAP_DWELL is 45vh each) so the whole beat feels like a subsection, not four full screens.
+ * the row gaps are tight, so all four lines + the active sub-caption + the statement above them fit as
+ * ONE block under the docked title within a single viewport. The per-domain scroll dwells are short
+ * too (see CAP_DWELL in heroTimeline.ts) so the whole beat feels like a subsection, not four screens.
  *
  * The list is REAL TEXT (content, not decoration): all four lines + subs are in the DOM at full opacity
  * to assistive tech; the dim/active scrub is purely visual (no aria-hidden). Reduced motion shows every
@@ -32,12 +32,17 @@ import { INTRO_EASE } from "@/lib/intro";
  */
 const ease = cubicBezier(...INTRO_EASE);
 
-const FLOOR = 0.35; // inactive lines sit here — present as a spine, demoted, never gone
+const FLOOR = 0.55; // inactive lines stay warm-present — not washed to grey
 const SUB_RISE = 10; // px the sub-caption lifts as it inks (small — it's a caption, not a headline)
 
-// The active-crossfade ramp on each side of a dwell, as a FRACTION of the dwell width (short — the line
-// snaps to voice then holds). CAP_DWELL windows are compact; ~0.28 of the dwell reads as a firm hand-off.
-const RAMP_FRAC = 0.28;
+// Active row: terracotta accent ink only — no scale reflow (reads cleaner at agency scale).
+const INK_REST = "#221e2e";
+const INK_ACTIVE = "#c9542e";
+
+// The active-crossfade ramp on each side of a dwell, as a FRACTION of the dwell width. The dwells are
+// LONG now (~70vh), so the fraction is small — the hand-off still reads firm (~14vh of scroll) while
+// the lit line holds for the long middle of its dwell.
+const RAMP_FRAC = 0.2;
 
 /**
  * One capability row. Its line crossfades FLOOR→1→FLOOR across its dwell (a short ramp at each edge), and
@@ -69,6 +74,17 @@ const Row = memo(function Row({
     isLast ? [FLOOR, 1, 1] : [FLOOR, 1, 1, FLOOR],
     { ease },
   );
+  // The active line's ink swings to the terracotta accent and back on the same ramps, and the row
+  // stands slightly proud (transform-only scale — no reflow). The last row keeps its accent through
+  // the dwell end and fades with the whole block instead.
+  const lineColor = useTransform(
+    progress,
+    isLast ? [d0, d0 + ramp, d1] : [d0, d0 + ramp, d1 - ramp, d1],
+    isLast
+      ? [INK_REST, INK_ACTIVE, INK_ACTIVE]
+      : [INK_REST, INK_ACTIVE, INK_ACTIVE, INK_REST],
+    { ease },
+  );
 
   // Sub-caption: sharper — 0 → 1 across a slightly quicker opening, held, then 1 → 0 at the close.
   const subOpacity = useTransform(
@@ -81,7 +97,10 @@ const Row = memo(function Row({
 
   return (
     <li className="narrative-capability-v4">
-      <motion.span className="narrative-capability-v4__line" style={{ opacity: lineOpacity }}>
+      <motion.span
+        className="narrative-capability-v4__line"
+        style={{ opacity: lineOpacity, color: lineColor }}
+      >
         {line}
       </motion.span>
       <motion.span
@@ -96,6 +115,13 @@ const Row = memo(function Row({
 
 export function CapabilityList({ progress }: { progress: MotionValue<number> }) {
   const reduce = useReducedMotion() ?? false;
+
+  // The spine's OWN entrance gate: the whole list stays at 0 until the statement above has fully
+  // established itself (CAPS_IN sits after MANIFESTO_IN), then fades in as one block just before
+  // the first dwell — so the list never competes with the reading of the statement. (The outer
+  // persona gate in NarrativeSection handles the chapter-level visibility; this sequences WITHIN
+  // the chapter.) Hook order is stable: `reduce` never changes within a mount.
+  const listOpacity = useTransform(progress, [...CAPS_IN], [0, 1], { ease });
 
   // Reduced motion: no scrub — every line + sub reads at full opacity in natural flow.
   if (reduce) {
@@ -112,7 +138,10 @@ export function CapabilityList({ progress }: { progress: MotionValue<number> }) 
   }
 
   return (
-    <ul className="narrative-capabilities-v4__list">
+    <motion.ul
+      className="narrative-capabilities-v4__list"
+      style={{ opacity: listOpacity }}
+    >
       {capabilities.map((cap, i) => (
         <Row
           key={cap.id}
@@ -123,6 +152,6 @@ export function CapabilityList({ progress }: { progress: MotionValue<number> }) 
           progress={progress}
         />
       ))}
-    </ul>
+    </motion.ul>
   );
 }

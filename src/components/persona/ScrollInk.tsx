@@ -13,10 +13,11 @@ import type { Window } from "@/components/hero/heroTimeline";
 import { INTRO_EASE } from "@/lib/intro";
 
 /**
- * The site's SCROLL-INK paragraph: a body of copy that writes itself on word-by-word as the reader
- * scrolls through a window of the master progress. Each word rises from a faint FLOOR opacity to full
- * and de-blurs, scrubbed on the hard-landing INTRO_EASE, staggered so the wipe reads as one flowing
- * gesture (the same stagger≪duration overlap the hero name's roll and HeroThesis's ink use).
+ * The site's SCROLL-INK paragraph: a body of copy that clarifies into focus word-by-word as the
+ * reader scrolls through a window of the master progress. The text sits in its FINAL layout position
+ * the whole time — every word is already set at a low ghost opacity, and each staggers up to full
+ * opacity on the hard-landing INTRO_EASE. OPACITY ONLY: no blur (it muddied the type), no transform
+ * (the paragraph never moves while revealing).
  *
  * A11Y — the words are aria-hidden decorative spans; a visually-hidden real <p> sibling carries the
  * sentence to assistive tech / SEO as ONE string (never read word-by-word or doubled) — HeroThesis's
@@ -30,13 +31,12 @@ import { INTRO_EASE } from "@/lib/intro";
 // "" instead of " " and rejoin runs), so the pacing math below stays token-agnostic.
 const GRANULARITY = "word" as const;
 
-// The floor a not-yet-inked word sits at — a faint pencil guide, not invisible, so the paragraph's
-// shape is present before the ink arrives (matches HeroThesis's ghost register).
-const OPACITY_FLOOR = 0.18;
-const BLUR_START = 3; // px — each word arrives softly focused, sharpening as it inks
+// The floor a not-yet-revealed word sits at — a faint pencil guide (spec: 0.16–0.24), not invisible,
+// so the paragraph's full shape is present before the reveal arrives.
+const OPACITY_FLOOR = 0.2;
 
-// Each word's wipe takes WORD_SPAN of the window; the starts spread over the remainder so consecutive
-// words overlap heavily (the line washes on rather than ticking word-by-word). Same math as HeroThesis.
+// Each word's reveal takes WORD_SPAN of the window; the starts spread over the remainder so
+// consecutive words overlap heavily (the line washes on rather than ticking word-by-word).
 const WORD_SPAN = 0.45;
 
 const ease = cubicBezier(...INTRO_EASE);
@@ -55,15 +55,9 @@ const InkToken = memo(function InkToken({
   const opacity = useTransform(progress, [start, end], [OPACITY_FLOOR, 1], {
     ease,
   });
-  const blur = useTransform(progress, [start, end], [BLUR_START, 0], { ease });
-  const filter = useTransform(blur, (b) => `blur(${b.toFixed(2)}px)`);
 
   return (
-    <motion.span
-      className="scroll-ink-v4__word"
-      style={{ opacity, filter }}
-      aria-hidden
-    >
+    <motion.span className="scroll-ink-v4__word" style={{ opacity }} aria-hidden>
       {token}
     </motion.span>
   );

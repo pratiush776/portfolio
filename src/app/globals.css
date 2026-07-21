@@ -23,7 +23,7 @@ body {
   padding: 0;
   /* Workhorse face. The next/font variable is registered on <body>; this belt-and-braces
      alias (see :root) keeps it resolving even if the var chain hiccups. */
-  font-family: var(--font-hanken), sans-serif;
+  font-family: var(--font-hanken-sans), sans-serif;
 }
 
 button:focus-visible,
@@ -98,14 +98,11 @@ button {
   animation: fadeAnimation 1s ease-in-out infinite;
 }
 
-@theme {
-  /* Font families — THREE faces only (see src/lib/fonts.ts). Fraunces (display/title) and Style
-     Script (accent) are referenced by their next/font variables DIRECTLY per rule — the safe
-     pattern, since an @theme/:root alias that fails to resolve silently drops to the fallback
-     face. --font-hanken is the ONE alias kept: it embeds the live next/font var
-     (--font-hanken-sans), so it resolves, and it is used pervasively for the primary text/UI. */
-  --font-hanken: var(--font-hanken-sans), sans-serif;
-}
+/* Font families — THREE faces only (see src/lib/fonts.ts): Fraunces (display/title), Hanken
+   Grotesk (primary text/UI), Style Script (script accent). ALL referenced by their next/font
+   variables DIRECTLY (var(--font-fraunces) / var(--font-hanken-sans) / var(--font-style-script))
+   — an intermediate @theme/:root alias that fails to resolve silently drops the declaration to the
+   fallback face, so no aliases exist. */
 
 /* =========================================================
    V3-INSPIRED TOKENS + SURFACES
@@ -138,11 +135,6 @@ button {
      tokens were unused.) */
   --v3-accent-gold: #e3b98a;
 
-  /* Belt-and-braces re-declaration of the @theme font alias. If the var chain ever fails to
-     resolve, font-family goes invalid and silently inherits the body sans (the manifesto once
-     rendered in the fallback because of exactly this). Declared here so it ALWAYS exists. */
-  --font-hanken: var(--font-hanken-sans), sans-serif;
-
   /* The motion voice: hard-landing curves (slow start, violent middle, dead stop).
      --intro-ease — all masked rises / reveals (JS twin: lib/intro INTRO_EASE).
      --ease-snap  — big scrubbed moves (JS twin: lib/intro SNAP_EASE).
@@ -166,11 +158,10 @@ button {
   --v3-surface-max: 144rem;
   --v3-nav-height: clamp(3rem, 2.65rem + 1vw, 4rem);
 
-  /* ── Brand name. The hero name is TEXT (Bricolage Grotesque heavy caps, so it can morph per-letter
-     into PROJECTS); the nav keeps the SVG wordmark (aspect 1436 / 265) as the identity mark.
-     The gutter MUST match the nav's left inset (.site-nav-v3 left) so the hero name and the
-     nav logo share one vertical line. --name-hero-size is the master "name scale" knob:
-     8 glyphs at this size span ≈ the old SVG hero width (~46vw). */
+  /* ── Brand name. The hero name is TEXT (Fraunces display caps, so it can morph per-letter into
+     PROJECTS); the nav uses a Fraunces text logotype as the identity mark. The gutter MUST match
+     the nav's left inset (.site-nav-v3 left) so the hero name and the nav logo share one vertical
+     line. --name-hero-size is the master "name scale" knob. */
   --brand-gutter: clamp(1.5rem, 3.5vw, 3.5rem);
   --name-hero-size: clamp(3.2rem, 9.2vw, 10rem);
   --brand-nav-w: clamp(7rem, 8.5vw, 9rem); /* logo size in the nav */
@@ -279,51 +270,46 @@ button {
 /* =========================================================
    V3 HOMEPAGE HERO
    ========================================================= */
-/* THE PERSISTENT-TITLE TRACK: the hero title scrolls UP to a dock near the top (CSS sticky) and holds
-   there as the section title while EVERY chapter — INCLUDING the projects grid — flows beneath it. Two
-   containers make that work (read NarrativeSection's header map + the coupling comments below):
-     • .narrative-track-v4 (this) — position:relative, the sticky title's containing block. Height is
-       INTRINSIC (the fixed-height stage + the projects grid's real height); it releases the title at its
-       bottom edge, before the footer.
-     • .narrative-stage-v4 — the fixed-height SCRUBBED STAGE that drives the master progress. Its height
-       MUST equal PINNED_VH + 100svh (PINNED_VH = 485 in heroTimeline); the extra 100svh is the trailing
-       viewport that lets the last chapter play before the stage ends. Tune pacing via the CHAPTERS table
-       in heroTimeline.ts, not here. */
+/* THE PERSISTENT-TITLE TRACK: the hero title scrolls UP to a dock near the top (CSS sticky), holds
+   there as the section title while the chapters flow beneath it, then LIFTS + FADES out before the
+   projects grid. GEOMETRY: heroTimeline.ts is the single source of truth — NarrativeSection injects
+   --stage-h / --travel / --persona-span as inline custom properties on this root, and the rules
+   below only ever READ the vars. Re-budget a chapter in the beat sheet and the layout follows.
+     • .narrative-track-v4 (this) — position:relative, wrapper for the stage + grid.
+     • .narrative-stage-v4 — the fixed-height SCRUBBED STAGE that drives the master progress. */
 .narrative-track-v4 {
   position: relative;
 }
 
-/* The SCRUBBED STAGE — fixed height so the beat-sheet fractions stay stable no matter how tall the
-   projects grid grows. NarrativeSection's `useScroll({target: stageRef, offset:["start start","end
-   end"]})` over this is the ONE master progress. Height = PINNED_VH (470) + 100svh trailing = 570svh.
-   ⚠ If PINNED_VH changes, change this too. */
+/* The SCRUBBED STAGE — fixed height (var(--stage-h), injected = PINNED_VH + 100svh) so the
+   beat-sheet fractions stay stable no matter how tall the projects grid grows. NarrativeSection's
+   `useScroll({target: stageRef, offset:["start start","end end"]})` over this is the ONE master
+   progress. */
 .narrative-stage-v4 {
   position: relative;
-  height: 570svh;
+  height: var(--stage-h);
 }
 
-/* The ATMOSPHERE layer — one sticky viewport of warm field behind the whole track (aurora / glow /
-   smoke / grain). NO background here — the page-wide SectionAurora (fixed, behind everything) is the
-   SINGLE continuous field; this just layers the warm atmosphere on top, each layer feather-masked at
-   the bottom so there's no seam into the scroll. z 0 (below the rails/flow/title). */
+/* The ATMOSPHERE layer — an absolute wrapper spanning the stage with ONE sticky viewport of warm
+   field inside (aurora / glow / smoke / grain): the same wrapper+sticky pattern as the DNA rail, so
+   no flow-cancellation tricks. NO background here — the page-wide SectionAurora (fixed, behind
+   everything) is the SINGLE continuous field; this just layers the warm atmosphere on top, each
+   layer feather-masked at the bottom so there's no seam into the scroll. z 0. */
+.narrative-atmosphere-v4 {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
 .hero-root-v3 {
   position: sticky;
   top: 0;
-  min-height: 100svh;
   height: 100svh;
-  /* CRITICAL: a `position: sticky` element STILL occupies normal-flow space. As the stage's first
-     child, this 100svh atmosphere would push the chapter-flow column (the C0 hero copy) a full
-     viewport DOWN — below the fold at scroll 0, so only the absolutely-positioned title-rail name
-     showed ("only the name is visible"). This negative margin cancels its own flow height so it sticks
-     as a viewport backdrop WITHOUT consuming the scroll budget: the flow column then starts at the
-     stage top (overlaying the atmosphere via z-index), and the flow arithmetic (copy 100 + persona 340
-     + tail 130 = 570svh = the stage) holds, which it silently didn't before. */
-  margin-bottom: -100svh;
   padding: 0;
   background: transparent;
   overflow: hidden;
   isolation: isolate;
-  z-index: 0;
 }
 
 /* Every hero-scoped decor layer feathers out at the bottom — otherwise the grain/aurora
@@ -351,20 +337,23 @@ button {
    ========================================================= */
 
 /* --dock-top: where the title RESTS once docked — just below the fixed nav.
-   --docked-name-h: the docked name's height. The name NEVER scales now (spec: full --name-hero-size the
-   whole time), so this is just one line box of the name — used to place the sticky persona block below
-   the docked title.
-   --content-top: where the sticky persona block (manifesto + capability spine) engages, clear of the
-   docked name + a breath. */
+   --docked-name-h: the docked name's height. The name never scales (full --name-hero-size the whole
+   time), so this is one line box of the name — used to place the sticky persona block below the
+   docked title.
+   --content-top: where the sticky persona block (statement + capability spine) engages, clear of the
+   docked name + a REAL breath (the title needs its own visual zone — the old 1.75rem sat the copy
+   right under the giant caps).
+   (--travel and --stage-h/--persona-span are INJECTED inline from heroTimeline.ts — not defined
+   here.) */
 .narrative-track-v4 {
   --dock-top: calc(var(--v3-nav-height) + 1.5rem);
-  /* --travel: the title's natural scroll travel before it docks. == heroTimeline TRAVEL_VH (40) — the
-     title-rail spacer is sized to this exact span, so the two MUST move together. Trimmed from 55 →
-     40svh: a snappier open (less dead scroll before the dock) that also drops the docked name higher,
-     giving the C0 tail (tagline + locator) real headroom on shorter desktops. */
-  --travel: 40svh;
   --docked-name-h: var(--name-hero-size);
-  --content-top: calc(var(--dock-top) + var(--docked-name-h) + 1.75rem);
+  /* The TITLE ZONE breath: the docked PERSONA caps own their band, and the statement sits clearly
+     BELOW it — a full editorial step, not a caption gap (the old 2.75–4.5rem set the statement
+     right under the giant title and it read glued). (TUNE HERE: title ↔ statement separation.) */
+  --content-top: calc(
+    var(--dock-top) + var(--docked-name-h) + clamp(2.75rem, 6svh, 4.25rem)
+  );
 
   /* ── VERTICAL RHYTHM SCALE (the ONE spacing vocabulary for the narrative + projects) ────────────────
      A nested set of steps so every gap on the page reads as a deliberate system, not ad-hoc values.
@@ -393,8 +382,13 @@ button {
      top nav+4svh, bottom 10svh). */
   height: calc(100svh - (var(--v3-nav-height) + 4svh) - 10svh);
   margin-left: auto;
-  margin-right: var(--brand-gutter);
-  width: min(46vw, 46rem);
+  /* Revision pass: the helix hugged the right gutter and left a dead middle between it and the
+     statement. Pulled INWARD — a narrower box plus a vw-scaled right inset centres the helix around
+     ~68% of the viewport, inside the warm glow pool, so the widened statement (left) → capability
+     spine → helix read as one composed spread. (TUNE HERE with .scroll-ink-v4's measure together:
+     the statement's right edge must stay clear of the helix's left chips.) */
+  margin-right: calc(var(--brand-gutter) + 9vw);
+  width: min(36vw, 36rem);
   pointer-events: none;
 }
 
@@ -409,6 +403,7 @@ button {
   align-items: flex-start;
   padding: 0 var(--brand-gutter);
   text-align: left;
+  overflow: visible;
 }
 
 /* C0 — the hero copy block. It fills ~one viewport and composes AROUND the title's resting position so
@@ -439,6 +434,7 @@ button {
   /* A modest foot so the locator isn't jammed to the fold edge; small on short screens to protect the
      one-viewport fit. */
   padding-bottom: clamp(3rem, 6svh, 5rem);
+  overflow: visible;
   will-change: transform, opacity, mask;
 }
 
@@ -457,57 +453,43 @@ button {
   height: calc(var(--name-hero-size) * 1);
 }
 
-/* C1 — the PERSONA block's sticky SPAN (manifesto + compact capability spine held as ONE block). The
-   WRAPPER's height is the hold budget: the sticky child engages at --content-top as it rises into view
-   (dovetailing the title's travel), HOLDS fully visible below the docked title through the whole
-   persona/capabilities beat, then RELEASES as the wrapper's bottom edge passes and rides up and out in
-   C2. A margin CANNOT bound a sticky element — only its containing block's edge releases it — hence the
-   wrapper.
-   ── FLOW ARITHMETIC (the ONE place the persona flow height is decided) ──────────────────────────────
-   Stage height = PINNED_VH (470) + 100svh = 570svh. The flow column stacks, top → bottom:
-     C0 copy         min-height 100svh
-     C1 persona span            340svh   ← this wrapper
-     tail spacer                130svh   (= 570 − 100 − 340; completes the column, .narrative-tail-v4)
-   → 100 + 340 + 130 = 570svh, matching the stage. The span's top sits at flow-offset 100svh; its sticky
-   child pins at --content-top (~30svh), so it ENGAGES at scrollY ≈ 100 − 30 = 70svh (the title-dock
-   dovetail: the name has docked at C1=40 and MORPH 1 is landing PERSONA) and RELEASES when the span
-   bottom (100 + 340 = 440svh) reaches content-top + the block box (~55svh) ≈ 355svh — just into MORPH 2
-   (C2 = 340), so the persona block rides UP and out under the nav-dissolve feather exactly as PROJECTS
-   forms, nothing lingering under the landing PROJECTS frame. */
+/* C1 — the PERSONA block's sticky SPAN (statement + compact capability spine held as ONE block). The
+   WRAPPER's height is the hold budget: the sticky child engages at --content-top as it rises into
+   view (dovetailing the title's travel) and HOLDS below the docked title through the whole
+   persona/capabilities beat. The VISUAL exit is a scrubbed dissolve at rest (PERSONA_OUT — see
+   NarrativeSection personaFade); this span just keeps the sticky engaged until that fade completes,
+   so the block never visibly slides. A margin cannot bound a sticky element — only its containing
+   block's edge releases it — hence the wrapper. The height is INJECTED from heroTimeline's
+   PERSONA_SPAN_VH (the release timing is derived there — one source of truth). The flow column no
+   longer needs to sum to the stage height: a shorter column inside the fixed-height stage is fine
+   (the old tail spacer was pure bookkeeping and is gone). */
 .narrative-persona-span-v4 {
   align-self: stretch;
-  height: 340svh;
+  height: var(--persona-span);
 }
 
 /* The persona block itself STICKS below the docked title (--content-top) and holds while its span
-   scrolls through: the manifesto paragraph on top, the compact capability spine directly below it, as
-   one composed block within a single viewport. pointer-events:none — read-only content; the mask
-   feathers it under the nav on the ride-out. */
+   scrolls through: the statement paragraph on top, the compact capability spine directly below it,
+   as one composed block within a single viewport. pointer-events:none — read-only content; the exit
+   is a scrubbed opacity dissolve at rest (NarrativeSection personaFade / PERSONA_OUT). */
 .narrative-persona-v4 {
   position: sticky;
   top: var(--content-top);
-  /* Bound by the manifesto's own measure below; the flex box only needs to be wide enough for the
-     capability lines (the longest line, "Product Design & Motion", fits well within this). */
-  max-width: 48ch;
+  max-width: 38rem;
   display: flex;
   flex-direction: column;
-  /* GROUP break: the manifesto (voice) and the capability spine (the skill list) are two distinct
-     groups, so they get the largest nested step — clearly more air than the spine's own row gaps
-     below, so the reader parses "statement, then list". */
   gap: var(--rhythm-group);
   pointer-events: none;
-  will-change: mask;
+  will-change: opacity;
 }
 
 .narrative-capabilities-v4__list {
   list-style: none;
   margin: 0;
-  padding: 0;
+  padding: var(--rhythm-bond) 0 0;
+  border-top: 1px solid color-mix(in srgb, var(--v3-text-dark) 11%, transparent);
   display: flex;
   flex-direction: column;
-  /* TIGHT row gap (the rhythm scale's "within a group" step) — the four lines are ONE compact spine,
-     not four headlines, so consecutive rows sit close; still clearly smaller than the group step that
-     separates the spine from the manifesto above, so the nesting reads. */
   gap: var(--rhythm-tight);
 }
 
@@ -519,33 +501,26 @@ button {
   gap: var(--rhythm-hairline);
 }
 
-/* The line — Bricolage display (referenced DIRECTLY per the Fonts rule), sentence case, solid plum ink.
-   COMPACT subsection scale (not a full-screen headline — user-directed), so the four lines read as a
-   tight spine that fits under the docked title. The active/inactive dim is a per-line opacity scrub
-   (CapabilityList), NOT a colour change — one accent discipline. NO numbering, NO eyebrow label. */
+/* The line — sentence case, solid plum ink, COMPACT subsection scale (not a full-screen headline),
+   so the four lines read as a tight spine that fits under the docked title. The active/inactive dim
+   is a per-line opacity scrub (CapabilityList), NOT a colour change — one accent discipline. NO
+   numbering, NO eyebrow label. */
 .narrative-capability-v4__line {
-  /* The capability spine is the primary/UI voice (Hanken), NOT a title — the discipline names read
-     as a firm, contemporary label list under the docked title. Semibold gives Hanken the presence
-     Bricolage Medium had per px, keeping the spine reading as the firmer element beside the lede. */
-  font-family: var(--font-hanken), sans-serif;
-  font-weight: 600;
-  /* HARMONISED with the manifesto lede (up to 1.55rem): the spine sits just ABOVE the lede's peak so
-     the two read as a hierarchy — statement (voice) first, then the compact skill list — without the
-     old 2.05rem headline scale that dwarfed the manifesto. Bricolage Medium caps carry more visual
-     weight per px than Hanken body, so at near-equal size the spine still reads as the firmer element
-     while the manifesto keeps primacy through its longer measure + leading. (TUNE HERE: the spine's
-     presence relative to the lede above.) */
-  font-size: clamp(1.2rem, 1.6vw, 1.7rem);
-  line-height: 1.14;
-  letter-spacing: -0.01em;
+  font-family: var(--font-hanken-sans), sans-serif;
+  font-weight: 500;
+  font-size: clamp(1.02rem, 1.3vw, 1.28rem);
+  line-height: 1.2;
+  letter-spacing: -0.005em;
   color: var(--v3-text-dark);
+  transform-origin: left center;
+  align-self: flex-start;
   will-change: opacity;
 }
 
 /* The sub-caption — the active line's VOICE: Hanken body register, muted plum (the same 70% ink the
    project meta used, WCAG-safe), narrow measure. Inactive subs scrub to 0 (not permanent furniture). */
 .narrative-capability-v4__sub {
-  font-family: var(--font-hanken), sans-serif;
+  font-family: var(--font-hanken-sans), sans-serif;
   font-weight: 400;
   font-size: clamp(0.9rem, 0.95vw, 1.02rem);
   line-height: 1.45;
@@ -556,74 +531,64 @@ button {
   will-change: opacity, transform;
 }
 
-/* The tail spacer completes the flow column to the stage height (see the FLOW ARITHMETIC above). */
-.narrative-tail-v4 {
-  width: 100%;
-  height: 130svh;
-}
-
-/* ── TITLE RAIL (z 4) — the docked title, now a CHILD OF THE STAGE (its containing block). Absolute,
-   inset 0 of the stage, pointer-events:none EXCEPT the title. The padding-top spacer is the coupling:
-   it offsets the sticky title down by TRAVEL_VH so the title TRAVELS exactly TRAVEL_VH of scroll at page
-   speed before it hits its --dock-top and sticks.
-   ⚠ The spacer (--travel = 40svh) and heroTimeline's TRAVEL_VH (40) MUST MOVE TOGETHER — change one,
-   change both. The title's EXIT (lift + fade, BEFORE the grid) is progress-driven in NarrativeSection
-   (titleExit*), NOT a sticky-release — so the rail simply spans the whole stage (inset 0) and the title
-   is invisible by the time the stage ends and the projects grid scrolls up. ── */
-.narrative-title-rail-v4 {
+/* ── THESIS RAIL (z 2) — the C2 bridge layer: an absolute wrapper spanning the stage with one
+   sticky viewport inside (the DNA-rail pattern). The rail CENTRES the statement both ways
+   (user-directed): HeroThesis then rides it up from below the fold (y 72vh → 0, linear/scroll-
+   carried) so it inks in on the climb and dissolves exactly as it reaches this centre seat
+   (THESIS_RISE / THESIS_IN / THESIS_OUT). Below the title (z 4), above the atmosphere. ── */
+.narrative-thesis-rail-v4 {
   position: absolute;
   inset: 0;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.narrative-thesis-rail-v4__sticky {
+  position: sticky;
+  top: 0;
+  height: 100svh;
+  display: flex;
+  /* Dead-centre seat: y = 0 in HeroThesis IS the viewport centre, so "it goes away as it hits the
+     centre" is exact by construction. The statement passes BELOW the docked title band on its way
+     up and never reaches it (the fade completes at centre). */
+  align-items: center;
+  justify-content: center;
+  padding: 0 var(--brand-gutter);
+  pointer-events: none;
+}
+
+/* ── TITLE RAIL (z 4) — the docked title, a CHILD OF THE OUTER TRACK (stage + projects). Absolute
+   over the whole narrative track so PROJECTS stays docked while the grid scrolls beneath it. The
+   padding-top spacer offsets the sticky title down by --travel (INJECTED from TRAVEL_VH) so the title
+   travels exactly that much scroll at page speed before it docks. The bottom edge releases the sticky
+   hold ~one viewport before the footer so title + cards scroll away together — no fade. ── */
+.narrative-title-rail-v4 {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: clamp(10rem, 22svh, 18rem);
   z-index: 4;
   pointer-events: none;
-  /* The title's RESTING offset from the stage top is (--dock-top + --travel): sticky pins the title at
-     --dock-top, so it travels EXACTLY --travel of scroll at page speed before it docks. ⚠ This spacer
-     (--travel = 40svh) and heroTimeline's TRAVEL_VH (40) MUST MOVE TOGETHER — change one, change both. */
   padding-top: calc(var(--dock-top) + var(--travel));
   padding-left: var(--brand-gutter);
   padding-right: var(--brand-gutter);
 }
 
-/* The sticky title itself. It rests at --dock-top; combined with the rail's TRAVEL_VH spacer above, its
-   resting offset from the track top is (--dock-top + TRAVEL_VH svh). The name is FULL SIZE the whole
-   time (no dock scale) — it just travels up and sticks, then morphs. The nav-dissolve mask (JS) melts
-   the whole title + thesis under the nav on the ride-out. */
+/* The sticky title itself. It rests at --dock-top; combined with the rail's --travel spacer above,
+   its resting offset from the stage top is (--dock-top + --travel). The name is FULL SIZE the whole
+   time (no dock scale) — it just travels up and sticks, then morphs. The nav-dissolve mask (JS)
+   melts the title under the nav on the ride-out. */
 .narrative-title-v4 {
   position: sticky;
   top: var(--dock-top);
-  /* Full-width so it becomes the containing block for the parallaxing thesis layer (which anchors to
-     the viewport-right via `right`), while the name inside still left-anchors at the gutter. */
   width: 100%;
+  overflow: visible;
+  padding-bottom: 0.14em;
   pointer-events: none;
   will-change: mask;
   /* (Reduced motion makes this static + order:-1 so it reads first in a plain document flow and never
      sits over the grid — see the prefers-reduced-motion block further down.) */
-}
-
-.canvas-v3 {
-  position: relative;
-  width: 100%;
-  min-height: 100svh;
-  background: var(--v3-bg-primary);
-  overflow: hidden;
-}
-
-.canvas-v3--hero {
-  width: 100%;
-  min-height: 100svh;
-  height: 100svh;
-  margin: 0;
-  background: transparent;
-  overflow: hidden;
-  display: flex;
-  align-items: flex-start;
-  justify-content: center;
-  padding: 0;
-}
-
-.hero-stage-v3 {
-  position: relative;
-  width: 100vw;
-  height: 100svh;
 }
 
 .neon-bg-v3 {
@@ -675,15 +640,10 @@ button {
 .fluid-smoke-v3 {
   position: absolute;
   inset: 0;
-  mix-blend-mode: screen;
-  /* THE "black-and-white cloud from the left" fix (user-flagged, persona beat). Root cause: this
-     cursor-driven WebGL smoke paints a near-white dye (#FFF4E6) with mix-blend-mode:screen, and the
-     shader's normal-based SHADING term darkens the wisp edges — screened over the warm field, a pale
-     desaturated puff reads as a separate cool/greyish cloud, and because it follows the cursor (which
-     lives over the left-column persona copy during that beat) it drifts in "from the left". Toned DOWN
-     (0.72 → 0.42) so the wisp stays a faint warm atmospheric breath that never reads as an out-of-place
-     block; the dye colour itself is warmed toward amber at the call site (NarrativeSection). */
-  opacity: 0.42;
+  /* soft-light keeps the wisp warm; screen + shader shading read as a cool grey puff over the left
+     column during the persona beat (user-flagged "B&W on the left"). */
+  mix-blend-mode: soft-light;
+  opacity: 0.26;
 }
 
 /* ---- Warm gradient "aurora": two slowly-drifting mesh layers ---- */
@@ -820,329 +780,9 @@ button {
   transition: opacity 0.9s var(--intro-ease);
 }
 
-/* Pre-existing paper-PNG texture surface (used by PaperTexture.tsx). */
-.paper-texture-v3 {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background-repeat: no-repeat;
-  background-size: cover;
-  background-position: center;
-}
-
-.hero-composition-v3 {
-  position: absolute;
-  /* Top-anchored, NOT vertically centered. The box is intentionally taller than the
-     viewport (see the svh scale lever below) and its content is top-biased — the figure +
-     text live in the top ~60%, the bottom ~40% is empty. Centering an oversized box like
-     this splits the overflow onto the top and clips the head; anchoring it below the nav
-     lets the empty bottom spill off-screen instead. The offset gives headroom for the
-     photo's crown — raise it until the crown clears the nav. (Tunable.)
-     OPTICAL-CENTER lever: on common 16:9/16:10 viewports the box (113svh tall) doesn't
-     spill its empty bottom 40%, so a dead band lingers under the CTA and the cluster sits
-     ~5%h too high. Bumped 5svh → 9svh to push that empty bottom off-screen and balance the
-     top/bottom breathing room. Range: 6svh (higher) … 11svh (lower); over ~11 the CTA risks
-     clipping on short viewports. */
-  top: calc(var(--v3-nav-height) + 9svh);
-  left: 50%;
-  /* ── Footprint / scale levers (proportional system; see v4-handbook/hero-portrait.md) ──
-     The cluster's elegance comes from INSET CONTENT, not a shrunken box: the box stays ~full
-     viewport width (so it still overflows vertically and the empty bottom spills off-screen,
-     keeping the head un-clipped), while the wordmark/portrait sit inset within it (wordmark
-     66cqi centered → ~17% box margin each side → wordmark spans ≈ the golden-major part of
-     the viewport, leaving generous negative space).
-       • 96vw   — box side gutter. Lower (e.g. 90vw) to pull the WHOLE cluster in from the
-                  screen edges; this is the master "overall scale vs. viewport" knob.
-       • 175svh — vertical fill. Keeps the box taller than short/16:9 viewports so the empty
-                  bottom band spills off-screen. Lower only if the cluster floats too high.
-       • 1920px — cap so the wordmark doesn't balloon on ultrawide. */
-  width: min(96vw, 175svh, 1920px);
-  aspect-ratio: 2048 / 1326;
-  transform: translateX(-50%);
-  container-type: inline-size;
-  z-index: 5;
-}
-
-.hero-greeting-v3 {
-  position: absolute;
-  /* Eyebrow. Shares the wordmark's left anchor (17.9%) and sits a tight 3.5%h above the
-     wordmark cap so it binds to the name, not orphaned (§9). Type: one step up the 1.25
-     scale from the roles base (0.95 → 1.188cqi). */
-  top: 27.5%;
-  left: 17.9%;
-  margin: 0;
-  color: var(--v3-text-dark);
-  font-size: 1.188cqi;
-  font-weight: 500;
-  line-height: 1;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-  white-space: nowrap;
-  z-index: 7;
-}
-
-.hero-domains-v3 {
-  position: absolute;
-  /* Roles row — the sub-label of the name lockup. Pulled up from 53.6% so its gap below the
-     wordmark baseline (49.6%) ≈ the eyebrow's gap above the cap (symmetric framing): the
-     greeting + wordmark + roles now read as ONE tight unit instead of the roles drifting low.
-     NOTE: the wordmark SVG carries ~2.4%vh of empty padding below its last glyph, so the
-     visual baseline sits above the stack's container edge (49.6%) — measured off-screenshot,
-     not the box math. 49.5% lands the roles ~2.3%vh under the *visible* baseline, matching the
-     greeting's 2.2%vh gap above the cap (true symmetric framing).
-     Shares the wordmark left anchor (17.9%). Base step of the 1.25 type scale (0.95cqi). */
-  top: 49.5%;
-  left: 17.9%;
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: inline-flex;
-  align-items: center;
-  gap: 2.2cqi;
-  z-index: 7;
-}
-
-.hero-domain-v3 {
-  position: relative;
-  color: var(--v3-text-dark);
-  font-size: 0.95cqi;
-  font-weight: 500;
-  line-height: 1;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-}
-
-.hero-domain-v3:not(:last-child)::after {
-  content: "";
-  position: absolute;
-  right: -1.1cqi;
-  top: 50%;
-  width: 1px;
-  height: 0.85em;
-  background: currentColor;
-  opacity: 0.45;
-  transform: translateY(-50%);
-}
-
-.hero-pratiush-stack-v3 {
-  position: absolute;
-  /* PRIMARY focal element (§4): the name. Reduced from the old edge-to-edge 81.48cqi to
-     66cqi and CENTERED (left = (100-66)/2 = 17%) so it spans ≈ the golden-major part of the
-     viewport with generous negative space each side — the headline footprint fix. The
-     portrait scales WITH this (disc = 0.42 × this width) so the woven composition holds.
-     This `width` is the secondary scale knob: nudge it to grow/shrink the name (and re-center
-     `left` to (100-width)/2). Vertical band ≈ 31% → 49.6%h. */
-  top: 31%;
-  left: 17%;
-  width: 66cqi;
-  aspect-ratio: 1436 / 265;
-  pointer-events: none;
-  user-select: none;
-}
-
-.hero-pratiush-v3 {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  user-select: none;
-  color: var(--v3-accent-red);
-}
-
-.hero-pratiush-v3 svg {
-  width: 100%;
-  height: 100%;
-}
-
-.hero-pratiush-v3--main {
-  z-index: 1;
-}
-
-.hero-pratiush-v3--outline {
-  z-index: 3;
-}
-
-/* Positioning frame for the portrait. Holds two INDEPENDENT parallax layers (disc behind,
-   figure in front) — still ONE image, no second copy. No z-index here so the layers
-   interleave with the wordmark (filled z1 / outline z3) in the composition's stacking
-   context. Bigger than before so the figure has presence and its body reaches past the disc
-   edge. Each layer owns its own transform (Motion x/y), so centre the frame via `left`.
-   overflow:visible lets the head + disc bleed past the frame. */
-.hero-pratiush-photo-v3 {
-  position: absolute;
-  /* SECONDARY focal element (§4): scaled DOWN with the wordmark (≈ 0.815× the old size) so
-     the figure stays subordinate to the name while the weave holds. width = 0.42 × wordmark
-     width (66cqi). Keep the 0.80 w/h ratio (matches the cutout asset) so the head stays whole.
-     Centered via `left`; crown sits just under the nav, body passes through the disc. */
-  left: calc(50% - 13.86cqi);
-  top: -1.63cqi;
-  width: 27.72cqi;
-  height: 34.65cqi;
-  overflow: visible;
-  pointer-events: none;
-}
-
-/* The two parallax planes. The figure drifts MORE than the disc (rates set in
-   HeroPortrait.tsx) → real depth between them. Both z:2 (between filled wordmark z1 and
-   outline z3); the figure is later in the DOM so it paints over the disc. They are NOT
-   clipped to each other, so the relative drift can't tear or ghost. */
-.hero-portrait-disc-layer,
-.hero-portrait-figure-layer {
-  position: absolute;
-  inset: 0;
-  z-index: 2;
-  will-change: transform;
-}
-
-/* The anchor: a warm disc the figure passes THROUGH (head out the top, body out the
-   bottom). Given real presence — vivid warm gradient, firmer rim, near-opaque — but still a
-   radial that feathers out so the rim doesn't stamp a hard ring.
-   Tunables: size, top (centre on the torso), gradient stops/tones, opacity. */
-.hero-portrait-disc {
-  position: absolute;
-  left: 50%;
-  /* Disc diameter = frame width = 0.42 × wordmark width (scaled with the portrait).
-     WEAVE FIX: dropped 3.26 → 6.5cqi so the disc's centre sits on the chest and the wordmark
-     band now crosses the disc roughly through its middle (disc spans ≈7.5%h→50%h of the box,
-     reaching just past the wordmark baseline) — the type reads as passing THROUGH the figure
-     instead of the disc hovering above the word. The head still breaks out the disc's top. */
-  top: 6.5cqi;
-  width: 27.72cqi;
-  height: 27.72cqi;
-  transform: translateX(-50%);
-  border-radius: 50%;
-  background: radial-gradient(
-    circle at 50% 47%,
-    #efc488 0%,
-    #d27a39 60%,
-    rgba(199, 84, 46, 0) 83%
-  );
-  /* Receded from 0.9 → 0.8 (and the transparent stop pulled 88% → 83%) so the disc reads as
-     a soft warm anchor BEHIND the figure, not the heaviest solid mass on screen — keeps the
-     wordmark the unambiguous primary focal element (§4). Don't go below ~0.7 or the disc
-     reads as absent (it was once over-faded). Raise toward 0.9 to re-assert. */
-  opacity: 0.8;
-}
-
-/* Wrapper carries the soft lift shadow — a drop-shadow on the masked image itself would be
-   clipped away by its own mask, so it goes on the parent. */
-.hero-portrait-figure {
-  position: absolute;
-  inset: 0;
-  filter: drop-shadow(0 10px 18px rgba(34, 30, 46, 0.28));
-}
-
-/* ONE image, clipped + broken out by a single mask that UNIONS two shapes:
-   - a circle → the body (turns the photo's straight cut-off edges into a clean curve). Its
-     bottom (centre frame-y 23 + radius 16 = 39cqi) sits ABOVE the photo's straight bottom
-     edge (frame-y 42.5), so the visible body bottom is the CURVE, never the straight cut —
-     and it reaches just past the disc's bottom edge so the figure isn't a small thing
-     floating inside the disc;
-   - a top band → the head (the break-out above the disc).
-   `mask-composite: add` unions them; the band overlaps the circle's top (no neck gap).
-   Warm grade joins the cool B&W to the palette (§6) + a slight contrast drop demotes it
-   under the wordmark (§4).
-   Tunables: circle radius/centre, the feather band (body→disc softness), the band stops
-   (land the fade on the neck), the warm filter. */
-.hero-portrait-img {
-  object-fit: cover;
-  object-position: center top;
-  filter: contrast(0.9) brightness(1.03) sepia(0.32) saturate(1.2)
-    hue-rotate(-12deg);
-  /* Mask radius + circle centre-y are in cqi (absolute % of box width), so they must scale
-     with the frame. WEAVE FIX: centre-y dropped 18.75 → 20.5cqi to extend the visible torso
-     DOWN past the wordmark baseline (so the figure stands THROUGH the type, not above it).
-     Guardrails held: circle bottom (20.5 + 13.05 = 33.55cqi) still sits above the photo's
-     straight bottom (34.65cqi) → clean curved body, no straight cut; circle top (7.45cqi) still
-     overlaps the head band's end (24% × 34.65 = 8.32cqi) → no neck gap. Max safe centre-y =
-     34.65 − 13.05 = 21.6cqi. The top band uses % (of the frame) so it scales automatically. */
-  -webkit-mask-image:
-    radial-gradient(circle 13.05cqi at 50% 20.5cqi, #000 80%, transparent 100%),
-    linear-gradient(to bottom, #000 0 24%, transparent 36%);
-  -webkit-mask-composite: source-over;
-  mask-image:
-    radial-gradient(circle 13.05cqi at 50% 20.5cqi, #000 80%, transparent 100%),
-    linear-gradient(to bottom, #000 0 24%, transparent 36%);
-  mask-composite: add;
-}
-
-.works-cta-v3 {
-  position: absolute;
-  /* CTA — the action, deliberately detached from the name lockup with its own air (~4%h
-     below the tightened roles row). Tracks the roles' move up. Shares the wordmark left
-     anchor (17.9%). One step up the 1.25 type scale (= the greeting step, 1.188cqi). */
-  top: 55.3%;
-  left: 17.9%;
-  display: inline-flex;
-  align-items: center;
-  gap: 1.1cqi;
-  padding: 1.25cqi 2cqi 1.25cqi 2.4cqi;
-  border-radius: 1rem;
-  background: var(--v3-text-dark);
-  color: var(--v3-bg-primary);
-  font-family: var(--font-hanken), sans-serif;
-  font-size: 1.188cqi;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  line-height: 1;
-  white-space: nowrap;
-  transition:
-    transform 0.25s ease,
-    background-color 0.25s ease;
-  z-index: 6;
-}
-
-.works-cta-v3:hover {
-  transform: translateY(-2px);
-  background: var(--v3-accent-red);
-}
-
-.works-cta-v3__icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 1.6cqi;
-  height: 1.6cqi;
-  transition: transform 0.25s ease;
-}
-
-.works-cta-v3__icon svg {
-  width: 100%;
-  height: 100%;
-}
-
-.works-cta-v3:hover .works-cta-v3__icon {
-  transform: translate(2px, -2px);
-}
-
 /* =========================================================
    V3 STYLE NAV
    ========================================================= */
-.hero-locator-v3 {
-  position: absolute;
-  /* Locator metadata. Mirrors the roles row on the right anchor line (17.9% = the wordmark's
-     right edge inset), aligned to the same baseline as the roles → §1 shared anchor / §5
-     counterweight. Tracks the roles' new tightened top. Base step of the 1.25 scale (0.95cqi). */
-  top: 49.5%;
-  right: 17.9%;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5cqi;
-  color: var(--v3-text-dark);
-  opacity: 0.75;
-  font-size: 0.95cqi;
-  font-weight: 500;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-  line-height: 1;
-  z-index: 6;
-}
-
-.hero-locator-v3 svg {
-  width: 0.8cqi;
-  height: 0.97cqi;
-}
-
 .site-nav-v3 {
   position: fixed;
   top: clamp(1.5rem, 3svh, 2.25rem);
@@ -1215,7 +855,6 @@ button {
 
 /* =========================================================
    V4 — Left-aligned hero cluster + morphing brand wordmark
-   (supersedes the centered .hero-composition-v3 lockup above)
    ========================================================= */
 
 /* Visually hidden but available to assistive tech (real <h1>). */
@@ -1244,7 +883,7 @@ button {
   border-radius: 10px;
   background: var(--v3-text-dark);
   color: var(--v3-bg-primary);
-  font-family: var(--font-hanken), sans-serif;
+  font-family: var(--font-hanken-sans), sans-serif;
   font-size: 0.9rem;
   letter-spacing: 0.01em;
   transform: translateY(-200%);
@@ -1257,58 +896,34 @@ button {
   outline-offset: 3px;
 }
 
+/* Paint-room wrapper — keeps Style Script's left swash inside a box the page's overflow-x:clip
+   won't shave (the eyebrow itself uses solid ink, but the swash still extends past its em box). */
+.hero-eyebrow-wrap-v4 {
+  display: block;
+  margin-left: -0.7em;
+  padding-left: 0.7em;
+  overflow: visible;
+}
+
 /* The greeting is the quiet personal voice — a fluid brush script (Style Script), the hand-written
    lead-in to the identity, not a separate decorative system. */
 .hero-eyebrow-v4 {
-  /* eyebrow→name: tuned so the VISIBLE gap matches the name→role gap below — greeting, name and role
-     sit on ONE even rhythm. A script sits in a tall em box (small glyph, deep ascender/descender
-     allowance); that box space plus the name's top line-box overhang inflate the visible gap past the
-     margin value, so this stays NEGATIVE to cancel that overhang down to the shared target gap.
-     (TUNE HERE: metric-dependent — toward 0 if the greeting sits too close to the name, more negative
-     if too far. Must track the name→role cap below, currently ~1.3rem.) */
-  margin: 0 0 clamp(-0.35rem, -0.7vh, -0.5rem) -0.16em;
-  /* background-clip:text paints only INSIDE the box, so Style Script's left entry stroke was getting
-     clipped at the box edge. This pad widens the paint box leftward to cover the swash; the matching
-     negative margin-left above cancels it, so the visual left edge (on the name's P-ink line) holds. */
-  padding-left: 0.16em;
-  /* Fluid brush calligraphy (Style Script) — full-bodied, confident strokes that read warm and
-     polished, where Allura's uniform thin hairlines read spindly. Reference the next/font variable
-     DIRECTLY — the same pattern the hero name uses (var(--font-fraunces)); an intermediate @theme
-     alias resolved to the fallback face instead of the loaded script. */
+  margin: 0 0 calc(clamp(-0.35rem, -0.7vh, -0.5rem) - 0.24em) 0;
+  padding: 0 0.1em 0.28em 0;
   font-family: var(--font-style-script), "Snell Roundhand", cursive;
-  /* A script's x-height is tiny and most of its presence lives in the caps/ascenders, so it needs
-     more point size than a serif to read at the same visual weight. Style Script sits fuller in the
-     em than the thin copperplate scripts, so this multiplier eases back.
-     (TUNE HERE if the script reads large/small — this multiplier is the knob.) */
   font-size: max(1.7rem, calc(var(--name-hero-size) * 0.31));
-  /* Style Script ships a single weight; tracking stays normal — letter-spacing would break the
-     connecting strokes of a script. */
   font-weight: 400;
   line-height: 1;
   letter-spacing: normal;
-  /* The greeting's colour FLOWS into the name, kept SUBTLE: a tight single-hue band — a gentle
-     deepening at the very top easing to the name's EXACT full accent by ~two-thirds down, so the
-     lower part already sits on the colour PRATIUSH is painted in (they read as connected) and the
-     script reads as clean terracotta with just a breath of depth up top. The top stop is mostly
-     accent with only a touch of the deep shade mixed in — NOT the full plum-tinged ink-terra, which
-     made the top read muddy. (The name itself stays SOLID terracotta — the greeting carries the
-     colour flow; the name is its bright terminus.) `color` is the solid fallback where
-     background-clip:text is unsupported. */
-  color: var(--hero-ink-terra);
-  background: linear-gradient(
-    180deg,
-    color-mix(in srgb, var(--hero-accent) 78%, var(--hero-ink-terra)) 0%,
-    var(--hero-accent) 68%
-  );
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
+  background: none;
+  -webkit-text-fill-color: var(--hero-accent);
+  color: var(--hero-accent);
   opacity: 1;
 }
 
-/* The closing statement — the lockup's human voice, set in the editorial serif (Sentient). The
-   warm, personal counterweight to the mono credential above it; this is where the lockup stops
-   stating facts and speaks. Two authored lines (see HeroLede) for an editorial cadence. */
+/* The closing statement — the lockup's human voice, set in the editorial serif (Fraunces). The
+   warm, personal counterweight to the tracked-caps credential above it; this is where the lockup
+   stops stating facts and speaks. Two authored lines for an editorial cadence. */
 .hero-tagline-v4 {
   /* A hair more than the even identity-block gap above (~6px at desktop) — a subtle breath before the
      voice, marking the role and statement as separate thoughts without breaking the lockup's even
@@ -1334,9 +949,9 @@ button {
   /* Crisp, near-neutral display tracking — a touch tighter knits the serif words without letting
      them touch (display-serif floor is ≥ -0.04em). */
   letter-spacing: -0.01em;
-  /* x-height harmony: the humanist serif has a smaller x-height than Bricolage at the same px, so
-     font-size-adjust normalises it to sit at equal optical size beside the labels above (and holds
-     across the Sentient→Georgia load swap). Tunable knob (Bricolage ≈ 0.52, Gambetta ≈ 0.50). */
+  /* x-height harmony: the serif has a smaller x-height than the sans labels at the same px, so
+     font-size-adjust normalises it to sit at equal optical size beside them (and holds across the
+     Fraunces→Georgia load swap). Tunable knob. */
   font-size-adjust: 0.5;
   /* Kept the warm-plum voice colour (NOT terracotta) as the lockup's one dark anchor — it grounds
      the otherwise all-terracotta cluster and guarantees readability. Swap to --hero-ink-terra for a
@@ -1361,11 +976,8 @@ button {
 .hero-name-v4 {
   position: relative;
   width: 100%;
-  /* "Hi, I'm" + the name are one phrase, so this top gap is the tightest in the lockup — kept
-     minimal to bond the greeting to PRATIUSH. Bricolage's caps sit high in a generous line box; the
-     negative bottom margin removes only that invisible under-space so the name-to-role gap below
-     is the real, tunable one. */
-  margin: 0 0 -0.075em;
+  margin: 0;
+  padding-bottom: 0.14em;
   /* next/font defines this variable on <body>; reference it in scope. Fraunces at its DISPLAY
      optical size (opsz 144) with a light-to-mid weight reads as a high-contrast Didone — thin
      hairlines, thick stems — elegant and expensive at hero scale, the editorial voice that now
@@ -1398,7 +1010,7 @@ button {
    To match the greeting, the bottom margin mirrors .hero-eyebrow-v4 verbatim — that negative value,
    paired with bottom:100% (the name's cap line), drops the script onto the word at the identical offset
    the greeting sits above PRATIUSH (cancelling the name's top line-box overhang). The LEFT is the
-   greeting's −0.16em swash-cancel PLUS a small per-glyph optical nudge: the greeting's value was tuned
+   greeting's −0.3em swash-cancel PLUS a small per-glyph optical nudge: the greeting's value was tuned
    for its first letter "H", but "Featured" leads with "F" (different left bearing), so it read a hair
    right of the P — the extra −0.25em (the script F carries a wide left entry swash) lands the F's ink
    on the P's ink line. TUNE that nudge by eye. Width is left to shrink-to-fit, as the greeting's is. */
@@ -1407,7 +1019,7 @@ button {
   left: 0;
   bottom: 100%;
   display: block;
-  margin: 0 0 clamp(-0.35rem, -0.7vh, -0.5rem) calc(-0.16em - 0.25em);
+  margin: 0 0 clamp(-0.35rem, -0.7vh, -0.5rem) calc(-0.3em - 0.25em);
   transform-origin: left bottom;
   will-change: transform, opacity;
   pointer-events: none;
@@ -1420,63 +1032,52 @@ button {
    the box, so both were getting sliced. The other eyebrows dodge this per-glyph with tuned aprons;
    "My" simply doesn't need the gradient at all (on a two-glyph script the single-hue band is
    imperceptible), so it paints as SOLID accent ink — identical to the eye, and solid ink cannot
-   clip on any side. margin-left nets the M's ink onto the P's ink line (−0.26 + base 0.16em pad
+   clip on any side. margin-left nets the M's ink onto the P's ink line (−0.40 + base 0.3em pad
    = −0.10em); the extra −margin-bottom hugs the cap like "Hi, I'm" over PRATIUSH. TUNE by eye. */
 .hero-name-v4__eyebrow--my {
-  margin-left: -0.26em;
-  margin-bottom: clamp(-0.45rem, -0.9vh, -0.62rem);
+  margin-left: -0.4em;
+  /* Folds in the same −0.24em compensation as the base rule's descender paint apron (this override
+     replaces the whole margin-bottom, so the compensation must ride along or the "My" would sit
+     0.24em higher than tuned). */
+  margin-bottom: calc(clamp(-0.45rem, -0.9vh, -0.62rem) - 0.24em);
   background: none;
   -webkit-text-fill-color: var(--hero-accent);
   color: var(--hero-accent);
 }
 
-/* Entrance mask (the name rises from behind its baseline). Full row width + hidden
-   overflow: vertical for the entrance, horizontal is moot (letters never leave the row).
-   The entrance only needs to clip the BOTTOM (name rising from below), but the travelling-wave
-   LIFT pushes letters UP — so open headroom at the top with padding and cancel it with an equal
-   negative margin, keeping the baseline put while giving the crest room before the clip edge. */
+/* The name's entrance wrapper. NO overflow clip any more: the entrance is now the shared rise +
+   fade recipe (MorphName animates the run's y/opacity on BEAT.wordmark, matching the rest of the
+   C0 cascade), so this wrapper no longer masks anything — which also removes the clip surface that
+   was shaving Fraunces' baseline overshoot / the J descender at the bottom (user-flagged clipping).
+   The per-slot roll clip (.hero-name-v4__letter) still masks the glyph rolls. */
 .hero-name-v4__reveal {
   display: block;
   position: relative;
   z-index: 1;
   width: 100%;
-  padding-top: 0.45em;
-  margin-top: -0.45em;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .hero-name-v4__run {
   display: inline-flex;
-  /* Optical left-alignment (design guidebook §3): big display caps carry a left side-bearing that,
-     at hero scale, becomes ~11px of empty space before the P's ink — so a box-aligned name reads as
-     pushed RIGHT of the greeting/role/statement, whose own bearings are ~1px at their sizes. Cancel
-     it so the P's INK (not its glyph box) sits on the lockup's left line. Bricolage's P bearing is
-     0.069em; the secondary first-glyphs (Gambetta H/G, Hanken S) sit their ink ~0.009em in, so
-     −0.06em lands the P's ink on the same vertical as theirs (within ~0.1px across the clamp range).
-     em-based so it tracks --name-hero-size; the empty bearing it pulls past the reveal's clip is
-     invisible. (Tune here if the P reads a hair left/right of the greeting.) */
   margin-left: -0.06em;
   will-change: transform;
 }
 
-/* Each slot clips its own glyph roll (old letter up, PROJECTS letter rises from below).
-   Width and pair-kerning are driven by MorphName so both words retain the font's intended fit.
-   The clip box keeps its 1em CONTENT height but gains vertical HEADROOM (padding = half the
-   roll gap, cancelled by an equal negative margin so the baseline/lockup rhythm is unchanged):
-   `overflow` clips at the padding-box edge, so the elastic stretch + incoming tilt now have room
-   before the hard edge — no sliced glyph tops. The matching column gap below keeps that headroom
-   showing only empty space, never the other stacked glyph. */
+/* Each slot clips its own glyph roll. Width/kerning are driven by MorphName; the clip box MUST stay
+   on the LETTER (symmetric 1em + roll-gap padding) — NOT on the inner roll stack. rollY() computes
+   translateY as a % of the roll column's full height; pinning height on .hero-name-v4__roll breaks
+   that math. Extra bottom/side APRONS (--roll-apron-*, set on .hero-name-v4) widen the clip paint
+   box for Fraunces descenders + side-bearings without shifting the centred content window. */
 .hero-name-v4__letter {
   position: relative;
   display: inline-block;
   height: 1em;
-  padding: calc(var(--roll-gap, 0px) / 2) 0;
-  margin: calc(var(--roll-gap, 0px) / -2) 0;
-  /* Clip the VERTICAL axis ONLY — that masks the glyph roll (old up / new from below). The slot's
-     width is the glyph's ADVANCE width, so a full `overflow: hidden` also clips the X axis, which
-     shaved the ink off tight-bearing glyphs (e.g. PROJECTS' E sits 0.004em off its right edge) on the
-     landed word. Nothing ever moves horizontally inside a slot, so X must stay visible; `clip` on Y
-     keeps the `visible` X from coercing to `auto` (no scroll). */
+  padding: calc(var(--roll-gap, 0px) / 2) var(--roll-apron-x, 0px)
+    calc(var(--roll-gap, 0px) / 2 + var(--roll-apron-bottom, 0px)) var(--roll-apron-x, 0px);
+  margin: calc(var(--roll-gap, 0px) / -2) calc(var(--roll-apron-x, 0px) * -1)
+    calc((var(--roll-gap, 0px) / -2) - var(--roll-apron-bottom, 0px))
+    calc(var(--roll-apron-x, 0px) * -1);
   overflow: visible clip;
   will-change: transform;
 }
@@ -1485,9 +1086,6 @@ button {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  /* Separates the two stacked glyphs so the slot's headroom reveals only this empty gap, never
-     the neighbour glyph (the static P/R slot has a single child, so this is a no-op there). The
-     roll travel in MorphName is derived from the same ROLL_GAP, so the landing stays centred. */
   gap: var(--roll-gap, 0px);
   will-change: transform;
 }
@@ -1521,56 +1119,28 @@ button {
   white-space: pre;
 }
 
-/* The framing line, inked in beside the word as it lands as PROJECTS. Anton gives the phrase
-   the tall cinematic poster force that contrasts the Bricolage wordmark; one terracotta emphasis
-   word ties it back to the landed PROJECTS. */
-/* The thesis LAYER — part of the DOCKED TITLE (inside NarrativeSection's sticky .narrative-title-v4, so
-   it shares the title's nav dissolve feather and rides out with the composed frame). It PARALLAXES UP
-   from below the fold toward the top as the section transitions PERSONA → PROJECTS: NarrativeSection
-   drives a large `y` travel (THESIS_IN) on the inner wrapper at a rate different from raw scroll, and
-   HeroThesis fades it in as it climbs — the transitional statement between persona and projects, arriving
-   by MOVEMENT (the old per-word clip-path ink-wipe is gone). Anchored upper-right (the diagonal
-   counterpoint to the lower-left word) as its RESTING position once it has risen; the RIGHT safe-area is
-   larger than the brand gutter so the right-anchored statement reads as intentionally placed. */
-.hero-thesis-layer-v4 {
-  position: absolute;
-  /* Its RESTING top (after the parallax `y` settles toward −8vh): sits just above the docked title line,
-     the diagonal counterpoint to the docked lower-left word. */
-  top: clamp(-1rem, -2svh, 0rem);
-  right: clamp(3rem, 6vw, 6.5rem);
-  pointer-events: none;
-  will-change: transform;
-}
-
-/* The statement block — a tighter column so it reads as a counterpoint, not a second full poster. */
+/* The thesis statement — the C2 BRIDGE chapter's only content, living in its own sticky viewport
+   layer (.narrative-thesis-rail-v4, see the narrative-track rules). CENTERED (user-directed): the
+   rail seats it at dead viewport centre and HeroThesis rides it up from below the fold into that
+   seat, inking in on the climb and dissolving on arrival — a passing statement carried by the
+   scroll. The ONE display serif (Fraunces) at an editorial statement scale; one terracotta accent
+   word ("polished"). */
 .hero-thesis-v4 {
   margin: 0;
-  max-width: min(24rem, 30vw);
-  /* The transition statement in the ONE display serif (Fraunces) at a poster weight + display
-     optical size, so it reads as an editorial counterpoint to the terracotta hero word rather than
-     a second, unrelated display face (the old condensed Anton). */
+  /* A statement, not a poster wall: sized so the longest line ("polished products") reads as one
+     confident editorial line with generous air around it. (TUNE HERE: the bridge's presence.) */
   font-family: var(--font-fraunces), Georgia, serif;
   font-weight: 420;
   font-variation-settings:
     "opsz" 144,
     "SOFT" 0,
     "WONK" 0;
-  /* Max eased down so the widest words ("polished"/"products") aren't so large they crowd the
-     right safe-area — the statement gets air and stays fully legible as it scrolls past. */
-  font-size: clamp(1.7rem, 3vw, 3.5rem);
-  line-height: 0.96;
+  font-size: clamp(2.4rem, 4.6vw, 5rem);
+  line-height: 1.04;
   letter-spacing: 0;
-  text-align: right;
+  text-align: center;
   color: var(--hero-ink-strong);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  /* The static hero frame is already fully composed (lockup + note + DNA); the decorative poster
-     would overlay it, so it's hidden — its visually-hidden SIBLING sentence (see HeroThesis) still
-     carries the value prop to AT/SEO. */
-  .hero-thesis-layer-v4 .hero-thesis-v4 {
-    display: none;
-  }
+  will-change: opacity, transform;
 }
 
 /* One composed line of the thesis (see HeroThesis LINES). Block so each defined line stacks;
@@ -1580,14 +1150,8 @@ button {
   white-space: nowrap;
 }
 
-.hero-thesis-v4__line:nth-child(3) {
-  margin: 0.06em 0 0.015em;
-}
-
-/* Each word is inline-block so the per-word SIZE variation composes the poster rhythm; the inter-word
-   space is a real text node outside it so the line still wraps. The accent word carries the terracotta,
-   tying it to the landed PROJECTS. (The statement is legible whole — it arrives by the parallax rise,
-   not a per-word ink wipe, so no ghost/ink overlay layers.) */
+/* Each word is inline-block so the per-line SIZE rhythm composes; the inter-word space is a real
+   text node outside it so the line still wraps. The accent word carries the terracotta. */
 .hero-thesis-v4__word {
   position: relative;
   display: inline-block;
@@ -1610,9 +1174,8 @@ button {
   margin: clamp(0.9rem, 1.7vh, 1.3rem) 0 0;
   padding: 0;
   /* Hanken Grotesk (the primary text/UI voice) as a tracked-caps credential — a clean, contemporary
-     label under the serif name. Reference the next/font variable via the --font-hanken alias (which
-     embeds the live next/font var, so it always resolves). */
-  font-family: var(--font-hanken), sans-serif;
+     label under the serif name. Referenced by its next/font variable directly. */
+  font-family: var(--font-hanken-sans), sans-serif;
   /* Size keyed to the name (≈ 0.104 × its cap). Hanken's cap height ≈ the prior mono's, so the line
      holds the same optical size through the swap. */
   font-size: max(0.74rem, calc(var(--name-hero-size) * 0.104));
@@ -1646,7 +1209,7 @@ button {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  font-family: var(--font-hanken), sans-serif;
+  font-family: var(--font-hanken-sans), sans-serif;
   font-size: clamp(0.68rem, 0.78vw, 0.82rem);
   font-weight: 500;
   line-height: 1.2;
@@ -1707,7 +1270,7 @@ button {
 
   /* The persona block stays (real content), but drop the sticky hold — a pinned block fights the narrow
      single-column layout, and the DNA it partnered is hidden here anyway. Simplest safe default; the real
-     responsive pass is a separate future workstream. The span/tail then just add quiet scroll. */
+     responsive pass is a separate future workstream. The span then just adds quiet scroll. */
   .narrative-persona-v4 {
     position: static;
   }
@@ -1735,81 +1298,6 @@ button {
     font-size: 1rem;
   }
 
-  .hero-composition-v3 {
-    top: calc(var(--v3-nav-top) + var(--v3-nav-height) + var(--v3-space-4));
-    bottom: 5.7rem;
-    left: 50%;
-    width: calc(100% - (var(--v3-space-5) * 2));
-    transform: translateX(-50%);
-  }
-
-  .hero-greeting-v3 {
-    position: relative;
-    top: auto;
-    left: auto;
-    font-size: clamp(2rem, 4vw, 3rem);
-  }
-
-  .hero-pratiush-stack-v3 {
-    top: 50%;
-    left: 50%;
-    width: 100%;
-    transform: translate(-50%, -50%);
-  }
-
-  .hero-pratiush-photo-v3 {
-    top: 6%;
-    /* pair left:50% with translateX(-50%) here — the desktop base centres via `left` alone */
-    left: 50%;
-    width: min(52vw, 18rem);
-    /* aspect-ratio gives the frame a height so the absolutely-positioned parallax layers
-       (inset:0) don't collapse on tablet widths */
-    height: auto;
-    aspect-ratio: 34 / 42.5;
-    transform: translateX(-50%);
-  }
-
-  .hero-domains-v3 {
-    left: 50%;
-    top: auto;
-    bottom: 6rem;
-    transform: translateX(-50%);
-    display: inline-flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 1.25rem;
-  }
-
-  .hero-domain-v3 {
-    font-size: 0.78rem;
-    letter-spacing: 0.18em;
-  }
-
-  .hero-domain-v3:not(:last-child)::after {
-    right: -0.7rem;
-    height: 0.7em;
-  }
-
-  .works-cta-v3 {
-    top: auto;
-    left: 50%;
-    bottom: 1.5rem;
-    transform: translateX(-50%);
-    padding: 0.95rem 1.25rem 0.95rem 1.5rem;
-    font-size: 0.92rem;
-    gap: 0.55rem;
-    border-radius: 0.85rem;
-  }
-
-  .works-cta-v3:hover {
-    transform: translateX(-50%) translateY(-2px);
-  }
-
-  .works-cta-v3__icon {
-    width: 1rem;
-    height: 1rem;
-  }
-
   /* V4 narrative track — keep the lower-left composition on tablet/mobile.
      --brand-gutter matches the nav's left inset so the name and logo stay on one line. */
   :root {
@@ -1826,21 +1314,15 @@ button {
     display: none;
   }
 
-  /* The thesis is the right-hand counter-anchor of the desktop diagonal — it only composes against
-     the desktop golden-section layout. On narrow widths its right-anchored stack would need a real
-     reflow, so hold the whole layer for desktop until the pending hero responsive rewrite gives it
-     one (same deal as the DNA above). */
-  .hero-thesis-layer-v4 {
+  /* The thesis bridge composes against the desktop layout; on narrow widths it would need a real
+     reflow, so hold the layer for desktop until the pending responsive rewrite gives it one (same
+     deal as the DNA above). The visually-hidden sentence still reads to AT. */
+  .narrative-thesis-rail-v4 {
     display: none;
   }
 }
 
 @media (max-width: 640px) {
-  .canvas-v3--hero {
-    min-height: 100svh;
-    padding-top: 0;
-  }
-
   .site-nav-v3 {
     align-items: flex-start;
     gap: var(--v3-space-3);
@@ -1873,24 +1355,9 @@ button {
     letter-spacing: 0.14em;
   }
 
-  .hero-pratiush-stack-v3 {
-    top: 44%;
-  }
-
-  .hero-pratiush-photo-v3 {
-    width: min(58vw, 16rem);
-    height: min(78vw, 30rem);
-  }
-
-  .works-cta-v3 {
-    font-size: 0.85rem;
-    padding: 0.85rem 1.1rem 0.85rem 1.35rem;
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .works-cta-v3,
-  .works-cta-v3__icon,
   .site-nav-v3__link,
   .site-nav-v3__link::after {
     transition: none;
@@ -2020,7 +1487,9 @@ button {
    field — the curtain after the pitch. Email is the hero element; gold on plum holds AA.
    ========================================================= */
 .footer-v4 {
-  margin-top: clamp(6rem, 15vh, 11rem);
+  /* A chapter break after the work — tightened so the grid doesn't float in excess whitespace
+     before the dark curtain. (TUNE HERE: the work → contact breath.) */
+  margin-top: clamp(4rem, 8vh, 6rem);
   background: var(--v3-text-dark);
   color: var(--v3-bg-primary);
   border-radius: var(--v3-radius-stage) var(--v3-radius-stage) 0 0;
@@ -2108,7 +1577,7 @@ button {
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
-  font-family: var(--font-hanken), sans-serif;
+  font-family: var(--font-hanken-sans), sans-serif;
   font-weight: 500;
   font-size: 0.78rem;
   letter-spacing: 0.16em;
@@ -2167,15 +1636,16 @@ button {
 /* =========================================================
    V4 — reduced motion: settle everything, strip transitions
    The narrative track reads as a PLAIN DOCUMENT — nothing sticks, nothing scrubs. The title is a
-   normal heading that scrolls away (no dock, no scale scrub — MorphName's reduce branch shows
-   PRATIUSH), the manifesto reads in flow at full opacity (ScrollInk's static branch), the DNA holds
-   its static pose, and the thesis poster is hidden (its rule is above; the SR sentence survives).
-   The tall track collapses to content height (no scroll-length is needed with nothing to scrub).
+   normal heading that scrolls away (MorphName's reduce branch shows PRATIUSH), the persona statement
+   reads in flow at full opacity (ScrollInk's static branch), the DNA holds its static pose, and the
+   thesis reads STATICALLY in flow after the persona block (HeroThesis renders at full opacity under
+   reduced motion), so the motionless page still reads complete. The tall track collapses to content
+   height (no scroll-length is needed with nothing to scrub).
    ========================================================= */
 @media (prefers-reduced-motion: reduce) {
   /* Read as a plain document. The track is a normal flex column: the atmosphere fills the first
-     viewport (still absolute-masked behind), the TITLE reads first (order:-1, over the C0 copy's
-     reserved name gap), then the copy, then the manifesto in flow. Nothing sticks, nothing scrubs. */
+     viewport (absolute behind), the TITLE reads first (order:-1), then the copy, then the persona
+     statement in flow, then the thesis. Nothing sticks, nothing scrubs. */
   .narrative-track-v4 {
     height: auto;
     display: flex;
@@ -2183,9 +1653,24 @@ button {
     align-items: stretch;
   }
 
-  .hero-root-v3 {
-    position: absolute;
+  /* The atmosphere pins to the first viewport only (its inset-0 wrapper would otherwise stretch the
+     decorative field over the whole collapsed document). */
+  .narrative-atmosphere-v4 {
     inset: 0 0 auto 0;
+    height: 100svh;
+  }
+
+  /* The helix is scroll-choreography support (per-chapter presence) — with nothing scrubbing, its
+     absolute rail would just park a static decoration OVER the right side of the plain document
+     read. Drop it: the reduced-motion page reads hero → persona → thesis → projects → footer with
+     no floating overlays. */
+  .narrative-dna-rail-v4 {
+    display: none;
+  }
+
+  .hero-root-v3 {
+    position: static;
+    height: 100%;
   }
 
   /* The stage collapses to content height too (nothing to scrub), and reads as a plain flex column. */
@@ -2219,8 +1704,8 @@ button {
     justify-content: flex-start;
   }
 
-  /* The persona block (manifesto + capability spine) reads in flow at full opacity — no sticky hold, no
-     scrub (ScrollInk + CapabilityList render their plain --static variants). */
+  /* The persona block (statement + capability spine) reads in flow at full opacity — no sticky hold,
+     no scrub (ScrollInk + CapabilityList render their plain --static variants). */
   .narrative-persona-span-v4 {
     height: auto;
   }
@@ -2237,15 +1722,26 @@ button {
     transform: none;
   }
 
-  .narrative-tail-v4 {
-    height: 0;
+  /* The thesis reads statically in flow — a normal chapter statement AFTER the persona block
+     (order 1 places it behind the flow column's default 0 in the stage's flex read; the title rail
+     is -1) and before the grid. HeroThesis skips the opacity scrub under reduced motion. */
+  .narrative-thesis-rail-v4 {
+    position: static;
+    order: 1;
+  }
+
+  .narrative-thesis-rail-v4__sticky {
+    position: static;
+    height: auto;
+    padding: clamp(2rem, 6vh, 4rem) var(--brand-gutter);
   }
 
   /* In the reduced-motion read the title scrolls away in flow (see the .narrative-title-v4 override
-     above), so the projects grid opens as a normal chapter break — a slightly tighter top pad than the
-     full-motion intro whitespace. */
+     above), so the projects grid opens as a normal chapter break — no pull-up (the stage has no
+     trailing viewport to close when nothing is fixed-height), a normal top pad. */
   .projects-index-v4 {
-    padding-top: clamp(4rem, 10vh, 7rem);
+    margin-top: 0;
+    padding-top: clamp(3rem, 8vh, 5rem);
   }
 
   .footer-v4__email,
@@ -2270,30 +1766,22 @@ button {
    per-word spans (aria-hidden) plus a visually-hidden real <p>; the type below applies to both. */
 .scroll-ink-v4 {
   margin: 0;
-  /* Tighter measure (~40ch) than plain body — a lede reads best a little narrower, and it keeps the
-     statement compact under the docked title so the whole persona block fits one viewport. */
-  max-width: 40ch;
-  font-family: var(--font-hanken), sans-serif;
-  /* A considered LEDE, not a caption (user-directed): the persona STATEMENT is the primary voice of
-     this chapter, so it carries a touch more presence than plain body — up ~1 step from the old body
-     size. Still Hanken (the workhorse), still solid plum ink; the serif voice stays reserved for the
-     hero tagline. The capability lines below are sized to sit as a compact spine BENEATH this, so the
-     hierarchy reads statement-first. (TUNE HERE: the manifesto's presence dial.) */
+  max-width: 42ch;
+  font-family: var(--font-hanken-sans), sans-serif;
   font-weight: 400;
-  font-size: clamp(1.15rem, 1.45vw, 1.55rem);
-  /* A hair tighter than plain body (1.6) — at lede size 1.5 keeps the paragraph feeling deliberate and
-     set, not loosely spaced. */
-  line-height: 1.5;
-  letter-spacing: -0.005em;
+  font-size: clamp(1.12rem, 1.42vw, 1.48rem);
+  line-height: 1.55;
+  letter-spacing: -0.003em;
   color: var(--v3-text-dark);
   text-wrap: pretty;
 }
 
-/* Each inked word is an inline span so opacity + blur can scrub per word; the spaces are real text
-   nodes (kept static) so the paragraph still wraps naturally. inline-block would break wrapping. */
+/* Each word is an inline span so opacity can scrub per word (OPACITY ONLY — no blur, no movement);
+   the spaces are real text nodes (kept static) so the paragraph still wraps naturally. inline-block
+   would break wrapping. */
 .scroll-ink-v4__word {
   display: inline;
-  will-change: opacity, filter;
+  will-change: opacity;
 }
 
 .scroll-ink-v4__space {
@@ -2319,15 +1807,17 @@ button {
   position: absolute;
   left: 0;
   top: 0;
-  width: clamp(2.4rem, 3.2vw, 3.4rem);
-  height: clamp(2.4rem, 3.2vw, 3.4rem);
+  /* Calm pass: slightly smaller chips + a fainter ring and shadow, so the beads read as part of the
+     helix's atmosphere (integrated marks), not stickers floating over it. */
+  width: clamp(2.2rem, 2.9vw, 3.05rem);
+  height: clamp(2.2rem, 2.9vw, 3.05rem);
   display: grid;
   place-items: center;
   border-radius: 50%;
   background: #fffaf2; /* warm paper, a step lighter than the field so the bead reads as an object */
-  border: 1px solid rgba(201, 84, 46, 0.18);
-  box-shadow: 0 2px 12px rgba(64, 38, 26, 0.08);
-  opacity: 0; /* the draw-on brings each in */
+  border: 1px solid rgba(201, 84, 46, 0.14);
+  box-shadow: 0 2px 8px rgba(64, 38, 26, 0.06);
+  opacity: 0; /* the scroll-linked flow lights each bead inside its set's window */
   transform-origin: center;
   will-change: transform, opacity;
   pointer-events: none;
@@ -2371,12 +1861,12 @@ button {
   position: relative;
   z-index: 1;
   color: var(--v3-text-dark);
-  /* The docked PROJECTS title has LIFTED away by the time this grid scrolls up (it exits at the stage's
-     end — see NarrativeSection titleExit*), so the grid STANDS ALONE: a generous intro whitespace at the
-     top (the "spacious PROJECTS intro" the section opens on), then a generous foot. No docked title to
-     clear anymore, and no scrim needed — nothing scrolls behind the letterforms. */
-  padding: clamp(5rem, 12vh, 9rem) var(--brand-gutter) clamp(8rem, 18vh, 12rem);
-  overflow-x: clip; /* contain any cover bleed without creating a scroll container */
+  /* Pull into the stage's trailing viewport so the first cards enter (~10% from the bottom) while
+     MORPH 2 runs. padding-top is ONLY the breath below the docked title — NOT a second full title
+     zone (that was the huge dead gap, user-flagged). --projects-pull injected from heroTimeline. */
+  margin-top: calc(-1 * var(--projects-pull, 0px));
+  padding: clamp(1.75rem, 3.5vh, 2.75rem) var(--brand-gutter) clamp(5rem, 10vh, 7rem);
+  overflow-x: clip;
 }
 
 .projects-index-v4__grid {
@@ -2421,7 +1911,9 @@ button {
   aspect-ratio: 16 / 10;
   border-radius: var(--v3-radius-lg);
   background: color-mix(in srgb, var(--v3-text-dark) 6%, var(--v3-bg-primary));
-  box-shadow: 0 34px 80px -46px rgba(34, 30, 46, 0.5);
+  /* A quiet lift, not a floating card — editorial covers sit ON the page (the old 80px plume read
+     as SaaS-card styling against the flat warm field). */
+  box-shadow: 0 18px 44px -30px rgba(34, 30, 46, 0.35);
 }
 
 .projects-index-v4__img {
@@ -2490,7 +1982,7 @@ button {
 .projects-index-v4__plate-caption {
   position: relative;
   z-index: 1;
-  font-family: var(--font-hanken), sans-serif;
+  font-family: var(--font-hanken-sans), sans-serif;
   font-size: clamp(0.68rem, 3cqi, 0.9rem);
   line-height: 1.4;
   color: color-mix(in srgb, var(--v3-bg-primary) 74%, transparent);
@@ -2538,7 +2030,7 @@ button {
   /* HAIRLINE step — the meta is the title's own facts line, bonded tight to it (the tightest gap in
      the cell) so the caption unit reads as one. */
   margin: 0.45rem 0 0;
-  font-family: var(--font-hanken), sans-serif;
+  font-family: var(--font-hanken-sans), sans-serif;
   font-size: clamp(0.82rem, 0.9vw, 0.95rem);
   letter-spacing: 0.015em;
   color: color-mix(in srgb, var(--v3-text-dark) 70%, transparent);
@@ -2578,13 +2070,13 @@ button {
 
 .case-v4__meta {
   margin: 0 0 clamp(1rem, 2.4vh, 1.6rem);
-  font-family: var(--font-hanken), sans-serif;
+  font-family: var(--font-hanken-sans), sans-serif;
   font-size: clamp(0.82rem, 0.9vw, 0.95rem);
   letter-spacing: 0.015em;
   color: color-mix(in srgb, var(--v3-text-dark) 70%, transparent);
 }
 
-/* Salvaged from .project-feature-v4__title — the oversized Fraunces display treatment. */
+/* The oversized Fraunces display treatment. */
 .case-title-v4 {
   margin: 0 0 0 -0.03em;
   font-family: var(--font-fraunces), Georgia, serif;
@@ -2637,7 +2129,7 @@ button {
 
 .case-v4__para {
   margin: 0;
-  font-family: var(--font-hanken), sans-serif;
+  font-family: var(--font-hanken-sans), sans-serif;
   font-size: clamp(1.05rem, 1.15vw, 1.22rem);
   line-height: 1.65;
   text-wrap: pretty;
@@ -2706,7 +2198,7 @@ button {
 .case-plate-v4__caption {
   position: relative;
   z-index: 1;
-  font-family: var(--font-hanken), sans-serif;
+  font-family: var(--font-hanken-sans), sans-serif;
   font-size: clamp(0.75rem, 2.6cqi, 1rem);
   line-height: 1.4;
   color: color-mix(in srgb, var(--v3-bg-primary) 74%, transparent);
@@ -2723,7 +2215,7 @@ button {
 }
 
 .case-stack-v4 li {
-  font-family: var(--font-hanken), sans-serif;
+  font-family: var(--font-hanken-sans), sans-serif;
   font-size: clamp(0.72rem, 0.85vw, 0.82rem);
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -2744,7 +2236,7 @@ button {
   display: inline-flex;
   align-items: center;
   gap: 0.45rem;
-  font-family: var(--font-hanken), sans-serif;
+  font-family: var(--font-hanken-sans), sans-serif;
   font-weight: 500;
   font-size: clamp(1rem, 1.1vw, 1.15rem);
   letter-spacing: 0.01em;
@@ -2808,7 +2300,7 @@ button {
 }
 
 .case-v4__nav-dir {
-  font-family: var(--font-hanken), sans-serif;
+  font-family: var(--font-hanken-sans), sans-serif;
   font-size: clamp(0.7rem, 0.8vw, 0.8rem);
   letter-spacing: 0.16em;
   text-transform: uppercase;
@@ -2823,7 +2315,7 @@ button {
 }
 
 .case-v4__nav-back {
-  font-family: var(--font-hanken), sans-serif;
+  font-family: var(--font-hanken-sans), sans-serif;
   font-size: clamp(0.78rem, 0.9vw, 0.9rem);
   letter-spacing: 0.06em;
   color: color-mix(in srgb, var(--v3-text-dark) 72%, transparent);

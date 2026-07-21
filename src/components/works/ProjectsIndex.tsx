@@ -12,7 +12,8 @@ import { INTRO_EASE } from "@/lib/intro";
  * /works/[slug] case page. The layout is a disciplined TWO-UP grid with equal, generously-sized covers;
  * the right column drops a single CONSISTENT editorial beat (see .projects-index-v4__cell:nth-child(even))
  * so the spread has rhythm without reading ragged. The morphed PROJECTS title from the hero already
- * titles this section (it holds as the intro, then lifts away just before the grid), so there is NO dry
+ * titles this section (it holds as the intro while cards compose beneath it, then scrolls away
+ * naturally), so there is NO dry "Selected Work" eyebrow (show, don't tell); a real visually-hidden
  * "Selected Work" eyebrow (show, don't tell); a real visually-hidden <h2> keeps the outline honest.
  */
 

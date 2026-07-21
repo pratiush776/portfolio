@@ -47,10 +47,10 @@ export type Beat = { delay: number; duration: number; y: number };
 // a close ~0.13s premium stagger (each sibling kicks off while the prior is barely a third in), so the
 // whole lockup reads as ONE staggered gesture rather than separated chunks. Tune the spacing here.
 export const BEAT = {
-  eyebrow: { delay: 0.0, duration: 0.7, y: 14 }, // "Hi, I'm" — the whisper that leads
-  wordmark: { delay: 0.14, duration: 0.9, y: 16 }, // PRATIUSH — the signature rises right behind the greeting
-  roles: { delay: 0.24, duration: 0.6, y: 14 }, // credential — close premium stagger off the greeting
-  tagline: { delay: 0.38, duration: 0.66, y: 22 }, // serif statement closes the lockup on the same stagger
-  meta: { delay: 0.48, duration: 0.6, y: 14 }, // bottom-right locator follows
+  eyebrow: { delay: 0.0, duration: 0.72, y: 14 }, // "Hi, I'm" — the whisper that leads
+  wordmark: { delay: 0.1, duration: 0.72, y: 14 }, // PRATIUSH — same rise + stagger as the greeting
+  roles: { delay: 0.2, duration: 0.68, y: 14 }, // credential — tight cascade off the name
+  tagline: { delay: 0.32, duration: 0.72, y: 14 }, // serif statement — same recipe, slightly later
+  meta: { delay: 0.42, duration: 0.68, y: 14 }, // bottom-right locator closes the lockup
   // cue: { delay: 0.62, duration: 0.6, y: 0 }, // right-rail scroll cue fades in last
 } as const satisfies Record<string, Beat>;
