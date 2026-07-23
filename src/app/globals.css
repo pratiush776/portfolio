@@ -1,2373 +1,668 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* =============================================================================
+   THE SYSTEM
+   Two colours (bone + ink), three faces, four spacing steps, two aspect ratios.
+   Everything else is size, weight, case and tracking.
+
+   Where things live: the design system is a class here; one-off layout for a single
+   element is a Tailwind utility in the JSX.
+
+   Font families are written DIRECTLY as their next/font variable in every rule.
+   Routing one through an alias silently drops it to the fallback face.
+   ============================================================================= */
+
+@theme {
+  --color-bone: #efedea; /* the page */
+  --color-bone-sunk: #e3e1de; /* media placeholder, hover fill */
+  --color-bone-muted: #8f8d8a; /* secondary text ON ink — 5.2:1 */
+  --color-ink: #191919; /* text, and the inverted surface */
+  --color-ink-muted: #666666; /* secondary text ON bone — 4.9:1 */
+  --color-rule: rgba(25, 25, 25, 0.14); /* hairlines */
 }
 
-main {
-  -ms-overflow-style: none;
-  /* Internet Explorer 10+ */
-  scrollbar-width: none;
-  /* Firefox */
-}
+/* ── base ──────────────────────────────────────────────────────────────────── */
 
-.container::-webkit-scrollbar,
-main::-webkit-scrollbar {
-  display: none;
-  /* Safari and Chrome */
+html {
+  scroll-behavior: smooth;
 }
 
 body {
   margin: 0;
-  padding: 0;
-  /* Workhorse face. The next/font variable is registered on <body>; this belt-and-braces
-     alias (see :root) keeps it resolving even if the var chain hiccups. */
-  font-family: var(--font-hanken-sans), sans-serif;
+  background: var(--color-bone);
+  color: var(--color-ink);
+  font-family: var(--font-instrument), Helvetica, Arial, sans-serif;
+  /* display type at 12vw overhangs its box on narrow screens */
+  overflow-x: clip;
 }
 
-button:focus-visible,
-a:focus-visible,
-input:focus-visible,
-textarea:focus-visible {
-  /* On-brand focus ring (was a hard-coded v2 navy). Plum ink reads ~13:1 on the cream — well
-     clear of the 3:1 non-text-UI floor — and matches the palette. */
-  outline: 2px solid var(--v3-text-dark);
-  outline-offset: 3px;
-}
-
-.h1 {
-  @apply text-[40px] leading-[40px] tracking-[0px];
-}
-
-.h1-desktop {
-  @apply text-[44px] leading-[52px] tracking-[0px];
-}
-
-.h2 {
-  @apply text-[32px] leading-[36px] tracking-[0.5px];
-}
-
-.h2-desktop {
-  @apply text-[36px] leading-[44px] tracking-[0.5px];
-}
-
-.title {
-  @apply text-[32px] leading-[36px] tracking-[1.25px] font-semibold md:leading-[40px] md:text-[40px] md:tracking-[1px] mb-[8px];
-}
-
-.h3 {
-  @apply text-[28px] md:text-[32px] md:font-semibold leading-[36px] tracking-[0.25px];
-}
-
-.h3-desktop {
-  @apply text-[28px] leading-[32px] tracking-[0.25px];
+::selection {
+  background: var(--color-ink);
+  color: var(--color-bone);
 }
 
 button {
   cursor: pointer;
 }
 
-.p {
-  @apply text-[16px] md:text-[18px] leading-[24px] tracking-[0px];
-}
-
-.button {
-  @apply text-[16px] cursor-pointer leading-[24px] tracking-[0.5px] py-[4px] px-[24px] rounded-[10px] flex gap-[4px] items-center justify-center drop-shadow-md;
-}
-
-.btn-icon {
-  @apply h-[15px];
-}
-
-@keyframes fadeAnimation {
-  30% {
-    opacity: 1;
-  }
-
-  70% {
-    opacity: 0.5;
-  }
-
-  100% {
-    opacity: 1;
-  }
-}
-
-.animate-fade {
-  animation: fadeAnimation 1s ease-in-out infinite;
-}
-
-/* Font families — THREE faces only (see src/lib/fonts.ts): Fraunces (display/title), Hanken
-   Grotesk (primary text/UI), Style Script (script accent). ALL referenced by their next/font
-   variables DIRECTLY (var(--font-fraunces) / var(--font-hanken-sans) / var(--font-style-script))
-   — an intermediate @theme/:root alias that fails to resolve silently drops the declaration to the
-   fallback face, so no aliases exist. */
-
-/* =========================================================
-   V3-INSPIRED TOKENS + SURFACES
-   ========================================================= */
-:root {
-  --v3-bg-primary: #f4e3ce; /* Dusk: warm peach-cream hero (was acid chartreuse) */
-  --v3-text-dark: #221e2e; /* one consistent near-black-plum neutral across all stages */
-  --v3-accent-red: #c9542e; /* THE accent — terracotta, carried through every stage */
-  --hero-ink-strong: var(--v3-text-dark);
-  --hero-ink-voice: color-mix(
-    in srgb,
-    var(--v3-text-dark) 82%,
-    var(--v3-accent-red)
-  );
-  --hero-accent: var(--v3-accent-red);
-  /* Secondary-text terracotta — a DEEP shade of the accent (toward the plum ink for depth + AA)
-     for the greeting and role line, so the hero reads as one terracotta family: light terracotta
-     field → full-accent name → deep-terracotta labels. ~5:1 on the warm field. */
-  --hero-ink-terra: color-mix(
-    in srgb,
-    var(--v3-accent-red) 65%,
-    var(--v3-text-dark)
-  );
-  --v3-white: #ffffff;
-
-  /* Warm gold — the terracotta accent's tonal sibling for the DARK footer surface. The terracotta
-     only reaches ~3.7:1 on the plum curtain; this lighter warm tone holds ~9:1 there, so it carries
-     the footer email while staying in the one warm family. (The cool v3 accents — teal #4c8577 and
-     slate #4d5c60 — were removed: the v4 identity is a single warm terracotta system and those
-     tokens were unused.) */
-  --v3-accent-gold: #e3b98a;
-
-  /* The motion voice: hard-landing curves (slow start, violent middle, dead stop).
-     --intro-ease — all masked rises / reveals (JS twin: lib/intro INTRO_EASE).
-     --ease-snap  — big scrubbed moves (JS twin: lib/intro SNAP_EASE).
-     --ease-micro — hover micro-interactions (underlines, arrows, link swaps). */
-  --intro-ease: cubic-bezier(0.82, 0, 0.18, 1);
-  --ease-snap: cubic-bezier(0.9, 0, 0.1, 1);
-  --ease-micro: cubic-bezier(0.98, 0, 0.02, 1);
-
-  --v3-space-1: 0.25rem;
-  --v3-space-2: 0.5rem;
-  --v3-space-3: 0.75rem;
-  --v3-space-4: 1rem;
-  --v3-space-5: 1.5rem;
-  --v3-space-6: 2rem;
-  --v3-space-7: 3rem;
-  --v3-space-8: 4rem;
-
-  --v3-page-gutter: clamp(1rem, 0.8rem + 1vw, 2rem);
-  --v3-shell-inset: clamp(1.75rem, 1.1rem + 1.8vw, 3.25rem);
-  --v3-shell-inner-x: clamp(1.25rem, 0.9rem + 1.2vw, 2.25rem);
-  --v3-surface-max: 144rem;
-  --v3-nav-height: clamp(3rem, 2.65rem + 1vw, 4rem);
-
-  /* ── Brand name. The hero name is TEXT (Fraunces display caps, so it can morph per-letter into
-     PROJECTS); the nav uses a Fraunces text logotype as the identity mark. The gutter MUST match
-     the nav's left inset (.site-nav-v3 left) so the hero name and the nav logo share one vertical
-     line. --name-hero-size is the master "name scale" knob. */
-  --brand-gutter: clamp(1.5rem, 3.5vw, 3.5rem);
-  --name-hero-size: clamp(3.2rem, 9.2vw, 10rem);
-  --brand-nav-w: clamp(7rem, 8.5vw, 9rem); /* logo size in the nav */
-  --v3-outline-top: clamp(2.5rem, 5.581svh, 5rem);
-  --v3-outline-right: clamp(2rem, 2.93vw, 3.75rem);
-  --v3-outline-bottom: clamp(2.5rem, 5.505svh, 5rem);
-  --v3-outline-left: clamp(2rem, 2.832vw, 3.75rem);
-
-  --v3-radius-lg: 1.5rem;
-  --v3-radius-xl: 2rem;
-  --v3-radius-stage: clamp(2rem, 2vw + 1rem, 4rem);
-  --v3-radius-pill: 999px;
-  --v3-shadow-soft: 0 16px 32px rgba(56, 56, 56, 0.08);
-  --v3-hairline: 1px solid rgba(56, 56, 56, 0.64);
-
-  /* --- Dusk / Pastel-Pop palette (translated from portfolio_v3_draft) --- */
-  --v3-blush: #f4dad2;
-  --v3-lilac: #dcd9f2;
-  --v3-mint: #d2e8d6;
-  --v3-butter: #f6eecb;
-  --v3-cherry: #c9542e; /* unified to the terracotta accent */
-  --v3-citron: #c7d24e;
-  /* Mono-lavender card tints — one hue stepped by value */
-  --v3-card-1: #e6e2f5;
-  --v3-card-2: #d7d2ee;
-  --v3-card-3: #c7c0e6;
-  --v3-card-4: #b7aedd;
-  /* Twilight key */
-  --v3-twilight: #9d9ad6;
-  --v3-twilight-deep: #6f6cb0;
-  --v3-twilight-text: #221e2e; /* same neutral as --v3-text-dark */
-  --v3-twilight-accent: #c9542e; /* = the carried terracotta accent */
-  /* Settled "sky" — lighter lavender than twilight, soft vignette edge */
-  --v3-sky-field: #cbc6ec;
-  --v3-sky-edge: #a9a3d6;
-  /* Soft warm ink for text on pastels */
-  --v3-ink: #2a2730;
-  /* Mesh-gradient presets (full background-image values) */
-  --mesh-lilac:
-    radial-gradient(60% 70% at 22% 28%, var(--v3-lilac) 0%, transparent 60%),
-    radial-gradient(55% 65% at 80% 22%, var(--v3-blush) 0%, transparent 58%),
-    radial-gradient(70% 75% at 72% 82%, var(--v3-mint) 0%, transparent 62%),
-    radial-gradient(60% 60% at 30% 85%, var(--v3-butter) 0%, transparent 60%),
-    var(--v3-bg-primary);
-  --mesh-twilight:
-    radial-gradient(
-      65% 75% at 28% 24%,
-      color-mix(in srgb, var(--v3-lilac) 78%, var(--v3-sky-field)) 0%,
-      transparent 62%
-    ),
-    radial-gradient(
-      60% 70% at 82% 30%,
-      color-mix(in srgb, var(--v3-blush) 60%, var(--v3-sky-field)) 0%,
-      transparent 60%
-    ),
-    radial-gradient(
-      75% 80% at 68% 86%,
-      color-mix(in srgb, var(--v3-sky-edge) 70%, transparent) 0%,
-      transparent 64%
-    ),
-    var(--v3-sky-field);
-  /* Warm "aurora" mesh — two drifting layers of soft blobs over the cream hero.
-     Kept warm & low-opacity so it adds atmospheric depth without fighting the
-     photo + wordmark. Layer A warms the empty right/lower; B fills the bottom. */
-  --mesh-aurora-a:
-    radial-gradient(
-      46% 56% at 82% 24%,
-      rgba(227, 185, 138, 0.55) 0%,
-      transparent 60%
-    ),
-    radial-gradient(
-      54% 62% at 96% 74%,
-      rgba(201, 84, 46, 0.16) 0%,
-      transparent 62%
-    ),
-    radial-gradient(
-      40% 50% at 66% 54%,
-      rgba(232, 196, 170, 0.3) 0%,
-      transparent 60%
-    );
-  --mesh-aurora-b:
-    radial-gradient(
-      56% 64% at 56% 98%,
-      rgba(246, 238, 203, 0.62) 0%,
-      transparent 60%
-    ),
-    radial-gradient(
-      44% 54% at 16% 88%,
-      rgba(244, 218, 210, 0.5) 0%,
-      transparent 58%
-    ),
-    radial-gradient(
-      40% 48% at 88% 40%,
-      rgba(227, 185, 138, 0.3) 0%,
-      transparent 58%
-    );
-  /* Natural film grain: opaque mid-grey fractal noise (feColorMatrix desaturates to
-     luminance and forces alpha=1). Blended with `overlay` it modulates the image
-     both lighter AND darker around mid-tone — like real grain, not dark speckle.
-     Big seamless tile avoids visible repetition. --grain-opacity is the master dial. */
-  --grain-opacity: 0.34;
-  --grain-scale: 260px;
-  --grain-url: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='grain'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0.33 0.33 0.33 0 0 0.33 0.33 0.33 0 0 0.33 0.33 0.33 0 0 0 0 0 0 1'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23grain)'/%3E%3C/svg%3E");
-}
-
-/* =========================================================
-   V3 HOMEPAGE HERO
-   ========================================================= */
-/* THE PERSISTENT-TITLE TRACK: the hero title scrolls UP to a dock near the top (CSS sticky), holds
-   there as the section title while the chapters flow beneath it, then LIFTS + FADES out before the
-   projects grid. GEOMETRY: heroTimeline.ts is the single source of truth — NarrativeSection injects
-   --stage-h / --travel / --persona-span as inline custom properties on this root, and the rules
-   below only ever READ the vars. Re-budget a chapter in the beat sheet and the layout follows.
-     • .narrative-track-v4 (this) — position:relative, wrapper for the stage + grid.
-     • .narrative-stage-v4 — the fixed-height SCRUBBED STAGE that drives the master progress. */
-.narrative-track-v4 {
-  position: relative;
-}
-
-/* The SCRUBBED STAGE — fixed height (var(--stage-h), injected = PINNED_VH + 100svh) so the
-   beat-sheet fractions stay stable no matter how tall the projects grid grows. NarrativeSection's
-   `useScroll({target: stageRef, offset:["start start","end end"]})` over this is the ONE master
-   progress. */
-.narrative-stage-v4 {
-  position: relative;
-  height: var(--stage-h);
-}
-
-/* The ATMOSPHERE layer — an absolute wrapper spanning the stage with ONE sticky viewport of warm
-   field inside (aurora / glow / smoke / grain): the same wrapper+sticky pattern as the DNA rail, so
-   no flow-cancellation tricks. NO background here — the page-wide SectionAurora (fixed, behind
-   everything) is the SINGLE continuous field; this just layers the warm atmosphere on top, each
-   layer feather-masked at the bottom so there's no seam into the scroll. z 0. */
-.narrative-atmosphere-v4 {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-}
-
-.hero-root-v3 {
-  position: sticky;
-  top: 0;
-  height: 100svh;
-  padding: 0;
-  background: transparent;
-  overflow: hidden;
-  isolation: isolate;
-}
-
-/* Every hero-scoped decor layer feathers out at the bottom — otherwise the grain/aurora
-   would stamp their own hard edge where the section ends. */
-.hero-root-v3 .hero-aurora-v3,
-.hero-root-v3 .radial-glow-wrap-v3,
-.hero-root-v3 .neon-bg-v3,
-.hero-root-v3 .hero-grain-v3 {
-  -webkit-mask-image: linear-gradient(to bottom, #000 72%, transparent 100%);
-  mask-image: linear-gradient(to bottom, #000 72%, transparent 100%);
-}
-
-/* Carrier for the glow's gravity drift (motion drives x as the name is pulled). The wrap
-   stays inset:0 inside so the bloom transitions and feather mask keep working untouched. */
-.hero-glow-drift-v4 {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  will-change: transform;
-}
-
-/* =========================================================
-   V4 — NARRATIVE TRACK layers (Phase 1)
-   The docked-title geometry is the centrepiece; read the coupling comments loudly.
-   ========================================================= */
-
-/* --dock-top: where the title RESTS once docked — just below the fixed nav.
-   --docked-name-h: the docked name's height. The name never scales (full --name-hero-size the whole
-   time), so this is one line box of the name — used to place the sticky persona block below the
-   docked title.
-   --content-top: where the sticky persona block (statement + capability spine) engages, clear of the
-   docked name + a REAL breath (the title needs its own visual zone — the old 1.75rem sat the copy
-   right under the giant caps).
-   (--travel and --stage-h/--persona-span are INJECTED inline from heroTimeline.ts — not defined
-   here.) */
-.narrative-track-v4 {
-  --dock-top: calc(var(--v3-nav-height) + 1.5rem);
-  --docked-name-h: var(--name-hero-size);
-  /* The TITLE ZONE breath: the docked PERSONA caps own their band, and the statement sits clearly
-     BELOW it — a full editorial step, not a caption gap (the old 2.75–4.5rem set the statement
-     right under the giant title and it read glued). (TUNE HERE: title ↔ statement separation.) */
-  --content-top: calc(
-    var(--dock-top) + var(--docked-name-h) + clamp(2.75rem, 6svh, 4.25rem)
-  );
-
-  /* ── VERTICAL RHYTHM SCALE (the ONE spacing vocabulary for the narrative + projects) ────────────────
-     A nested set of steps so every gap on the page reads as a deliberate system, not ad-hoc values.
-     Bind-tight → separate groups → chapter breaks. Each is a small clamp so it breathes on tall screens
-     and tightens on short ones. TUNE the whole page's density from HERE. */
-  --rhythm-hairline: clamp(0.3rem, 0.6svh, 0.5rem); /* binds a line to its sub-caption */
-  --rhythm-tight: clamp(0.65rem, 1.4svh, 1.05rem); /* within a group (e.g. list rows) */
-  --rhythm-bond: clamp(1.05rem, 2vh, 1.5rem); /* a small breath between bonded thoughts */
-  --rhythm-group: clamp(1.6rem, 3.4svh, 2.5rem); /* separates GROUPS (manifesto ↔ spine) */
-}
-
-/* ── DNA RAIL (z 2) — the helix counterweight in the right void, spanning the whole track. Its sticky
-   child pins TechDNA at the SAME inset/width the old .hero-persona-dna-v4 used, so the helix sits in
-   exactly the same place while the chapters scroll past it. pointer-events:none; hidden ≤1100px. ── */
-.narrative-dna-rail-v4 {
-  position: absolute;
-  inset: 0;
-  z-index: 2;
-  pointer-events: none;
-}
-
-.narrative-dna-rail-v4__sticky {
-  position: sticky;
-  top: calc(var(--v3-nav-height) + 4svh);
-  /* height fills the viewport below the top inset down to the bottom inset (matches the old DNA box:
-     top nav+4svh, bottom 10svh). */
-  height: calc(100svh - (var(--v3-nav-height) + 4svh) - 10svh);
-  margin-left: auto;
-  /* Revision pass: the helix hugged the right gutter and left a dead middle between it and the
-     statement. Pulled INWARD — a narrower box plus a vw-scaled right inset centres the helix around
-     ~68% of the viewport, inside the warm glow pool, so the widened statement (left) → capability
-     spine → helix read as one composed spread. (TUNE HERE with .scroll-ink-v4's measure together:
-     the statement's right edge must stay clear of the helix's left chips.) */
-  margin-right: calc(var(--brand-gutter) + 9vw);
-  width: min(36vw, 36rem);
-  pointer-events: none;
-}
-
-/* ── CHAPTER FLOW (z 3) — the left-gutter column of in-flow content that scrolls past the docked
-   title. Same gutter as the old cluster. Each BLOCK inside carries its own nav-dissolve mask (a mask on
-   this full-track column would mis-place, since its box top sits far above the viewport). ── */
-.narrative-flow-v4 {
-  position: relative;
-  z-index: 3;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  padding: 0 var(--brand-gutter);
-  text-align: left;
-  overflow: visible;
-}
-
-/* C0 — the hero copy block. It fills ~one viewport and composes AROUND the title's resting position so
-   the full lockup is VISIBLE and correctly stacked (greeting ABOVE the name, role + tagline BELOW it,
-   locator quiet at the foot). TOP-anchored to the title's own geometry (--dock-top + --travel is the
-   name's resting top — the ONE source of truth, since the name lives in the title rail): a
-   bottom-anchored stack would only line up with the rail-positioned name by coincidence, drifting per
-   viewport. --c0-greeting-room is the greeting line + its bond gap above the name (so the greeting sits
-   just over where the name docks); --c0-name-gap reserves the FULL-SIZE name's room below the greeting
-   so the role/tagline never overlap the docked-name position (the #1 fix — the old gap under-reserved
-   it). Both are tune-by-eye knobs. */
-.narrative-copy-v4 {
-  /* The greeting's room above the name. DERIVED FROM THE NAME SIZE (not the viewport height): it must
-     track the greeting's own line height (≈ name × 0.31, see .hero-eyebrow-v4) plus a hair of bond, so
-     the name-gap top lands on the docked name's real box top and the role/tagline below always clear
-     the name's visible caps. The OLD value was an `svh` clamp that ballooned on tall screens and LIFTED
-     the whole copy column UP while the docked name stayed put at `dock-top + travel` — pulling the role
-     line up INTO the name (the desktop overlap). Tying it to the name size decouples it from viewport
-     height, so the lockup composes the same at every desktop height. (TUNE HERE: larger opens the
-     greeting→name gap; smaller tightens it.) */
-  --c0-greeting-room: max(1.9rem, calc(var(--name-hero-size) * 0.34));
-  min-height: 100svh;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  justify-content: flex-start;
-  padding-top: calc(var(--dock-top) + var(--travel) - var(--c0-greeting-room));
-  /* A modest foot so the locator isn't jammed to the fold edge; small on short screens to protect the
-     one-viewport fit. */
-  padding-bottom: clamp(3rem, 6svh, 5rem);
-  overflow: visible;
-  will-change: transform, opacity, mask;
-}
-
-/* The spacer that reserves the FULL-SIZE name's room in the C0 composition (the docked title itself
-   lives in the title rail, not this column). Sized off the name's font-size so it tracks
-   --name-hero-size: one line box of the caps (≈1em) plus a small breath, so the role line below always
-   clears the docked-name position (nothing renders behind/over it). */
-.narrative-name-gap-v4 {
-  width: 100%;
-  /* Reserves the docked name's room in the C0 column (the name itself renders in the title rail). The
-     name box is line-height:1 and Fraunces display caps fill ≈0.72em of it, so reserving the FULL 1.0em
-     line box clears the name's visible glyph bottom by ≈0.28em of air — the role line never rides up
-     into the docked caps. With --c0-greeting-room now derived from the name size, this reservation is
-     deterministic at every desktop height. (TUNE HERE: toward 1.08 if the role crowds the Fraunces
-     caps, toward 0.92 to reclaim room on short screens.) */
-  height: calc(var(--name-hero-size) * 1);
-}
-
-/* C1 — the PERSONA block's sticky SPAN (statement + compact capability spine held as ONE block). The
-   WRAPPER's height is the hold budget: the sticky child engages at --content-top as it rises into
-   view (dovetailing the title's travel) and HOLDS below the docked title through the whole
-   persona/capabilities beat. The VISUAL exit is a scrubbed dissolve at rest (PERSONA_OUT — see
-   NarrativeSection personaFade); this span just keeps the sticky engaged until that fade completes,
-   so the block never visibly slides. A margin cannot bound a sticky element — only its containing
-   block's edge releases it — hence the wrapper. The height is INJECTED from heroTimeline's
-   PERSONA_SPAN_VH (the release timing is derived there — one source of truth). The flow column no
-   longer needs to sum to the stage height: a shorter column inside the fixed-height stage is fine
-   (the old tail spacer was pure bookkeeping and is gone). */
-.narrative-persona-span-v4 {
-  align-self: stretch;
-  height: var(--persona-span);
-}
-
-/* The persona block itself STICKS below the docked title (--content-top) and holds while its span
-   scrolls through: the statement paragraph on top, the compact capability spine directly below it,
-   as one composed block within a single viewport. pointer-events:none — read-only content; the exit
-   is a scrubbed opacity dissolve at rest (NarrativeSection personaFade / PERSONA_OUT). */
-.narrative-persona-v4 {
-  position: sticky;
-  top: var(--content-top);
-  max-width: 38rem;
-  display: flex;
-  flex-direction: column;
-  gap: var(--rhythm-group);
-  pointer-events: none;
-  will-change: opacity;
-}
-
-.narrative-capabilities-v4__list {
-  list-style: none;
-  margin: 0;
-  padding: var(--rhythm-bond) 0 0;
-  border-top: 1px solid color-mix(in srgb, var(--v3-text-dark) 11%, transparent);
-  display: flex;
-  flex-direction: column;
-  gap: var(--rhythm-tight);
-}
-
-/* One capability row: the line HAIRLINE-bonded to its sub-caption — the smallest step on the page, so
-   a line and its own voice read as one unit while the row gaps keep the four rows apart. */
-.narrative-capability-v4 {
-  display: flex;
-  flex-direction: column;
-  gap: var(--rhythm-hairline);
-}
-
-/* The line — sentence case, solid plum ink, COMPACT subsection scale (not a full-screen headline),
-   so the four lines read as a tight spine that fits under the docked title. The active/inactive dim
-   is a per-line opacity scrub (CapabilityList), NOT a colour change — one accent discipline. NO
-   numbering, NO eyebrow label. */
-.narrative-capability-v4__line {
-  font-family: var(--font-hanken-sans), sans-serif;
-  font-weight: 500;
-  font-size: clamp(1.02rem, 1.3vw, 1.28rem);
-  line-height: 1.2;
-  letter-spacing: -0.005em;
-  color: var(--v3-text-dark);
-  transform-origin: left center;
-  align-self: flex-start;
-  will-change: opacity;
-}
-
-/* The sub-caption — the active line's VOICE: Hanken body register, muted plum (the same 70% ink the
-   project meta used, WCAG-safe), narrow measure. Inactive subs scrub to 0 (not permanent furniture). */
-.narrative-capability-v4__sub {
-  font-family: var(--font-hanken-sans), sans-serif;
-  font-weight: 400;
-  font-size: clamp(0.9rem, 0.95vw, 1.02rem);
-  line-height: 1.45;
-  letter-spacing: 0;
-  max-width: 40ch;
-  color: color-mix(in srgb, var(--v3-text-dark) 70%, transparent);
-  text-wrap: pretty;
-  will-change: opacity, transform;
-}
-
-/* ── THESIS RAIL (z 2) — the C2 bridge layer: an absolute wrapper spanning the stage with one
-   sticky viewport inside (the DNA-rail pattern). The rail CENTRES the statement both ways
-   (user-directed): HeroThesis then rides it up from below the fold (y 72vh → 0, linear/scroll-
-   carried) so it inks in on the climb and dissolves exactly as it reaches this centre seat
-   (THESIS_RISE / THESIS_IN / THESIS_OUT). Below the title (z 4), above the atmosphere. ── */
-.narrative-thesis-rail-v4 {
-  position: absolute;
-  inset: 0;
-  z-index: 2;
-  pointer-events: none;
-}
-
-.narrative-thesis-rail-v4__sticky {
-  position: sticky;
-  top: 0;
-  height: 100svh;
-  display: flex;
-  /* Dead-centre seat: y = 0 in HeroThesis IS the viewport centre, so "it goes away as it hits the
-     centre" is exact by construction. The statement passes BELOW the docked title band on its way
-     up and never reaches it (the fade completes at centre). */
-  align-items: center;
-  justify-content: center;
-  padding: 0 var(--brand-gutter);
-  pointer-events: none;
-}
-
-/* ── TITLE RAIL (z 4) — the docked title, a CHILD OF THE OUTER TRACK (stage + projects). Absolute
-   over the whole narrative track so PROJECTS stays docked while the grid scrolls beneath it. The
-   padding-top spacer offsets the sticky title down by --travel (INJECTED from TRAVEL_VH) so the title
-   travels exactly that much scroll at page speed before it docks. The bottom edge releases the sticky
-   hold ~one viewport before the footer so title + cards scroll away together — no fade. ── */
-.narrative-title-rail-v4 {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: clamp(10rem, 22svh, 18rem);
-  z-index: 4;
-  pointer-events: none;
-  padding-top: calc(var(--dock-top) + var(--travel));
-  padding-left: var(--brand-gutter);
-  padding-right: var(--brand-gutter);
-}
-
-/* The sticky title itself. It rests at --dock-top; combined with the rail's --travel spacer above,
-   its resting offset from the stage top is (--dock-top + --travel). The name is FULL SIZE the whole
-   time (no dock scale) — it just travels up and sticks, then morphs. The nav-dissolve mask (JS)
-   melts the title under the nav on the ride-out. */
-.narrative-title-v4 {
-  position: sticky;
-  top: var(--dock-top);
-  width: 100%;
-  overflow: visible;
-  padding-bottom: 0.14em;
-  pointer-events: none;
-  will-change: mask;
-  /* (Reduced motion makes this static + order:-1 so it reads first in a plain document flow and never
-     sits over the grid — see the prefers-reduced-motion block further down.) */
-}
-
-.neon-bg-v3 {
-  position: absolute;
-  inset: 0;
-  overflow: hidden;
-  pointer-events: none;
-  z-index: 1;
-}
-
-.radial-glow-v3 {
-  position: absolute;
-  left: -16rem;
-  top: -14rem;
-  width: 84rem;
-  height: 84rem;
-  border-radius: 50%;
-  /* A deliberate warm light source. Core pulled DOWN from off-screen-top to ~mid-left so it
-     pools behind/above the lifted lockup and frames the name, rather than lighting empty space
-     up top. A luminous WARM APRICOT/AMBER core — biased toward orange (low blue) so it reads as
-     warm terracotta light, sitting between the old yellow-gold and the too-rosy peach it replaces. */
-  background: radial-gradient(
-    50% 50% at 50% 50%,
-    rgba(250, 212, 168, 0.96) 0%,
-    rgba(247, 203, 160, 0.86) 32%,
-    rgba(244, 198, 158, 0.48) 60%,
-    rgba(244, 202, 165, 0) 80%
-  );
-  pointer-events: none;
-  z-index: 0;
-  transform-origin: 38% 36%;
-  will-change: transform, opacity;
-  animation: radial-glow-breathe 11s ease-in-out infinite;
-}
-
-/* Slow, premium "breathing" — barely-there scale + brightness pulse. */
-@keyframes radial-glow-breathe {
-  0%,
-  100% {
-    transform: scale(1);
-    opacity: 0.82;
-  }
-  50% {
-    transform: scale(1.09);
-    opacity: 1;
-  }
-}
-
-.fluid-smoke-v3 {
-  position: absolute;
-  inset: 0;
-  /* soft-light keeps the wisp warm; screen + shader shading read as a cool grey puff over the left
-     column during the persona beat (user-flagged "B&W on the left"). */
-  mix-blend-mode: soft-light;
-  opacity: 0.26;
-}
-
-/* ---- Warm gradient "aurora": two slowly-drifting mesh layers ---- */
-.hero-aurora-v3 {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  overflow: hidden;
-  z-index: 0;
-}
-
-.hero-aurora-v3__layer {
-  position: absolute;
-  inset: -24%;
-  background-repeat: no-repeat;
-  will-change: transform;
-}
-
-.hero-aurora-v3__layer--a {
-  background-image: var(--mesh-aurora-a);
-  animation: hero-aurora-drift-a 15s ease-in-out infinite;
-}
-
-.hero-aurora-v3__layer--b {
-  background-image: var(--mesh-aurora-b);
-  animation: hero-aurora-drift-b 19s ease-in-out infinite;
-}
-
-/* Looping drift paths (figure-eight-ish) so the colour field flows continuously
-   instead of pulsing back and forth — visibly moving, but slow enough to stay calm. */
-@keyframes hero-aurora-drift-a {
-  0% {
-    transform: translate3d(0%, 0%, 0) scale(1.06);
-  }
-  25% {
-    transform: translate3d(6%, -4%, 0) scale(1.1);
-  }
-  50% {
-    transform: translate3d(9%, 3%, 0) scale(1.08);
-  }
-  75% {
-    transform: translate3d(4%, 7%, 0) scale(1.12);
-  }
-  100% {
-    transform: translate3d(0%, 0%, 0) scale(1.06);
-  }
-}
-
-@keyframes hero-aurora-drift-b {
-  0% {
-    transform: translate3d(0%, 0%, 0) scale(1.1);
-  }
-  25% {
-    transform: translate3d(-7%, 5%, 0) scale(1.05);
-  }
-  50% {
-    transform: translate3d(-9%, -3%, 0) scale(1.08);
-  }
-  75% {
-    transform: translate3d(-3%, -7%, 0) scale(1.04);
-  }
-  100% {
-    transform: translate3d(0%, 0%, 0) scale(1.1);
-  }
-}
-
-/* Actual film grain (SVG fractal-noise tile) — distinct from the paper-PNG texture. */
-.hero-grain-v3 {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background-image: var(--grain-url);
-  background-repeat: repeat;
-  background-size: var(--grain-scale) var(--grain-scale);
-  opacity: var(--grain-opacity);
-  mix-blend-mode: overlay;
-  z-index: 8;
-}
-
-/* =========================================================
-   Opening choreography — backdrop bloom + scroll-cue gate
-   The decor layers start hidden and bloom in once IntroProvider flips
-   `.hero-root-v3[data-backdrop="in"]` on mount (instant life; the foreground copy + wordmark
-   are gated separately in JS on fonts-ready). The base warm gradient on .hero-root-v3 is always
-   present, so there's no flash — the layers just gather. The perpetual drift/breathe keyframes
-   keep running underneath; the bloom rides on the aurora WRAPPER / the glow WRAPPER / non-animated
-   containers so a transitioned opacity never fights an animated one.
-   ========================================================= */
-
-/* Wrapper that carries the radial glow's bloom (the inner .radial-glow-v3 owns the breathe
-   keyframe, so its own opacity/transform can't be transitioned — see RadialGlow.tsx). */
-.radial-glow-wrap-v3 {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  z-index: 0;
-  transform-origin: 38% 36%;
-  will-change: transform, opacity;
-}
-
-/* Pre-intro: layers hidden, glow slightly expanded so it blooms inward. */
-.hero-root-v3[data-backdrop="out"] .radial-glow-wrap-v3,
-.hero-root-v3[data-backdrop="out"] .hero-aurora-v3,
-.hero-root-v3[data-backdrop="out"] .neon-bg-v3,
-.hero-root-v3[data-backdrop="out"] .hero-grain-v3 {
-  opacity: 0;
-}
-
-.hero-root-v3[data-backdrop="out"] .radial-glow-wrap-v3 {
-  transform: scale(1.06);
-}
-
-/* Bloom in — staggered slightly so the field gathers rather than snapping on as a block. */
-.hero-root-v3[data-backdrop="in"] .radial-glow-wrap-v3 {
-  opacity: 1;
-  transform: scale(1);
-  transition:
-    opacity 1.1s var(--intro-ease),
-    transform 1.1s var(--intro-ease);
-}
-
-.hero-root-v3[data-backdrop="in"] .hero-aurora-v3 {
-  opacity: 1;
-  transition: opacity 1.2s var(--intro-ease) 0.05s;
-}
-
-.hero-root-v3[data-backdrop="in"] .neon-bg-v3 {
-  opacity: 1;
-  transition: opacity 1.4s var(--intro-ease) 0.1s;
-}
-
-.hero-root-v3[data-backdrop="in"] .hero-grain-v3 {
-  opacity: var(--grain-opacity);
-  transition: opacity 0.9s var(--intro-ease);
-}
-
-/* =========================================================
-   V3 STYLE NAV
-   ========================================================= */
-.site-nav-v3 {
-  position: fixed;
-  top: clamp(1.5rem, 3svh, 2.25rem);
-  left: clamp(1.5rem, 3.5vw, 3.5rem);
-  right: clamp(1.5rem, 3.5vw, 3.5rem);
-  width: auto;
-  min-height: clamp(2.75rem, 3vw, 3rem);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: var(--v3-space-5);
-  z-index: 100;
-}
-
-/* Brand slot: the clickable home link that holds the nav text logotype (<NavLogo/>). */
-.site-nav-v3__brand {
-  display: inline-flex;
-  align-items: center;
-}
-
-.site-nav-v3__links {
-  display: flex;
-  align-items: center;
-  gap: clamp(3rem, 4vw, 4.75rem);
-  margin-left: auto;
-}
-
-.site-nav-v3__link {
-  position: relative;
-  font-size: clamp(0.95rem, 1vw, 1.0625rem);
-  font-weight: 400;
-  letter-spacing: 0.01em;
-  line-height: 1;
-  color: var(--v3-text-dark);
-  transition: color 0.5s var(--ease-micro);
-}
-
-.site-nav-v3__link::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  bottom: -0.35em;
-  width: 100%;
-  height: 1px;
-  background: currentColor;
-  transform: scaleX(0);
-  transform-origin: left center;
-  transition: transform 0.55s var(--ease-micro);
-}
-
-.site-nav-v3__link:hover::after {
-  transform: scaleX(1);
-}
-
-/* External-artifact cue on the Resume link — the terracotta accent marks it as the grabbable
-   PDF (recruiter's highest-intent target) without giving it a competing pill. */
-.site-nav-v3__ext {
-  display: inline-block;
-  margin-left: 0.28em;
-  font-size: 0.78em;
-  line-height: 0;
-  vertical-align: 0.08em;
-  color: var(--v3-accent-red);
-  transition: transform 0.5s var(--ease-micro);
-}
-
-.site-nav-v3__link:hover .site-nav-v3__ext {
-  transform: translate(0.1em, -0.1em);
-}
-
-/* =========================================================
-   V4 — Left-aligned hero cluster + morphing brand wordmark
-   ========================================================= */
-
-/* Visually hidden but available to assistive tech (real <h1>). */
-.visually-hidden {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  margin: -1px;
-  padding: 0;
-  border: 0;
-  overflow: hidden;
-  clip: rect(0 0 0 0);
-  clip-path: inset(50%);
-  white-space: nowrap;
-}
-
-/* Keyboard skip link — off-screen until focused, so the visual default is untouched; on Tab it slides
-   in at the top-left, above the nav (z 100), and lands focus on the #works section. */
-.skip-link {
-  position: fixed;
-  top: 0;
-  left: 0;
-  z-index: 110;
-  margin: 0.75rem;
-  padding: 0.6rem 1rem;
-  border-radius: 10px;
-  background: var(--v3-text-dark);
-  color: var(--v3-bg-primary);
-  font-family: var(--font-hanken-sans), sans-serif;
-  font-size: 0.9rem;
-  letter-spacing: 0.01em;
-  transform: translateY(-200%);
-  transition: transform 0.25s var(--ease-micro);
-}
-
-.skip-link:focus-visible {
-  transform: translateY(0);
-  outline: 2px solid var(--v3-text-dark);
-  outline-offset: 3px;
-}
-
-/* Paint-room wrapper — keeps Style Script's left swash inside a box the page's overflow-x:clip
-   won't shave (the eyebrow itself uses solid ink, but the swash still extends past its em box). */
-.hero-eyebrow-wrap-v4 {
-  display: block;
-  margin-left: -0.7em;
-  padding-left: 0.7em;
-  overflow: visible;
-}
-
-/* The greeting is the quiet personal voice — a fluid brush script (Style Script), the hand-written
-   lead-in to the identity, not a separate decorative system. */
-.hero-eyebrow-v4 {
-  margin: 0 0 calc(clamp(-0.35rem, -0.7vh, -0.5rem) - 0.24em) 0;
-  padding: 0 0.1em 0.28em 0;
-  font-family: var(--font-style-script), "Snell Roundhand", cursive;
-  font-size: max(1.7rem, calc(var(--name-hero-size) * 0.31));
-  font-weight: 400;
-  line-height: 1;
-  letter-spacing: normal;
-  background: none;
-  -webkit-text-fill-color: var(--hero-accent);
-  color: var(--hero-accent);
-  opacity: 1;
-}
-
-/* The closing statement — the lockup's human voice, set in the editorial serif (Fraunces). The
-   warm, personal counterweight to the tracked-caps credential above it; this is where the lockup
-   stops stating facts and speaks. Two authored lines for an editorial cadence. */
-.hero-tagline-v4 {
-  /* A hair more than the even identity-block gap above (~6px at desktop) — a subtle breath before the
-     voice, marking the role and statement as separate thoughts without breaking the lockup's even
-     rhythm. (They share the plum colour, so even this small step does visible separating work.) */
-  margin: clamp(1.3rem, 2.1vh, 1.7rem) 0 0;
-  /* The human voice — the editorial serif (Fraunces), warm and personal, the tonal counterweight
-     to the tracked-caps role line above, so the lockup reads as identity block + voice block. Same
-     display family as the hero word but at a restrained size, so optical-sizing keeps a readable
-     (less extreme) cut here while the name gets the full Didone contrast. */
-  font-family: var(--font-fraunces), Georgia, serif;
-  font-optical-sizing: auto;
-  /* Regular (400): the name is Light 300, so a Regular serif harmonises with it rather than sitting
-     heavier than the display above — the classic light-display + regular-serif editorial pairing.
-     (Medium 500 read chunky against the airy name.) */
-  font-weight: 400;
-  /* Cap ≈ 0.195 × the name's cap (with font-size-adjust normalising x-height below); max() floors
-     it for mobile legibility. (TUNE HERE.) */
-  font-size: max(1.38rem, calc(var(--name-hero-size) * 0.195));
-  /* Two-line serif statement needs leading to breathe — 1.05 set the lines almost solid and read
-     cramped. ~1.2 gives the voice a relaxed, confident editorial cadence (the inter-line rule below
-     is zeroed now that line-height carries the gap). */
-  line-height: 1.2;
-  /* Crisp, near-neutral display tracking — a touch tighter knits the serif words without letting
-     them touch (display-serif floor is ≥ -0.04em). */
-  letter-spacing: -0.01em;
-  /* x-height harmony: the serif has a smaller x-height than the sans labels at the same px, so
-     font-size-adjust normalises it to sit at equal optical size beside them (and holds across the
-     Fraunces→Georgia load swap). Tunable knob. */
-  font-size-adjust: 0.5;
-  /* Kept the warm-plum voice colour (NOT terracotta) as the lockup's one dark anchor — it grounds
-     the otherwise all-terracotta cluster and guarantees readability. Swap to --hero-ink-terra for a
-     fully monochrome hero if wanted. */
-  color: var(--hero-ink-voice);
-}
-
-.hero-tagline-v4__line {
-  display: block;
-  white-space: nowrap;
-}
-
-.hero-tagline-v4__line + .hero-tagline-v4__line {
-  /* line-height (1.2) now carries the inter-line leading; no extra margin so the two lines sit on
-     an even, predictable rhythm. */
-  margin-top: 0;
-}
-
-/* ── The hero name (MorphName): real text so the pinned hero can transform it per-letter
-   into PROJECTS. The row spans the full lockup width — the word starts at its left edge
-   and lands at its right edge (the mirror). ── */
-.hero-name-v4 {
-  position: relative;
-  width: 100%;
-  margin: 0;
-  padding-bottom: 0.14em;
-  /* next/font defines this variable on <body>; reference it in scope. Fraunces at its DISPLAY
-     optical size (opsz 144) with a light-to-mid weight reads as a high-contrast Didone — thin
-     hairlines, thick stems — elegant and expensive at hero scale, the editorial voice that now
-     carries every title. wght is Fraunces' variable default axis; the per-letter morph re-measures
-     glyph widths at runtime, so a weight change re-fits automatically. (TUNE HERE: wght 300 for
-     thinner/more delicate, 400+ for more presence; drop opsz if the hairlines feel too fine at
-     this scale.) */
-  font-family: var(--font-fraunces), Georgia, serif;
-  font-weight: 340;
-  font-variation-settings:
-    "opsz" 144,
-    "SOFT" 0,
-    "WONK" 0;
-  font-size: var(--name-hero-size);
-  font-kerning: normal;
-  font-feature-settings: "kern" 1;
-  /* Kept at 0: MorphName measures each slot's real advance + pair kerning and interpolates them,
-     so a global letter-spacing here would double-count between slots and split the word. */
-  letter-spacing: 0;
-  line-height: 1;
-  color: var(--hero-accent);
-  pointer-events: none;
-  user-select: none;
-}
-
-/* The "Featured" script eyebrow above the landed PROJECTS — .hero-eyebrow-v4 supplies the face,
-   colour, SIZE and swash treatment (literally the same hand as the hero's "Hi, I'm"); this only
-   re-anchors it ABOVE the word and inside the name's drifting root, so it rides the title parallax and
-   never adds height to the name box (the word's position is unchanged).
-   To match the greeting, the bottom margin mirrors .hero-eyebrow-v4 verbatim — that negative value,
-   paired with bottom:100% (the name's cap line), drops the script onto the word at the identical offset
-   the greeting sits above PRATIUSH (cancelling the name's top line-box overhang). The LEFT is the
-   greeting's −0.3em swash-cancel PLUS a small per-glyph optical nudge: the greeting's value was tuned
-   for its first letter "H", but "Featured" leads with "F" (different left bearing), so it read a hair
-   right of the P — the extra −0.25em (the script F carries a wide left entry swash) lands the F's ink
-   on the P's ink line. TUNE that nudge by eye. Width is left to shrink-to-fit, as the greeting's is. */
-.hero-name-v4__eyebrow {
-  position: absolute;
-  left: 0;
-  bottom: 100%;
-  display: block;
-  margin: 0 0 clamp(-0.35rem, -0.7vh, -0.5rem) calc(-0.3em - 0.25em);
-  transform-origin: left bottom;
-  will-change: transform, opacity;
-  pointer-events: none;
-}
-
-/* The "My" eyebrow (over PERSONA during the persona beat — "My Persona", same hand, same anchor
-   and treatment as the greeting/"Featured"). WHY it was clipping: the base .hero-eyebrow-v4 paints
-   through background-clip:text, which stops ink at the padding-box edge — Style Script's capital M
-   swings its entry stroke LEFT past the base 0.16em apron, and the y's descender loop swings below
-   the box, so both were getting sliced. The other eyebrows dodge this per-glyph with tuned aprons;
-   "My" simply doesn't need the gradient at all (on a two-glyph script the single-hue band is
-   imperceptible), so it paints as SOLID accent ink — identical to the eye, and solid ink cannot
-   clip on any side. margin-left nets the M's ink onto the P's ink line (−0.40 + base 0.3em pad
-   = −0.10em); the extra −margin-bottom hugs the cap like "Hi, I'm" over PRATIUSH. TUNE by eye. */
-.hero-name-v4__eyebrow--my {
-  margin-left: -0.4em;
-  /* Folds in the same −0.24em compensation as the base rule's descender paint apron (this override
-     replaces the whole margin-bottom, so the compensation must ride along or the "My" would sit
-     0.24em higher than tuned). */
-  margin-bottom: calc(clamp(-0.45rem, -0.9vh, -0.62rem) - 0.24em);
-  background: none;
-  -webkit-text-fill-color: var(--hero-accent);
-  color: var(--hero-accent);
-}
-
-/* The name's entrance wrapper. NO overflow clip any more: the entrance is now the shared rise +
-   fade recipe (MorphName animates the run's y/opacity on BEAT.wordmark, matching the rest of the
-   C0 cascade), so this wrapper no longer masks anything — which also removes the clip surface that
-   was shaving Fraunces' baseline overshoot / the J descender at the bottom (user-flagged clipping).
-   The per-slot roll clip (.hero-name-v4__letter) still masks the glyph rolls. */
-.hero-name-v4__reveal {
-  display: block;
-  position: relative;
-  z-index: 1;
-  width: 100%;
-  overflow: visible;
-}
-
-.hero-name-v4__run {
-  display: inline-flex;
-  margin-left: -0.06em;
-  will-change: transform;
-}
-
-/* Each slot clips its own glyph roll. Width/kerning are driven by MorphName; the clip box MUST stay
-   on the LETTER (symmetric 1em + roll-gap padding) — NOT on the inner roll stack. rollY() computes
-   translateY as a % of the roll column's full height; pinning height on .hero-name-v4__roll breaks
-   that math. Extra bottom/side APRONS (--roll-apron-*, set on .hero-name-v4) widen the clip paint
-   box for Fraunces descenders + side-bearings without shifting the centred content window. */
-.hero-name-v4__letter {
-  position: relative;
-  display: inline-block;
-  height: 1em;
-  padding: calc(var(--roll-gap, 0px) / 2) var(--roll-apron-x, 0px)
-    calc(var(--roll-gap, 0px) / 2 + var(--roll-apron-bottom, 0px)) var(--roll-apron-x, 0px);
-  margin: calc(var(--roll-gap, 0px) / -2) calc(var(--roll-apron-x, 0px) * -1)
-    calc((var(--roll-gap, 0px) / -2) - var(--roll-apron-bottom, 0px))
-    calc(var(--roll-apron-x, 0px) * -1);
-  overflow: visible clip;
-  will-change: transform;
-}
-
-.hero-name-v4__roll {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: var(--roll-gap, 0px);
-  will-change: transform;
-}
-
-/* Glyphs shrink-wrap to their natural advance so the slot can measure them. No background-toned
-   stroke/shadow "halo": against the unified, grain-textured field a single flat ring couldn't stay
-   invisible (it read as a pale outline at rest and around the static landed PROJECTS). The roll gap
-   (var(--roll-gap)) already keeps the two stacked glyphs apart through the morph, so the letters
-   stay clean on their own — solid terracotta fill (inherited --hero-accent), no ring. */
-.hero-name-v4__roll span {
-  display: inline-block;
-  height: 1em;
-  line-height: 1;
-  white-space: pre;
-}
-
-/* Offscreen pair samples let MorphName recover the kerning that is normally lost when a word
-   is split into independently animated spans. */
-.hero-name-v4__metrics {
-  position: absolute;
-  inset: 0 auto auto 0;
-  width: max-content;
-  height: auto;
-  visibility: hidden;
-  pointer-events: none;
-  white-space: nowrap;
-}
-
-.hero-name-v4__metrics span {
-  display: inline-block;
-  white-space: pre;
-}
-
-/* The thesis statement — the C2 BRIDGE chapter's only content, living in its own sticky viewport
-   layer (.narrative-thesis-rail-v4, see the narrative-track rules). CENTERED (user-directed): the
-   rail seats it at dead viewport centre and HeroThesis rides it up from below the fold into that
-   seat, inking in on the climb and dissolving on arrival — a passing statement carried by the
-   scroll. The ONE display serif (Fraunces) at an editorial statement scale; one terracotta accent
-   word ("polished"). */
-.hero-thesis-v4 {
-  margin: 0;
-  /* A statement, not a poster wall: sized so the longest line ("polished products") reads as one
-     confident editorial line with generous air around it. (TUNE HERE: the bridge's presence.) */
-  font-family: var(--font-fraunces), Georgia, serif;
-  font-weight: 420;
-  font-variation-settings:
-    "opsz" 144,
-    "SOFT" 0,
-    "WONK" 0;
-  font-size: clamp(2.4rem, 4.6vw, 5rem);
-  line-height: 1.04;
-  letter-spacing: 0;
-  text-align: center;
-  color: var(--hero-ink-strong);
-  will-change: opacity, transform;
-}
-
-/* One composed line of the thesis (see HeroThesis LINES). Block so each defined line stacks;
-   nowrap locks the authored composition. */
-.hero-thesis-v4__line {
-  display: block;
-  white-space: nowrap;
-}
-
-/* Each word is inline-block so the per-line SIZE rhythm composes; the inter-word space is a real
-   text node outside it so the line still wraps. The accent word carries the terracotta. */
-.hero-thesis-v4__word {
-  position: relative;
-  display: inline-block;
-}
-
-.hero-thesis-v4__word--accent {
-  color: var(--hero-accent);
-}
-
-/* Role / credential. Sits directly beneath the name as its descriptor (name → role →
-   statement), so it qualifies the wordmark at a glance. Set in the workhorse grotesque (Hanken) as
-   tracked caps — the SAME face/register as the bottom locator, so the lockup's two labels share one
-   "credential voice" instead of the role being a lone monospace. Dropping the mono also removes a
-   reflex-default face and the "mono = developer" costume, tightening the hero to four typefaces. */
-.hero-roles-v4 {
-  /* The identity block's EVEN step: greeting→name and name→role share this one gap, so the three sit
-     on a single rhythm (the greeting's negative margin above is tuned to match this visible gap). The
-     role rides in the name's orbit as its credential; still clearly less than the role→statement step
-     below. (Colour and spacing cross-cut: plum colour, name's orbit.) */
-  margin: clamp(0.9rem, 1.7vh, 1.3rem) 0 0;
-  padding: 0;
-  /* Hanken Grotesk (the primary text/UI voice) as a tracked-caps credential — a clean, contemporary
-     label under the serif name. Referenced by its next/font variable directly. */
-  font-family: var(--font-hanken-sans), sans-serif;
-  /* Size keyed to the name (≈ 0.104 × its cap). Hanken's cap height ≈ the prior mono's, so the line
-     holds the same optical size through the swap. */
-  font-size: max(0.74rem, calc(var(--name-hero-size) * 0.104));
-  /* Medium: caps need a little body to read as a deliberate label without shouting. */
-  font-weight: 500;
-  line-height: 1.05;
-  /* Proportional sans caps need MORE tracking than the mono did (mono advances are already wide, so
-     0.16em sufficed there). 0.2em opens it into a confident label and relates it to the locator's
-     0.18em — the two credential labels share one tracked-caps language. */
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  /* "case" centres the · separator to cap height (it sat on the baseline before); "kern" pairs. */
-  font-feature-settings:
-    "case" 1,
-    "kern" 1;
-  /* Plum voice ink — NOT terracotta. The role is structural content (a credential), so it belongs
-     to the plum family with the statement and the locator, not to the warm "Hi, I'm + name" identity.
-     This reserves terracotta for the name as the single warm signature (so it reads as the figure),
-     matches the locator — the lockup's other tracked-caps label — in colour, and keeps the hero on
-     the page's plum-ink/terracotta-accent strategy. Plum on the warm field clears AA comfortably. */
-  color: var(--hero-ink-voice);
-  opacity: 1;
-}
-
-/* Bottom meta strip (right). Pinned bottom-right as a lone locator that counterweights the
-   left-anchored lockup. */
-.hero-meta-v4 {
-  position: absolute;
-  right: var(--brand-gutter);
-  bottom: clamp(1.75rem, 5svh, 3.25rem);
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-family: var(--font-hanken-sans), sans-serif;
-  font-size: clamp(0.68rem, 0.78vw, 0.82rem);
-  font-weight: 500;
-  line-height: 1.2;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  font-feature-settings:
-    "case" 1,
-    "kern" 1;
-  font-optical-sizing: auto;
-  color: var(--hero-ink-strong);
-  /* This is the smallest label on the page (down to 0.58rem on mobile) and sits over the peach-
-     saturated right side where local contrast dips below the cream-based estimate; 0.78 lifts it to
-     a comfortable AA margin without making the locator shout. */
-  opacity: 0.78;
-}
-
-/* In the narrative flow the locator joins the C0 copy column (no absolute corner in a scrolling
-   flow): a quiet tracked-caps line at the foot of the opening composition, above the tagline's rhythm. */
-.hero-meta-v4--flow {
-  /* Fully reset the base .hero-meta-v4's absolute bottom-right corner treatment to STATIC flow so the
-     locator reads as the quiet foot of the C0 lockup (base sets position:absolute; right; bottom). */
-  position: static;
-  right: auto;
-  bottom: auto;
-  /* The lockup's largest inter-element step (the rhythm scale's GROUP break) — the locator is the
-     lockup's distinct foot, so it sits clearly apart from the tagline above without wandering off a
-     short fold. */
-  margin-top: var(--rhythm-group);
-}
-
-.hero-meta-v4 svg {
-  width: 0.82em;
-  height: auto;
-}
-
-/* The nav's wordmark — a text logotype in Fraunces (the display serif), terracotta to echo the hero
-   name. Hidden at the top of the landing while the big hero name owns the stage; scrub-reveals as the
-   name morphs away (motion drives opacity/y). */
-.nav-logo-v4 {
-  display: inline-block;
-  font-family: var(--font-fraunces), Georgia, serif;
-  font-weight: 460;
-  font-optical-sizing: auto;
-  font-size: clamp(1.35rem, 1.5vw, 1.7rem);
-  line-height: 1;
-  letter-spacing: 0.01em;
-  color: var(--hero-accent);
-  white-space: nowrap;
-}
-
-@media (max-width: 1100px) {
-  /* The narrative track holds its structure on small screens (the fractions in heroTimeline are
-     width-independent); a real mobile pass is pending the hero responsive rewrite. The DNA rail is
-     hidden (no right void on narrow widths — same as before), so the helix waits for that rewrite. */
-  .narrative-dna-rail-v4 {
-    display: none;
-  }
-
-  /* The persona block stays (real content), but drop the sticky hold — a pinned block fights the narrow
-     single-column layout, and the DNA it partnered is hidden here anyway. Simplest safe default; the real
-     responsive pass is a separate future workstream. The span then just adds quiet scroll. */
-  .narrative-persona-v4 {
-    position: static;
-  }
-
-  .hero-root-v3 {
-    height: 100svh;
-    min-height: 100svh;
-    padding: 0;
-  }
-
-  .site-nav-v3 {
-    top: clamp(1rem, 2svh, 1.5rem);
-    left: clamp(1rem, 3vw, 1.5rem);
-    right: clamp(1rem, 3vw, 1.5rem);
-    min-height: var(--v3-nav-height);
-  }
-
-  .site-nav-v3__links {
-    gap: var(--v3-space-3);
-    flex-wrap: wrap;
-    justify-content: flex-end;
-  }
-
-  .site-nav-v3__link {
-    font-size: 1rem;
-  }
-
-  /* V4 narrative track — keep the lower-left composition on tablet/mobile.
-     --brand-gutter matches the nav's left inset so the name and logo stay on one line. */
-  :root {
-    --brand-gutter: clamp(1rem, 3vw, 1.5rem);
-    --name-hero-size: clamp(2.2rem, 9.2vw, 6.4rem);
-    --brand-nav-w: clamp(6.5rem, 30vw, 8.5rem);
-  }
-
-  /* (No copy-padding override here: the base rule anchors the lockup to the title-rail geometry —
-     one source of truth — and narrow widths await the pending hero responsive rewrite anyway.) */
-
-  .radial-glow-v3,
-  .neon-bg-v3 {
-    display: none;
-  }
-
-  /* The thesis bridge composes against the desktop layout; on narrow widths it would need a real
-     reflow, so hold the layer for desktop until the pending responsive rewrite gives it one (same
-     deal as the DNA above). The visually-hidden sentence still reads to AT. */
-  .narrative-thesis-rail-v4 {
-    display: none;
-  }
-}
-
-@media (max-width: 640px) {
-  .site-nav-v3 {
-    align-items: flex-start;
-    gap: var(--v3-space-3);
-  }
-
-  .site-nav-v3__links {
-    max-width: none;
-    flex-wrap: nowrap;
-    gap: var(--v3-space-2);
-    justify-content: flex-end;
-  }
-
-  .site-nav-v3__link {
-    font-size: 0.875rem;
-  }
-
-  .site-nav-v3__location {
-    display: none;
-  }
-
-  .hero-roles-v4 {
-    max-width: 13rem;
-    font-size: 0.62rem;
-    line-height: 1.4;
-    letter-spacing: 0.2em;
-  }
-
-  .hero-meta-v4 {
-    font-size: 0.58rem;
-    letter-spacing: 0.14em;
-  }
-
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .site-nav-v3__link,
-  .site-nav-v3__link::after {
-    transition: none;
-  }
-
-  .hero-aurora-v3__layer--a,
-  .hero-aurora-v3__layer--b,
-  .radial-glow-v3 {
-    animation: none;
-  }
-
-  /* No backdrop bloom — settle every layer at its final opacity instantly, regardless of the
-     intro gates (which IntroProvider flips immediately under reduced motion). */
-  .radial-glow-wrap-v3,
-  .hero-aurora-v3,
-  .neon-bg-v3 {
-    opacity: 1 !important;
-    transform: none !important;
-    transition: none !important;
-  }
-
-  .hero-grain-v3 {
-    opacity: var(--grain-opacity) !important;
-    transition: none !important;
-  }
-}
-
-/* =========================================================
-   V4 — page shell + continuous warm aurora
-   ========================================================= */
-.page-v4 {
-  position: relative;
-  isolation: isolate;
-  width: 100%;
-  overflow-x: clip; /* clip (NOT hidden) so the sticky work cards keep working */
-  background: var(--v3-bg-primary);
-  /* Warm plum is the inherited default for any copy that doesn't set its own colour
-     (replaces the deprecated cool v2 `text-navy` that used to ride the page root). */
-  color: var(--v3-text-dark);
-}
-
-/* keep all real content above the fixed aurora field (z-index 0) */
-.page-v4 > .narrative-track-v4,
-.footer-v4 {
-  position: relative;
-  z-index: 1;
-}
-
-/* One continuous, slowly drifting warm field behind the whole post-hero scroll.
-   Fixed = not an ancestor of the sticky cards, so it can never break their sticky. */
-.section-aurora-v4 {
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  overflow: hidden;
-}
-
-.section-aurora-v4__layer {
-  position: absolute;
-  inset: -28%;
-  background-repeat: no-repeat;
-  opacity: 0.85;
-  will-change: transform;
-}
-
-.section-aurora-v4__layer--a {
-  background-image: var(--mesh-aurora-a);
-  animation: section-aurora-drift-a 26s ease-in-out infinite;
-}
-
-.section-aurora-v4__layer--b {
-  background-image: var(--mesh-aurora-b);
-  animation: section-aurora-drift-b 34s ease-in-out infinite;
-}
-
-.section-aurora-v4__grain {
-  position: absolute;
-  inset: 0;
-  background-image: var(--grain-url);
-  background-repeat: repeat;
-  background-size: var(--grain-scale) var(--grain-scale);
-  opacity: calc(var(--grain-opacity) * 0.55);
-  mix-blend-mode: overlay;
-}
-
-/* Slow figure-eight drift — calmer than the hero so it reads as quiet atmosphere. */
-@keyframes section-aurora-drift-a {
-  0% {
-    transform: translate3d(0%, 0%, 0) scale(1.05);
-  }
-  25% {
-    transform: translate3d(5%, -3%, 0) scale(1.08);
-  }
-  50% {
-    transform: translate3d(7%, 4%, 0) scale(1.06);
-  }
-  75% {
-    transform: translate3d(3%, 6%, 0) scale(1.09);
-  }
-  100% {
-    transform: translate3d(0%, 0%, 0) scale(1.05);
-  }
-}
-
-@keyframes section-aurora-drift-b {
-  0% {
-    transform: translate3d(0%, 0%, 0) scale(1.08);
-  }
-  25% {
-    transform: translate3d(-6%, 4%, 0) scale(1.04);
-  }
-  50% {
-    transform: translate3d(-8%, -3%, 0) scale(1.07);
-  }
-  75% {
-    transform: translate3d(-3%, -6%, 0) scale(1.03);
-  }
-  100% {
-    transform: translate3d(0%, 0%, 0) scale(1.08);
-  }
-}
-
-/* =========================================================
-   V4 — 03 · The ask (dark contact finale)
-   The page's only dark surface: a plum sheet with rounded shoulders rising over the warm
-   field — the curtain after the pitch. Email is the hero element; gold on plum holds AA.
-   ========================================================= */
-.footer-v4 {
-  /* A chapter break after the work — tightened so the grid doesn't float in excess whitespace
-     before the dark curtain. (TUNE HERE: the work → contact breath.) */
-  margin-top: clamp(4rem, 8vh, 6rem);
-  background: var(--v3-text-dark);
-  color: var(--v3-bg-primary);
-  border-radius: var(--v3-radius-stage) var(--v3-radius-stage) 0 0;
-  padding: clamp(5rem, 13vh, 9rem) var(--brand-gutter)
-    clamp(1.75rem, 4vh, 2.75rem);
-  overflow: hidden;
-  isolation: isolate;
-}
-
-.footer-v4__inner {
-  position: relative;
-  z-index: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: clamp(1.75rem, 4.5vh, 3rem);
-}
-
-.footer-v4__headline {
-  font-family: var(--font-fraunces), Georgia, serif;
-  font-weight: 380;
-  font-variation-settings:
-    "opsz" 144,
-    "SOFT" 0,
-    "WONK" 0;
-  font-size: clamp(2.5rem, 6.5vw, 5.25rem);
-  line-height: 1.04;
-  letter-spacing: 0;
-}
-
-.footer-v4__line {
-  display: block;
-  overflow: hidden;
-  padding-bottom: 0.1em;
-}
-
-.footer-v4__line-inner {
-  display: block;
-  will-change: transform;
-}
-
-.footer-v4__email {
-  font-family: var(--font-fraunces), Georgia, serif;
-  font-weight: 550;
-  font-variation-settings:
-    "wght" 550,
-    "opsz" 144,
-    "SOFT" 0,
-    "WONK" 0;
-  font-size: clamp(1.35rem, 2.6vw, 2.3rem);
-  letter-spacing: -0.01em;
-  color: var(--v3-accent-gold);
-  border-bottom: 1px solid
-    color-mix(in srgb, var(--v3-accent-gold) 45%, transparent);
-  padding-bottom: 0.12em;
-  transition:
-    color 0.5s var(--ease-micro),
-    border-color 0.5s var(--ease-micro);
-}
-
-.footer-v4__email:hover {
-  color: var(--v3-bg-primary);
-  border-color: var(--v3-bg-primary);
-}
-
-.footer-v4__meta {
-  width: 100%;
-  margin-top: clamp(2rem, 6vh, 4rem);
-  padding-top: clamp(1.1rem, 2.5vh, 1.5rem);
-  border-top: 1px solid
-    color-mix(in srgb, var(--v3-bg-primary) 18%, transparent);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 1rem 2rem;
-  flex-wrap: wrap;
-}
-
-.footer-v4__links {
-  display: flex;
-  gap: clamp(1.25rem, 2.5vw, 2.5rem);
-}
-
-.footer-v4__link {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  font-family: var(--font-hanken-sans), sans-serif;
-  font-weight: 500;
-  font-size: 0.78rem;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  opacity: 0.8;
-  transition: opacity 0.5s var(--ease-micro);
-}
-
-.footer-v4__link:hover {
-  opacity: 1;
-}
-
-.footer-v4__link-icon {
-  display: inline-flex;
-  width: 0.7rem;
-  height: 0.7rem;
-  transition: transform 0.6s var(--ease-micro);
-}
-
-.footer-v4__link-icon svg {
-  width: 100%;
-  height: 100%;
-}
-
-.footer-v4__link:hover .footer-v4__link-icon {
-  transform: translate(2px, -2px);
-}
-
-.footer-v4__colophon {
-  display: flex;
-  gap: 1.75rem;
-  margin: 0;
-  font-size: 0.8rem;
-  opacity: 0.55;
-}
-
-.footer-v4__grain {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  background-image: var(--grain-url);
-  background-repeat: repeat;
-  background-size: var(--grain-scale) var(--grain-scale);
-  opacity: calc(var(--grain-opacity) * 0.5);
-  mix-blend-mode: overlay;
-}
-
-@media (max-width: 640px) {
-  .footer-v4__meta {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-}
-
-/* =========================================================
-   V4 — reduced motion: settle everything, strip transitions
-   The narrative track reads as a PLAIN DOCUMENT — nothing sticks, nothing scrubs. The title is a
-   normal heading that scrolls away (MorphName's reduce branch shows PRATIUSH), the persona statement
-   reads in flow at full opacity (ScrollInk's static branch), the DNA holds its static pose, and the
-   thesis reads STATICALLY in flow after the persona block (HeroThesis renders at full opacity under
-   reduced motion), so the motionless page still reads complete. The tall track collapses to content
-   height (no scroll-length is needed with nothing to scrub).
-   ========================================================= */
-@media (prefers-reduced-motion: reduce) {
-  /* Read as a plain document. The track is a normal flex column: the atmosphere fills the first
-     viewport (absolute behind), the TITLE reads first (order:-1), then the copy, then the persona
-     statement in flow, then the thesis. Nothing sticks, nothing scrubs. */
-  .narrative-track-v4 {
-    height: auto;
-    display: flex;
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  /* The atmosphere pins to the first viewport only (its inset-0 wrapper would otherwise stretch the
-     decorative field over the whole collapsed document). */
-  .narrative-atmosphere-v4 {
-    inset: 0 0 auto 0;
-    height: 100svh;
-  }
-
-  /* The helix is scroll-choreography support (per-chapter presence) — with nothing scrubbing, its
-     absolute rail would just park a static decoration OVER the right side of the plain document
-     read. Drop it: the reduced-motion page reads hero → persona → thesis → projects → footer with
-     no floating overlays. */
-  .narrative-dna-rail-v4 {
-    display: none;
-  }
-
-  .hero-root-v3 {
-    position: static;
-    height: 100%;
-  }
-
-  /* The stage collapses to content height too (nothing to scrub), and reads as a plain flex column. */
-  .narrative-stage-v4 {
-    height: auto;
-    display: flex;
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  /* Title reads first as the page heading; the copy's reserved name-gap is dropped so the real name
-     (PRATIUSH, from MorphName's reduce branch) isn't doubled by an empty spacer. The rail is the last
-     child of the STAGE (a flex column here), and order:-1 floats the title to the top of the read. */
-  .narrative-title-rail-v4 {
-    position: static;
-    order: -1;
-    padding-top: calc(var(--v3-nav-height) + 2rem);
-  }
-
-  .narrative-title-v4 {
-    position: static;
-    width: auto;
-  }
-
-  .narrative-name-gap-v4 {
-    display: none;
-  }
-
-  .narrative-copy-v4 {
-    min-height: 0;
-    justify-content: flex-start;
-  }
-
-  /* The persona block (statement + capability spine) reads in flow at full opacity — no sticky hold,
-     no scrub (ScrollInk + CapabilityList render their plain --static variants). */
-  .narrative-persona-span-v4 {
-    height: auto;
-  }
-
-  .narrative-persona-v4 {
-    position: static;
-    margin-bottom: clamp(3rem, 8vh, 6rem);
-  }
-
-  /* Every line + sub at full opacity (the active/inactive dim is visual only). */
-  .narrative-capability-v4__line,
-  .narrative-capability-v4__sub {
-    opacity: 1;
-    transform: none;
-  }
-
-  /* The thesis reads statically in flow — a normal chapter statement AFTER the persona block
-     (order 1 places it behind the flow column's default 0 in the stage's flex read; the title rail
-     is -1) and before the grid. HeroThesis skips the opacity scrub under reduced motion. */
-  .narrative-thesis-rail-v4 {
-    position: static;
-    order: 1;
-  }
-
-  .narrative-thesis-rail-v4__sticky {
-    position: static;
-    height: auto;
-    padding: clamp(2rem, 6vh, 4rem) var(--brand-gutter);
-  }
-
-  /* In the reduced-motion read the title scrolls away in flow (see the .narrative-title-v4 override
-     above), so the projects grid opens as a normal chapter break — no pull-up (the stage has no
-     trailing viewport to close when nothing is fixed-height), a normal top pad. */
-  .projects-index-v4 {
-    margin-top: 0;
-    padding-top: clamp(3rem, 8vh, 5rem);
-  }
-
-  .footer-v4__email,
-  .footer-v4__link,
-  .footer-v4__link-icon {
-    transition: none;
-  }
-}
-
-/* =========================================================
-   V4 — PERSONA MANIFESTO (C1 of the narrative track) + SCROLL-INK
-   The "what I'm made of" breath: as the docked title rolls PRATIUSH → PERSONA, the manifesto
-   paragraph writes itself on WORD-BY-WORD below it (ScrollInk), then HOLDS fully visible with the
-   compact capability spine as one sticky persona block (see .narrative-persona-v4 above), the tech-DNA
-   helix holding in the right void. These rules carry the manifesto's TYPE. Timing: heroTimeline.ts. */
-
-/* The manifesto copy — MINIMAL BODY, not a tagline (user-directed): the SAME register as the site's
-   quiet informational copy, the project brief — Hanken (the body workhorse, referenced DIRECTLY per
-   the Fonts rule), modest size, relaxed leading, solid plum ink. The serif voice stays reserved for
-   the hero tagline; a plain, grounded paragraph reads as a statement, not a pull-quote. The hierarchy
-   triplet is script "My" (eyebrow) → PERSONA (docked title) → this (body). ScrollInk splits it into
-   per-word spans (aria-hidden) plus a visually-hidden real <p>; the type below applies to both. */
-.scroll-ink-v4 {
-  margin: 0;
-  max-width: 42ch;
-  font-family: var(--font-hanken-sans), sans-serif;
-  font-weight: 400;
-  font-size: clamp(1.12rem, 1.42vw, 1.48rem);
-  line-height: 1.55;
-  letter-spacing: -0.003em;
-  color: var(--v3-text-dark);
-  text-wrap: pretty;
-}
-
-/* Each word is an inline span so opacity can scrub per word (OPACITY ONLY — no blur, no movement);
-   the spaces are real text nodes (kept static) so the paragraph still wraps naturally. inline-block
-   would break wrapping. */
-.scroll-ink-v4__word {
-  display: inline;
-  will-change: opacity;
-}
-
-.scroll-ink-v4__space {
-  white-space: pre-wrap;
-}
-
-.tech-dna-v4 {
-  position: relative;
-  width: 100%;
-  height: 100%;
-}
-
-/* One logo node — positioned & styled every frame by the rAF loop (transform/opacity/filter only).
-   MUST anchor at the container's origin (left/top 0): the loop's translate(x, y) is the node's
-   FULL position within the root, so any CSS offset here shears every logo off its strand (the
-   original left:50% is exactly what detached the logos from the helix).
-   Every node is a UNIFORM CIRCULAR CHIP — a warm paper disc with a hairline terracotta ring — so
-   the raw brand marks (squares, wide wordmarks, circles…) all present as one consistent bead on
-   the strand instead of a jumble of silhouettes. Logos keep their TRUE colour (content, not
-   chrome); depth is told by scale/opacity, and the far side morphs into terracotta beads — the
-   rAF loop drives transform/opacity plus the disc/ring paint, never a colour filter. */
-.tech-dna-v4__node {
-  position: absolute;
-  left: 0;
-  top: 0;
-  /* Calm pass: slightly smaller chips + a fainter ring and shadow, so the beads read as part of the
-     helix's atmosphere (integrated marks), not stickers floating over it. */
-  width: clamp(2.2rem, 2.9vw, 3.05rem);
-  height: clamp(2.2rem, 2.9vw, 3.05rem);
-  display: grid;
-  place-items: center;
-  border-radius: 50%;
-  background: #fffaf2; /* warm paper, a step lighter than the field so the bead reads as an object */
-  border: 1px solid rgba(201, 84, 46, 0.14);
-  box-shadow: 0 2px 8px rgba(64, 38, 26, 0.06);
-  opacity: 0; /* the scroll-linked flow lights each bead inside its set's window */
-  transform-origin: center;
-  will-change: transform, opacity;
-  pointer-events: none;
-}
-
-.tech-dna-v4__logo {
-  width: 58%; /* the mark sits inside the chip with even air all round */
-  height: 58%;
-  object-fit: contain;
-  display: block;
-  user-select: none;
-}
-
-/* The backbone strands + base-pair rungs are painted on this canvas, behind the logo nodes. */
-.tech-dna-v4__canvas {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-}
-
-/* Reduced motion — kept HERE (after the base rules it overrides; the main reduced-motion block sits
-   earlier in the sheet and would lose the cascade): with no scrub, the manifesto reads at full
-   opacity (ScrollInk renders the plain paragraph — see .scroll-ink-v4--static), and TechDNA renders
-   its static fully-drawn pose in the right void. */
-@media (prefers-reduced-motion: reduce) {
-  .scroll-ink-v4--static {
-    opacity: 1;
-  }
-}
-
-/* =========================================================
-   V4 — PROJECTS INDEX (the magazine grid)
-   All four featured works at once on the continuous cream surface (the fixed SectionAurora shows
-   through — no card, no seam). An editorial/asymmetric 12-col grid: cells alternate wide/narrow and
-   carry a vertical offset so it reads as a designed spread, not a uniform gallery. Each cell is a
-   whole-cell link to /works/[slug]. No pin, no scroll-jack — the section simply flows.
-   ========================================================= */
-.projects-index-v4 {
-  position: relative;
-  z-index: 1;
-  color: var(--v3-text-dark);
-  /* Pull into the stage's trailing viewport so the first cards enter (~10% from the bottom) while
-     MORPH 2 runs. padding-top is ONLY the breath below the docked title — NOT a second full title
-     zone (that was the huge dead gap, user-flagged). --projects-pull injected from heroTimeline. */
-  margin-top: calc(-1 * var(--projects-pull, 0px));
-  padding: clamp(1.75rem, 3.5vh, 2.75rem) var(--brand-gutter) clamp(5rem, 10vh, 7rem);
-  overflow-x: clip;
-}
-
-.projects-index-v4__grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  column-gap: clamp(1.75rem, 4vw, 4rem);
-  /* Generous vertical air between rows — the whitespace IS the composition. The right-column drop
-     below is derived from this unit so the editorial stagger reads as a measured beat, not a nudge.
-     (TUNE HERE: the spread's row breathing.) */
-  --projects-row-gap: clamp(4.5rem, 10vh, 8rem);
-  row-gap: var(--projects-row-gap);
-  /* A contained measure (matches the case pages) so the two covers read as an intentional spread,
-     not a sprawling full-bleed gallery. */
-  max-width: 84rem;
-  margin: 0 auto;
-}
-
-/* ---- one work cell ---- */
-.projects-index-v4__cell {
-  min-width: 0; /* let grid tracks shrink; keeps covers from overflowing */
-  align-self: start; /* pin each cover to its row top so the stagger stays clean */
-}
-
-/* The RIGHT column drops ONE consistent beat (≈ 0.6 × the row gap) for an editorial stagger — the two
-   columns stay cleanly aligned within themselves, and the rhythm comes from this single repeated offset
-   rather than the old per-cell wide/narrow nudges that read ragged. */
-.projects-index-v4__cell:nth-child(even) {
-  margin-top: calc(var(--projects-row-gap) * 0.6);
-}
-
-.projects-index-v4__link {
-  display: block;
+a {
   color: inherit;
   text-decoration: none;
 }
 
-/* Cover frame — fixed aspect, consistent crop, rounded to match the site; overflow hidden so the
-   hover scale on the inner image/plate is cropped by the frame. */
-.projects-index-v4__cover {
-  position: relative;
-  overflow: hidden;
-  aspect-ratio: 16 / 10;
-  border-radius: var(--v3-radius-lg);
-  background: color-mix(in srgb, var(--v3-text-dark) 6%, var(--v3-bg-primary));
-  /* A quiet lift, not a floating card — editorial covers sit ON the page (the old 80px plume read
-     as SaaS-card styling against the flat warm field). */
-  box-shadow: 0 18px 44px -30px rgba(34, 30, 46, 0.35);
+:where(a, button, input, textarea):focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 3px;
 }
 
-.projects-index-v4__img {
+:root {
+  /* The one motion curve: slow start, fast middle, dead stop. Nothing springs. */
+  --ease: cubic-bezier(0.82, 0, 0.18, 1);
+
+  /* The page's display scale — the hero name and the projects title are the SAME size, one
+     per screen. `cqi` resolves against whichever container the var is used in, so both
+     .hero and .projects-title declare `container-type: inline-size` and get the same
+     value from the shared measure. */
+  --display-size: clamp(2.75rem, 18cqi, 15.5rem);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ── type roles ────────────────────────────────────────────────────────────── */
+
+/* The display voice: uppercase, tight, sub-1 leading. Two sizes, one face, one weight. */
+.display,
+.display-section {
+  font-family: var(--font-kumbh), sans-serif;
+  font-weight: 700;
+  text-transform: uppercase;
+  margin: 0;
+}
+
+.display {
+  font-size: clamp(2.75rem, 12vw, 12.5rem);
+  line-height: 0.78;
+  letter-spacing: -0.05em;
+}
+
+.display-section {
+  font-size: clamp(2rem, calc(0.75rem + 6vw), 7rem);
+  line-height: 0.82;
+  letter-spacing: -0.04em;
+}
+
+/* Headings below the display. The text face carries them — there is no serif. */
+.h2 {
+  margin: 0;
+  font-size: clamp(1.5rem, calc(1rem + 1.4vw), 2.75rem);
+  font-weight: 500;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+}
+
+.h3 {
+  margin: 0;
+  font-size: clamp(1.15rem, calc(0.95rem + 0.6vw), 1.6rem);
+  font-weight: 500;
+  line-height: 1.2;
+  letter-spacing: -0.015em;
+}
+
+/* Prose gets real leading. Meta and labels stay tight — that is the context split. */
+.prose {
+  margin: 0;
+  max-width: 62ch;
+  font-size: clamp(1rem, 0.95rem + 0.2vw, 1.125rem);
+  line-height: 1.55;
+  text-wrap: pretty;
+}
+
+.note {
+  margin: 0;
+  font-size: clamp(1rem, 0.9rem + 0.4vw, 1.3125rem);
+  line-height: 1.2;
+  letter-spacing: 0.01em;
+}
+
+.label {
+  margin: 0;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.muted {
+  color: var(--color-ink-muted);
+}
+
+/* The signature. One phrase, one place. */
+.script {
+  font-family: var(--font-style-script), "Snell Roundhand", cursive;
+  font-weight: 400;
+  line-height: 1;
+}
+
+/* ── layout ────────────────────────────────────────────────────────────────── */
+
+.gutter {
+  padding-inline: 15px;
+}
+
+@media (min-width: 768px) {
+  .gutter {
+    padding-inline: clamp(2rem, 6.5vw, 9rem);
+  }
+}
+
+/* The chapter step — the page's one big silence. */
+.section {
+  padding-block: 100px;
+}
+
+@media (min-width: 768px) {
+  .section {
+    padding-block: 200px;
+  }
+}
+
+.measure {
+  max-width: 90rem;
+  margin-inline: auto;
+}
+
+/* ── the frame ─────────────────────────────────────────────────────────────── */
+/* Every image and video on the site sits in one of these. Hard edges, no shadow.
+   Monochrome until you engage with it. */
+
+.frame {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  background: var(--color-bone-sunk);
+}
+
+.frame--wide {
+  aspect-ratio: 4 / 3;
+}
+
+.frame--video {
+  aspect-ratio: 16 / 9;
+}
+
+.frame__media {
   display: block;
   width: 100%;
   height: 100%;
   object-fit: cover;
-  /* the one restrained hover tell — a slow, small push-in, cropped by the frame */
+  filter: grayscale(1);
   transform: scale(1);
-  transition: transform 0.5s var(--ease-micro);
-  will-change: transform;
+  transition:
+    filter 0.7s var(--ease),
+    transform 0.7s var(--ease);
 }
 
-.projects-index-v4__link:hover .projects-index-v4__img,
-.projects-index-v4__link:focus-visible .projects-index-v4__img {
-  transform: scale(1.035);
+a:hover .frame__media,
+a:focus-visible .frame__media {
+  filter: grayscale(0);
+  transform: scale(1.03);
 }
 
-/* Poster-kind cover: a designed typographic plate (bg = media.tint) — a deliberate cover, not a
-   blank. Same salvaged plate language as the old overlay, scaled to fill the frame. */
-.projects-index-v4__plate {
+/* Works with no usable screenshot get a typographic plate instead of a blank box. */
+.plate {
   position: absolute;
   inset: 0;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 0.75rem;
-  padding: clamp(1.25rem, 6cqi, 2.5rem);
-  text-align: center;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  padding: clamp(1.25rem, 4cqi, 2.5rem);
+  background: var(--color-ink);
+  color: var(--color-bone);
   container-type: inline-size;
-  transform: scale(1);
-  transition: transform 0.5s var(--ease-micro);
-  will-change: transform;
 }
 
-.projects-index-v4__link:hover .projects-index-v4__plate,
-.projects-index-v4__link:focus-visible .projects-index-v4__plate {
-  transform: scale(1.035);
-}
-
-.projects-index-v4__plate::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background-image: var(--grain-url);
-  background-repeat: repeat;
-  background-size: var(--grain-scale) var(--grain-scale);
-  opacity: 0.28;
-  mix-blend-mode: overlay;
-  pointer-events: none;
-}
-
-.projects-index-v4__plate-word {
-  position: relative;
-  z-index: 1;
-  font-family: var(--font-fraunces), Georgia, serif;
-  font-weight: 440;
-  font-optical-sizing: auto;
+.plate__word {
+  font-family: var(--font-kumbh), sans-serif;
+  font-weight: 700;
+  text-transform: uppercase;
   font-size: clamp(1.5rem, 9cqi, 3rem);
-  line-height: 1.05;
-  letter-spacing: 0.01em;
-  color: var(--v3-bg-primary);
+  line-height: 0.9;
+  letter-spacing: -0.03em;
 }
 
-.projects-index-v4__plate-caption {
-  position: relative;
-  z-index: 1;
-  font-family: var(--font-hanken-sans), sans-serif;
-  font-size: clamp(0.68rem, 3cqi, 0.9rem);
-  line-height: 1.4;
-  color: color-mix(in srgb, var(--v3-bg-primary) 74%, transparent);
+.plate__caption {
+  font-size: clamp(0.8rem, 3cqi, 0.95rem);
+  line-height: 1.2;
+  color: var(--color-bone-muted);
 }
 
-/* Under the cover: the serif title, then a muted year · role meta line (the exact 70% plum ink the
-   old spread used). Title gains a hairline underline on hover — one restrained tell, paired with the
-   cover's push-in. */
-.projects-index-v4__title {
+/* ── links ────────────────────────────────────────────────────────────────── */
+/* One underline behaviour everywhere: a rule that wipes in from the left. */
+
+.underline-link {
   position: relative;
   display: inline-block;
-  /* BOND step — the title belongs to the cover above it (cover → title → meta is one caption unit),
-     so it sits a clear breath below the frame but reads as its label. */
-  margin: clamp(0.9rem, 1.8vh, 1.35rem) 0 0;
-  font-family: var(--font-fraunces), Georgia, serif;
-  font-weight: 400;
-  font-optical-sizing: auto;
-  font-size: clamp(1.6rem, 3vw, 2.6rem);
-  line-height: 1.05;
-  letter-spacing: 0;
-  color: var(--v3-text-dark);
 }
 
-.projects-index-v4__title::after {
+.underline-link::after {
   content: "";
   position: absolute;
   left: 0;
-  bottom: -0.08em;
+  bottom: -0.2em;
   width: 100%;
   height: 1px;
   background: currentColor;
   transform: scaleX(0);
   transform-origin: left;
-  transition: transform 0.5s var(--ease-micro);
+  transition: transform 0.5s var(--ease);
 }
 
-.projects-index-v4__link:hover .projects-index-v4__title::after,
-.projects-index-v4__link:focus-visible .projects-index-v4__title::after {
+.underline-link:hover::after,
+.underline-link:focus-visible::after,
+a:hover .underline-link::after,
+a:focus-visible .underline-link::after {
   transform: scaleX(1);
 }
 
-/* The recruiter-facing facts line — 70% plum on cream clears WCAG AA (~5.4:1) at this size (58%
-   read sub-AA). Hanken, the single quiet support voice; no accent. */
-.projects-index-v4__meta {
-  /* HAIRLINE step — the meta is the title's own facts line, bonded tight to it (the tightest gap in
-     the cell) so the caption unit reads as one. */
-  margin: 0.45rem 0 0;
-  font-family: var(--font-hanken-sans), sans-serif;
-  font-size: clamp(0.82rem, 0.9vw, 0.95rem);
-  letter-spacing: 0.015em;
-  color: color-mix(in srgb, var(--v3-text-dark) 70%, transparent);
-}
+/* ── rows ─────────────────────────────────────────────────────────────────── */
+/* The shared text-row list: capabilities and the archive both use it. */
 
-/* =========================================================
-   V4 — CASE STUDY PAGE (/works/[slug])
-   A calm real route: oversized serif title, facts line, brief, the cover bleeding right, the body
-   write-up, media at size, the full stack, external links, and prev/next nav. Static reveals only
-   (CaseView owns a single mount cascade). Salvaged type language from the deleted spread/overlay.
-   ========================================================= */
-.case-v4 {
-  position: relative;
-  z-index: 1;
-  color: var(--v3-text-dark);
-  max-width: 84rem;
-  margin: 0 auto;
-  padding: clamp(7rem, 16vh, 11rem) var(--brand-gutter) clamp(6rem, 12vh, 9rem);
-  display: flex;
-  flex-direction: column;
-  gap: clamp(3.5rem, 8vh, 6rem);
-}
-
-/* Hero band — intro column left, cover bleeding right. */
-.case-v4__hero {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
-  align-items: center;
-  gap: clamp(2rem, 5vw, 4.5rem);
-}
-
-.case-v4__intro {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-}
-
-.case-v4__meta {
-  margin: 0 0 clamp(1rem, 2.4vh, 1.6rem);
-  font-family: var(--font-hanken-sans), sans-serif;
-  font-size: clamp(0.82rem, 0.9vw, 0.95rem);
-  letter-spacing: 0.015em;
-  color: color-mix(in srgb, var(--v3-text-dark) 70%, transparent);
-}
-
-/* The oversized Fraunces display treatment. */
-.case-title-v4 {
-  margin: 0 0 0 -0.03em;
-  font-family: var(--font-fraunces), Georgia, serif;
-  font-weight: 340;
-  /* push Fraunces to its display optical size for the thin hairlines + thick stems of a Didone */
-  font-variation-settings:
-    "opsz" 144,
-    "SOFT" 0,
-    "WONK" 0;
-  font-size: clamp(3rem, 8vw, 7rem);
-  line-height: 0.92;
-  letter-spacing: 0.005em;
-  color: var(--v3-text-dark);
-}
-
-.case-v4__brief {
-  margin: clamp(1.4rem, 3vh, 2.2rem) 0 0;
-  max-width: 34rem;
-  font-family: var(--font-fraunces), Georgia, serif;
-  font-optical-sizing: auto;
-  font-size: clamp(1.15rem, 1.4vw, 1.5rem);
-  line-height: 1.5;
-  text-wrap: pretty;
-  color: color-mix(in srgb, var(--v3-text-dark) 92%, transparent);
-}
-
-.case-v4__cover {
-  position: relative;
-  overflow: hidden;
-  aspect-ratio: 4 / 3;
-  border-radius: var(--v3-radius-lg);
-  background: color-mix(in srgb, var(--v3-text-dark) 6%, var(--v3-bg-primary));
-  box-shadow: 0 40px 90px -48px rgba(34, 30, 46, 0.5);
-}
-
-.case-v4__cover-img {
-  display: block;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-/* Body write-up — Hanken body measure, one comfortable column. */
-.case-v4__body {
-  max-width: 42rem;
-  display: flex;
-  flex-direction: column;
-  gap: clamp(1.1rem, 2.4vh, 1.6rem);
-}
-
-.case-v4__para {
+.rows {
+  list-style: none;
   margin: 0;
-  font-family: var(--font-hanken-sans), sans-serif;
-  font-size: clamp(1.05rem, 1.15vw, 1.22rem);
-  line-height: 1.65;
-  text-wrap: pretty;
-  color: color-mix(in srgb, var(--v3-text-dark) 88%, transparent);
+  padding: 0;
+  border-top: 1px solid var(--color-rule);
 }
 
-/* Media at size — the demo video, or the plate large. */
-.case-v4__media {
-  position: relative;
-  overflow: hidden;
-  border-radius: var(--v3-radius-lg);
-  background: color-mix(in srgb, var(--v3-text-dark) 8%, var(--v3-bg-primary));
-  box-shadow: 0 44px 100px -50px rgba(34, 30, 46, 0.55);
-}
-
-.case-v4__video {
-  display: block;
-  width: 100%;
-  height: auto;
-  aspect-ratio: 16 / 9;
-  object-fit: cover;
-  background: var(--v3-text-dark);
-}
-
-/* Salvaged plate — shared by the case cover (poster kind) and the large media block. */
-.case-plate-v4 {
+.row {
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 1rem;
-  text-align: center;
-  container-type: inline-size;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 15px 30px;
+  padding-block: 30px;
+  border-bottom: 1px solid var(--color-rule);
 }
 
-.case-plate-v4--cover {
-  position: absolute;
-  inset: 0;
-  padding: clamp(1.5rem, 7cqi, 3rem);
+.row__line {
+  flex: 0 0 auto;
+  min-width: min(100%, 18rem);
 }
 
-.case-plate-v4::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background-image: var(--grain-url);
-  background-repeat: repeat;
-  background-size: var(--grain-scale) var(--grain-scale);
-  opacity: 0.28;
-  mix-blend-mode: overlay;
+.row__sub {
+  flex: 1 1 20rem;
+  color: var(--color-ink-muted);
+}
+
+/* ── accessibility ────────────────────────────────────────────────────────── */
+
+.skip-link {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 110;
+  margin: 15px;
+  padding: 0.6rem 1rem;
+  background: var(--color-ink);
+  color: var(--color-bone);
+  transform: translateY(-200%);
+  transition: transform 0.25s var(--ease);
+}
+
+.skip-link:focus-visible {
+  transform: translateY(0);
+}
+
+/* ── nav ──────────────────────────────────────────────────────────────────── */
+
+/* The bar spans the viewport, but its contents sit on the SAME measure as every section
+   below — so the wordmark lands on the page's left axis and the links on its right, rather
+   than opening a second, wider grid at the top. */
+.site-nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  mix-blend-mode: difference;
+  color: var(--color-bone);
   pointer-events: none;
 }
 
-.case-plate-v4__word {
-  position: relative;
-  z-index: 1;
-  font-family: var(--font-fraunces), Georgia, serif;
-  font-weight: 440;
-  font-optical-sizing: auto;
-  font-size: clamp(2rem, 12cqi, 4.5rem);
-  line-height: 1.05;
-  letter-spacing: 0.01em;
-  color: var(--v3-bg-primary);
+.site-nav__inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding-block: 18px;
 }
 
-.case-plate-v4__caption {
-  position: relative;
-  z-index: 1;
-  font-family: var(--font-hanken-sans), sans-serif;
-  font-size: clamp(0.75rem, 2.6cqi, 1rem);
-  line-height: 1.4;
-  color: color-mix(in srgb, var(--v3-bg-primary) 74%, transparent);
+/* Only the controls take the pointer — the bar itself must not eat clicks. */
+.site-nav a {
+  pointer-events: auto;
 }
 
-/* Stack — the full list as a clean row of quiet caps chips (salvaged from the overlay's stack). */
-.case-stack-v4 {
+.site-nav__brand {
+  font-family: var(--font-kumbh), sans-serif;
+  font-weight: 700;
+  font-size: 1rem;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.site-nav__links {
+  display: flex;
+  align-items: center;
+  gap: clamp(1rem, 2vw, 1.75rem);
+}
+
+.site-nav__link {
+  font-size: 1rem;
+  line-height: 1;
+}
+
+/* ── hero ─────────────────────────────────────────────────────────────────── */
+
+/* `cqi` rather than `vw`: the name is sized against the measure it actually sits in, so it
+   keeps its proportion once .measure caps the page at 90rem. */
+.hero {
+  /* Positive values push the lockup DOWN from mathematical centre. THE knob for the hero's
+     optical balance. */
+  --hero-bias: clamp(1.5rem, 4vh, 2.5rem);
+  container-type: inline-size;
+  /* Deliberately short of the fold: the projects title that follows crops against the
+     viewport edge, and that half-word IS the invitation to scroll. */
+  min-height: 88svh;
+  display: flex;
+  flex-direction: column;
+  /* Top padding only clears the fixed nav; the lockup then centres itself in whatever is
+     left above the cue (see .hero__block margin). */
+  padding-block: 90px 30px;
+}
+
+/* No indent of its own — the lockup sits on the page's single left axis, the same one the
+   nav wordmark and every section below use. `margin-block: auto` centres the box, so the
+   padding-top shifts visible content down by half its value. */
+.hero__block {
+  margin-block: auto;
+  padding-top: var(--hero-bias);
+}
+
+/* Rests just on the cap line and lightly crosses it — the script has to stay readable on
+   the bone, not sink into the black letterforms. */
+.hero__greeting {
+  margin: 0 0 calc(var(--display-size) * -0.028);
+  font-size: calc(var(--display-size) * 0.175);
+  position: relative;
+  z-index: 1;
+}
+
+.hero__name {
+  font-size: var(--display-size);
+  /* Base tracking is tightened by 0.006em per gap to absorb the two per-letter openings
+     below (0.04em over seven gaps), so opening T–I and I–U costs the word no extra width. */
+  letter-spacing: -0.021em;
+  /* The P carries a left side bearing, so its box edge sits left of its ink. Pulling the
+     box out by that bearing puts the P's STEM on the same axis as the copy below — one
+     strict left edge for the whole lockup. Tune if the stem sits off the line. */
+  margin-left: -0.04em;
+}
+
+/* T–I and I–U jam where the narrow verticals meet the broad U. Opened locally rather than
+   by loosening the whole word. */
+.hero__name-open {
+  margin-right: 0.02em;
+}
+
+/* Role and tagline are one thought — bonded tight, then a real step down to the foot. */
+.hero__role {
+  margin: 40px 0 0;
+  font-weight: 500;
+}
+
+/* The statement holds the left axis and the locator is pushed to the far edge, sharing its
+   baseline — so the block spans the full measure instead of huddling in the left third
+   under a full-width name. They stack, and the row gap returns, when there isn't room. */
+.hero__voice {
+  margin-top: 8px;
   display: flex;
   flex-wrap: wrap;
-  gap: 0.6rem 0.75rem;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 30px 40px;
+}
+
+/* The expressive line: larger than the role and lighter in WEIGHT, but the same full ink —
+   it earns prominence by scale, not by being the only coloured thing. */
+.hero__tagline {
+  margin: 0;
+  max-width: 28ch;
+}
+
+.hero__foot {
+  flex: none;
+}
+
+/* ── the projects title ───────────────────────────────────────────────────── */
+/* PR( ◼ )JECTS — the work section's heading, at the SAME display scale as the hero name
+   (one giant word per screen, never two). At this size the slot is large enough to read an
+   actual project still, which is the whole point of the device. Centre-aligned rather than
+   baseline-aligned, which is correct for all-caps with a square sitting inside the word. */
+
+.projects-title {
+  container-type: inline-size;
+  margin-bottom: 100px;
+}
+
+.projects-cue {
+  display: inline-flex;
+  align-items: center;
+  gap: calc(0.06em + 0.4vw);
+  font-size: var(--display-size);
+  letter-spacing: -0.03em;
+}
+
+/* Both brackets are the SAME glyph, the opening one mirrored — so the pair is exactly
+   symmetric instead of relying on the font's ( and ) to match. */
+.projects-cue__paren--open {
+  transform: scaleX(-1);
+}
+
+/* 0.8em — the reference sits its slot at ~0.82em of the display line, which is what makes
+   the image legible rather than a smudge. */
+.projects-cue__slot {
+  position: relative;
+  flex: none;
+  aspect-ratio: 1;
+  height: 0.8em;
+  overflow: hidden;
+  background: var(--color-bone-sunk);
+}
+
+/* Stacked stills; only the active one is opaque. Monochrome until you engage, the same
+   rule .frame uses. */
+.projects-cue__still {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  filter: grayscale(1);
+  transition:
+    opacity 0.4s var(--ease),
+    filter 0.7s var(--ease);
+}
+
+.projects-cue__still[data-active="true"] {
+  opacity: 1;
+}
+
+.projects-cue:hover .projects-cue__still {
+  filter: grayscale(0);
+}
+
+/* ── work index ───────────────────────────────────────────────────────────── */
+
+/* A short top step rather than the full chapter break: the title has to clear the hero by
+   only a little so it crops against the fold. The chapter silence is restored below it. */
+.work-section {
+  padding-block: 40px 100px;
+}
+
+@media (min-width: 768px) {
+  .work-section {
+    padding-block: 50px 200px;
+  }
+}
+
+.work-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 50px;
+}
+
+@media (min-width: 768px) {
+  .work-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 100px 50px;
+  }
+
+  /* The right column drops one beat so the pair reads as a spread, not a table. */
+  .work-grid > :nth-child(even) {
+    margin-top: 100px;
+  }
+}
+
+.work-card__title {
+  margin: 30px 0 0;
+}
+
+.work-card__meta {
+  margin: 15px 0 0;
+}
+
+/* ── footer ───────────────────────────────────────────────────────────────── */
+/* The inverted surface — the same two values, swapped. */
+
+.footer {
+  background: var(--color-ink);
+  color: var(--color-bone);
+}
+
+.footer__headline {
+  margin: 0;
+}
+
+.footer__line {
+  display: block;
+  overflow: hidden;
+}
+
+.footer__line-inner {
+  display: block;
+}
+
+.footer__email {
+  display: inline-block;
+  margin-top: 50px;
+  font-size: clamp(1.25rem, 3vw, 2.5rem);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+
+.footer__meta {
+  margin-top: 100px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 30px;
+  padding-top: 30px;
+  border-top: 1px solid rgba(239, 237, 234, 0.18);
+}
+
+.footer__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 30px;
+}
+
+.footer__colophon {
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 30px;
+  color: var(--color-bone-muted);
+}
+
+/* ── case page ────────────────────────────────────────────────────────────── */
+
+.case {
+  display: flex;
+  flex-direction: column;
+  gap: 100px;
+  padding-block: 25vh 100px;
+}
+
+.case__intro {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+.case__body {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+.case__stack {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
-.case-stack-v4 li {
-  font-family: var(--font-hanken-sans), sans-serif;
-  font-size: clamp(0.72rem, 0.85vw, 0.82rem);
+.case__stack li {
+  padding: 0.55em 1em;
+  border: 1px solid var(--color-rule);
+  font-size: 0.8125rem;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: color-mix(in srgb, var(--v3-text-dark) 74%, transparent);
-  padding: 0.5em 0.9em;
-  border: 1px solid color-mix(in srgb, var(--v3-text-dark) 18%, transparent);
-  border-radius: var(--v3-radius-pill);
+  color: var(--color-ink-muted);
 }
 
-/* External links — salvaged link language; the site's one accent on hover. */
-.case-v4__links {
+.case__links {
   display: flex;
   flex-wrap: wrap;
-  gap: clamp(1.25rem, 2vw, 2rem);
+  gap: 30px;
 }
 
-.case-link-v4 {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.45rem;
-  font-family: var(--font-hanken-sans), sans-serif;
-  font-weight: 500;
-  font-size: clamp(1rem, 1.1vw, 1.15rem);
-  letter-spacing: 0.01em;
-  color: var(--v3-accent-red);
-  text-decoration: none;
-  border-bottom: 1px solid currentColor;
-  padding-bottom: 0.2em;
-  transition: transform 0.3s var(--ease-micro);
+.case__nav {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 30px;
+  padding-top: 30px;
+  border-top: 1px solid var(--color-rule);
 }
 
-.case-link-v4:hover {
-  transform: translateX(3px);
-}
-
-.case-link-v4__icon {
-  display: inline-flex;
-  width: 0.8em;
-  height: 0.8em;
-  transition: transform 0.6s var(--ease-micro);
-}
-
-.case-link-v4__icon svg {
-  width: 100%;
-  height: 100%;
-}
-
-.case-link-v4:hover .case-link-v4__icon {
-  transform: translate(2px, -2px);
-}
-
-/* Prev / next / back footer nav. */
-.case-v4__nav {
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
-  align-items: center;
-  gap: clamp(1rem, 3vw, 2.5rem);
-  margin-top: clamp(1rem, 3vh, 2rem);
-  padding-top: clamp(2rem, 5vh, 3rem);
-  border-top: 1px solid color-mix(in srgb, var(--v3-text-dark) 14%, transparent);
-}
-
-.case-v4__nav-link {
+.case__nav-item {
   display: flex;
   flex-direction: column;
-  gap: 0.2rem;
-  color: inherit;
-  text-decoration: none;
-  transition: transform 0.3s var(--ease-micro);
-}
-
-.case-v4__nav-link--next {
-  align-items: flex-end;
-  text-align: right;
-}
-
-.case-v4__nav-link--prev:hover {
-  transform: translateX(-3px);
-}
-.case-v4__nav-link--next:hover {
-  transform: translateX(3px);
-}
-
-.case-v4__nav-dir {
-  font-family: var(--font-hanken-sans), sans-serif;
-  font-size: clamp(0.7rem, 0.8vw, 0.8rem);
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: color-mix(in srgb, var(--v3-text-dark) 60%, transparent);
-}
-
-.case-v4__nav-title {
-  font-family: var(--font-fraunces), Georgia, serif;
-  font-optical-sizing: auto;
-  font-size: clamp(1.05rem, 1.4vw, 1.4rem);
-  color: var(--v3-text-dark);
-}
-
-.case-v4__nav-back {
-  font-family: var(--font-hanken-sans), sans-serif;
-  font-size: clamp(0.78rem, 0.9vw, 0.9rem);
-  letter-spacing: 0.06em;
-  color: color-mix(in srgb, var(--v3-text-dark) 72%, transparent);
-  text-decoration: none;
-  border-bottom: 1px solid transparent;
-  transition: color 0.4s var(--ease-micro), border-color 0.4s var(--ease-micro);
-}
-
-.case-v4__nav-back:hover {
-  color: var(--v3-accent-red);
-  border-bottom-color: currentColor;
-}
-
-/* =========================================================
-   V4 — projects index + case: responsive
-   ========================================================= */
-@media (max-width: 1000px) {
-  /* Collapse the two-up to a single flowing column — the stagger stops earning its keep below the
-     two-up threshold and would only leave a lopsided gap. */
-  .projects-index-v4__grid {
-    grid-template-columns: 1fr;
-    row-gap: clamp(4rem, 10vh, 7rem);
-    max-width: 40rem;
-  }
-
-  .projects-index-v4__cell:nth-child(even) {
-    margin-top: 0; /* no stagger in a single column */
-  }
-
-  /* Case hero stacks: title/brief over the cover. */
-  .case-v4__hero {
-    grid-template-columns: 1fr;
-    gap: clamp(2rem, 5vh, 3rem);
-  }
-}
-
-@media (max-width: 640px) {
-  .case-v4__nav {
-    grid-template-columns: 1fr 1fr;
-    grid-template-areas:
-      "prev next"
-      "back back";
-    row-gap: 2rem;
-  }
-  .case-v4__nav-link--prev {
-    grid-area: prev;
-  }
-  .case-v4__nav-link--next {
-    grid-area: next;
-  }
-  .case-v4__nav-back {
-    grid-area: back;
-    justify-self: center;
-  }
+  gap: 15px;
 }

@@ -1,10 +1,9 @@
 /**
  * Real shipped work, in two tiers:
- *  • `featured` — the four case panels on the landing page. Media is honest: a demo video
- *    where one exists, a typographic poster where the only artifacts are rough screenshots
- *    (a designed cover reads deliberate; a blurry capture reads careless).
- *  • `archive` — the smaller pieces. NOT rendered on the landing page (by design); reserved
- *    for the upcoming dedicated /works page that lists the full catalogue.
+ *  • `featured` — the four works in the landing index, each with a case page at /works/[slug].
+ *    Media is honest: a demo video where one exists, a typographic poster where the only
+ *    artifacts are rough screenshots.
+ *  • `archive` — the smaller pieces, listed as text rows under the index.
  */
 export type WorkMedia =
   | {
@@ -31,10 +30,8 @@ export type FeaturedWork = {
   slug: string;
   year: string;
   role: string;
-  /** Short editorial category for the cinematic stage's rotated label (e.g. "NIL Marketplace").
-      Optional — the stage falls back to the role line when absent. */
-  kicker?: string;
-  /** A short, definition-style gloss shown under the project name (Serendipity DNA). Optional. */
+  /** A short, definition-style gloss. The case page uses it as the brief, falling back to
+      `description` when absent. */
   tagline?: string;
   /** First-person, concrete. This is the human voice of the section. */
   description: string;
@@ -43,9 +40,8 @@ export type FeaturedWork = {
       it / where it landed) from `description` + `stack`, inventing no metrics. When unset the case
       page falls back to `description`. */
   caseBody?: string[];
-  /** A photographed product still shown as the editorial spread's bleed image (the laptop scene
-      on the lead spread). The demo `media` still drives the play-in-place / detail-overlay video.
-      Optional — only the recomposed editorial spreads use it. */
+  /** A photographed product still. Preferred as the frame image in the index and on the case
+      page; falls back to the video's own poster frame when absent. */
   cover?: string;
   /** Voiced alt text for the cover still — describes the actual scene, not "Title product".
       Falls back to a generic label when absent. */
@@ -68,7 +64,6 @@ export const featured: FeaturedWork[] = [
     slug: "nilink",
     year: "2025",
     role: "Software Engineer",
-    kicker: "NIL Marketplace",
     tagline: "Athletes on one side. Brands on the other.",
     description:
       "A platform centralizing NIL deals end-to-end for college athletes and local brands.",
@@ -79,12 +74,11 @@ export const featured: FeaturedWork[] = [
     cover: "/projects_assets/NILINK/NILINK_product_img.png",
     coverAlt:
       "The NILINK marketplace open on a laptop, showing athlete and brand deal listings side by side.",
-    // Headline tech first — the spread meta shows the first two as "Next.js / Supabase".
+    // Headline tech first — the case meta line shows the first two.
     stack: ["Next.js", "Supabase", "TypeScript", "SWR", "Vitest"],
     media: {
       kind: "video",
       src: "/projects_assets/NILINK/demo.mp4",
-      poster: "/projects_assets/NILINK/poster.jpg",
     },
     links: [{ label: "Visit live", href: "https://mvp-inky-eta.vercel.app/" }],
   },

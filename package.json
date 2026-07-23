@@ -3,33 +3,25 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev & npx next-video sync -w",
+    "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "eslint ."
   },
   "dependencies": {
-    "@gsap/react": "^2.1.2",
-    "@radix-ui/react-dialog": "^1.1.15",
     "@vercel/analytics": "^1.6.1",
-    "clsx": "^2.1.1",
-    "gsap": "^3.12.7",
     "lenis": "^1.2.3",
-    "lucide-react": "^0.483.0",
     "motion": "^12.6.2",
     "next": "^16.1.4",
-    "next-video": "^2.7.1",
     "react": "^19.2.3",
-    "react-dom": "^19.2.3",
-    "react-medium-image-zoom": "^5.2.14",
-    "tailwind-merge": "^3.0.2"
+    "react-dom": "^19.2.3"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
     "@tailwindcss/postcss": "^4.0.17",
     "@types/node": "^20",
-    "@types/react": "^18",
-    "@types/react-dom": "^18",
+    "@types/react": "^19.2.17",
+    "@types/react-dom": "^19.2.3",
     "eslint": "^9",
     "eslint-config-next": "^16.1.4",
     "tailwindcss": "^4.0.17",

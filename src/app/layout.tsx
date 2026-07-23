@@ -1,15 +1,14 @@
 import type { Metadata } from "next";
 
 import "./globals.css";
-import { styleScript, fraunces, hankenGrotesk } from "@/lib/fonts";
+import { instrumentSans, kumbhSans, styleScript } from "@/lib/fonts";
 import { Analytics } from "@vercel/analytics/next";
 import { SiteNav } from "@/components/layout/SiteNav";
 import { SmoothScroll } from "@/components/layout/SmoothScroll";
-import { IntroProvider } from "@/components/intro/IntroProvider";
 
 export const metadata: Metadata = {
   title: "Pratiush Karki",
-  description: "Pratiush Karki | Portfolio | Software Engineer | UI/UX Designer | Business Analyst",
+  description: "Pratiush Karki — Software Engineer.",
   icons: {
     icon: "/favicon.png",
   },
@@ -23,19 +22,13 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${hankenGrotesk.variable} ${fraunces.variable} ${styleScript.variable} antialiased`}
+        className={`${instrumentSans.variable} ${kumbhSans.variable} ${styleScript.variable} antialiased`}
       >
-        {/* Keyboard skip link — hidden until focused, so the visual default is unchanged. Lets AT /
-            keyboard users jump past the long pinned hero straight to the work. */}
-        <a href="#works" className="skip-link">
-          Skip to projects
+        <a href="#work" className="skip-link">
+          Skip to work
         </a>
-        {/* IntroProvider is the single opening-choreography clock — backdrop, hero copy, name
-            and scroll cue all read the same two gates instead of each animating independently. */}
-        <IntroProvider>
-          <SiteNav />
-          <SmoothScroll>{children}</SmoothScroll>
-        </IntroProvider>
+        <SiteNav />
+        <SmoothScroll>{children}</SmoothScroll>
         <Analytics />
       </body>
     </html>
