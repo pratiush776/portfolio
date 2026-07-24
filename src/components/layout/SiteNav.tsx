@@ -5,13 +5,13 @@ import Link from "next/link";
  * scrolls underneath, so it stays legible over bone, over the ink footer, and over imagery
  * without needing a background plate of its own.
  *
- * The inner row carries `gutter measure` — the same container every section uses — so the
- * header sits on the page's grid instead of its own.
+ * The inner row runs system-wide on its own thin gutter — wider than the content's inset
+ * measure — so the header opens the page rather than sitting on the content axis.
  */
 export function SiteNav() {
   return (
     <nav className="site-nav" aria-label="Primary">
-      <div className="site-nav__inner gutter measure">
+      <div className="site-nav__inner">
         <Link href="/" className="site-nav__brand" aria-label="Pratiush — home">
           Pratiush
         </Link>

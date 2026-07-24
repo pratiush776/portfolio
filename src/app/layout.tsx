@@ -8,7 +8,7 @@ import { SmoothScroll } from "@/components/layout/SmoothScroll";
 
 export const metadata: Metadata = {
   title: "Pratiush Karki",
-  description: "Pratiush Karki — Software Engineer.",
+  description: "Pratiush Karki — Product-focused full-stack developer.",
   icons: {
     icon: "/favicon.png",
   },

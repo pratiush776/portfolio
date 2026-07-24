@@ -6,8 +6,11 @@ import { ArrowUpRight } from "@/components/icons";
 import { EASE, RISE } from "@/lib/motion";
 
 /**
- * The ask, and the page's only inverted surface — ink field, bone text. The headline
- * lines rise out of their own overflow-hidden boxes; everything else uses the shared rise.
+ * The page's only inverted surface — ink field, bone text — and its sign-off. Contact and
+ * status sit up top, filling the width; the first name then closes the page at display scale,
+ * a bookend to the hero's opening "Pratiush". The name rises out of its own overflow-clip box;
+ * everything else uses the shared rise. The giant name is decorative (the accessible name lives
+ * in the nav, hero, and page title), so it is aria-hidden.
  */
 const STAGGER: Variants = {
   hidden: {},
@@ -23,8 +26,6 @@ const lineRise: Variants = {
   hidden: { y: "110%" },
   visible: { y: "0%", transition: { duration: 0.9, ease: EASE } },
 };
-
-const HEADLINE_LINES = ["Tell me what", "you're building."];
 
 const PROFILES = [
   { label: "GitHub", href: "https://github.com/pratiush776" },
@@ -48,50 +49,62 @@ export function SiteFooter() {
         whileInView={reduce ? undefined : "visible"}
         viewport={{ once: true, margin: "0px 0px -25% 0px" }}
       >
-        <h2 className="footer__headline display-section">
-          {HEADLINE_LINES.map((line) => (
-            <span key={line} className="footer__line">
-              <motion.span
-                className="footer__line-inner"
-                variants={reduce ? undefined : lineRise}
-              >
-                {line}
-              </motion.span>
-            </span>
-          ))}
-        </h2>
+        <div className="footer__top">
+          <motion.div
+            className="footer__contact"
+            variants={reduce ? undefined : rise}
+          >
+            <h2 className="footer__eyebrow label">Get in touch</h2>
+            <a className="footer__email" href="mailto:pratiush776@gmail.com">
+              <span className="underline-link">pratiush776@gmail.com</span>
+            </a>
+          </motion.div>
 
-        <motion.a
-          className="footer__email"
-          href="mailto:pratiush776@gmail.com"
+          <motion.div
+            className="footer__status"
+            variants={reduce ? undefined : rise}
+          >
+            <p className="footer__status-role">
+              Product-focused full-stack developer
+            </p>
+            <p className="footer__status-line">Open to new opportunities</p>
+            <p className="footer__status-line">
+              Based in USA · open to relocation
+            </p>
+            <nav className="footer__links" aria-label="Profiles">
+              {PROFILES.map(({ label, href }) => (
+                <a
+                  key={label}
+                  href={href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="footer__link note"
+                >
+                  <span className="underline-link">{label}</span>
+                  <ArrowUpRight width="12" height="12" aria-hidden />
+                </a>
+              ))}
+            </nav>
+          </motion.div>
+        </div>
+
+        <div className="footer__name display" aria-hidden>
+          <span className="footer__line">
+            <motion.span
+              className="footer__line-inner"
+              variants={reduce ? undefined : lineRise}
+            >
+              Pratiush
+            </motion.span>
+          </span>
+        </div>
+
+        <motion.p
+          className="footer__colophon label"
           variants={reduce ? undefined : rise}
         >
-          <span className="underline-link">pratiush776@gmail.com</span>
-        </motion.a>
-
-        <motion.div
-          className="footer__meta"
-          variants={reduce ? undefined : rise}
-        >
-          <nav className="footer__links" aria-label="Profiles">
-            {PROFILES.map(({ label, href }) => (
-              <a
-                key={label}
-                href={href}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="note"
-              >
-                <span className="underline-link">{label}</span>
-                <ArrowUpRight width="12" height="12" aria-hidden />
-              </a>
-            ))}
-          </nav>
-          <p className="footer__colophon label">
-            <span>Based in USA</span>
-            <span>© {year} Pratiush Karki</span>
-          </p>
-        </motion.div>
+          © {year} Pratiush
+        </motion.p>
       </motion.div>
     </footer>
   );

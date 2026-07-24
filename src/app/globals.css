@@ -64,6 +64,11 @@ a {
      .hero and .projects-title declare `container-type: inline-size` and get the same
      value from the shared measure. */
   --display-size: clamp(2.75rem, 18cqi, 15.5rem);
+
+  /* The display column sits on the page's inset-left measure, which leaves more air on the
+     right than the left. This nudges the whole axis — the hero block AND the projects word —
+     a touch right so it reads optically centred; applied to both so they stay on one line. */
+  --axis-shift: clamp(1.25rem, 2vw, 2.25rem);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -277,33 +282,70 @@ a:focus-visible .underline-link::after {
   transform: scaleX(1);
 }
 
-/* ── rows ─────────────────────────────────────────────────────────────────── */
-/* The shared text-row list: capabilities and the archive both use it. */
-
-.rows {
+/* ── what I do ────────────────────────────────────────────────────────────── */
+/* Capabilities as proof: each row is a claim that links to the work backing it. Own classes
+   (not a shared row pattern) and a larger line at .h2, so this chapter and the compact archive
+   read as two different sections. Same row-nudge + arrow language as the archive, for a
+   consistent "this navigates" signal. */
+.capabilities__list {
   list-style: none;
-  margin: 0;
+  margin: 50px 0 0;
   padding: 0;
   border-top: 1px solid var(--color-rule);
 }
 
-.row {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 15px 30px;
-  padding-block: 30px;
+.capabilities__row {
   border-bottom: 1px solid var(--color-rule);
 }
 
-.row__line {
-  flex: 0 0 auto;
-  min-width: min(100%, 18rem);
+.capabilities__link {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 12px 40px;
+  padding: 36px 0;
+  transition: padding-left 0.4s var(--ease);
 }
 
-.row__sub {
-  flex: 1 1 20rem;
+.capabilities__link:hover,
+.capabilities__link:focus-visible {
+  padding-left: 14px;
+}
+
+.capabilities__line {
+  flex: 0 0 auto;
+  min-width: min(100%, 20rem);
+}
+
+.capabilities__sub {
+  flex: 1 1 22rem;
   color: var(--color-ink-muted);
+}
+
+/* The proof pointer — names the project and lights up with the row. */
+.capabilities__proof {
+  margin-left: auto;
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45em;
+  color: var(--color-ink-muted);
+  transition: color 0.4s var(--ease);
+}
+
+.capabilities__link:hover .capabilities__proof,
+.capabilities__link:focus-visible .capabilities__proof {
+  color: var(--color-ink);
+}
+
+.capabilities__proof-arrow {
+  flex: none;
+  transition: transform 0.4s var(--ease);
+}
+
+.capabilities__link:hover .capabilities__proof-arrow,
+.capabilities__link:focus-visible .capabilities__proof-arrow {
+  transform: translate(3px, -3px);
 }
 
 /* ── accessibility ────────────────────────────────────────────────────────── */
@@ -327,9 +369,8 @@ a:focus-visible .underline-link::after {
 
 /* ── nav ──────────────────────────────────────────────────────────────────── */
 
-/* The bar spans the viewport, but its contents sit on the SAME measure as every section
-   below — so the wordmark lands on the page's left axis and the links on its right, rather
-   than opening a second, wider grid at the top. */
+/* The bar spans the viewport and its contents run wide with it, on a thin gutter that sits
+   OUTSIDE the content's inset measure — the wide outer header grid over the narrower page. */
 .site-nav {
   position: fixed;
   top: 0;
@@ -347,6 +388,9 @@ a:focus-visible .underline-link::after {
   justify-content: space-between;
   gap: 20px;
   padding-block: 18px;
+  /* Thin outer gutter — on mobile it matches the content's 15px so they align, on desktop it
+     stays well inside the content's clamp(2rem, 6.5vw, 9rem). THE knob for the edge inset. */
+  padding-inline: clamp(15px, 4vw, 3.5rem);
 }
 
 /* Only the controls take the pointer — the bar itself must not eat clicks. */
@@ -378,32 +422,35 @@ a:focus-visible .underline-link::after {
 /* `cqi` rather than `vw`: the name is sized against the measure it actually sits in, so it
    keeps its proportion once .measure caps the page at 90rem. */
 .hero {
-  /* Positive values push the lockup DOWN from mathematical centre. THE knob for the hero's
-     optical balance. */
-  --hero-bias: clamp(1.5rem, 4vh, 2.5rem);
+  /* Shifts the auto-centred content off mathematical centre as a transform — negative up,
+     positive down, 1:1. Purely visual, so it never moves the PROJECTS crop below (that is
+     fixed by min-height). THE knob for the hero's vertical balance. */
+  --hero-bias: -2.5rem;
   container-type: inline-size;
   /* Deliberately short of the fold: the projects title that follows crops against the
-     viewport edge, and that half-word IS the invitation to scroll. */
+     viewport edge, and that sliver of the word IS the invitation to scroll. Raise min-height
+     (→90svh, →92svh) to reveal LESS of it — THE knob for the crop. */
   min-height: 88svh;
   display: flex;
   flex-direction: column;
-  /* Top padding only clears the fixed nav; the lockup then centres itself in whatever is
-     left above the cue (see .hero__block margin). */
+  /* Top padding clears the fixed nav; the block then auto-centres in what's left. */
   padding-block: 90px 30px;
 }
 
-/* No indent of its own — the lockup sits on the page's single left axis, the same one the
-   nav wordmark and every section below use. `margin-block: auto` centres the box, so the
-   padding-top shifts visible content down by half its value. */
+/* Auto-centred in the hero, then nudged off centre by the bias transform. The content holds
+   the page's inset left axis; the nav now runs wider, outside it. */
 .hero__block {
   margin-block: auto;
-  padding-top: var(--hero-bias);
+  transform: translateX(var(--axis-shift)) translateY(var(--hero-bias));
 }
 
 /* Rests just on the cap line and lightly crosses it — the script has to stay readable on
    the bone, not sink into the black letterforms. */
 .hero__greeting {
   margin: 0 0 calc(var(--display-size) * -0.028);
+  /* A slight left overhang past the P's stem, so the script doesn't sit rigidly on the axis.
+     THE knob for the greeting's horizontal position; the vertical overlap is the margin above. */
+  margin-left: -0.18em;
   font-size: calc(var(--display-size) * 0.175);
   position: relative;
   z-index: 1;
@@ -426,92 +473,118 @@ a:focus-visible .underline-link::after {
   margin-right: 0.02em;
 }
 
-/* Role and tagline are one thought — bonded tight, then a real step down to the foot. */
-.hero__role {
-  margin: 40px 0 0;
-  font-weight: 500;
-}
-
-/* The statement holds the left axis and the locator is pushed to the far edge, sharing its
-   baseline — so the block spans the full measure instead of huddling in the left third
-   under a full-width name. They stack, and the row gap returns, when there isn't room. */
-.hero__voice {
-  margin-top: 8px;
+/* The bracketed portrait on the left, the meta as a column that brackets its height on the
+   right. `align-items: stretch` makes the column as tall as the bracket; the foot's own
+   margin-top:auto then drops it to the bottom while role/tagline hold the top. The column-gap
+   is the paren-to-role breathing room — added here, not as a meta margin, so it doesn't indent
+   the column off the left axis when the row wraps. Stacks on narrow. */
+.hero__lockup {
+  margin-top: 40px;
   display: flex;
   flex-wrap: wrap;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 30px 40px;
+  align-items: stretch;
+  gap: 20px calc(40px + clamp(0.75rem, 1vw, 1.125rem));
 }
 
-/* The expressive line: larger than the role and lighter in WEIGHT, but the same full ink —
-   it earns prominence by scale, not by being the only coloured thing. */
-.hero__tagline {
-  margin: 0;
-  max-width: 28ch;
-}
-
-.hero__foot {
-  flex: none;
-}
-
-/* ── the projects title ───────────────────────────────────────────────────── */
-/* PR( ◼ )JECTS — the work section's heading, at the SAME display scale as the hero name
-   (one giant word per screen, never two). At this size the slot is large enough to read an
-   actual project still, which is the whole point of the device. Centre-aligned rather than
-   baseline-aligned, which is correct for all-caps with a square sitting inside the word. */
-
-.projects-title {
-  container-type: inline-size;
-  margin-bottom: 100px;
-}
-
-.projects-cue {
+/* ( ▣ ) — the ornament at the SAME display size as the name, so the portrait reads as a
+   second major row rather than metadata. Items are centre-aligned so the square sits
+   concentric with the parens and fills their full height (see .hero__portrait). */
+.hero__bracket {
   display: inline-flex;
   align-items: center;
-  gap: calc(0.06em + 0.4vw);
+  /* The gap is the only spacing authority here, so the display face's negative tracking is
+     zeroed rather than left to fight it. */
+  gap: calc(0.1em + 1vw);
   font-size: var(--display-size);
-  letter-spacing: -0.03em;
+  letter-spacing: 0;
+  /* Below the square's height, so the row is sized by the portrait, not the parens' looser
+     line box. */
+  line-height: 0.8;
 }
 
 /* Both brackets are the SAME glyph, the opening one mirrored — so the pair is exactly
    symmetric instead of relying on the font's ( and ) to match. */
-.projects-cue__paren--open {
+.hero__bracket-paren--open {
   transform: scaleX(-1);
 }
 
-/* 0.8em — the reference sits its slot at ~0.82em of the display line, which is what makes
-   the image legible rather than a smudge. */
-.projects-cue__slot {
+/* Sized to the parenthesis glyph height — Kumbh's ( spans 1829/2048 = 0.893em against the
+   bracket's display-size face — so the square fills the parens' full height instead of the
+   caps'. The bracket centres it, so it sits concentric with the ( ) rather than footed on
+   the baseline. The ink ground is what the portrait's transparent PNG resolves against. */
+.hero__portrait {
   position: relative;
   flex: none;
   aspect-ratio: 1;
-  height: 0.8em;
+  height: 0.893em;
   overflow: hidden;
-  background: var(--color-bone-sunk);
+  background: var(--color-ink);
 }
 
-/* Stacked stills; only the active one is opaque. Monochrome until you engage, the same
-   rule .frame uses. */
-.projects-cue__still {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
+/* Top-anchored: a centred square crop of the 1122×1402 portrait cuts the head off. Anchored
+   to the top, the hair lands ~7% down and the chin ~57%. Kept in colour: the amber lenses are
+   the site's one saturated note, the accent the interaction states will pick up. */
+.hero__portrait img {
   object-fit: cover;
-  opacity: 0;
-  filter: grayscale(1);
-  transition:
-    opacity 0.4s var(--ease),
-    filter 0.7s var(--ease);
+  object-position: 50% 0%;
 }
 
-.projects-cue__still[data-active="true"] {
-  opacity: 1;
+/* Stretched to the bracket by the lockup's align-items. The foot's own margin-top:auto pins
+   it to the bottom edge; `gap` is the floor for when the row wraps and the column collapses
+   to its content height, where there's no free space left to push into. */
+.hero__meta {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
 }
 
-.projects-cue:hover .projects-cue__still {
-  filter: grayscale(0);
+/* Role and statement are one thought — bonded tight at the top of the column. */
+.hero__meta-top {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.hero__role {
+  margin: 0;
+  font-weight: 500;
+}
+
+/* The expressive line: larger than the role but a step down in weight AND lifted a modest
+   step off full ink — so the role stays the harder mark and this earns prominence by scale.
+   Not the muted grey; just ink carried 15% toward bone. No width cap: the column governs the
+   measure, so it holds one line on desktop and wraps only when stacked. */
+.hero__tagline {
+  margin: 0;
+  font-weight: 400;
+  color: color-mix(in srgb, var(--color-ink) 85%, var(--color-bone));
+}
+
+/* Pinned to the column's bottom, then lifted a hair so the line's optical baseline lands on
+   the portrait's lower edge instead of hanging a descender below it. */
+.hero__foot {
+  margin: 0;
+  margin-top: auto;
+  padding-bottom: 0.2rem;
+}
+
+/* ── the projects title ───────────────────────────────────────────────────── */
+/* One word at the SAME display scale as the hero name — one giant word per screen, never
+   two. Its own container so the `cqi`-based --display-size resolves against the same
+   measure the hero uses; containment on .work-section itself would wrap the whole grid. */
+
+.projects-title {
+  container-type: inline-size;
+  margin-bottom: 100px;
+  /* translateX keeps the word on the hero's nudged axis (see --axis-shift); translateY drops
+     it so less of the letter crops above the fold — the fine knob for the incoming sliver,
+     paired with the hero's min-height. Transform doesn't change the cqi the word sizes to. */
+  transform: translateX(var(--axis-shift)) translateY(0.65rem);
+}
+
+.projects-word {
+  font-size: var(--display-size);
+  letter-spacing: -0.03em;
 }
 
 /* ── work index ───────────────────────────────────────────────────────────── */
@@ -546,12 +619,153 @@ a:focus-visible .underline-link::after {
   }
 }
 
-.work-card__title {
-  margin: 30px 0 0;
+/* Each featured cell is one link — frame, then body. A block anchor wraps the image and the
+   text as a single target. */
+.work-card__link {
+  display: block;
 }
 
+.work-card__body {
+  margin-top: 30px;
+}
+
+/* Title with a trailing link cue on one line. The cue's slide, the frame's colour reveal and
+   the title underline all fire together on hover/focus, so the card reads as clickable without
+   a button and without leaning on colour alone. */
+.work-card__title {
+  display: flex;
+  align-items: center;
+  gap: 0.4em;
+  margin: 0;
+}
+
+.work-card__arrow {
+  flex: none;
+  color: var(--color-ink-muted);
+  transition:
+    transform 0.4s var(--ease),
+    color 0.4s var(--ease);
+}
+
+a:hover .work-card__arrow,
+a:focus-visible .work-card__arrow {
+  color: var(--color-ink);
+  transform: translate(3px, -3px);
+}
+
+/* The evidence line — full ink, held to a readable measure. What turns the image from
+   decoration into a claim about what the product is. */
+.work-card__desc {
+  margin: 14px 0 0;
+  max-width: 48ch;
+  font-size: clamp(1rem, 0.95rem + 0.3vw, 1.15rem);
+  line-height: 1.45;
+  text-wrap: pretty;
+}
+
+/* Two quiet meta lines under the claim: relationship + year, then the headline stack. */
 .work-card__meta {
-  margin: 15px 0 0;
+  margin: 16px 0 0;
+  font-size: 0.9375rem;
+  letter-spacing: 0.01em;
+  color: var(--color-ink-muted);
+}
+
+.work-card__stack {
+  margin: 6px 0 0;
+  font-size: 0.875rem;
+  letter-spacing: 0.04em;
+  color: var(--color-ink-muted);
+}
+
+/* ── the archive ──────────────────────────────────────────────────────────── */
+/* "Also built" takes its own classes rather than the shared .rows, so it and the capabilities
+   list below read as two different sections instead of one repeated row pattern. */
+.archive__title {
+  margin: 0;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-ink-muted);
+}
+
+.archive__list {
+  list-style: none;
+  margin: 30px 0 0;
+  padding: 0;
+  border-top: 1px solid var(--color-rule);
+}
+
+.archive__row {
+  border-bottom: 1px solid var(--color-rule);
+}
+
+/* The whole row is the target — a generous block. It slides in slightly and lights its arrow
+   on hover/focus, so the interaction doesn't rest on colour. */
+.archive__link {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px 30px;
+  padding: 26px 0;
+  transition: padding-left 0.4s var(--ease);
+}
+
+a.archive__link:hover,
+a.archive__link:focus-visible {
+  padding-left: 12px;
+}
+
+/* Title holds its own line on narrow screens, then the note flows in beside it — the proven
+   .row split, kept. */
+.archive__name {
+  flex: 0 0 auto;
+  min-width: min(100%, 16rem);
+}
+
+.archive__note {
+  flex: 1 1 20rem;
+  color: var(--color-ink-muted);
+}
+
+.archive__year {
+  margin-left: auto;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-ink-muted);
+}
+
+.archive__arrow {
+  flex: none;
+  align-self: center;
+  color: var(--color-ink-muted);
+  transition:
+    transform 0.4s var(--ease),
+    color 0.4s var(--ease);
+}
+
+a.archive__link:hover .archive__arrow,
+a.archive__link:focus-visible .archive__arrow {
+  color: var(--color-ink);
+  transform: translate(3px, -3px);
+}
+
+/* ── statement ────────────────────────────────────────────────────────────── */
+/* One centered line of voice between the work and the capability list — a breather that breaks
+   the stacked lists into distinct beats. The text face at statement scale (three-face rule
+   holds: the break is scale + centering, not a new serif). */
+.statement {
+  max-width: 22ch;
+  margin-inline: auto;
+  text-align: center;
+  font-size: clamp(2rem, 5vw, 4.5rem);
+  font-weight: 500;
+  line-height: 1.12;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
 }
 
 /* ── footer ───────────────────────────────────────────────────────────────── */
@@ -562,8 +776,60 @@ a:focus-visible .underline-link::after {
   color: var(--color-bone);
 }
 
-.footer__headline {
+/* The contact + status row fills the width the old single-column CTA left empty on the right. */
+.footer__top {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 40px 30px;
+}
+
+.footer__eyebrow {
+  margin: 0 0 20px;
+  color: var(--color-bone-muted);
+}
+
+.footer__email {
+  display: inline-block;
+  font-size: clamp(1.25rem, 3vw, 2.5rem);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+
+.footer__status {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.footer__status-role {
   margin: 0;
+  font-weight: 500;
+}
+
+.footer__status-line {
+  margin: 0;
+  color: var(--color-bone-muted);
+}
+
+.footer__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  margin-top: 14px;
+}
+
+.footer__link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4em;
+}
+
+/* The sign-off name at display scale — a bookend to the hero's opening "PRATIUSH", with a big
+   silence above it. Each line rises out of its own overflow-clip box. */
+.footer__name {
+  margin: clamp(80px, 12vw, 160px) 0 0;
 }
 
 .footer__line {
@@ -575,35 +841,8 @@ a:focus-visible .underline-link::after {
   display: block;
 }
 
-.footer__email {
-  display: inline-block;
-  margin-top: 50px;
-  font-size: clamp(1.25rem, 3vw, 2.5rem);
-  line-height: 1.1;
-  letter-spacing: -0.02em;
-}
-
-.footer__meta {
-  margin-top: 100px;
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  gap: 30px;
-  padding-top: 30px;
-  border-top: 1px solid rgba(239, 237, 234, 0.18);
-}
-
-.footer__links {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 30px;
-}
-
 .footer__colophon {
-  margin: 0;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 30px;
+  margin: 40px 0 0;
   color: var(--color-bone-muted);
 }
 

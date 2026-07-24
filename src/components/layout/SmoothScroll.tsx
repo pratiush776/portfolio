@@ -32,16 +32,16 @@ export function SmoothScroll({ children }: { children: React.ReactNode }) {
   if (prefersReducedMotion) return <>{children}</>;
 
   return (
-    // Duration mode rather than lerp: each wheel input becomes one fixed animation, so a
-    // quick flick doesn't drift past the section it was aimed at.
+    // Lerp mode: each frame the scroll position eases toward the target by a fixed fraction —
+    // a continuous inertial glide rather than a per-input timed animation, the feel the
+    // reference scrolls with. Lower `lerp` floats heavier, higher is snappier and closer to
+    // native; this is the one knob for the scroll character. Touch is left native (Lenis does
+    // not sync touch by default), so phones keep their own momentum.
     <ReactLenis
       root
       options={{
-        duration: 1.2,
-        easing: (t: number) => 1 - Math.pow(1 - t, 2),
+        lerp: 0.1,
         smoothWheel: true,
-        wheelMultiplier: 1,
-        touchMultiplier: 2,
       }}
     >
       {children}

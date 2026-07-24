@@ -3,8 +3,8 @@
 import Link from "next/link";
 import { motion, useReducedMotion } from "motion/react";
 
-import { ProjectsCue } from "@/components/home/ProjectsCue";
 import { archive, featured, type FeaturedWork } from "@/data/works";
+import { ArrowUpRight } from "@/components/icons";
 import { EASE, RISE } from "@/lib/motion";
 
 /**
@@ -56,53 +56,77 @@ export function WorkIndex() {
 
   return (
     <section id="work" className="work-section gutter measure" tabIndex={-1}>
-      {/* The section's real heading, at full display scale. Its own container so the
-          `cqi`-based --display-size resolves against the same measure the hero uses. */}
       <div className="projects-title">
-        <ProjectsCue />
+        <h2 className="projects-word display">Projects</h2>
       </div>
 
       <div className="work-grid">
         {featured.map((work, index) => (
           <motion.article key={work.slug} {...reveal(index)}>
-            <Link href={`/works/${work.slug}`}>
+            <Link href={`/works/${work.slug}`} className="work-card__link">
               <div className="frame frame--wide">
                 <Cover work={work} />
               </div>
-              <h3 className="work-card__title h2">
-                <span className="underline-link">{work.title}</span>
-              </h3>
-              <p className="work-card__meta note muted">
-                {work.year} · {work.role}
-              </p>
+              <div className="work-card__body">
+                <h3 className="work-card__title h2">
+                  <span className="underline-link">{work.title}</span>
+                  <ArrowUpRight
+                    className="work-card__arrow"
+                    width="22"
+                    height="22"
+                    aria-hidden
+                  />
+                </h3>
+                <p className="work-card__desc">{work.description}</p>
+                <p className="work-card__meta">
+                  {work.role} · {work.year}
+                </p>
+                <p className="work-card__stack">
+                  {work.stack.slice(0, 3).join(" · ")}
+                </p>
+              </div>
             </Link>
           </motion.article>
         ))}
       </div>
 
       <motion.div className="mt-[100px]" {...reveal(0)}>
-        <h3 className="label muted">Also built</h3>
-        <ul className="rows mt-[30px]">
-          {archive.map((item) => (
-            <li key={item.title} className="row">
-              <span className="row__line h3">
+        <h3 className="archive__title">Also built</h3>
+        <ul className="archive__list">
+          {archive.map((item) => {
+            const content = (
+              <>
+                <span className="archive__name h3">{item.title}</span>
+                <span className="archive__note">{item.note}</span>
+                <span className="archive__year">{item.year}</span>
+                {item.href && (
+                  <ArrowUpRight
+                    className="archive__arrow"
+                    width="16"
+                    height="16"
+                    aria-hidden
+                  />
+                )}
+              </>
+            );
+
+            return (
+              <li key={item.title} className="archive__row">
                 {item.href ? (
                   <a
                     href={item.href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="underline-link"
+                    className="archive__link"
                   >
-                    {item.title}
+                    {content}
                   </a>
                 ) : (
-                  item.title
+                  <div className="archive__link">{content}</div>
                 )}
-              </span>
-              <span className="row__sub prose">{item.note}</span>
-              <span className="label muted">{item.year}</span>
-            </li>
-          ))}
+              </li>
+            );
+          })}
         </ul>
       </motion.div>
     </section>

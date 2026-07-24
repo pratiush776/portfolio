@@ -1,14 +1,15 @@
 "use client";
 
+import Image from "next/image";
 import { motion, useReducedMotion, type Variants } from "motion/react";
 
 import { EASE, RISE } from "@/lib/motion";
 
 /**
  * The opening: the script greeting resting on the wordmark, the name at display scale, and
- * the role and statement beneath it, all on one left axis. It stops short of the fold on
- * purpose — the projects title below crops against the viewport edge and does the work a
- * scroll cue would. The cascade runs on mount; nothing here is tied to scroll.
+ * the bracketed portrait, role and statement beneath it, all on one left axis. It stops
+ * short of the fold on purpose — the projects title below crops against the viewport edge
+ * and does the work a scroll cue would. The cascade runs on mount; nothing is tied to scroll.
  */
 const STAGGER: Variants = {
   hidden: {},
@@ -59,23 +60,45 @@ export function Hero() {
           ))}
         </motion.h1>
 
-        <motion.p
-          className="hero__role note"
-          variants={reduce ? undefined : rise}
-        >
-          Software Engineer
-        </motion.p>
-
-        {/* Statement left, locator hard right on the same baseline — the row spans the
-            measure so the block isn't a narrow column under a full-width name. */}
+        {/* The bracketed portrait, then the meta as a column that brackets its height. The
+            portrait is the only thing on the page that isn't ink or bone — its ground is
+            transparent, so the square reads as a block of ink that resolves into a face up
+            close. */}
         <motion.div
-          className="hero__voice"
+          className="hero__lockup"
           variants={reduce ? undefined : rise}
         >
-          <p className="hero__tagline h3">
-            Building thoughtful digital products.
-          </p>
-          <p className="hero__foot label muted">Open to relocation · USA</p>
+          <span className="hero__bracket display">
+            <span className="hero__bracket-paren--open" aria-hidden>
+              )
+            </span>
+
+            <span className="hero__portrait">
+              <Image
+                src="/images/portrait_v2.png"
+                alt="Portrait of Pratiush Karki"
+                fill
+                sizes="(max-width: 768px) 128px, 220px"
+                priority
+              />
+            </span>
+
+            <span aria-hidden>)</span>
+          </span>
+
+          {/* Role + statement bonded at the top, locator dropped to the bottom — the column
+              spans the bracket so the text brackets the frame instead of huddling beside it. */}
+          <div className="hero__meta">
+            <div className="hero__meta-top">
+              <p className="hero__role note">
+                Product-focused full-stack developer
+              </p>
+              <p className="hero__tagline h3">
+                Building thoughtful digital products.
+              </p>
+            </div>
+            <p className="hero__foot label muted">Open to relocation · USA</p>
+          </div>
         </motion.div>
       </div>
     </motion.header>
