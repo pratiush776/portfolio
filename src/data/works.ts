@@ -1,9 +1,11 @@
 /**
- * Real shipped work, in two tiers:
- *  • `featured` — the four works in the landing index, each with a case page at /works/[slug].
- *    Media is honest: a demo video where one exists, a typographic poster where the only
- *    artifacts are rough screenshots.
- *  • `archive` — the smaller pieces, listed as text rows under the index.
+ * Real shipped work, modelled on two independent axes — *has a case page* vs *where it shows on
+ * the landing page*:
+ *  • `works` — every piece with a case page at /works/[slug]. Media is honest: a demo video
+ *    where one exists, a typographic poster where the only artifacts are rough screenshots.
+ *  • `featured` — the `primary`-tier subset shown as big cards in the landing index.
+ *  • `archive` — the text rows under the index: `secondary`-tier case works (which link in to
+ *    their own case page) above the smaller external-only pieces.
  */
 export type WorkMedia =
   | {
@@ -28,11 +30,18 @@ export type FeaturedWork = {
   /** URL segment for the dedicated case route (/works/[slug]). Stable, lowercase, hand-written
       per work so a title rename never silently 404s an existing link. */
   slug: string;
+  /** Which landing surface it shows on: `primary` is a big card in the grid; `secondary` is a
+      text row in the archive that still links to its own case page. Independent of whether a
+      case page exists — every entry here has one. */
+  tier: "primary" | "secondary";
   year: string;
   role: string;
   /** A short, definition-style gloss. The case page uses it as the brief, falling back to
       `description` when absent. */
   tagline?: string;
+  /** A terse one-liner used only when this work shows as an archive row (secondary tier) —
+      shorter than `description`, which is the grid and case-page voice. */
+  archiveNote?: string;
   /** First-person, concrete. This is the human voice of the section. */
   description: string;
   /** The fuller case write-up, one paragraph per entry — the dedicated /works page renders these
@@ -56,12 +65,16 @@ export type ArchiveWork = {
   year: string;
   note: string;
   href?: string;
+  /** True when `href` is an in-site case route (client-navigated) rather than an external link
+      (opened in a new tab). */
+  internal?: boolean;
 };
 
-export const featured: FeaturedWork[] = [
+export const works: FeaturedWork[] = [
   {
     title: "NILINK",
     slug: "nilink",
+    tier: "primary",
     year: "2025",
     role: "Software Engineer",
     tagline: "Athletes on one side. Brands on the other.",
@@ -85,6 +98,7 @@ export const featured: FeaturedWork[] = [
   {
     title: "Lucid Tone",
     slug: "lucid-tone",
+    tier: "primary",
     year: "2025",
     role: "Founder",
     description:
@@ -107,8 +121,11 @@ export const featured: FeaturedWork[] = [
   {
     title: "Private Law RAG Agent",
     slug: "private-law-rag",
+    tier: "secondary",
     year: "2024",
     role: "Solo build",
+    archiveNote:
+      "Local-only RAG over confidential legal records — nothing leaves the building.",
     description:
       "A research assistant for law firms that can't ship documents to the cloud. Ingestion, embeddings, retrieval, and generation all run on local infrastructure, so decades of confidential records become searchable without a byte leaving the building.",
     caseBody: [
@@ -132,6 +149,7 @@ export const featured: FeaturedWork[] = [
   {
     title: "Whisk It All",
     slug: "whisk-it-all",
+    tier: "primary",
     year: "2024",
     role: "Client work · Design & build",
     description:
@@ -140,6 +158,8 @@ export const featured: FeaturedWork[] = [
       "A local bakery owner needed a real website, not a template — somewhere to tell their story, list services, show testimonials, and be found by actual customers. I owned both sides of it: the design and the build. Small project on paper, but real stakes, because a business's front door was riding on it.",
       "It's a Next.js and Tailwind site with GSAP carrying the motion, and — the part that mattered most to the client — a Tina CMS so they can update their own copy and content without calling me. The brief was to hand over something they'd keep using, and a self-serve CMS was how I made sure of that.",
     ],
+    coverAlt:
+      "The Whisk It All bakery site on screen — its story, menu, and booking laid out for local customers.",
     stack: ["Next.js", "Tailwind", "GSAP", "Tina CMS"],
     media: {
       kind: "video",
@@ -155,13 +175,20 @@ export const featured: FeaturedWork[] = [
   },
 ];
 
-/** Look up a featured work by its route slug — the /works/[slug] page's single entry point.
-    Returns undefined when nothing matches so the route can `notFound()`. */
+/** The primary-tier subset — the big cards in the landing grid. */
+export const featured: FeaturedWork[] = works.filter(
+  (work) => work.tier === "primary",
+);
+
+/** Look up a case work by its route slug — the /works/[slug] page's single entry point. Searches
+    all `works`, so a secondary-tier case page (the RAG agent) still resolves even though it isn't
+    in the grid. Returns undefined when nothing matches so the route can `notFound()`. */
 export function getWork(slug: string): FeaturedWork | undefined {
-  return featured.find((work) => work.slug === slug);
+  return works.find((work) => work.slug === slug);
 }
 
-export const archive: ArchiveWork[] = [
+/** The external-only pieces — no case page of their own, so their rows link straight out. */
+const externalArchive: ArchiveWork[] = [
   {
     title: "HomeDoc",
     year: "2023",
@@ -169,15 +196,25 @@ export const archive: ArchiveWork[] = [
     href: "https://homedoc-backend.onrender.com/",
   },
   {
-    title: "Whisk It All — business card",
-    year: "2023",
-    note: "QR-scannable digital card for the same bakery, before the full site.",
-    href: "https://whisk-it-all-business.web.app/",
-  },
-  {
     title: "RoomMates",
     year: "2022",
     note: "Chore management for housemates. My first full-stack app end to end.",
     href: "https://roommatesapp.onrender.com/",
   },
+];
+
+/** The archive list: secondary-tier case works (linking in to their own case page) above the
+    external-only pieces. Newest-first falls out on its own — RAG (2024) → HomeDoc (2023) →
+    RoomMates (2022). */
+export const archive: ArchiveWork[] = [
+  ...works
+    .filter((work) => work.tier === "secondary")
+    .map((work) => ({
+      title: work.title,
+      year: work.year,
+      note: work.archiveNote ?? work.description,
+      href: `/works/${work.slug}`,
+      internal: true,
+    })),
+  ...externalArchive,
 ];

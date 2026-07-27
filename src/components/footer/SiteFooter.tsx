@@ -65,7 +65,7 @@ export function SiteFooter() {
             variants={reduce ? undefined : rise}
           >
             <p className="footer__status-role">
-              Product-focused full-stack developer
+              Full-stack developer
             </p>
             <p className="footer__status-line">Open to new opportunities</p>
             <p className="footer__status-line">

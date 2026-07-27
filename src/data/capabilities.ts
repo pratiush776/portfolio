@@ -1,7 +1,8 @@
 /**
  * The three capability domains, each a claim linked to the project that proves it. `line` is
- * the domain, `sub` a one-line gloss, and `proof` the featured work that demonstrates it — its
- * `slug` must match an entry in works.ts, and `label` names that work.
+ * the domain, `sub` a one-line gloss, and `proof` the work that demonstrates it — its `slug` must
+ * match an entry in `works` (the AI/LLM proof is a secondary case work, still reachable), and
+ * `label` names that work.
  */
 export type Capability = {
   id: string;

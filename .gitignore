@@ -49,3 +49,9 @@ public/_next-video
 
 # large original video files
 public/projects_assets/LucidTone/demo_original.mp4
+
+# impeccable design skill + its artifacts (local design tooling, not part of the site)
+/.claude/skills/impeccable/
+/.impeccable/
+/PRODUCT.md
+/DESIGN.md

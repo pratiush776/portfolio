@@ -8,7 +8,8 @@ import { SmoothScroll } from "@/components/layout/SmoothScroll";
 
 export const metadata: Metadata = {
   title: "Pratiush Karki",
-  description: "Pratiush Karki — Product-focused full-stack developer.",
+  description:
+    "Pratiush Karki — I build and ship products across the full stack, AI, and design.",
   icons: {
     icon: "/favicon.png",
   },
@@ -24,8 +25,8 @@ export default function RootLayout({
       <body
         className={`${instrumentSans.variable} ${kumbhSans.variable} ${styleScript.variable} antialiased`}
       >
-        <a href="#work" className="skip-link">
-          Skip to work
+        <a href="#main" className="skip-link">
+          Skip to content
         </a>
         <SiteNav />
         <SmoothScroll>{children}</SmoothScroll>

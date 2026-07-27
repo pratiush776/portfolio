@@ -1,33 +1,41 @@
 "use client";
 
-import { ReactLenis } from "lenis/react";
-import { useSyncExternalStore } from "react";
+import { ReactLenis, type LenisRef } from "lenis/react";
+import { cancelFrame, frame } from "motion/react";
+import { useEffect, useRef } from "react";
+
+import { useMediaQuery } from "@/lib/useMediaQuery";
 
 /**
- * Root smooth-scroll provider. Lenis runs its own RAF loop — nothing on the page is
- * scroll-scrubbed, so there is no second animation clock to keep in step with.
+ * Root smooth-scroll provider, and the page's single animation clock.
  *
- * Under `prefers-reduced-motion` the children render with native scrolling and Lenis is
- * skipped entirely. `useSyncExternalStore` reads the media query without a hydration
- * mismatch: the server assumes motion is allowed, the client corrects after hydration.
+ * Lenis and Motion each ship their own requestAnimationFrame loop, and left alone they run as two
+ * independent passes in an order the browser doesn't guarantee. That is invisible while nothing is
+ * scroll-scrubbed, but the featured deck reads `window.scrollY` every frame to place a card: when
+ * the two loops fall out of step, the card is positioned from a scroll value Lenis is about to
+ * change in the same frame, and the travel picks up a shimmer that no amount of easing removes.
+ *
+ * So Lenis' own loop is switched off (`autoRaf: false`) and driven from Motion's scheduler instead.
+ * One clock, one ordering: scroll settles, then everything reading it updates.
+ *
+ * Under `prefers-reduced-motion` the children render with native scrolling and Lenis is skipped
+ * entirely; the deck drops to its flat layout on the same signal, so nothing is left scrubbing.
  */
-const QUERY = "(prefers-reduced-motion: reduce)";
-
-function subscribe(callback: () => void) {
-  const mq = window.matchMedia(QUERY);
-  mq.addEventListener("change", callback);
-  return () => mq.removeEventListener("change", callback);
-}
-
-const getSnapshot = () => window.matchMedia(QUERY).matches;
-const getServerSnapshot = () => false;
-
 export function SmoothScroll({ children }: { children: React.ReactNode }) {
-  const prefersReducedMotion = useSyncExternalStore(
-    subscribe,
-    getSnapshot,
-    getServerSnapshot,
-  );
+  const prefersReducedMotion = useMediaQuery("(prefers-reduced-motion: reduce)");
+  const lenis = useRef<LenisRef>(null);
+
+  useEffect(() => {
+    if (prefersReducedMotion) return;
+
+    const update = ({ timestamp }: { timestamp: number }) => {
+      lenis.current?.lenis?.raf(timestamp);
+    };
+
+    // `keepAlive` — the callback has to run every frame, not once.
+    frame.update(update, true);
+    return () => cancelFrame(update);
+  }, [prefersReducedMotion]);
 
   if (prefersReducedMotion) return <>{children}</>;
 
@@ -39,9 +47,11 @@ export function SmoothScroll({ children }: { children: React.ReactNode }) {
     // not sync touch by default), so phones keep their own momentum.
     <ReactLenis
       root
+      ref={lenis}
       options={{
         lerp: 0.1,
         smoothWheel: true,
+        autoRaf: false,
       }}
     >
       {children}

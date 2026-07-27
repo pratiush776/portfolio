@@ -2,7 +2,7 @@
 
 /* =============================================================================
    THE SYSTEM
-   Two colours (bone + ink), three faces, four spacing steps, two aspect ratios.
+   Two colours (bone + ink), three faces, two spacing steps at 2:1, two aspect ratios.
    Everything else is size, weight, case and tracking.
 
    Where things live: the design system is a class here; one-off layout for a single
@@ -18,6 +18,7 @@
   --color-bone-muted: #8f8d8a; /* secondary text ON ink — 5.2:1 */
   --color-ink: #191919; /* text, and the inverted surface */
   --color-ink-muted: #666666; /* secondary text ON bone — 4.9:1 */
+  --color-accent: #D98324; /* the portrait's amber lenses — the one interaction accent. Tune to the real lens colour later. */
   --color-rule: rgba(25, 25, 25, 0.14); /* hairlines */
 }
 
@@ -69,6 +70,35 @@ a {
      right than the left. This nudges the whole axis — the hero block AND the projects word —
      a touch right so it reads optically centred; applied to both so they stay on one line. */
   --axis-shift: clamp(1.25rem, 2vw, 2.25rem);
+
+  /* ── the vertical rhythm ──────────────────────────────────────────────────
+     Two steps, and the second is exactly half the first. Every vertical gap on the page is one
+     of these, which is why the page reads as one rule rather than as a value chosen per section.
+
+     280px is where four separate derivations meet: ten base lines (18px × 1.55), comfortably
+     larger than the display word's own 18cqi ≈ 219px em box (below that, the word reads as
+     belonging to the gap instead of to its section), about 23% of a 1200px viewport, and just
+     under the average of what the page already had — so the length barely moves.
+
+     Both interpolate over the same 375→1440 range, so every gap grows at the same rate. That is
+     the part the old mix of 9vw / 12vw / 13vw / 14vw / 25vh could not do at any width but one.
+     Both stop at 1440 because .measure stops there: once the content stops widening, so should
+     the silence around it.
+
+     The half-step also makes "more space above a heading than below it" structural — a section
+     gets a chapter above and gives its title a block below, 2:1, without anyone remembering to. */
+  --space-chapter: clamp(128px, calc(74.5px + 14.27vw), 280px);
+  --space-block: clamp(64px, calc(37.2px + 7.13vw), 140px);
+}
+
+/* THE rule. The gap between chapters is owned by the space between them, never by either side's
+   padding — two neighbours can no longer add their paddings together and land on a different
+   silence than the pair beside them.
+
+   Opt-in by class, not `main > * + *`: the case route's root is also a <main> (see CaseView), and
+   the bare selector would drop a chapter step between every block on all four case pages. */
+.chapters > * + * {
+  margin-top: var(--space-chapter);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -172,15 +202,15 @@ a {
   }
 }
 
-/* The chapter step — the page's one big silence. */
-.section {
-  padding-block: 100px;
-}
+/* An inset surface's own internal silence — used where a section has a background of its own and
+   so cannot take its breathing room from the gap outside it. The gaps BETWEEN chapters come from
+   `.chapters > * + *`; this is only for the inside of the footer's ink field.
 
-@media (min-width: 768px) {
-  .section {
-    padding-block: 200px;
-  }
+   A block step, not a chapter: the chapter step is already spent on the bone above the ink edge,
+   and spending it twice would put more than half a screen between the last work and the sign-off.
+   Together with .footer__name it gives the footer one uniform internal rhythm. */
+.section {
+  padding-block: var(--space-block);
 }
 
 .measure {
@@ -223,6 +253,14 @@ a:hover .frame__media,
 a:focus-visible .frame__media {
   filter: grayscale(0);
   transform: scale(1.03);
+}
+
+/* Touch/coarse pointers can't hover — show the work in colour by default so the media reveal isn't lost on mobile. */
+@media (hover: none), (pointer: coarse) {
+  .frame__media {
+    filter: none;
+    transform: none;
+  }
 }
 
 /* Works with no usable screenshot get a typographic plate instead of a blank box. */
@@ -289,7 +327,7 @@ a:focus-visible .underline-link::after {
    consistent "this navigates" signal. */
 .capabilities__list {
   list-style: none;
-  margin: 50px 0 0;
+  margin: var(--space-block) 0 0;
   padding: 0;
   border-top: 1px solid var(--color-rule);
 }
@@ -303,18 +341,32 @@ a:focus-visible .underline-link::after {
   flex-wrap: wrap;
   align-items: baseline;
   gap: 12px 40px;
-  padding: 36px 0;
-  transition: padding-left 0.4s var(--ease);
+  padding: 44px 0;
 }
 
-.capabilities__link:hover,
-.capabilities__link:focus-visible {
-  padding-left: 14px;
+/* The nudge moves the left of the row and leaves the right-aligned proof where it is — a squeeze,
+   not a slide. It rides on the two left items rather than on the row's own padding: padding would
+   narrow the flex container mid-transition, which can re-wrap the gloss under the cursor. The 14px
+   comes out of the 40px column gap, so the two halves never meet. */
+.capabilities__line,
+.capabilities__sub {
+  transition: transform 0.4s var(--ease);
+}
+
+.capabilities__link:hover .capabilities__line,
+.capabilities__link:hover .capabilities__sub,
+.capabilities__link:focus-visible .capabilities__line,
+.capabilities__link:focus-visible .capabilities__sub {
+  transform: translateX(14px);
 }
 
 .capabilities__line {
   flex: 0 0 auto;
   min-width: min(100%, 20rem);
+  /* A step above base .h2: "What I do" is now the first content beat, so the domain must carry
+     real weight under the big section title rather than reading as a caption. */
+  font-size: clamp(1.6rem, 1rem + 2vw, 3rem);
+  line-height: 1.05;
 }
 
 .capabilities__sub {
@@ -335,7 +387,7 @@ a:focus-visible .underline-link::after {
 
 .capabilities__link:hover .capabilities__proof,
 .capabilities__link:focus-visible .capabilities__proof {
-  color: var(--color-ink);
+  color: var(--color-accent);
 }
 
 .capabilities__proof-arrow {
@@ -433,8 +485,9 @@ a:focus-visible .underline-link::after {
   min-height: 88svh;
   display: flex;
   flex-direction: column;
-  /* Top padding clears the fixed nav; the block then auto-centres in what's left. */
-  padding-block: 90px 30px;
+  /* Nav clearance, not rhythm — which is why it stays a fixed value rather than a step. The gap
+     below the hero is the flow rule's, like every other gap between chapters. */
+  padding-block: 90px 0;
 }
 
 /* Auto-centred in the hero, then nudged off centre by the bias transform. The content holds
@@ -575,10 +628,10 @@ a:focus-visible .underline-link::after {
 
 .projects-title {
   container-type: inline-size;
-  margin-bottom: 100px;
-  /* translateX keeps the word on the hero's nudged axis (see --axis-shift); translateY drops
-     it so less of the letter crops above the fold — the fine knob for the incoming sliver,
-     paired with the hero's min-height. Transform doesn't change the cqi the word sizes to. */
+  margin-bottom: var(--space-block);
+  /* translateX keeps the word on the shared display axis (see --axis-shift) — lined up under the
+     statement that leads into it and the hero name above. translateY is a small vertical nudge;
+     transform doesn't change the cqi the word sizes to. */
   transform: translateX(var(--axis-shift)) translateY(0.65rem);
 }
 
@@ -589,44 +642,61 @@ a:focus-visible .underline-link::after {
 
 /* ── work index ───────────────────────────────────────────────────────────── */
 
-/* A short top step rather than the full chapter break: the title has to clear the hero by
-   only a little so it crops against the fold. The chapter silence is restored below it. */
+/* A short top step rather than the full chapter break: the statement above leads straight into
+   the work, so the title sits close beneath it. The chapter silence is restored below it. */
+/* No vertical padding of its own: the chapter step above comes from the flow rule, and the step
+   below is the footer's margin-top from the same rule. */
 .work-section {
-  padding-block: 40px 100px;
-}
-
-@media (min-width: 768px) {
-  .work-section {
-    padding-block: 50px 200px;
-  }
+  padding-block: 0;
 }
 
 .work-grid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 50px;
+  gap: var(--space-chapter);
 }
 
-@media (min-width: 768px) {
-  .work-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 100px 50px;
-  }
-
-  /* The right column drops one beat so the pair reads as a spread, not a table. */
-  .work-grid > :nth-child(even) {
-    margin-top: 100px;
-  }
-}
-
-/* Each featured cell is one link — frame, then body. A block anchor wraps the image and the
-   text as a single target. */
+/* Each featured cell is one link wrapping the frame and the text as a single target — stacked
+   (frame over body) on mobile, a side-by-side row at ≥768px (see below). Base rules first so the
+   media-query overrides win at desktop (equal specificity resolves on source order). */
 .work-card__link {
   display: block;
 }
 
 .work-card__body {
   margin-top: 30px;
+}
+
+@media (min-width: 768px) {
+  /* Each project is a full-measure ROW: the frame on one side, the text block on the other,
+     vertically centred against it. Alternating the side row-to-row gives the sequence its rhythm —
+     and because every project owns a whole row, three (or any count) never leave a column-shaped
+     void the way a two-up grid does with an odd card. */
+  .work-card__link {
+    display: grid;
+    grid-template-columns: 1.05fr 0.95fr;
+    align-items: center;
+    gap: clamp(2rem, 5vw, 5rem);
+  }
+
+  .work-card__body {
+    margin-top: 0;
+  }
+
+  /* Even rows flip: text leads on the left, frame sits on the right. */
+  .work-grid > :nth-child(even) .work-card__link {
+    grid-template-columns: 0.95fr 1.05fr;
+  }
+
+  .work-grid > :nth-child(even) .frame {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  .work-grid > :nth-child(even) .work-card__body {
+    grid-column: 1;
+    grid-row: 1;
+  }
 }
 
 /* Title with a trailing link cue on one line. The cue's slide, the frame's colour reveal and
@@ -649,7 +719,7 @@ a:focus-visible .underline-link::after {
 
 a:hover .work-card__arrow,
 a:focus-visible .work-card__arrow {
-  color: var(--color-ink);
+  color: var(--color-accent);
   transform: translate(3px, -3px);
 }
 
@@ -663,22 +733,251 @@ a:focus-visible .work-card__arrow {
   text-wrap: pretty;
 }
 
-/* Two quiet meta lines under the claim: relationship + year, then the headline stack. */
+/* Two meta lines under the claim, stepped so there is a clear next-read: relationship + year is
+   the stronger line, then the stack recedes into a quiet tag row. */
 .work-card__meta {
   margin: 16px 0 0;
-  font-size: 0.9375rem;
+  font-size: 1rem;
+  font-weight: 500;
   letter-spacing: 0.01em;
   color: var(--color-ink-muted);
 }
 
 .work-card__stack {
-  margin: 6px 0 0;
-  font-size: 0.875rem;
-  letter-spacing: 0.04em;
+  margin: 8px 0 0;
+  font-size: 0.8125rem;
+  letter-spacing: 0.06em;
   color: var(--color-ink-muted);
 }
 
+/* ── the featured deck ────────────────────────────────────────────────────── */
+/* The pinned treatment of the same three works (FeaturedStack, ≥1024px and motion allowed).
+   Everything above stays exactly as it is — it is still what renders on narrow viewports and
+   under reduced motion, so none of these rules may reach it. */
+
+.stack {
+  /* THE knob: how much scroll one project owns. The pin lasts --stack-count × this, and the
+     section is that plus the one viewport the pin occupies. */
+  --stack-step: 110svh;
+  /* Half the content gutter, roughly — enough air that the rail reads as page furniture rather
+     than as part of the row. */
+  --stack-rail-inset: clamp(1.25rem, 3.25vw, 4.5rem);
+  /* Nothing crosses open space to reach the well any more, so this no longer has to leave a
+     runway under it — it only has to fit above the fold. Verified at 720/900/1240 tall. */
+  --stack-well-h: clamp(220px, 46svh, 500px);
+  /* The page's block step, capped so a short viewport can't push the well past the fold. On a
+     typical laptop the cap and the token land within about 10% of each other. */
+  --stack-gap: min(var(--space-block), 8svh);
+
+  position: relative;
+  height: calc(var(--stack-count) * var(--stack-step) + 100svh);
+}
+
+/* `overflow` on the sticky element itself is safe; the trap is `overflow` on an ANCESTOR of one.
+   It no longer has a deck to hide — every card is clipped to its own frame — but it still keeps
+   the title's masked edge honest. */
+.stack__pin {
+  position: sticky;
+  top: 0;
+  height: 100svh;
+  overflow: hidden;
+  display: grid;
+  /* The composition is centred. It used to sit LOW, which was not a compositional choice: cards
+     were parked below the screen and travelled up to the frame, so the frame had to sit close to
+     the bottom edge or the travel read as an element floating through open space. Nothing travels
+     now, so the slack goes back where it belongs — evenly, either side. */
+  grid-template-rows: auto;
+  align-content: center;
+  /* Clears the fixed bar, which is 18px of padding either side of a 1rem line. */
+  padding-top: 54px;
+  padding-bottom: 54px;
+}
+
+.stack__inner {
+  display: grid;
+  gap: var(--stack-gap);
+  width: 100%;
+}
+
+/* The title keeps its axis and its scale — same word, same size as the flat layout and as the
+   hero name — but a short viewport must never be able to push the well off the bottom. */
+.stack__inner .projects-title {
+  margin-bottom: 0;
+}
+
+.stack .projects-word {
+  font-size: min(var(--display-size), 22svh);
+}
+
+/* The word rides up from behind a clipped edge as the stage arrives. Kumbh's J drops well under
+   the baseline at display scale, so the clip carries room for it and gives it back as negative
+   margin — the descender is never shaved, and the layout is unchanged. */
+.stack__word-clip {
+  display: block;
+  overflow: hidden;
+  /* Sub-1 leading means the glyphs overflow their line box at BOTH edges, so the clip is opened
+     a little either way and the space given straight back as negative margin. The top room costs
+     nothing — the word only ever rises from below — and it is what stops the caps shearing once
+     the word has landed. */
+  padding-top: 0.06em;
+  margin-top: -0.06em;
+  padding-bottom: 0.16em;
+  margin-bottom: -0.16em;
+}
+
+.stack__word {
+  display: block;
+}
+
+.stack__row {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+  align-items: center;
+  gap: clamp(2rem, 5vw, 5rem);
+}
+
+/* The well is the fixed plate the deck lives in. Width follows the column until the viewport gets
+   short, then the height cap takes over — so the frame is the same 4/3 it is everywhere else and
+   always fits above the fold.
+
+   It carries the same sunk surface a .frame does, because a card that has receded leaves a thin
+   margin around itself while the next one is uncovering over it. Against the page that margin
+   reads as a hole opening; against a sunk plate it reads as the card sitting back off the
+   surface, which is the whole point of the drift. */
+.stack-well {
+  position: relative;
+  width: 100%;
+  max-width: calc(var(--stack-well-h) * 4 / 3);
+  aspect-ratio: 4 / 3;
+  background: var(--color-bone-sunk);
+}
+
+/* The frame is what the curtain clips — bottom edge fixed, top edge rising. It never moves and
+   never scales; the layer inside it does. Scaling this element would drag the clip line in with
+   it, and a card at 96% would leave a strip of the one behind it showing under its own bottom
+   edge. */
+.stack-card {
+  position: absolute;
+  inset: 0;
+  will-change: clip-path;
+}
+
+/* One masked edge per line, so the words ride in and out from behind it rather than fading.
+   The em of padding is descender room, given straight back as margin. */
+.work-card__clip {
+  display: block;
+  overflow: hidden;
+  padding-bottom: 0.12em;
+  margin-bottom: -0.12em;
+}
+
+/* The line's top margin belongs to the WRAPPER, not the text. A translate is a percentage of the
+   element, so a margin left inside the clip makes the clip taller than the thing riding in it and
+   the ride can never clear the edge — that is what left three projects' meta lines on screen at
+   once. Same values as the flat layout above; only the element carrying them moves. */
+.work-card__clip > * {
+  margin-top: 0;
+}
+
+.work-card__clip--desc {
+  margin-top: 14px;
+}
+
+.work-card__clip--meta {
+  margin-top: 16px;
+}
+
+.work-card__clip--stack {
+  margin-top: 8px;
+}
+
+.stack-card__link {
+  position: absolute;
+  inset: 0;
+  display: block;
+}
+
+/* The layer that drifts. One continuous scale ramp per card, running the whole width of its own
+   window and on through the still half — so the deck always has a slow current under it. */
+.stack-card__media {
+  position: absolute;
+  inset: 0;
+  will-change: transform, filter;
+}
+
+/* Colour is scroll-driven here — the card you are on is the one in colour — so the still itself
+   must stop carrying a filter of its own or the two would compound. Hover keeps its push-in. */
+.stack-card .frame__media {
+  filter: none;
+}
+
+/* Three copies in one cell. They stretch to the tallest of the three rather than each centring
+   itself, so every title rides in at exactly the height the last one left — the descriptions run
+   two, four and four lines, and self-centring made the heading jump between projects. The group
+   as a whole is still centred against the well by .stack__row. */
+.stack-copy {
+  display: grid;
+}
+
+.stack-copy__block {
+  grid-area: 1 / 1;
+  display: block;
+}
+
+/* The rail: three stations always drawn. The one you are on stretches from a dot into a bar and
+   fills top-down as its window is spent; the other two stay dots. Nothing travels between them, so
+   there is no in-between position to misread — the long mark is where you are, and how full it is
+   says how long until the next. The column's total length is constant, because the stretching and
+   collapsing stations are exactly complementary. */
+.stack-dots {
+  position: absolute;
+  left: calc(var(--stack-rail-inset) * -1);
+  top: 50%;
+  transform: translateY(-50%);
+  width: 9px;
+}
+
+/* Height and offset are both scroll-driven (see StackDot). The offset rides on a transform; the
+   height has to be real, because a scaled pill would drag its own outline and corner radius out of
+   shape. Each station is absolutely positioned, so that height change is contained to the mark and
+   never reaches the row around it. */
+.stack-dots__station {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 9px;
+  will-change: transform;
+}
+
+/* A radius past half the width: a circle at rest, and a true pill at every length above it — one
+   mark at two lengths rather than two shapes. */
+.stack-dots__ring,
+.stack-dots__fill {
+  position: absolute;
+  inset: 0;
+  border-radius: 999px;
+}
+
+/* Heavier than the page hairline on purpose: a hairline reads as a rule because it runs the width
+   of the measure, but the same wash on a 9px circle disappears. This is the weight at which three
+   small marks still read as three considered marks — and, stretched, as a track with a fill in it. */
+.stack-dots__ring {
+  border: 1px solid rgba(25, 25, 25, 0.32);
+}
+
+.stack-dots__fill {
+  background: var(--color-ink);
+  will-change: clip-path;
+}
+
 /* ── the archive ──────────────────────────────────────────────────────────── */
+
+/* The step down from the work to the list of it — a block, not a chapter: still the same section. */
+.work-archive {
+  margin-top: var(--space-block);
+}
+
 /* "Also built" takes its own classes rather than the shared .rows, so it and the capabilities
    list below read as two different sections instead of one repeated row pattern. */
 .archive__title {
@@ -708,13 +1007,22 @@ a:focus-visible .work-card__arrow {
   flex-wrap: wrap;
   align-items: baseline;
   gap: 8px 30px;
-  padding: 26px 0;
-  transition: padding-left 0.4s var(--ease);
+  padding: 34px 0;
 }
 
-a.archive__link:hover,
-a.archive__link:focus-visible {
-  padding-left: 12px;
+/* Same squeeze as the capabilities row, on transforms for the same reason — the year is pinned
+   right by `margin-left: auto` and holds still while the name and note slide under it. The `a.`
+   prefix stays: a row with no link renders as a div and must not respond. */
+.archive__name,
+.archive__note {
+  transition: transform 0.4s var(--ease);
+}
+
+a.archive__link:hover .archive__name,
+a.archive__link:hover .archive__note,
+a.archive__link:focus-visible .archive__name,
+a.archive__link:focus-visible .archive__note {
+  transform: translateX(12px);
 }
 
 /* Title holds its own line on narrow screens, then the note flows in beside it — the proven
@@ -722,6 +1030,9 @@ a.archive__link:focus-visible {
 .archive__name {
   flex: 0 0 auto;
   min-width: min(100%, 16rem);
+  /* A step above base .h3 so the archive reads as a genuine second tier of work, not footnotes. */
+  font-size: clamp(1.25rem, 1rem + 0.9vw, 1.9rem);
+  letter-spacing: -0.015em;
 }
 
 .archive__note {
@@ -749,23 +1060,47 @@ a.archive__link:focus-visible {
 
 a.archive__link:hover .archive__arrow,
 a.archive__link:focus-visible .archive__arrow {
-  color: var(--color-ink);
+  color: var(--color-accent);
   transform: translate(3px, -3px);
 }
 
 /* ── statement ────────────────────────────────────────────────────────────── */
-/* One centered line of voice between the work and the capability list — a breather that breaks
-   the stacked lists into distinct beats. The text face at statement scale (three-face rule
-   holds: the break is scale + centering, not a new serif). */
+/* The promise, and the hand-off into the work. Aligned to the PROJECTS word's optical left edge
+   below it — not merely to the shared --axis-shift. The projects title is set in the Kumbh display
+   face, whose "P" carries a ~0.04em left side bearing the title leaves uncompensated (the hero
+   cancels its own with margin-left:-0.04em), so its P sits a touch right of the axis. This text-face
+   statement, which sits on the axis, is nudged right by that same 0.04em of the shared --display-size
+   to land its first letter under the P's stem. Sized well below the display word so it leads into
+   PROJECTS rather than competing; the text face keeps the three-face rule (the beat is scale +
+   placement, not a new serif). Tune the 0.04 if the line over/undershoots the P. */
 .statement {
-  max-width: 22ch;
-  margin-inline: auto;
-  text-align: center;
-  font-size: clamp(2rem, 5vw, 4.5rem);
+  max-width: 26ch;
+  /* --display-size resolves via .statement-lead's container-type, matching the projects title. */
+  transform: translateX(calc(var(--axis-shift) + var(--display-size) * 0.04));
+  font-size: clamp(1.75rem, 4.5vw, 3.75rem);
   font-weight: 500;
-  line-height: 1.12;
+  line-height: 1.14;
   letter-spacing: -0.02em;
-  text-wrap: balance;
+  text-wrap: pretty;
+}
+
+/* The bridge floats between "What I do" and the work with balanced silence on both sides.
+   "What I do" already lays its own chapter step below itself, and .work-section adds only a
+   short step above the PROJECTS word — so the statement carries a little less on top and more
+   on the bottom to even the two visible gaps out. The result is a standalone beat suspended
+   between the two sections, not a lead-in glued to the work. Tune the two clamps to taste. */
+/* The bridge floats between "What I do" and the work. It now gets a full chapter step on each side
+   from the flow rule, which is the balanced silence its own brief asked for — the hand-tuned
+   asymmetry above only existed to even out two neighbours that were adding their paddings. */
+.statement-lead {
+  /* A query container so the statement can resolve --display-size the same way the projects title
+     does (18cqi against the same measure), to align their left edges — see .statement transform. */
+  container-type: inline-size;
+}
+
+@media (max-width: 767px) {
+  /* Tighten the capability rows on phones so the work arrives sooner. */
+  .capabilities__link { padding: 32px 0; }
 }
 
 /* ── footer ───────────────────────────────────────────────────────────────── */
@@ -829,7 +1164,7 @@ a.archive__link:focus-visible .archive__arrow {
 /* The sign-off name at display scale — a bookend to the hero's opening "PRATIUSH", with a big
    silence above it. Each line rises out of its own overflow-clip box. */
 .footer__name {
-  margin: clamp(80px, 12vw, 160px) 0 0;
+  margin: var(--space-block) 0 0;
 }
 
 .footer__line {

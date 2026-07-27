@@ -26,7 +26,7 @@ export function Capabilities() {
       };
 
   return (
-    <section className="section gutter measure">
+    <section className="gutter measure">
       <motion.h2 className="display-section" {...reveal}>
         What I do
       </motion.h2>

@@ -48,6 +48,7 @@ export function Hero() {
 
         <motion.h1
           className="hero__name display"
+          aria-label="Pratiush Karki"
           variants={reduce ? undefined : rise}
         >
           {NAME.split("").map((letter, i) => (
@@ -91,10 +92,10 @@ export function Hero() {
           <div className="hero__meta">
             <div className="hero__meta-top">
               <p className="hero__role note">
-                Product-focused full-stack developer
+                Full-stack developer
               </p>
               <p className="hero__tagline h3">
-                Building thoughtful digital products.
+                I build and ship products across the full stack, AI, and design.
               </p>
             </div>
             <p className="hero__foot label muted">Open to relocation · USA</p>
