@@ -16,8 +16,11 @@ export function SiteNav() {
           Pratiush
         </Link>
 
+        {/* `scroll={false}` on the two in-page links: Lenis owns anchor navigation now (see
+            SmoothScroll), and Next's router would otherwise jump to the same target instantly
+            while Lenis was still gliding toward it. */}
         <div className="site-nav__links">
-          <Link href="/#work" className="site-nav__link underline-link">
+          <Link href="/#work" className="site-nav__link underline-link" scroll={false}>
             Work
           </Link>
           <Link
@@ -28,7 +31,7 @@ export function SiteNav() {
           >
             Resume
           </Link>
-          <Link href="/#contact" className="site-nav__link underline-link">
+          <Link href="/#contact" className="site-nav__link underline-link" scroll={false}>
             Contact
           </Link>
         </div>

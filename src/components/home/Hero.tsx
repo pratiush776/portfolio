@@ -1,40 +1,46 @@
 "use client";
 
 import Image from "next/image";
-import { motion, useReducedMotion, type Variants } from "motion/react";
+import { motion, useReducedMotion } from "motion/react";
 
-import { EASE, RISE } from "@/lib/motion";
+import { TypedLine } from "@/components/home/TypedLine";
+import { useIntro } from "@/components/intro/IntroContext";
+import { kerned } from "@/lib/kerning";
+import { STAGGER, rise } from "@/lib/motion";
 
 /**
- * The opening: the script greeting resting on the wordmark, the name at display scale, and
- * the bracketed portrait, role and statement beneath it, all on one left axis. It stops
- * short of the fold on purpose — the projects title below crops against the viewport edge
- * and does the work a scroll cue would. The cascade runs on mount; nothing is tied to scroll.
+ * The opening: the script greeting leading into the name at display scale, and the bracketed
+ * portrait, role and statement beneath it. It takes the whole fold and sits centred in it on both
+ * axes — balanced silence above and below, balanced weight left and right, nothing of the next
+ * section peeking in.
+ *
+ * The row under the name is TWO systems that read as one: the bracketed portrait, and the meta.
+ * They are held apart by the page's --col-gap, which is about twice the bracket's own internal
+ * rhythm — enough to tell them apart, not enough to let them come loose from each other. Nothing
+ * here is tied to scroll.
+ *
+ * The cascade waits for the intro's cue rather than firing on mount. Mounting happens BEHIND the
+ * ink field, so an unconditional entrance would spend itself where nobody can see it and the
+ * curtain would lift on a hero that had already finished arriving. The cue comes partway through
+ * the lift, so the two overlap and the page is already in motion as the ink clears. On the loads
+ * with no intro — reduced motion, no JS — the cue is true from the first render and this behaves
+ * exactly as it did before.
  */
-const STAGGER: Variants = {
-  hidden: {},
-  visible: { transition: { staggerChildren: 0.09, delayChildren: 0.05 } },
-};
 
-const rise: Variants = {
-  hidden: RISE.hidden,
-  visible: { ...RISE.visible, transition: { duration: 0.8, ease: EASE } },
-};
-
-/* The name is set letter by letter so the two jammed pairs can be opened individually.
-   `openAfter` are the indices whose right side needs air: T→I and I→U. */
+/* Set letter by letter so the pairs can be spaced individually — see lib/kerning for what the
+   values are and how they were measured. The aria-label below is what keeps the split readable. */
 const NAME = "Pratiush";
-const OPEN_AFTER = new Set([3, 4]);
 
 export function Hero() {
   const reduce = useReducedMotion() ?? false;
+  const { ready } = useIntro();
 
   return (
     <motion.header
       className="hero gutter measure"
       variants={reduce ? undefined : STAGGER}
       initial={reduce ? false : "hidden"}
-      animate={reduce ? undefined : "visible"}
+      animate={reduce ? undefined : ready ? "visible" : "hidden"}
     >
       <div className="hero__block">
         {/* Decorative — the heading below carries the real accessible name. */}
@@ -51,12 +57,9 @@ export function Hero() {
           aria-label="Pratiush Karki"
           variants={reduce ? undefined : rise}
         >
-          {NAME.split("").map((letter, i) => (
-            <span
-              key={i}
-              className={OPEN_AFTER.has(i) ? "hero__name-open" : undefined}
-            >
-              {letter}
+          {kerned(NAME).map(({ char, style }, i) => (
+            <span key={i} style={style}>
+              {char}
             </span>
           ))}
         </motion.h1>
@@ -75,12 +78,15 @@ export function Hero() {
             </span>
 
             <span className="hero__portrait">
+              {/* `preload`, not `priority` — the latter is deprecated as of Next 16. This is the
+                  page's one preload: the single true LCP candidate, and the one image the intro
+                  is most likely to still be waiting on. */}
               <Image
                 src="/images/portrait_v2.png"
                 alt="Portrait of Pratiush Karki"
                 fill
                 sizes="(max-width: 768px) 128px, 220px"
-                priority
+                preload
               />
             </span>
 
@@ -91,11 +97,12 @@ export function Hero() {
               spans the bracket so the text brackets the frame instead of huddling beside it. */}
           <div className="hero__meta">
             <div className="hero__meta-top">
-              <p className="hero__role note">
-                Full-stack developer
-              </p>
+              {/* The anchor: a fixed noun that answers "who is this", so the moving line below
+                  can answer "what do they do" without a visitor having to wait out a cycle to
+                  learn either. */}
+              <p className="hero__role note">Software Engineer</p>
               <p className="hero__tagline h3">
-                I build and ship products across the full stack, AI, and design.
+                <TypedLine start={ready} reduced={reduce} />
               </p>
             </div>
             <p className="hero__foot label muted">Open to relocation · USA</p>

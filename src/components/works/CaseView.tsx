@@ -1,10 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { motion, useReducedMotion, type Variants } from "motion/react";
+import { motion, useReducedMotion } from "motion/react";
 
 import { ArrowUpRight } from "@/components/icons";
-import { EASE, RISE } from "@/lib/motion";
+import { STAGGER, rise } from "@/lib/motion";
 import type { FeaturedWork } from "@/data/works";
 
 /**
@@ -12,15 +12,6 @@ import type { FeaturedWork } from "@/data/works";
  * brief, the cover, the write-up, the demo, the stack, and prev/next. One mount cascade,
  * then the page just sits there.
  */
-const STAGGER: Variants = {
-  hidden: {},
-  visible: { transition: { staggerChildren: 0.1, delayChildren: 0.05 } },
-};
-
-const rise: Variants = {
-  hidden: RISE.hidden,
-  visible: { ...RISE.visible, transition: { duration: 0.8, ease: EASE } },
-};
 
 export function CaseView({
   work,
@@ -53,7 +44,9 @@ export function CaseView({
         <motion.h1 className="display-section" variants={v}>
           {work.title}
         </motion.h1>
-        <motion.p className="h2 muted" variants={v}>
+        {/* The serif's second and last appearance on the site. This line and the landing
+            statement are the two places the writing is a claim rather than a description. */}
+        <motion.p className="case__brief editorial muted" variants={v}>
           {brief}
         </motion.p>
       </header>
@@ -94,7 +87,9 @@ export function CaseView({
       <motion.section aria-label="Tech stack" variants={v}>
         <ul className="case__stack">
           {work.stack.map((tech) => (
-            <li key={tech}>{tech}</li>
+            <li key={tech} className="label">
+              {tech}
+            </li>
           ))}
         </ul>
       </motion.section>

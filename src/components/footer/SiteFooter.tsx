@@ -3,7 +3,8 @@
 import { motion, useReducedMotion, type Variants } from "motion/react";
 
 import { ArrowUpRight } from "@/components/icons";
-import { EASE, RISE } from "@/lib/motion";
+import { kerned } from "@/lib/kerning";
+import { ENTER, STAGGER, THRESHOLD, rise } from "@/lib/motion";
 
 /**
  * The page's only inverted surface — ink field, bone text — and its sign-off. Contact and
@@ -12,19 +13,13 @@ import { EASE, RISE } from "@/lib/motion";
  * everything else uses the shared rise. The giant name is decorative (the accessible name lives
  * in the nav, hero, and page title), so it is aria-hidden.
  */
-const STAGGER: Variants = {
-  hidden: {},
-  visible: { transition: { staggerChildren: 0.12, delayChildren: 0.1 } },
-};
 
-const rise: Variants = {
-  hidden: RISE.hidden,
-  visible: { ...RISE.visible, transition: { duration: 0.8, ease: EASE } },
-};
-
+/** The signature's own variant, because it rides out of a mask rather than fading up — but on the
+    shared entrance timing, so the sign-off lands at the speed everything else on the page arrives
+    at. The gesture is the local part; the clock is not. */
 const lineRise: Variants = {
   hidden: { y: "110%" },
-  visible: { y: "0%", transition: { duration: 0.9, ease: EASE } },
+  visible: { y: "0%", transition: ENTER },
 };
 
 const PROFILES = [
@@ -47,7 +42,7 @@ export function SiteFooter() {
         variants={reduce ? undefined : STAGGER}
         initial={reduce ? false : "hidden"}
         whileInView={reduce ? undefined : "visible"}
-        viewport={{ once: true, margin: "0px 0px -25% 0px" }}
+        viewport={{ once: true, margin: THRESHOLD }}
       >
         <div className="footer__top">
           <motion.div
@@ -64,9 +59,9 @@ export function SiteFooter() {
             className="footer__status"
             variants={reduce ? undefined : rise}
           >
-            <p className="footer__status-role">
-              Full-stack developer
-            </p>
+            {/* The same title the hero opens with. These two are the only places the site names
+                the role, so they have to agree. */}
+            <p className="footer__status-role">Software Engineer</p>
             <p className="footer__status-line">Open to new opportunities</p>
             <p className="footer__status-line">
               Based in USA · open to relocation
@@ -90,11 +85,19 @@ export function SiteFooter() {
 
         <div className="footer__name display" aria-hidden>
           <span className="footer__line">
+            {/* Same word at the same size as the hero's opening, so it takes the same optical
+                spacing — left on the font's own kerning it would be a visibly different shape
+                from the thing it is a bookend to. Already aria-hidden, so the split costs
+                nothing here. */}
             <motion.span
               className="footer__line-inner"
               variants={reduce ? undefined : lineRise}
             >
-              Pratiush
+              {kerned("Pratiush").map(({ char, style }, i) => (
+                <span key={i} style={style}>
+                  {char}
+                </span>
+              ))}
             </motion.span>
           </span>
         </div>

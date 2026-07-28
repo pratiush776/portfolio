@@ -1,10 +1,10 @@
 "use client";
 
 import { ReactLenis, type LenisRef } from "lenis/react";
-import { cancelFrame, frame } from "motion/react";
+import { cancelFrame, frame, useReducedMotion } from "motion/react";
 import { useEffect, useRef } from "react";
 
-import { useMediaQuery } from "@/lib/useMediaQuery";
+import { useIntro } from "@/components/intro/IntroContext";
 
 /**
  * Root smooth-scroll provider, and the page's single animation clock.
@@ -22,7 +22,8 @@ import { useMediaQuery } from "@/lib/useMediaQuery";
  * entirely; the deck drops to its flat layout on the same signal, so nothing is left scrubbing.
  */
 export function SmoothScroll({ children }: { children: React.ReactNode }) {
-  const prefersReducedMotion = useMediaQuery("(prefers-reduced-motion: reduce)");
+  const prefersReducedMotion = useReducedMotion() ?? false;
+  const { locked } = useIntro();
   const lenis = useRef<LenisRef>(null);
 
   useEffect(() => {
@@ -37,6 +38,17 @@ export function SmoothScroll({ children }: { children: React.ReactNode }) {
     return () => cancelFrame(update);
   }, [prefersReducedMotion]);
 
+  // The intro holds the page, and this is the half of that lock CSS cannot do. `overflow: clip` on
+  // <html> stops the document scrolling, but Lenis keeps its own target position and would go on
+  // accumulating wheel delta behind the curtain — then spend all of it at once the moment the lock
+  // came off. Stopping the instance is what makes the held page actually still.
+  useEffect(() => {
+    const instance = lenis.current?.lenis;
+    if (!instance) return;
+    if (locked) instance.stop();
+    else instance.start();
+  }, [locked]);
+
   if (prefersReducedMotion) return <>{children}</>;
 
   return (
@@ -49,9 +61,18 @@ export function SmoothScroll({ children }: { children: React.ReactNode }) {
       root
       ref={lenis}
       options={{
-        lerp: 0.1,
+        // 0.13, matched from adcker.com — the reference for how this should feel. Lenis damps
+        // frame-rate independently with lambda = lerp × 60, so this is a settling time constant of
+        // 1/7.8 ≈ 128ms against the 167ms of the 0.1 we had: the glide keeps its weight but stops
+        // trailing the wheel, which is the whole difference between inertial and floaty.
+        lerp: 0.13,
         smoothWheel: true,
         autoRaf: false,
+        // In-page links glide instead of jumping. Off by default, which left the nav's `/#work`
+        // and `/#contact` as the only hard cuts on a page whose whole character is the glide —
+        // Lenis' handler matches the `/#…` form these use, so it is one flag away. The `<Link>`s
+        // pass `scroll={false}` so Next's own router scroll doesn't race this to the same target.
+        anchors: true,
       }}
     >
       {children}

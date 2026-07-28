@@ -2,8 +2,9 @@
 
 /* =============================================================================
    THE SYSTEM
-   Two colours (bone + ink), three faces, two spacing steps at 2:1, two aspect ratios.
-   Everything else is size, weight, case and tracking.
+   Two colours (bone + ink), four faces, two spacing steps at 2:1, two aspect ratios.
+   Everything else is size, weight, case and tracking — and those four come off the
+   scale in :root, never out of a literal written at the rule that needed it.
 
    Where things live: the design system is a class here; one-off layout for a single
    element is a Tailwind utility in the JSX.
@@ -24,8 +25,19 @@
 
 /* ── base ──────────────────────────────────────────────────────────────────── */
 
-html {
-  scroll-behavior: smooth;
+/* There is deliberately no `scroll-behavior` declaration on `html`, at any width or in any state.
+   Lenis IS the page's smooth scroll, and it drives the real scroll position from a rAF loop; a
+   native smooth scroll running underneath it is a second clock moving the same value, which is the
+   exact problem SmoothScroll was written to remove. Under `prefers-reduced-motion` Lenis is skipped
+   and the initial value — an instant jump — is what that visitor asked for. Both cases want the
+   default, so the property is simply left alone. */
+
+/* The intro holds the page. `clip` rather than `hidden` because it is what Lenis' own
+   `.lenis-stopped` uses, and unlike `hidden` it cannot create a scroll container of its own. This
+   is the half of the lock that works BEFORE hydration, when there is no Lenis to stop; the class is
+   put on by the blocking script in layout.tsx and taken off once at the end of the lift. */
+html.is-loading {
+  overflow: clip;
 }
 
 body {
@@ -33,6 +45,13 @@ body {
   background: var(--color-bone);
   color: var(--color-ink);
   font-family: var(--font-instrument), Helvetica, Arial, sans-serif;
+  /* The floor for anything that never opts into a type role — the archive notes and the footer's
+     status lines both land here. Without it they inherit the UA's `normal`, which is around 1.2
+     and is a heading's leading, not a sentence's. */
+  line-height: var(--lh-body);
+  /* Explicit rather than left at `auto`, which lets an engine drop kerning above a size
+     threshold — the exact sizes on this page where kerning matters most. */
+  font-kerning: normal;
   /* display type at 12vw overhangs its box on narrow screens */
   overflow-x: clip;
 }
@@ -60,16 +79,51 @@ a {
   /* The one motion curve: slow start, fast middle, dead stop. Nothing springs. */
   --ease: cubic-bezier(0.82, 0, 0.18, 1);
 
+  /* ── the duration scale ───────────────────────────────────────────────────
+     Five lengths, and each one is a KIND of event rather than a number someone picked: how long a
+     thing takes is what says what sort of thing it is. These five are mirrored exactly by `DUR` in
+     lib/motion.ts, which owns the same scale for anything animated in JS, and the two sides must
+     stay identical — the way `--ease` and `EASE` do. These are the values the page already used;
+     naming them is the change. The intro's own tempo, below, is deliberately not part of this. */
+  --dur-tap: 0.25s; /* a control acknowledging you — the skip link */
+  --dur-hover: 0.4s; /* a small thing answering the pointer — arrows, row nudges, colour */
+  --dur-wipe: 0.5s; /* a rule drawing itself across a word — the link underline */
+  --dur-media: 0.7s; /* a picture changing state — further, over a much larger area */
+  --dur-enter: 0.8s; /* something arriving on the page for the first time */
+
+  /* The intro runs on its own tempo, slower than the page's. Its choreography is something you
+     watch rather than something answering you, and the lengths that make an interface feel
+     responsive make a title sequence feel hurried. Kept separate so slowing the intro can never
+     drag on a link underline. The curtain's own length is JS-side (`DUR.curtain`), because the lift
+     is a Motion animation rather than a CSS transition. */
+  --dur-intro-rise: 0.65s; /* the word arriving out of its mask */
+
+  /* The hero's caret at rest. Twinned with `TYPE.blink` in lib/motion the way the five above are
+     twinned with `DUR` — the typing itself is JS (it changes text, not style), the blink is CSS,
+     and they belong to one gesture, so the two halves have to stay in step. */
+  --dur-caret-blink: 1.1s;
+
+  /* ── the nav's edge ───────────────────────────────────────────────────────
+     The header's own thin gutter, which sits OUTSIDE the content's inset measure — on mobile it
+     matches the content's 15px so the two align, and on desktop it stays well inside the content's
+     own clamp. THE knob for the fixed bar's edge inset. It lives here rather than inline on
+     .site-nav__inner because the intro's field reads the same pair to keep its word off the screen
+     edge on a narrow viewport. */
+  --nav-gutter: clamp(15px, 4vw, 3.5rem);
+  --nav-pad-block: 18px;
+
   /* The page's display scale — the hero name and the projects title are the SAME size, one
      per screen. `cqi` resolves against whichever container the var is used in, so both
      .hero and .projects-title declare `container-type: inline-size` and get the same
      value from the shared measure. */
   --display-size: clamp(2.75rem, 18cqi, 15.5rem);
 
-  /* The display column sits on the page's inset-left measure, which leaves more air on the
-     right than the left. This nudges the whole axis — the hero block AND the projects word —
-     a touch right so it reads optically centred; applied to both so they stay on one line. */
-  --axis-shift: clamp(1.25rem, 2vw, 2.25rem);
+  /* ── the column gap ───────────────────────────────────────────────────────
+     The air between two things standing side by side, wherever the page does that: the frame and
+     the copy in a work row, the well and the copy in the deck, the bracketed portrait and the meta
+     in the hero. It was three copies of the same clamp written at three rules; it is one value
+     because a page whose side-by-side gaps drift apart reads as three layouts rather than one. */
+  --col-gap: clamp(2rem, 5vw, 5rem);
 
   /* ── the vertical rhythm ──────────────────────────────────────────────────
      Two steps, and the second is exactly half the first. Every vertical gap on the page is one
@@ -89,6 +143,58 @@ a {
      gets a chapter above and gives its title a block below, 2:1, without anyone remembering to. */
   --space-chapter: clamp(128px, calc(74.5px + 14.27vw), 280px);
   --space-block: clamp(64px, calc(37.2px + 7.13vw), 140px);
+
+  /* ── the type scale ───────────────────────────────────────────────────────
+     Ten rungs, and every font-size on the site is one of them. Before this, sizes were written
+     as literals per rule, and the file had drifted into four near-identical label sizes, three
+     near-identical body sizes, and four one-offs sitting between .h2 and .display-section with
+     no role at all. Naming the rungs is what stops the drift: a new element picks the rung it
+     belongs to instead of inventing a clamp two hundredths away from an existing one.
+
+     Every fluid rung interpolates over the SAME 375→1440 range the spacing scale does, so type
+     and silence grow at one rate — a page at 900px is the same design as a page at 1440px, not
+     a differently-proportioned one. Above 1440 everything stops, because .measure stops.
+
+     --display-size, above, is deliberately NOT part of this: it is `cqi`-based and there is only
+     ever one word per screen wearing it. */
+  --t-xs: 0.8125rem; /*                                        13    — labels, stack, year */
+  --t-sm: 0.9375rem; /*                                        15    — archive eyebrow */
+  --t-base: clamp(1rem, 0.95rem + 0.2vw, 1.125rem); /*         16→18 — prose, card desc, body */
+  --t-lg: clamp(1.0625rem, 0.94rem + 0.5vw, 1.3125rem); /*     17→21 — .note */
+  --t-xl: clamp(1.15rem, 0.95rem + 0.6vw, 1.6rem); /*          18→26 — .h3 */
+  --t-2xl: clamp(1.3125rem, 1.05rem + 1.1vw, 2rem); /*         21→32 — archive name */
+  --t-3xl: clamp(1.5rem, 1rem + 1.4vw, 2.75rem); /*            24→44 — .h2, brief, email */
+  --t-4xl: clamp(1.6rem, 1rem + 2vw, 3rem); /*                 26→48 — capabilities line */
+  --t-5xl: clamp(1.75rem, 1.1rem + 2.6vw, 3.75rem); /*         28→60 — the statement */
+  --t-section: clamp(2rem, calc(0.75rem + 6vw), 7rem); /*      32→112 — .display-section */
+
+  /* ── tracking ─────────────────────────────────────────────────────────────
+     Tracking is a FUNCTION of size, which is the rule the old literals had lost: small text and
+     caps need air added because their counters are tiny relative to their sidebearings, and
+     display type needs air taken away because at 10rem the gaps a text face was drawn with read
+     as holes. Sorted here from loosest to tightest, which is also smallest to largest — if a new
+     value ever has to break that ordering, the size it is being used at is the thing to fix. */
+  --track-caps: 0.14em; /*      13px uppercase */
+  --track-eyebrow: 0.12em; /*   15px uppercase — larger caps need less */
+  --track-wide: 0.06em; /*      small mixed-case meta, the nav wordmark */
+  --track-normal: 0; /*         body, note, meta */
+  --track-snug: -0.015em; /*    xl–2xl, and the serif at 3xl */
+  --track-tight: -0.02em; /*    3xl–5xl sans */
+  --track-section: -0.025em; /* .display-section */
+  --track-display: -0.03em; /*  .display, .plate__word */
+
+  /* ── leading ──────────────────────────────────────────────────────────────
+     Two families. Display type gets sub-1 leading so the lines lock into a block; everything
+     that is read rather than looked at gets leading proportional to its measure — the wider the
+     column, the more the eye needs to find the next line. Hence two body values, not one:
+     --lh-copy is for the 48ch card description, --lh-body for 62ch prose. */
+  --lh-display: 0.78; /* .display */
+  --lh-section: 0.82; /* .display-section */
+  --lh-flat: 1; /*      labels — single line, always */
+  --lh-tight: 1.1; /*   headings */
+  --lh-snug: 1.2; /*    meta, captions */
+  --lh-copy: 1.45; /*   short-measure body (48ch) */
+  --lh-body: 1.55; /*   long-measure body (62ch) */
 }
 
 /* THE rule. The gap between chapters is owned by the space between them, never by either side's
@@ -101,11 +207,17 @@ a {
   margin-top: var(--space-chapter);
 }
 
-@media (prefers-reduced-motion: reduce) {
-  html {
-    scroll-behavior: auto;
-  }
+/* THE rule's one stated exception, and the only one it gets. The hero is the single section that
+   fills the fold, and it centres its block inside that fold — so it already ends with half a
+   screen of silence below the lockup (~430px at a 1237px-tall window). Charging a full chapter on
+   top of that would put ~670px between the name and the first thing it leads to. A half-step lands
+   the total slightly UNDER what the shorter hero used to give, while the fold itself now reads
+   centred. Specificity (0,2,0) is what carries it over the flow rule's (0,1,0). */
+.chapters > .hero + * {
+  margin-top: var(--space-block);
+}
 
+@media (prefers-reduced-motion: reduce) {
   *,
   *::before,
   *::after {
@@ -123,71 +235,123 @@ a {
   font-weight: 700;
   text-transform: uppercase;
   margin: 0;
+  /* These are the two places kerning is worth the most and where an engine is most tempted to
+     stop applying it. Stated rather than assumed. */
+  font-kerning: normal;
+  text-wrap: balance;
 }
 
 .display {
-  font-size: clamp(2.75rem, 12vw, 12.5rem);
-  line-height: 0.78;
-  letter-spacing: -0.05em;
+  /* The size lives here now rather than being re-declared by each of the three users. It used to
+     be a `12vw` clamp that nothing ever reached: the hero name and the projects word both replaced
+     it with --display-size, and only the footer sign-off was left on it — which is how the two
+     ends of the page ended up setting the same word at two different sizes. Where there is no
+     container to measure, `cqi` falls back to the small viewport, which is a better default than
+     the clamp was. */
+  font-size: var(--display-size);
+  line-height: var(--lh-display);
+  /* ONE display tracking. This used to be -0.05em here and then overridden per instance — the
+     hero at -0.021em, the projects word at -0.03em, the footer name left on the -0.05em — so
+     three renderings of the same voice, one of them the same WORD, read as three fonts. */
+  letter-spacing: var(--track-display);
 }
 
 .display-section {
-  font-size: clamp(2rem, calc(0.75rem + 6vw), 7rem);
-  line-height: 0.82;
-  letter-spacing: -0.04em;
+  font-size: var(--t-section);
+  line-height: var(--lh-section);
+  /* Looser than .display, because it is smaller. The old pair had this at -0.04em against the
+     display's -0.05em, which tightened the smaller of the two — backwards. */
+  letter-spacing: var(--track-section);
 }
 
-/* Headings below the display. The text face carries them — there is no serif. */
+/* Headings below the display, and the editorial voice beside them. */
 .h2 {
   margin: 0;
-  font-size: clamp(1.5rem, calc(1rem + 1.4vw), 2.75rem);
+  font-size: var(--t-3xl);
   font-weight: 500;
-  line-height: 1.05;
-  letter-spacing: -0.02em;
+  line-height: var(--lh-tight);
+  letter-spacing: var(--track-tight);
+  text-wrap: balance;
 }
 
+/* Looser leading than .h2 because it is smaller — the hero tagline wears this and wraps to three
+   lines when the lockup stacks. */
 .h3 {
   margin: 0;
-  font-size: clamp(1.15rem, calc(0.95rem + 0.6vw), 1.6rem);
+  font-size: var(--t-xl);
   font-weight: 500;
-  line-height: 1.2;
-  letter-spacing: -0.015em;
+  line-height: var(--lh-snug);
+  letter-spacing: var(--track-snug);
+  text-wrap: balance;
+}
+
+/* The editorial voice: the two lines where the site speaks about itself rather than describing
+   something — the statement on the landing page, and the brief at the top of a case page. The
+   serif is the whole signal, so it is spent at one weight, in two places, and never on body copy.
+   Tracking is a step looser than the sans would take at the same size: the serif's own sidebearings
+   already do part of that work, and closing it further muddies the joins. */
+.editorial {
+  margin: 0;
+  font-family: var(--font-instrument-serif), Georgia, "Times New Roman", serif;
+  font-weight: 400;
+  letter-spacing: var(--track-snug);
+  text-wrap: balance;
 }
 
 /* Prose gets real leading. Meta and labels stay tight — that is the context split. */
 .prose {
   margin: 0;
   max-width: 62ch;
-  font-size: clamp(1rem, 0.95rem + 0.2vw, 1.125rem);
-  line-height: 1.55;
+  font-size: var(--t-base);
+  line-height: var(--lh-body);
   text-wrap: pretty;
 }
 
 .note {
   margin: 0;
-  font-size: clamp(1rem, 0.9rem + 0.4vw, 1.3125rem);
-  line-height: 1.2;
-  letter-spacing: 0.01em;
+  font-size: var(--t-lg);
+  line-height: var(--lh-snug);
+  /* Was +0.01em. Positive tracking is a correction for CAPS and for small sizes; on lowercase
+     text running up to 21px it just loosens the word shapes the face was drawn with. */
+  letter-spacing: var(--track-normal);
 }
 
 .label {
   margin: 0;
-  font-size: 0.8125rem;
+  font-size: var(--t-xs);
   font-weight: 500;
-  line-height: 1;
-  letter-spacing: 0.14em;
+  line-height: var(--lh-flat);
+  letter-spacing: var(--track-caps);
   text-transform: uppercase;
+  /* Labels carry the years and the counts. Tabular figures keep a column of them aligned down
+     the archive list instead of ragging by a few tenths per row. */
+  font-variant-numeric: tabular-nums;
 }
 
 .muted {
   color: var(--color-ink-muted);
 }
 
+/* Present for assistive tech, absent for everyone else. Used where an animating string can't be
+   read aloud sensibly and a static equivalent has to sit beside it — see TypedLine. Clipped
+   rather than `display: none`, which would take it out of the accessibility tree too. */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
 /* The signature. One phrase, one place. */
 .script {
   font-family: var(--font-style-script), "Snell Roundhand", cursive;
   font-weight: 400;
-  line-height: 1;
+  line-height: var(--lh-flat);
 }
 
 /* ── layout ────────────────────────────────────────────────────────────────── */
@@ -229,8 +393,13 @@ a {
   background: var(--color-bone-sunk);
 }
 
+/* Wide, because the stills are wide. The covers run 1.33 to 1.89 (NILINK 1448×1086, Lucid Tone
+   1672×941, Whisk It All 1600×848) and `object-fit: cover` has to crop SOMETHING; 16/10 is the
+   ratio that takes the least from the set. A 4/3 frame cut a quarter off the left and right of
+   the two wide shots — and on a UI screenshot the sides are the interface, whereas the strip a
+   wide frame takes off a laptop render's top and bottom is desk and background. */
 .frame--wide {
-  aspect-ratio: 4 / 3;
+  aspect-ratio: 16 / 10;
 }
 
 .frame--video {
@@ -245,8 +414,8 @@ a {
   filter: grayscale(1);
   transform: scale(1);
   transition:
-    filter 0.7s var(--ease),
-    transform 0.7s var(--ease);
+    filter var(--dur-media) var(--ease),
+    transform var(--dur-media) var(--ease);
 }
 
 a:hover .frame__media,
@@ -281,14 +450,18 @@ a:focus-visible .frame__media {
   font-family: var(--font-kumbh), sans-serif;
   font-weight: 700;
   text-transform: uppercase;
+  /* Off the shared scale on purpose: a plate's word is sized to the PLATE, not to the page, so
+     that a card in the deck and the same card in the flat grid each fill their own frame. `cqi`
+     is what makes that true, and it is why these two are the file's only non-token sizes — and
+     why the leading is local too, since it has to suit whatever size the container hands over. */
   font-size: clamp(1.5rem, 9cqi, 3rem);
   line-height: 0.9;
-  letter-spacing: -0.03em;
+  letter-spacing: var(--track-display);
 }
 
 .plate__caption {
   font-size: clamp(0.8rem, 3cqi, 0.95rem);
-  line-height: 1.2;
+  line-height: var(--lh-snug);
   color: var(--color-bone-muted);
 }
 
@@ -310,7 +483,7 @@ a:focus-visible .frame__media {
   background: currentColor;
   transform: scaleX(0);
   transform-origin: left;
-  transition: transform 0.5s var(--ease);
+  transition: transform var(--dur-wipe) var(--ease);
 }
 
 .underline-link:hover::after,
@@ -350,7 +523,7 @@ a:focus-visible .underline-link::after {
    comes out of the 40px column gap, so the two halves never meet. */
 .capabilities__line,
 .capabilities__sub {
-  transition: transform 0.4s var(--ease);
+  transition: transform var(--dur-hover) var(--ease);
 }
 
 .capabilities__link:hover .capabilities__line,
@@ -365,8 +538,8 @@ a:focus-visible .underline-link::after {
   min-width: min(100%, 20rem);
   /* A step above base .h2: "What I do" is now the first content beat, so the domain must carry
      real weight under the big section title rather than reading as a caption. */
-  font-size: clamp(1.6rem, 1rem + 2vw, 3rem);
-  line-height: 1.05;
+  font-size: var(--t-4xl);
+  line-height: var(--lh-tight);
 }
 
 .capabilities__sub {
@@ -382,7 +555,7 @@ a:focus-visible .underline-link::after {
   align-items: center;
   gap: 0.45em;
   color: var(--color-ink-muted);
-  transition: color 0.4s var(--ease);
+  transition: color var(--dur-hover) var(--ease);
 }
 
 .capabilities__link:hover .capabilities__proof,
@@ -392,7 +565,7 @@ a:focus-visible .underline-link::after {
 
 .capabilities__proof-arrow {
   flex: none;
-  transition: transform 0.4s var(--ease);
+  transition: transform var(--dur-hover) var(--ease);
 }
 
 .capabilities__link:hover .capabilities__proof-arrow,
@@ -412,7 +585,7 @@ a:focus-visible .underline-link::after {
   background: var(--color-ink);
   color: var(--color-bone);
   transform: translateY(-200%);
-  transition: transform 0.25s var(--ease);
+  transition: transform var(--dur-tap) var(--ease);
 }
 
 .skip-link:focus-visible {
@@ -439,10 +612,9 @@ a:focus-visible .underline-link::after {
   align-items: center;
   justify-content: space-between;
   gap: 20px;
-  padding-block: 18px;
-  /* Thin outer gutter — on mobile it matches the content's 15px so they align, on desktop it
-     stays well inside the content's clamp(2rem, 6.5vw, 9rem). THE knob for the edge inset. */
-  padding-inline: clamp(15px, 4vw, 3.5rem);
+  /* The bar's own inset — both values are tokens in :root, where the reasoning lives. */
+  padding-block: var(--nav-pad-block);
+  padding-inline: var(--nav-gutter);
 }
 
 /* Only the controls take the pointer — the bar itself must not eat clicks. */
@@ -450,11 +622,14 @@ a:focus-visible .underline-link::after {
   pointer-events: auto;
 }
 
+/* The display face at its smallest, which is the one size where it needs tracking ADDED rather
+   than taken away: the same geometric caps that close up at 10rem jam at 16px, and the 0.02em this
+   carried before was not enough to separate them. */
 .site-nav__brand {
   font-family: var(--font-kumbh), sans-serif;
   font-weight: 700;
-  font-size: 1rem;
-  letter-spacing: 0.02em;
+  font-size: var(--t-base);
+  letter-spacing: var(--track-wide);
   text-transform: uppercase;
 }
 
@@ -465,8 +640,102 @@ a:focus-visible .underline-link::after {
 }
 
 .site-nav__link {
-  font-size: 1rem;
+  font-size: var(--t-base);
+  line-height: var(--lh-flat);
+}
+
+/* ── the intro ────────────────────────────────────────────────────────────── */
+/* The first-load field (see Preloader). Built from parts the page already owns: the footer's
+   inversion, the nav brand's exact metrics on the nav's exact gutter, the rail's track/fill pair
+   from the deck, and the deck's rising-edge curtain. Nothing here is a new idea. */
+
+/* Hidden unless <html> carries the gate. The markup is server-rendered either way, so the ink is in
+   the very first paint and no visitor ever sees the page through it; on the loads that skip the
+   intro — reduced motion, or no JS at all — the same markup costs a `display: none`. */
+.preloader {
+  display: none;
+}
+
+html.is-loading .preloader {
+  display: block;
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: var(--color-ink);
+  color: var(--color-bone);
+  will-change: clip-path;
+}
+
+/* One mark, centred, and nothing else on the screen. The gutter is the nav's so the word cannot
+   collide with the edge on a narrow viewport; it is otherwise unused here. */
+.preloader__inner {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: var(--nav-pad-block) var(--nav-gutter);
+}
+
+/* The entrance mask the word rides out of — the footer signature's gesture, at section scale. It
+   needs no descender padding: the word is set in caps, so nothing drops below the baseline. */
+.preloader__word-clip {
+  display: block;
+  overflow: hidden;
+}
+
+/* Carries .display-section from the JSX for face, weight, case and tracking — the page's own title
+   voice, so the intro opens in the register the page continues in.
+
+   `line-height` is the one thing overridden. The role sets 0.82, which is right for a title in a
+   stack and wrong here: sub-1 leading makes the caps overflow their own box, and a fill clipped to
+   that box would shave the tops of the letters off at full. At 1 the caps sit entirely inside the
+   line, so the fill can reach 100% without touching a letterform.
+
+   Deliberately the literal 1 and not `var(--lh-flat)`, even though that token holds the same
+   number. Preloader.tsx derives CAP_TOP / CAP_BOTTOM from Kumbh's vertical metrics AT THIS EXACT
+   VALUE; routing it through a shared token would mean a future tweak to labels' leading silently
+   knocked the fill out of register with the caps. This one is coupled to code, so it stays local.
+
+   On a keyframe rather than a mounted animation: JS cannot start until hydration, and the wait
+   before hydration is exactly what this screen is covering. CSS starts it on the first paint.
+
+   On the intro's own tempo, not the page's. This word is not part of the entrance cascade, and its
+   job is to clear the stage for the fill rather than to be the event itself — on the page's 0.8s
+   entrance the word was still arriving while the liquid was already halfway up it, and the two
+   beats cancelled each other out. Preloader reads the remaining time off THIS animation directly,
+   so changing the value here re-sequences the fill with it and the two can never drift apart. */
+.preloader__word {
+  position: relative;
+  display: block;
   line-height: 1;
+  animation: intro-rise var(--dur-intro-rise) var(--ease) both;
+}
+
+@keyframes intro-rise {
+  from {
+    transform: translateY(110%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+/* The unlit state: present, legible, clearly the same word — just not yet arrived. Muted rather
+   than a low-opacity bone so it stays a real tone from the palette rather than a wash. */
+.preloader__word-base {
+  display: block;
+  color: var(--color-bone-muted);
+}
+
+/* The lit state, laid over the base in exact register — same text, same face, same metrics, so the
+   two are indistinguishable except in tone. `inset: 0` rather than a re-stated position: it inherits
+   the base's box, which is the only way the two can be guaranteed to align at every viewport size.
+   The clip is driven from the scroll-free progress value in Preloader. */
+.preloader__word-fill {
+  position: absolute;
+  inset: 0;
+  color: var(--color-bone);
+  will-change: clip-path;
 }
 
 /* ── hero ─────────────────────────────────────────────────────────────────── */
@@ -474,15 +743,19 @@ a:focus-visible .underline-link::after {
 /* `cqi` rather than `vw`: the name is sized against the measure it actually sits in, so it
    keeps its proportion once .measure caps the page at 90rem. */
 .hero {
-  /* Shifts the auto-centred content off mathematical centre as a transform — negative up,
-     positive down, 1:1. Purely visual, so it never moves the PROJECTS crop below (that is
-     fixed by min-height). THE knob for the hero's vertical balance. */
+  /* Trims the nav clearance back out of the centring — negative up, positive down, 1:1.
+     `margin-block: auto` below centres the block in the space UNDER the 90px padding, which lands
+     it half that padding (45px) low; this pulls it back to within a few pixels of true centre.
+     The block is top-heavy — the display name is nearly all of its mass — so stopping a hair below
+     geometric centre is what reads as centred. THE knob for the hero's vertical balance. */
   --hero-bias: -2.5rem;
   container-type: inline-size;
-  /* Deliberately short of the fold: the projects title that follows crops against the
-     viewport edge, and that sliver of the word IS the invitation to scroll. Raise min-height
-     (→90svh, →92svh) to reveal LESS of it — THE knob for the crop. */
-  min-height: 88svh;
+  /* The hero owns the whole fold, and the block is centred in it: balanced silence above and
+     below, nothing of the next section peeking in. It used to stop short so that the section
+     following it would crop against the viewport edge and act as a scroll cue — but that section
+     is now Capabilities rather than the work, and at any normal desktop aspect its title landed
+     well below the fold, so the cue was paid for in dead space and never delivered. */
+  min-height: 100svh;
   display: flex;
   flex-direction: column;
   /* Nav clearance, not rhythm — which is why it stays a fixed value rather than a step. The gap
@@ -490,53 +763,91 @@ a:focus-visible .underline-link::after {
   padding-block: 90px 0;
 }
 
-/* Auto-centred in the hero, then nudged off centre by the bias transform. The content holds
-   the page's inset left axis; the nav now runs wider, outside it. */
+/* Centred both ways: `margin-block: auto` in the fold, `margin-inline: auto` on the page, then
+   nudged off vertical centre by the bias transform.
+
+   `width: fit-content` is what makes the horizontal centring mean anything — it collapses the
+   block onto its widest child, so everything inside centres against the NAME rather than against
+   the viewport, which is what keeps the lockup under the word instead of merely near it.
+
+   The name holds that role on any real screen: PRATIUSH sets at 4.7956em against a display size of
+   18cqi, i.e. 86.3% of the measure at every viewport (the ratio is fixed because both terms scale
+   with the same container), so it never wraps. Below about 500px the lockup takes over as the
+   widest child instead — the locator line is 13px with caps tracking and so does not shrink with
+   the rest — and the block simply fills the measure. Nothing breaks there; the two just centre
+   against the row rather than against the word. */
 .hero__block {
+  width: fit-content;
   margin-block: auto;
-  transform: translateX(var(--axis-shift)) translateY(var(--hero-bias));
+  margin-inline: auto;
+  transform: translateY(var(--hero-bias));
 }
 
 /* Rests just on the cap line and lightly crosses it — the script has to stay readable on
    the bone, not sink into the black letterforms. */
 .hero__greeting {
   margin: 0 0 calc(var(--display-size) * -0.028);
-  /* A slight left overhang past the P's stem, so the script doesn't sit rigidly on the axis.
-     THE knob for the greeting's horizontal position; the vertical overlap is the margin above. */
-  margin-left: -0.18em;
+  /* Sits just inside the name's box edge and so just left of the P's STEM — the script leads into
+     the word rather than lining up with it. It does NOT centre itself: "Hi, I'm" reads into
+     "PRATIUSH" as one sentence, and a phrase centred over the middle of the word would break the
+     reading. Was -0.18em when the name's own box was pulled left by 0.04em of display size; that
+     is 0.2286em of the greeting's own size, which is where this value comes from. THE knob for the
+     greeting's horizontal position; the vertical overlap is the margin above. */
+  margin-left: 0.05em;
   font-size: calc(var(--display-size) * 0.175);
   position: relative;
   z-index: 1;
 }
 
+/* Size and tracking are both .display's now — the same values the projects word and the footer
+   sign-off take. The per-pair corrections below are what this word needs beyond that, and they
+   are corrections rather than a different tracking. */
 .hero__name {
-  font-size: var(--display-size);
-  /* Base tracking is tightened by 0.006em per gap to absorb the two per-letter openings
-     below (0.04em over seven gaps), so opening T–I and I–U costs the word no extra width. */
-  letter-spacing: -0.021em;
-  /* The P carries a left side bearing, so its box edge sits left of its ink. Pulling the
-     box out by that bearing puts the P's STEM on the same axis as the copy below — one
-     strict left edge for the whole lockup. Tune if the stem sits off the line. */
-  margin-left: -0.04em;
+  /* Centring a word means centring its INK, not its box, and the two differ by however much the
+     bearings disagree. Measured off Kumbh Bold: the P's left bearing and the H's right bearing are
+     both 0.0596em — identical, so they cancel and no correction is owed on that account.
+
+     What does not cancel is `letter-spacing`, which CSS adds after the LAST glyph as well as
+     between them, hanging --track-display's 0.03em off the right end as empty box. Pulling it back
+     leaves the box hugging the ink symmetrically, so the block's centre is the word's centre
+     exactly. (This replaced a -0.04em left pull, which existed to stand the P's stem on a left
+     axis that the centred composition no longer has.) */
+  margin-right: -0.03em;
 }
 
-/* T–I and I–U jam where the narrow verticals meet the broad U. Opened locally rather than
-   by loosening the whole word. */
-.hero__name-open {
-  margin-right: 0.02em;
+/* Where the measured kerning lands. Any display word rendered through lib/kerning emits its
+   per-letter correction as `--kern`, and this is the one rule that spends it — so the hero name,
+   the footer sign-off and the projects word are spaced by one table rather than three. The
+   values, and how they were measured off the font's outlines, live in lib/kerning.
+
+   A descendant selector rather than a child one, because two of the three words sit inside a
+   mask: the footer's letters are under .footer__line-inner and the deck's are under
+   .stack__word. Reaching every span under .display is safe — the fallback is 0, so the spans
+   that are not letters (the hero bracket's parens, the clip wrappers themselves) resolve to
+   `margin-right: 0`, which is what they already had. */
+.display span {
+  margin-right: var(--kern, 0);
 }
 
 /* The bracketed portrait on the left, the meta as a column that brackets its height on the
    right. `align-items: stretch` makes the column as tall as the bracket; the foot's own
-   margin-top:auto then drops it to the bottom while role/tagline hold the top. The column-gap
-   is the paren-to-role breathing room — added here, not as a meta margin, so it doesn't indent
-   the column off the left axis when the row wraps. Stacks on narrow. */
+   margin-top:auto then drops it to the bottom while role/tagline hold the top.
+
+   TWO systems, one lockup. The bracketed portrait is one, the meta is the other, and the gap
+   between them is the whole argument: it has to be wide enough that they read as two things and
+   narrow enough that they read as one. --col-gap lands at roughly twice the bracket's own internal
+   rhythm (`calc(0.1em + 1vw)`), which is the ratio that separates without detaching — a column
+   line further right made them two unrelated islands with a hole between.
+
+   Centred, because the block above it is: the row sits under the middle of the name rather than
+   hanging off one end of it. */
 .hero__lockup {
   margin-top: 40px;
   display: flex;
   flex-wrap: wrap;
+  justify-content: center;
   align-items: stretch;
-  gap: 20px calc(40px + clamp(0.75rem, 1vw, 1.125rem));
+  gap: 20px var(--col-gap);
 }
 
 /* ( ▣ ) — the ornament at the SAME display size as the name, so the portrait reads as a
@@ -545,11 +856,10 @@ a:focus-visible .underline-link::after {
 .hero__bracket {
   display: inline-flex;
   align-items: center;
-  /* The gap is the only spacing authority here, so the display face's negative tracking is
-     zeroed rather than left to fight it. */
+  /* The gap is the only spacing authority here, so the display face's -0.03em is zeroed rather
+     than left to fight it. Size comes from .display. */
   gap: calc(0.1em + 1vw);
-  font-size: var(--display-size);
-  letter-spacing: 0;
+  letter-spacing: var(--track-normal);
   /* Below the square's height, so the row is sized by the portrait, not the parens' looser
      line box. */
   line-height: 0.8;
@@ -598,9 +908,14 @@ a:focus-visible .underline-link::after {
   gap: 8px;
 }
 
+/* A rung up from .note's --t-lg. Under a name at 18cqi the meta was the quietest thing on the
+   page — the information you actually came for, set smaller than the section labels below it.
+   Tracking follows size per the scale's own rule, so the rung up brings --track-snug with it. */
 .hero__role {
   margin: 0;
+  font-size: var(--t-xl);
   font-weight: 500;
+  letter-spacing: var(--track-snug);
 }
 
 /* The expressive line: larger than the role but a step down in weight AND lifted a modest
@@ -609,8 +924,56 @@ a:focus-visible .underline-link::after {
    measure, so it holds one line on desktop and wraps only when stacked. */
 .hero__tagline {
   margin: 0;
+  /* Two rungs up from .h3's --t-xl, which keeps it the larger of the two meta lines by the same
+     step it had before. Tracking follows size, so --track-tight comes with the rung. */
+  font-size: var(--t-3xl);
   font-weight: 400;
+  letter-spacing: var(--track-tight);
   color: color-mix(in srgb, var(--color-ink) 85%, var(--color-bone));
+  /* The line types and clears itself, so its width changes constantly. These two reserve the box
+     it will need at its widest, on both axes, and they exist for the same reason.
+
+     HEIGHT: without it a phrase that wrapped would push the locator below down and back on every
+     cycle, and the whole column would breathe.
+
+     WIDTH: the row is centred, so the meta's width sets where the whole lockup starts — an
+     unreserved line would slide the portrait left and right on every keystroke. 6.3em covers the
+     longest phrase, "I build with AI.", measured off Instrument Sans: 6.355em of advances, less
+     0.32em of tracking, plus 0.12em for the caret and its margin = 6.155em. Both are in the
+     element's own em, so both track the size above. Keep the phrases inside it (see TypedLine). */
+  min-height: calc(1em * var(--lh-snug));
+  min-width: 6.3em;
+}
+
+/* The caret. A rule the height of the type, sitting on the text's own colour rather than the
+   accent — it is punctuation for the line, not a highlight on it. */
+.typed__caret {
+  display: inline-block;
+  width: 0.06em;
+  height: 0.78em;
+  margin-left: 0.06em;
+  /* Lifts the bar off the baseline so it spans the letters rather than hanging under them. */
+  vertical-align: -0.04em;
+  background: currentColor;
+}
+
+/* Blinks only at rest. While characters are moving the caret stays solid, which is both what a
+   real one does and what keeps a blinking element off the screen during the part somebody is
+   reading. `steps(1)` because a caret snaps — this is the one thing on the page that is not on
+   --ease, and it is not on it because it is not a transition. */
+.typed__caret[data-idle] {
+  animation: caret-blink var(--dur-caret-blink) steps(1, end) infinite;
+}
+
+@keyframes caret-blink {
+  0%,
+  50% {
+    opacity: 1;
+  }
+  50.01%,
+  100% {
+    opacity: 0;
+  }
 }
 
 /* Pinned to the column's bottom, then lifted a hair so the line's optical baseline lands on
@@ -629,15 +992,19 @@ a:focus-visible .underline-link::after {
 .projects-title {
   container-type: inline-size;
   margin-bottom: var(--space-block);
-  /* translateX keeps the word on the shared display axis (see --axis-shift) — lined up under the
-     statement that leads into it and the hero name above. translateY is a small vertical nudge;
-     transform doesn't change the cqi the word sizes to. */
-  transform: translateX(var(--axis-shift)) translateY(0.65rem);
+  /* A small vertical nudge only. The word takes no horizontal shift: it has to sit on the same
+     left edge as the frame directly beneath it, and at this scale 29px of daylight between the
+     two reads as a mistake rather than as an axis. Transform doesn't change the cqi the word
+     sizes to. */
+  transform: translateY(0.65rem);
 }
 
+/* Size and tracking are .display's — this word is where that tracking value came from. */
 .projects-word {
-  font-size: var(--display-size);
-  letter-spacing: -0.03em;
+  /* Kumbh's P carries a left side bearing, so its box edge sits left of its ink. Pulling the box
+     out by that bearing puts the STEM on the gutter — the edge the frame below, the archive rows
+     and the statement above all sit on. Same value the hero name uses on the same glyph. */
+  margin-left: -0.04em;
 }
 
 /* ── work index ───────────────────────────────────────────────────────────── */
@@ -676,7 +1043,7 @@ a:focus-visible .underline-link::after {
     display: grid;
     grid-template-columns: 1.05fr 0.95fr;
     align-items: center;
-    gap: clamp(2rem, 5vw, 5rem);
+    gap: var(--col-gap);
   }
 
   .work-card__body {
@@ -713,8 +1080,8 @@ a:focus-visible .underline-link::after {
   flex: none;
   color: var(--color-ink-muted);
   transition:
-    transform 0.4s var(--ease),
-    color 0.4s var(--ease);
+    transform var(--dur-hover) var(--ease),
+    color var(--dur-hover) var(--ease);
 }
 
 a:hover .work-card__arrow,
@@ -724,12 +1091,17 @@ a:focus-visible .work-card__arrow {
 }
 
 /* The evidence line — full ink, held to a readable measure. What turns the image from
-   decoration into a claim about what the product is. */
+   decoration into a claim about what the product is.
+
+   Same size as .prose; the difference is the measure and therefore the leading. 48ch is a short
+   column, and a short column needs less leading than a 62ch one — the eye has less distance to
+   travel to find the next line, so 1.55 there and 1.45 here are the same decision applied twice,
+   not two body styles. That is what --lh-copy and --lh-body are for. */
 .work-card__desc {
   margin: 14px 0 0;
   max-width: 48ch;
-  font-size: clamp(1rem, 0.95rem + 0.3vw, 1.15rem);
-  line-height: 1.45;
+  font-size: var(--t-base);
+  line-height: var(--lh-copy);
   text-wrap: pretty;
 }
 
@@ -737,16 +1109,21 @@ a:focus-visible .work-card__arrow {
    the stronger line, then the stack recedes into a quiet tag row. */
 .work-card__meta {
   margin: 16px 0 0;
-  font-size: 1rem;
+  font-size: var(--t-base);
   font-weight: 500;
-  letter-spacing: 0.01em;
+  letter-spacing: var(--track-normal);
+  /* This line ends in a year. Tabular figures hold the digits on a common width so a column of
+     cards doesn't rag by a few tenths of a character from row to row. */
+  font-variant-numeric: tabular-nums;
   color: var(--color-ink-muted);
 }
 
+/* Dot-separated fragments rather than a sentence, so this one DOES want tracking added: the
+   extra air is what stops "Next.js · TypeScript · Postgres" reading as one long word. */
 .work-card__stack {
   margin: 8px 0 0;
-  font-size: 0.8125rem;
-  letter-spacing: 0.06em;
+  font-size: var(--t-xs);
+  letter-spacing: var(--track-wide);
   color: var(--color-ink-muted);
 }
 
@@ -756,21 +1133,30 @@ a:focus-visible .work-card__arrow {
    under reduced motion, so none of these rules may reach it. */
 
 .stack {
-  /* THE knob: how much scroll one project owns. The pin lasts --stack-count × this, and the
-     section is that plus the one viewport the pin occupies. */
-  --stack-step: 110svh;
+  /* THE knob: how much scroll one HANDOVER owns — a shrink and the curtain that follows it. The
+     pin lasts --stack-steps × this, and the section is that plus the one viewport the pin
+     occupies. Three projects are two handovers, so the deck no longer spends a whole step on the
+     first piece just to sit still through it. */
+  --stack-step: 130svh;
   /* Half the content gutter, roughly — enough air that the rail reads as page furniture rather
      than as part of the row. */
   --stack-rail-inset: clamp(1.25rem, 3.25vw, 4.5rem);
-  /* Nothing crosses open space to reach the well any more, so this no longer has to leave a
-     runway under it — it only has to fit above the fold. Verified at 720/900/1240 tall. */
-  --stack-well-h: clamp(220px, 46svh, 500px);
+  /* The gap between the well and the copy — the page's --col-gap, aliased locally because the
+     row's first track has to subtract it to work out the well's column share, and the alias is
+     what keeps that arithmetic readable. */
+  --stack-col-gap: var(--col-gap);
+  /* A guard, not a size: how tall the well is allowed to get before a short viewport would push
+     it past the fold. It is applied to the COLUMN (see .stack__row), never to the well itself —
+     capping the box inside a width-sized column is what used to leave a strip of empty column
+     beside the frame. At 16/10 the width is what binds on any viewport taller than about 680px,
+     so the guard is normally inert. */
+  --stack-well-h: clamp(220px, 56svh, 560px);
   /* The page's block step, capped so a short viewport can't push the well past the fold. On a
      typical laptop the cap and the token land within about 10% of each other. */
   --stack-gap: min(var(--space-block), 8svh);
 
   position: relative;
-  height: calc(var(--stack-count) * var(--stack-step) + 100svh);
+  height: calc(var(--stack-steps) * var(--stack-step) + 100svh);
 }
 
 /* `overflow` on the sticky element itself is safe; the trap is `overflow` on an ANCESTOR of one.
@@ -829,37 +1215,50 @@ a:focus-visible .work-card__arrow {
   display: block;
 }
 
+/* The first track IS the well: the lesser of its 1.05fr share of the row and the height guard.
+   Sizing the TRACK rather than the box is the whole trick — a height cap on a box sitting in a
+   width-sized column leaves the difference as dead gutter, and because the cap is height-driven
+   that dead strip breathes as the window resizes. Capping the track instead hands any slack to
+   the copy column, so the declared gap is the real gap at every viewport size. */
 .stack__row {
   position: relative;
   display: grid;
-  grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+  grid-template-columns:
+    min(
+      calc((100% - var(--stack-col-gap)) * 1.05 / 2),
+      calc(var(--stack-well-h) * 16 / 10)
+    )
+    minmax(0, 1fr);
   align-items: center;
-  gap: clamp(2rem, 5vw, 5rem);
+  gap: var(--stack-col-gap);
 }
 
-/* The well is the fixed plate the deck lives in. Width follows the column until the viewport gets
-   short, then the height cap takes over — so the frame is the same 4/3 it is everywhere else and
-   always fits above the fold.
+/* The well is the fixed plate the deck lives in. It simply fills its column — the height guard is
+   spent on the track above, so there is no cap here to leave a gap — at the same 16/10 the frame
+   is everywhere else on the site.
 
-   It carries the same sunk surface a .frame does, because a card that has receded leaves a thin
-   margin around itself while the next one is uncovering over it. Against the page that margin
-   reads as a hole opening; against a sunk plate it reads as the card sitting back off the
-   surface, which is the whole point of the drift. */
+   No ground of its own, and neither has a card (below). A card is off-fill only while it is being
+   covered (see SCALE_PAST), and what should show around a receding picture is the PAGE — the card
+   sinking back into the bone. A sunk plate here would instead draw a second, permanent rectangle
+   around the work and box it in, which is the one thing the form language does not do. It also
+   means the section introduces itself with the first curtain rising over bare paper rather than
+   over an empty grey box. */
 .stack-well {
   position: relative;
   width: 100%;
-  max-width: calc(var(--stack-well-h) * 4 / 3);
-  aspect-ratio: 4 / 3;
-  background: var(--color-bone-sunk);
+  aspect-ratio: 16 / 10;
 }
 
 /* The frame is what the curtain clips — bottom edge fixed, top edge rising. It never moves and
    never scales; the layer inside it does. Scaling this element would drag the clip line in with
-   it, and a card at 96% would leave a strip of the one behind it showing under its own bottom
-   edge. */
+   it, so the curtain would shrink along with the card instead of staying pinned to the well.
+
+   Its background is dropped for the same reason .stack-well has none — the air around a receding
+   picture should be the page. */
 .stack-card {
   position: absolute;
   inset: 0;
+  background: none;
   will-change: clip-path;
 }
 
@@ -906,10 +1305,22 @@ a:focus-visible .work-card__arrow {
   will-change: transform, filter;
 }
 
-/* Colour is scroll-driven here — the card you are on is the one in colour — so the still itself
-   must stop carrying a filter of its own or the two would compound. Hover keeps its push-in. */
-.stack-card .frame__media {
+/* The deck drives colour from the scroll — the card you are on is the one in colour — so the still
+   itself must carry no filter of its own or the two compound.
+
+   It must carry no hover push-in either, and the `:hover`/`:focus-visible` selectors have to be
+   repeated here to get it. `a:hover .frame__media` scores (0,2,1) against a bare
+   `.stack-card .frame__media` at (0,2,0), so the base rule was winning inside the deck: any pointer
+   resting over the well — which is where the pointer usually is while you scroll — put a 3% eased
+   zoom on the arriving picture, on the image ALONE and on a curve, in the middle of the one
+   sequence on the site that is meant to be linear and whole. The affordance is not lost; it lives
+   on the copy block beside it, which is the same link and carries the underline and the arrow. */
+.stack-card .frame__media,
+.stack-card a:hover .frame__media,
+.stack-card a:focus-visible .frame__media {
   filter: none;
+  transform: none;
+  transition: none;
 }
 
 /* Three copies in one cell. They stretch to the tallest of the three rather than each centring
@@ -935,7 +1346,7 @@ a:focus-visible .work-card__arrow {
   left: calc(var(--stack-rail-inset) * -1);
   top: 50%;
   transform: translateY(-50%);
-  width: 9px;
+  width: 5px;
 }
 
 /* Height and offset are both scroll-driven (see StackDot). The offset rides on a transform; the
@@ -946,24 +1357,24 @@ a:focus-visible .work-card__arrow {
   position: absolute;
   left: 0;
   top: 0;
-  width: 9px;
+  width: 5px;
   will-change: transform;
 }
 
 /* A radius past half the width: a circle at rest, and a true pill at every length above it — one
    mark at two lengths rather than two shapes. */
-.stack-dots__ring,
+.stack-dots__track,
 .stack-dots__fill {
   position: absolute;
   inset: 0;
   border-radius: 999px;
 }
 
-/* Heavier than the page hairline on purpose: a hairline reads as a rule because it runs the width
-   of the measure, but the same wash on a 9px circle disappears. This is the weight at which three
-   small marks still read as three considered marks — and, stretched, as a track with a fill in it. */
-.stack-dots__ring {
-  border: 1px solid rgba(25, 25, 25, 0.32);
+/* A flat wash, not an outline. At 5px a 1px ring is most of the mark, which is what made the rail
+   read as a widget rather than as page furniture; filled, an idle station is a quiet point and an
+   active one is a light track with ink descending through it. */
+.stack-dots__track {
+  background: rgba(25, 25, 25, 0.16);
 }
 
 .stack-dots__fill {
@@ -980,11 +1391,15 @@ a:focus-visible .work-card__arrow {
 
 /* "Also built" takes its own classes rather than the shared .rows, so it and the capabilities
    list below read as two different sections instead of one repeated row pattern. */
+/* An eyebrow one rung above .label, and tracked one step LESS because of it — caps need less
+   separation as they grow, so holding 0.14em here would have opened it past the point where
+   "Also built" reads as two words. The only place on the site that uses this pair. */
 .archive__title {
   margin: 0;
-  font-size: 0.9375rem;
+  font-size: var(--t-sm);
   font-weight: 500;
-  letter-spacing: 0.12em;
+  line-height: var(--lh-flat);
+  letter-spacing: var(--track-eyebrow);
   text-transform: uppercase;
   color: var(--color-ink-muted);
 }
@@ -1015,7 +1430,7 @@ a:focus-visible .work-card__arrow {
    prefix stays: a row with no link renders as a div and must not respond. */
 .archive__name,
 .archive__note {
-  transition: transform 0.4s var(--ease);
+  transition: transform var(--dur-hover) var(--ease);
 }
 
 a.archive__link:hover .archive__name,
@@ -1031,8 +1446,8 @@ a.archive__link:focus-visible .archive__note {
   flex: 0 0 auto;
   min-width: min(100%, 16rem);
   /* A step above base .h3 so the archive reads as a genuine second tier of work, not footnotes. */
-  font-size: clamp(1.25rem, 1rem + 0.9vw, 1.9rem);
-  letter-spacing: -0.015em;
+  font-size: var(--t-2xl);
+  letter-spacing: var(--track-snug);
 }
 
 .archive__note {
@@ -1040,12 +1455,10 @@ a.archive__link:focus-visible .archive__note {
   color: var(--color-ink-muted);
 }
 
+/* Type comes from .label on the span — including its tabular figures, which is what holds this
+   column's years on one right edge down the list. What is left here is placement and tone. */
 .archive__year {
   margin-left: auto;
-  font-size: 0.8125rem;
-  font-weight: 500;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
   color: var(--color-ink-muted);
 }
 
@@ -1054,8 +1467,8 @@ a.archive__link:focus-visible .archive__note {
   align-self: center;
   color: var(--color-ink-muted);
   transition:
-    transform 0.4s var(--ease),
-    color 0.4s var(--ease);
+    transform var(--dur-hover) var(--ease),
+    color var(--dur-hover) var(--ease);
 }
 
 a.archive__link:hover .archive__arrow,
@@ -1065,37 +1478,25 @@ a.archive__link:focus-visible .archive__arrow {
 }
 
 /* ── statement ────────────────────────────────────────────────────────────── */
-/* The promise, and the hand-off into the work. Aligned to the PROJECTS word's optical left edge
-   below it — not merely to the shared --axis-shift. The projects title is set in the Kumbh display
-   face, whose "P" carries a ~0.04em left side bearing the title leaves uncompensated (the hero
-   cancels its own with margin-left:-0.04em), so its P sits a touch right of the axis. This text-face
-   statement, which sits on the axis, is nudged right by that same 0.04em of the shared --display-size
-   to land its first letter under the P's stem. Sized well below the display word so it leads into
-   PROJECTS rather than competing; the text face keeps the three-face rule (the beat is scale +
-   placement, not a new serif). Tune the 0.04 if the line over/undershoots the P. */
-.statement {
-  max-width: 26ch;
-  /* --display-size resolves via .statement-lead's container-type, matching the projects title. */
-  transform: translateX(calc(var(--axis-shift) + var(--display-size) * 0.04));
-  font-size: clamp(1.75rem, 4.5vw, 3.75rem);
-  font-weight: 500;
-  line-height: 1.14;
-  letter-spacing: -0.02em;
-  text-wrap: pretty;
-}
+/* The promise, and the hand-off into the work. It sits on the plain gutter edge, which is now also
+   where the PROJECTS word's stem and the frames below it land — so the statement, the display word
+   and the work share one left edge with no per-element compensation between them. Sized well below
+   the display word so it leads into PROJECTS rather than competing.
 
-/* The bridge floats between "What I do" and the work with balanced silence on both sides.
-   "What I do" already lays its own chapter step below itself, and .work-section adds only a
-   short step above the PROJECTS word — so the statement carries a little less on top and more
-   on the bottom to even the two visible gaps out. The result is a standalone beat suspended
-   between the two sections, not a lead-in glued to the work. Tune the two clamps to taste. */
-/* The bridge floats between "What I do" and the work. It now gets a full chapter step on each side
-   from the flow rule, which is the balanced silence its own brief asked for — the hand-tuned
-   asymmetry above only existed to even out two neighbours that were adding their paddings. */
-.statement-lead {
-  /* A query container so the statement can resolve --display-size the same way the projects title
-     does (18cqi against the same measure), to align their left edges — see .statement transform. */
-  container-type: inline-size;
+   The serif is the beat. Everything either side of this line is a grotesque, so the one place the
+   site makes a claim about itself is the one place the letterforms change — which does more than
+   another size step could, and lets the size stay well under the display word's. Face and weight
+   come from .editorial; what is local is the measure and the leading. */
+.statement {
+  /* `ch` is the width of the CURRENT face's zero, so this number is not portable across the face
+     change — 26ch of Instrument Sans is a physically wider column than 26ch of Instrument Serif.
+     30ch is the serif's equivalent. THE knob for where the line breaks; it should land after
+     "ideas". */
+  max-width: 30ch;
+  font-size: var(--t-5xl);
+  /* A notch above --lh-tight: the serif carries longer extenders than the sans does, and at this
+     size two lines set at the sans's leading start to interlock. */
+  line-height: 1.15;
 }
 
 @media (max-width: 767px) {
@@ -1124,11 +1525,14 @@ a.archive__link:focus-visible .archive__arrow {
   color: var(--color-bone-muted);
 }
 
+/* On .h2's rung. It was a clamp of its own a hair under that, which is the sort of near-miss the
+   scale exists to stop — the contact address is the page's one direct ask and there is no reason
+   for it to sit below the heading tier it reads as. */
 .footer__email {
   display: inline-block;
-  font-size: clamp(1.25rem, 3vw, 2.5rem);
-  line-height: 1.1;
-  letter-spacing: -0.02em;
+  font-size: var(--t-3xl);
+  line-height: var(--lh-tight);
+  letter-spacing: var(--track-tight);
 }
 
 .footer__status {
@@ -1162,8 +1566,15 @@ a.archive__link:focus-visible .archive__arrow {
 }
 
 /* The sign-off name at display scale — a bookend to the hero's opening "PRATIUSH", with a big
-   silence above it. Each line rises out of its own overflow-clip box. */
+   silence above it. Each line rises out of its own overflow-clip box.
+
+   Its own container, so `--display-size` resolves here the way it does in .hero and
+   .projects-title. Without it the word fell through to .display's `12vw` clamp while the hero name
+   used `18cqi`, so the two ends of the page were setting the same word at two different sizes —
+   which is exactly the one thing a bookend cannot do. The three containers all sit inside the same
+   gutter+measure, so `100cqi` is the same length in each. */
 .footer__name {
+  container-type: inline-size;
   margin: var(--space-block) 0 0;
 }
 
@@ -1174,6 +1585,9 @@ a.archive__link:focus-visible .archive__arrow {
 
 .footer__line-inner {
   display: block;
+  /* The P's side bearing, pulled the same way the hero name and the projects word pull it, so the
+     sign-off's stem lands on the gutter the rest of the footer sits on. */
+  margin-left: -0.04em;
 }
 
 .footer__colophon {
@@ -1196,6 +1610,17 @@ a.archive__link:focus-visible .archive__arrow {
   gap: 30px;
 }
 
+/* The brief sits a step below the title and carries the serif. Same size it has always been (.h2's
+   rung), but with a measure of its own: .case is on .measure's 90rem, so a 44px line was running
+   about 65 characters, and the briefs that fall back to a work's full description were setting
+   five of them. The cap is what makes this a paragraph instead of a banner. Wider than the
+   statement's — this one describes a project, where the statement lands a single claim. */
+.case__brief {
+  max-width: 45ch;
+  font-size: var(--t-3xl);
+  line-height: var(--lh-tight);
+}
+
 .case__body {
   display: flex;
   flex-direction: column;
@@ -1211,12 +1636,12 @@ a.archive__link:focus-visible .archive__arrow {
   list-style: none;
 }
 
+/* Type comes from .label on the <li>. What is left here is the chip: its border, its padding and
+   its tone. The three metrics that used to be re-declared inline were identical to .label's and
+   had no way of staying that way. */
 .case__stack li {
   padding: 0.55em 1em;
   border: 1px solid var(--color-rule);
-  font-size: 0.8125rem;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
   color: var(--color-ink-muted);
 }
 

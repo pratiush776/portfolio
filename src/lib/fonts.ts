@@ -1,7 +1,13 @@
-import { Instrument_Sans, Kumbh_Sans, Style_Script } from "next/font/google";
+import {
+  Instrument_Sans,
+  Instrument_Serif,
+  Kumbh_Sans,
+  Style_Script,
+} from "next/font/google";
 
-/* THREE faces, one role each. All hierarchy comes from size, weight, case and tracking —
- * never from adding a fourth face.
+/* FOUR faces, one role each: a display, a text, an editorial and a signature. Within a role all
+ * hierarchy still comes from size, weight, case and tracking — a face is never added to make one
+ * line louder than the line above it.
  *
  * Each face exposes a CSS variable that rules in globals.css reference DIRECTLY
  * (`font-family: var(--font-kumbh), sans-serif`). Routing a family through an intermediate
@@ -28,6 +34,25 @@ export const instrumentSans = Instrument_Sans({
   variable: "--font-instrument",
   subsets: ["latin"],
   display: "swap",
+});
+
+/**
+ * EDITORIAL — the statement on the landing page, and the brief at the top of a case page. The two
+ * places the site speaks about itself rather than describing something. Instrument Serif is the
+ * sibling of the text face above, drawn as one superfamily, which is what lets a serif join
+ * without the page reading as two typographic systems bolted together. 400 only, and never body
+ * copy: it earns its place by appearing twice, large, and nowhere else.
+ *
+ * `preload: false` on purpose. Both uses sit below the fold, and the intro gates its lift on
+ * `document.fonts.ready` (see Preloader) — preloading a face nobody sees during the intro would
+ * let it stretch the intro's floor. Drop the flag if the statement ever flashes its fallback.
+ */
+export const instrumentSerif = Instrument_Serif({
+  variable: "--font-instrument-serif",
+  subsets: ["latin"],
+  weight: "400",
+  display: "swap",
+  preload: false,
 });
 
 /**

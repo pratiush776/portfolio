@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { motion, type MotionProps } from "motion/react";
 
 import { ArrowUpRight } from "@/components/icons";
@@ -12,7 +13,11 @@ import type { FeaturedWork } from "@/data/works";
  */
 
 /**
- * Frames are 4/3: the stills are landscape product shots, and a square crop cuts them in half.
+ * Frames are 16/10, because the stills are wide: the covers run 1.33 to 1.89, so any single ratio
+ * has to crop something, and this is the one that takes the least from the set. A narrower frame
+ * cut a quarter off the left and right of the two widest shots, which on a UI screenshot is the
+ * interface itself.
+ *
  * They sit greyscale until hovered (see .frame__media) — in the stack, until scrolled to.
  */
 export function Cover({ work }: { work: FeaturedWork }) {
@@ -40,13 +45,26 @@ export function Cover({ work }: { work: FeaturedWork }) {
   }
 
   return (
-    // The frame crops via overflow:hidden and the hover transform drives this element
-    // directly; next/image's wrapper fights both.
-    // eslint-disable-next-line @next/next/no-img-element
-    <img
+    // Optimised, not raw. The two real covers are a 1.9MB and a 1.5MB PNG on disk, and shipped
+    // as-is they were the landing page's single largest cost by a wide margin — enough that the
+    // intro could not honestly wait for them.
+    //
+    // There is no wrapper to fight: with `fill`, next/image positions the image element itself
+    // absolutely inside the nearest positioned ancestor, which is the .frame. So the crop still
+    // comes from the frame's overflow and the hover transform still drives this element directly,
+    // exactly as they did with a bare tag.
+    //
+    // `loading="eager"` because these are below the fold and would otherwise be lazy — and a lazy
+    // image is one the intro can never see start, let alone finish. Next 16's guidance is to reach
+    // for eager/fetchPriority here and reserve `preload` for the one true LCP image, which is the
+    // hero portrait.
+    <Image
       className="frame__media"
       src={still}
       alt={work.coverAlt ?? `${work.title} — project cover`}
+      fill
+      sizes="(max-width: 767px) 100vw, 52vw"
+      loading="eager"
       draggable={false}
     />
   );
