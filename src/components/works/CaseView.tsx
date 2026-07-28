@@ -2,7 +2,13 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import {
+  useEffect,
+  useId,
+  useRef,
+  useState,
+  type MouseEvent,
+} from "react";
 import { motion, useReducedMotion, type Variants } from "motion/react";
 
 import { ArrowUpRight } from "@/components/icons";
@@ -27,7 +33,6 @@ export function CaseView({
   const reduce = useReducedMotion() ?? false;
 
   const brief = work.tagline ?? work.description;
-  const stackLine = work.stack.join(" · ");
   const v = reduce ? undefined : rise;
 
   return (
@@ -41,7 +46,6 @@ export function CaseView({
         <CaseOpening
           work={work}
           brief={brief}
-          stackLine={stackLine}
           variants={v}
         />
       </motion.div>
@@ -55,30 +59,22 @@ export function CaseView({
 function CaseOpening({
   work,
   brief,
-  stackLine,
   variants,
 }: {
   work: FeaturedWork;
   brief: string;
-  stackLine: string;
   variants?: Variants;
 }) {
   return (
     <>
       <header className="case__intro">
-        <motion.p className="case__meta" variants={variants}>
-          {work.year} · {work.role} · {stackLine}
-        </motion.p>
         <motion.h1 className="display-section" variants={variants}>
           {work.title}
         </motion.h1>
-        <motion.p className="case__brief editorial" variants={variants}>
-          {brief}
-        </motion.p>
       </header>
 
       <motion.div variants={variants}>
-        <CaseLeadMedia work={work} />
+        <CaseMediaGallery work={work} brief={brief} />
       </motion.div>
     </>
   );
@@ -100,7 +96,7 @@ function CaseNarrative({ work }: { work: FeaturedWork }) {
           <p className="prose">{caseStudy.what}</p>
         </CaseBeat>
 
-        <CaseBeat title="How" wide>
+        <CaseBeat title="How">
           <p className="prose">{caseStudy.how}</p>
           <div className="case__decisions">
             {caseStudy.decisions.map((decision) => (
@@ -112,45 +108,118 @@ function CaseNarrative({ work }: { work: FeaturedWork }) {
           </div>
         </CaseBeat>
       </article>
-
-      {caseStudy.artifacts && caseStudy.artifacts.length > 0 && (
-        <section className="case__artifacts" aria-label="Project artifacts">
-          {caseStudy.artifacts.map((artifact) => (
-            <figure className="case__artifact" key={artifact.src}>
-              <div
-                className="case__artifact-frame"
-                style={{ aspectRatio: artifact.aspectRatio }}
-              >
-                <Image
-                  src={artifact.src}
-                  alt={artifact.alt}
-                  fill
-                  sizes="(max-width: 767px) 100vw, 78vw"
-                  className="case__artifact-image"
-                />
-              </div>
-              <figcaption>{artifact.note}</figcaption>
-            </figure>
-          ))}
-        </section>
-      )}
     </>
   );
 }
 
 function CaseBeat({
   title,
-  wide = false,
   children,
 }: {
   title: string;
-  wide?: boolean;
   children: React.ReactNode;
 }) {
   return (
-    <section className={`case__beat${wide ? " case__beat--wide" : ""}`}>
+    <section className="case__beat">
       <h2 className="case__beat-title editorial">{title}</h2>
       <div className="case__beat-content">{children}</div>
+    </section>
+  );
+}
+
+function CaseMediaGallery({
+  work,
+  brief,
+}: {
+  work: FeaturedWork;
+  brief: string;
+}) {
+  const [selected, setSelected] = useState(0);
+  const highlights = work.caseStudy.highlights ?? [];
+  const leadLabel = work.media.kind === "video" ? "Demo" : "Overview";
+  const stageRatio =
+    work.media.kind === "video" ? work.media.aspectRatio : "16 / 10";
+
+  return (
+    <section
+      className="case__media-gallery"
+      aria-label={`${work.title} media`}
+    >
+      <div className="case__media-context">
+        <p className="case__brief editorial">{brief}</p>
+
+        <div
+          className="case__highlights"
+          role="group"
+          aria-label="Choose media"
+        >
+          <button
+            type="button"
+            className="case__highlight"
+            aria-pressed={selected === 0}
+            onClick={() => setSelected(0)}
+          >
+            <span className="case__highlight-thumb case__highlight-thumb--lead">
+              {work.media.kind === "video" ? (
+                <span className="case__highlight-play" aria-hidden />
+              ) : (
+                <span className="case__highlight-letter" aria-hidden>
+                  {work.title.charAt(0)}
+                </span>
+              )}
+            </span>
+            <span>{leadLabel}</span>
+          </button>
+
+          {highlights.map((highlight, index) => (
+            <button
+              type="button"
+              className="case__highlight"
+              aria-pressed={selected === index + 1}
+              onClick={() => setSelected(index + 1)}
+              key={highlight.src}
+            >
+              <span className="case__highlight-thumb">
+                <Image
+                  src={highlight.src}
+                  alt=""
+                  fill
+                  sizes="80px"
+                  className="case__highlight-thumb-image"
+                />
+              </span>
+              <span>{highlight.label}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="case__media-view">
+        <div
+          className="case__media-stage"
+          style={{ aspectRatio: stageRatio }}
+        >
+          <div className="case__media-panel" hidden={selected !== 0}>
+            <CaseLeadMedia work={work} active={selected === 0} />
+          </div>
+
+          {highlights.map((highlight, index) => (
+            <div
+              className="case__media-panel"
+              hidden={selected !== index + 1}
+              key={highlight.src}
+            >
+              <Image
+                src={highlight.src}
+                alt={highlight.alt}
+                fill
+                sizes="(max-width: 767px) 100vw, 1024px"
+                className="case__media-image"
+              />
+            </div>
+          ))}
+        </div>
+      </div>
     </section>
   );
 }
@@ -210,11 +279,17 @@ function CaseActions({
 }
 
 /** Video leads when it exists. Poster-only work keeps its honest typographic plate. */
-function CaseLeadMedia({ work }: { work: FeaturedWork }) {
+function CaseLeadMedia({
+  work,
+  active,
+}: {
+  work: FeaturedWork;
+  active: boolean;
+}) {
   if (work.media.kind === "poster") {
     return (
       <div
-        className="frame frame--wide case__poster"
+        className="case__poster"
         role="img"
         aria-label={`${work.media.word}. ${work.media.caption}`}
       >
@@ -227,36 +302,139 @@ function CaseLeadMedia({ work }: { work: FeaturedWork }) {
   }
 
   return (
-    <CaseDemo
-      title={work.title}
-      src={work.media.src}
-      aspectRatio={work.media.aspectRatio}
-    />
+    <CaseDemo title={work.title} src={work.media.src} active={active} />
   );
 }
+
+const DEMO_TIMEOUT_MS = 12_000;
 
 function CaseDemo({
   title,
   src,
-  aspectRatio,
+  active,
 }: {
   title: string;
   src: string;
-  aspectRatio: string;
+  active: boolean;
 }) {
   const [phase, setPhase] = useState<
     "idle" | "loading" | "playing" | "error"
   >("idle");
+  const [attempt, setAttempt] = useState(0);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const gateRef = useRef<HTMLButtonElement>(null);
+  const retryRef = useRef<HTMLButtonElement>(null);
+  const stallTimeoutRef = useRef<number | null>(null);
+  const preserveKeyboardFocus = useRef(false);
   const requested = phase !== "idle";
+
+  useEffect(() => {
+    if (phase !== "loading" || !active) return;
+
+    const timeout = window.setTimeout(() => {
+      setPhase("error");
+    }, DEMO_TIMEOUT_MS);
+
+    return () => window.clearTimeout(timeout);
+  }, [active, attempt, phase]);
+
+  useEffect(() => {
+    const video = videoRef.current;
+
+    if (!active) {
+      video?.pause();
+      if (stallTimeoutRef.current !== null) {
+        window.clearTimeout(stallTimeoutRef.current);
+        stallTimeoutRef.current = null;
+      }
+      return;
+    }
+
+    if (phase === "loading") {
+      void video?.play().catch(() => {
+        setPhase("error");
+      });
+    }
+  }, [active, attempt, phase]);
+
+  useEffect(() => {
+    if (!preserveKeyboardFocus.current) return;
+
+    if (phase === "loading") {
+      gateRef.current?.focus({ preventScroll: true });
+    } else if (phase === "error") {
+      retryRef.current?.focus({ preventScroll: true });
+    }
+  }, [phase]);
+
+  useEffect(
+    () => () => {
+      if (stallTimeoutRef.current !== null) {
+        window.clearTimeout(stallTimeoutRef.current);
+      }
+    },
+    [],
+  );
+
+  const rememberInput = (event: MouseEvent<HTMLButtonElement>) => {
+    preserveKeyboardFocus.current = event.detail === 0;
+  };
+
+  const requestDemo = (event: MouseEvent<HTMLButtonElement>) => {
+    if (phase === "loading") return;
+    rememberInput(event);
+    setPhase("loading");
+  };
+
+  const retryDemo = (event: MouseEvent<HTMLButtonElement>) => {
+    rememberInput(event);
+    setAttempt((value) => value + 1);
+    setPhase("loading");
+  };
+
+  const handlePlaying = () => {
+    if (stallTimeoutRef.current !== null) {
+      window.clearTimeout(stallTimeoutRef.current);
+      stallTimeoutRef.current = null;
+    }
+
+    setPhase("playing");
+
+    if (preserveKeyboardFocus.current) {
+      window.requestAnimationFrame(() => {
+        videoRef.current?.focus({ preventScroll: true });
+        preserveKeyboardFocus.current = false;
+      });
+    }
+  };
+
+  const handleStall = () => {
+    if (phase !== "playing" || stallTimeoutRef.current !== null) return;
+
+    stallTimeoutRef.current = window.setTimeout(() => {
+      stallTimeoutRef.current = null;
+      setPhase("error");
+    }, DEMO_TIMEOUT_MS);
+  };
+
+  const handleError = () => {
+    if (stallTimeoutRef.current !== null) {
+      window.clearTimeout(stallTimeoutRef.current);
+      stallTimeoutRef.current = null;
+    }
+    setPhase("error");
+  };
 
   return (
     <section
       className="case__demo"
-      style={{ aspectRatio }}
       aria-label={`${title} demo`}
+      aria-busy={phase === "loading"}
     >
       {requested && (
         <video
+          key={attempt}
+          ref={videoRef}
           className={`case__demo-video${
             phase === "playing" ? " case__demo-video--visible" : ""
           }`}
@@ -266,50 +444,96 @@ function CaseDemo({
           controls
           autoPlay
           preload="auto"
-          onPlaying={() => setPhase("playing")}
-          onError={() => setPhase("error")}
+          tabIndex={0}
+          onPlaying={handlePlaying}
+          onStalled={handleStall}
+          onWaiting={handleStall}
+          onError={handleError}
         >
           <a href={src}>Open the {title} demo video</a>
         </video>
       )}
 
-      {phase === "idle" && (
+      {(phase === "idle" || phase === "loading") && (
         <button
+          ref={gateRef}
           type="button"
           className="case__demo-gate"
-          onClick={() => setPhase("loading")}
-          aria-label={`Play ${title} demo`}
+          onClick={requestDemo}
+          aria-disabled={phase === "loading"}
+          aria-label={
+            phase === "loading"
+              ? `Loading ${title} demo`
+              : `Play ${title} demo`
+          }
         >
-          <DemoMark />
+          <DemoMark loading={phase === "loading"} />
         </button>
       )}
 
       {phase === "loading" && (
-        <div className="case__demo-wait" role="status">
-          <DemoMark />
-          <span className="sr-only">Loading {title} demo</span>
-        </div>
+        <span className="sr-only" role="status">
+          Loading {title} demo
+        </span>
       )}
 
       {phase === "error" && (
-        <div className="case__demo-error" role="status">
-          <p>The demo could not load.</p>
-          <a href={src} className="underline-link">
-            Open the video
-          </a>
+        <div className="case__demo-error" role="alert">
+          <p>The demo didn’t load.</p>
+          <div className="case__demo-error-actions">
+            <button
+              ref={retryRef}
+              type="button"
+              className="underline-link"
+              onClick={retryDemo}
+            >
+              Try again
+            </button>
+            <a href={src} className="underline-link">
+              Open the video
+            </a>
+          </div>
         </div>
       )}
     </section>
   );
 }
 
-function DemoMark() {
+function DemoMark({ loading = false }: { loading?: boolean }) {
+  const orbitId = useId().replace(/:/g, "");
+  const orbitText = loading
+    ? "Loading · Loading · Loading · Loading · "
+    : "Demo · Demo · Demo · Demo · Demo · Demo · Demo · ";
+
   return (
-    <span className="demo-mark" aria-hidden>
-      <span className="demo-mark__word">Demo</span>
-      <span className="demo-mark__play demo-mark__play--one" />
-      <span className="demo-mark__play demo-mark__play--two" />
-      <span className="demo-mark__play demo-mark__play--three" />
+    <span
+      className={`demo-mark${loading ? " demo-mark--loading" : ""}`}
+      aria-hidden
+    >
+      <svg
+        className="demo-mark__orbit"
+        viewBox="0 0 160 160"
+        focusable="false"
+      >
+        <defs>
+          <path
+            id={orbitId}
+            d="M 80,80 m -58,0 a 58,58 0 1,1 116,0 a 58,58 0 1,1 -116,0"
+          />
+        </defs>
+        <text>
+          <textPath
+            href={`#${orbitId}`}
+            textLength="354"
+            lengthAdjust="spacing"
+          >
+            {orbitText}
+          </textPath>
+        </text>
+      </svg>
+      <span className="demo-mark__button">
+        <span className="demo-mark__triangle" />
+      </span>
     </span>
   );
 }

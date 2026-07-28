@@ -1,5 +1,6 @@
 "use client";
 
+import { Fragment } from "react";
 import Image from "next/image";
 import { motion, type MotionProps } from "motion/react";
 
@@ -73,10 +74,10 @@ export function Cover({ work }: { work: FeaturedWork }) {
 /**
  * The words: the title in the serif, a claim under it, the credit line, then the way in.
  *
- * Four lines, and the order is the read: what it is, what it does, what I was and when, where to
- * go. The tech stack used to sit at the foot of this block and is gone from it — it is a list of
- * nouns competing with the one line that asks for a click, and the case page already sets it
- * properly as chips (see .case__stack).
+ * The order is the read: what it is, what it does, what I was and when, where to go. The tech stack
+ * used to sit at the foot of this block and is gone from it — it is a list of nouns competing with
+ * the one line that asks for a click, and the case page already sets it in the opening context and
+ * the How narrative.
  *
  * `lines` lets the pinned stack drive each of the four lines on its own scroll window, so they
  * cascade rather than moving as one slab. The flat grid passes nothing and the elements render
@@ -94,60 +95,86 @@ export function WorkCopy({
   work,
   lines,
   clip = false,
+  credit = true,
 }: {
   work: FeaturedWork;
-  /** Per-line motion props, in reading order: title, description, meta, cta. */
+  /** Per-line motion props, in the order the rows below actually render — which is three long
+      rather than four when `credit` is off. */
   lines?: MotionProps[];
   clip?: boolean;
+  /** Whether the role/year line belongs in this column. The pinned deck sets it false and sets the
+      same two facts on their side in the page's left margin instead (see StackCredit), where they
+      read as the frame's caption rather than as a third line of the paragraph. The flat layout has
+      no margin to put them in, so it keeps them here. */
+  credit?: boolean;
 }) {
+  // Both branches have to carry the key, because both are returned into the same `.map()` below.
+  // The unclipped one takes a Fragment purely to hold it: the flat layout's whole point is that its
+  // rows sit directly in the card body with no wrapper of their own, and a Fragment keeps that true
+  // while still giving React something to key. Keying only the clipped branch left the flat spread
+  // warning on every load — and on EVERY viewport, since `useMediaQuery` reads false until
+  // hydration, so the flat layout is what renders first even on a desktop that is about to swap to
+  // the pinned deck.
   const wrap = (index: number, name: string, node: React.ReactNode) =>
     clip ? (
       <div key={index} className={`work-card__clip work-card__clip--${name}`}>
         {node}
       </div>
     ) : (
-      node
+      <Fragment key={index}>{node}</Fragment>
     );
 
-  return (
-    <>
-      {wrap(
-        0,
-        "title",
-        <motion.h3 className="work-card__title editorial" {...lines?.[0]}>
-          {work.title}
-        </motion.h3>,
-      )}
-      {wrap(
-        1,
-        "desc",
-        <motion.p className="work-card__desc" {...lines?.[1]}>
-          {work.description}
-        </motion.p>,
-      )}
-      {wrap(
-        2,
-        "meta",
-        <motion.p className="work-card__meta" {...lines?.[2]}>
-          {work.role} · {work.year}
-        </motion.p>,
-      )}
-      {wrap(
-        3,
-        "cta",
+  // Built as a list rather than as four literals, because dropping the credit has to renumber
+  // everything under it: `lines[2]` is the CTA's window in the deck and the credit's in the grid,
+  // and a row taking its motion from a fixed index would quietly ride on its neighbour's clock.
+  const rows: { name: string; render: (props?: MotionProps) => React.ReactNode }[] =
+    [
+      {
+        name: "title",
+        render: (props) => (
+          <motion.h3 className="work-card__title editorial" {...props}>
+            {work.title}
+          </motion.h3>
+        ),
+      },
+      {
+        name: "desc",
+        render: (props) => (
+          <motion.p className="work-card__desc" {...props}>
+            {work.description}
+          </motion.p>
+        ),
+      },
+      ...(credit
+        ? [
+            {
+              name: "meta",
+              render: (props?: MotionProps) => (
+                <motion.p className="work-card__meta" {...props}>
+                  {work.role} · {work.year}
+                </motion.p>
+              ),
+            },
+          ]
+        : []),
+      {
+        name: "cta",
         // A cue, not a link: the whole card — frame and words together — is already one anchor, in
         // both layouts. So this is a <p> carrying the affordance, and the hover states it lights up
         // are driven from the anchor above it, exactly as the arrow always was.
-        <motion.p className="work-card__cta" {...lines?.[3]}>
-          <span className="work-card__cta-label">View case study</span>
-          <ArrowUpRight
-            className="work-card__arrow"
-            width="18"
-            height="18"
-            aria-hidden
-          />
-        </motion.p>,
-      )}
-    </>
-  );
+        render: (props) => (
+          <motion.p className="work-card__cta" {...props}>
+            View case study
+            <ArrowUpRight
+              className="work-card__arrow"
+              width="18"
+              height="18"
+              aria-hidden
+            />
+          </motion.p>
+        ),
+      },
+    ];
+
+  return <>{rows.map((row, i) => wrap(i, row.name, row.render(lines?.[i])))}</>;
 }

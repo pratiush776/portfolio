@@ -187,6 +187,18 @@ a {
      because a page whose side-by-side gaps drift apart reads as three layouts rather than one. */
   --col-gap: clamp(2rem, 5vw, 5rem);
 
+  /* ── the page gutter ──────────────────────────────────────────────────────
+     The air between the content and the window, hoisted out of `.gutter` so rules that need to
+     reason ABOUT the margin can read it — the deck's two side rails both size themselves against
+     the room they have, and the room they have is this. `.gutter` remains the only rule that
+     spends it as padding. The narrow value lives in the media query below, with the class. */
+  --gutter: 15px;
+
+  /* The content's width ceiling, hoisted for the same reason. The deck's progress rail reaches past
+     the content to the window's own margin, and the distance it has to reach is the difference
+     between the window and this. `.measure` is the only rule that spends it. */
+  --measure: 90rem;
+
   /* ── the vertical rhythm ──────────────────────────────────────────────────
      Two steps, and the second is exactly half the first. Every vertical gap on the page is one
      of these, which is why the page reads as one rule rather than as a value chosen per section.
@@ -428,12 +440,12 @@ a {
 /* ── layout ────────────────────────────────────────────────────────────────── */
 
 .gutter {
-  padding-inline: 15px;
+  padding-inline: var(--gutter);
 }
 
 @media (min-width: 768px) {
-  .gutter {
-    padding-inline: clamp(2rem, 6.5vw, 9rem);
+  :root {
+    --gutter: clamp(2rem, 6.5vw, 9rem);
   }
 }
 
@@ -449,7 +461,7 @@ a {
 }
 
 .measure {
-  max-width: 90rem;
+  max-width: var(--measure);
   margin-inline: auto;
 }
 
@@ -471,10 +483,6 @@ a {
    wide frame takes off a laptop render's top and bottom is desk and background. */
 .frame--wide {
   aspect-ratio: 16 / 10;
-}
-
-.frame--video {
-  aspect-ratio: 16 / 9;
 }
 
 .frame__media {
@@ -1092,8 +1100,8 @@ html.is-loading .preloader {
    restores the presence the .h2 had — and it is a pairing the site already proves, since
    .past__title is this exact face at this exact rung.
 
-   No arrow and no underline here any more. Both moved to .work-card__cta at the foot of the block,
-   where a line that names the destination can carry them better than a title can. */
+   No arrow here any more. It moved to .work-card__cta at the foot of the block, where a line that
+   names the destination can carry it better than a title can. */
 .work-card__title {
   margin: 0;
   font-size: var(--t-5xl);
@@ -1158,27 +1166,6 @@ a:focus-visible .work-card__arrow {
   line-height: var(--lh-flat);
 }
 
-/* THE one rule on the site that is drawn at rest rather than wiped in on hover, and the reason is
-   that this is not a link. .underline-link is a word inside an anchor answering a pointer; this
-   line is the anchor's only standing declaration that the card goes somewhere, and a declaration
-   that appears only once you are already hovering has arrived too late to have said anything.
-
-   `0.2em` and 1px are the .underline-link values, so the two rules sit at the same distance and the
-   same weight — one underline drawn two ways, not two underlines. It is a real border rather than a
-   `text-decoration`, because a border grows the box: in the pinned deck this line rides inside an
-   `overflow: hidden` mask, and an underline that sits outside its own box is one the mask shaves. */
-.work-card__cta-label {
-  padding-bottom: 0.2em;
-  border-bottom: 1px solid currentColor;
-}
-
-/* The label is 0.2em taller than the arrow on account of that rule, so centring the two against
-   each other would leave the arrow sitting low against the WORDS. Handing the arrow the same gap
-   makes the two boxes the same shape, and the flex centre becomes the type's centre again. */
-.work-card__cta .work-card__arrow {
-  margin-bottom: 0.2em;
-}
-
 /* ── the featured deck ────────────────────────────────────────────────────── */
 /* The pinned treatment of the same three works (FeaturedStack, ≥1024px and motion allowed).
    Everything above stays exactly as it is — it is still what renders on narrow viewports and
@@ -1190,22 +1177,65 @@ a:focus-visible .work-card__arrow {
      occupies. Three projects are two handovers, so the deck no longer spends a whole step on the
      first piece just to sit still through it. */
   --stack-step: 90svh;
-  /* Half the content gutter, roughly — enough air that the rail reads as page furniture rather
-     than as part of the row. */
-  --stack-rail-inset: clamp(1.25rem, 3.25vw, 4.5rem);
-  /* The gap between the well and the copy — the page's --col-gap, aliased locally because the
-     row's first track has to subtract it to work out the well's column share, and the alias is
-     what keeps that arithmetic readable. */
-  --stack-col-gap: var(--col-gap);
-  /* A guard, not a size: how tall the well is allowed to get before a short viewport would push
-     it past the fold. It is applied to the COLUMN (see .stack__row), never to the well itself —
-     capping the box inside a width-sized column is what used to leave a strip of empty column
-     beside the frame. At 16/10 the width is what binds on any viewport taller than about 680px,
-     so the guard is normally inert. */
-  --stack-well-h: clamp(220px, 56svh, 560px);
-  /* The page's block step, capped so a short viewport can't push the well past the fold. On a
-     typical laptop the cap and the token land within about 10% of each other. */
-  --stack-gap: min(var(--space-block), 8svh);
+  /* THE CREDIT's air, on the left. It is the column gap — the same air that separates the frame
+     from the copy on its right — so the frame sits between two equal silences instead of being
+     nudged off-centre by a caption pressed closer to it than the words are.
+
+     Capped against the page margin, because the two are not the same size at every viewport: at
+     1440 the gutter is narrower than the column gap, and a credit seated at the full gap would
+     hang off the window. The cap keeps its outer edge ~15px inside the page edge, so the rule
+     degrades to "as close to matched as the margin allows" rather than to overflow. */
+  --stack-credit-gap: min(var(--stack-col-gap), calc(var(--gutter) - 2rem));
+
+  /* How far the credit holds off the frame's top and bottom edges. It has two jobs in one number:
+     clear the 5% the frame gives up when it recedes (half of that at each edge), and then leave a
+     little air inside the receded edge so the caption reads as sitting WITHIN the picture rather
+     than as touching its corners. Roughly the first plus a sixteenth of the frame.
+
+     It tracks viewport height rather than sitting at one value because the thing it has to fit
+     inside shrinks with the window: on a 700px-tall screen the frame is 300px and the longest role
+     needs nearly all of it, so the inset gives room back exactly where there is none to spare. */
+  --stack-credit-inset: clamp(1rem, 3.4svh, 2.5rem);
+
+  /* THE RAIL's standoff from the copy column — a fixed distance, not a share of the margin.
+     Anchoring it to the window instead put it 235px off the words on a wide screen, which reads as
+     abandoned rather than as restrained: past a point the mark stops being the composition's
+     indicator and becomes something stranded at the edge of the page. 7rem is roughly twice the
+     column gap, which is far enough that nothing beside the copy competes with it and near enough
+     that it still belongs to the row.
+
+     Capped by the room that actually exists — the measure's centring slack plus the gutter, less a
+     hold-off so it never touches the window. Below about 1500px that cap is what binds, and the
+     rail simply takes the margin it has. */
+  --stack-rail-gap: min(
+    7rem,
+    calc((100vw - min(var(--measure), 100vw)) / 2 + var(--gutter) - 1.5rem)
+  );
+  /* The gap between the well and the copy. It is the page's --col-gap taken in a step, and this is
+     the one place on the site that earns a local value: everywhere else a side-by-side gap is
+     measured once, between two things that hold still. Here the frame shrinks 5% as it hands over,
+     so the same declared gap is read at TWO widths — the full frame's and the receded one's, ~32px
+     apart. Set for the resting frame it opens up too far once the picture pulls back; set for the
+     receded one it crowds the frame at full size. Four fifths sits between the two readings. */
+  --stack-col-gap: calc(var(--col-gap) * 0.8);
+  /* A guard AND a ceiling. It is applied to the COLUMN (see .stack__row), never to the well itself
+     — capping the box inside a width-sized column is what used to leave a strip of empty column
+     beside the frame.
+
+     The 400px stop is the new part: at 16/10 it holds the frame to 640px wide however much room
+     the page has, so the size the composition was judged at is the largest it can ever reach. The
+     row's own ratio lands just under that on a wide screen, which means the two agree rather than
+     fight — the ratio sets the size and this refuses to let a taller window inflate it. */
+  --stack-well-h: clamp(220px, 46svh, 400px);
+  /* The air between the section's name and the work under it, capped so a short viewport can't
+     push the well past the fold.
+
+     Deliberately wider than the page's block step resolves to here. PROJECTS is set at display
+     scale — the largest thing on the screen by a wide margin — and a heading that size needs more
+     clearance than a body-scale one to stop reading as a label attached to the picture. The pin has
+     the room: title, gap and frame come to about four fifths of the viewport at this value, so the
+     composition still sits inside its 100svh with slack at both ends. */
+  --stack-gap: min(var(--space-block), 11svh);
 
   position: relative;
   height: calc(var(--stack-steps) * var(--stack-step) + 100svh);
@@ -1267,17 +1297,29 @@ a:focus-visible .work-card__arrow {
   display: block;
 }
 
-/* The first track IS the well: the lesser of its 1.05fr share of the row and the height guard.
-   Sizing the TRACK rather than the box is the whole trick — a height cap on a box sitting in a
-   width-sized column leaves the difference as dead gutter, and because the cap is height-driven
-   that dead strip breathes as the window resizes. Capping the track instead hands any slack to
-   the copy column, so the declared gap is the real gap at every viewport size. */
+/* The first track IS the well: the lesser of its share of the row and the height guard. Sizing the
+   TRACK rather than the box is the whole trick — a height cap on a box sitting in a width-sized
+   column leaves the difference as dead gutter, and because the cap is height-driven that dead strip
+   breathes as the window resizes. Capping the track instead hands any slack to the copy column, so
+   the declared gap is the real gap at every viewport size.
+
+   THE SPLIT is 1.3 : 1, down from 1.8 and a long way from the 1.05 : 0.95 this started as. The
+   near-equal split read as a row cut in half rather than as a work with its notes beside it, so the
+   frame was given the dominant share — but 1.8 overshot. At that ratio the picture ran to ~724px on
+   a wide screen and stopped being a plate on a page: it was the page, and the type beside it read
+   as a caption squeezed into what was left. At 1.3 the frame takes about 53% of the measure and the
+   words about 41%, which still ranks them unmistakably without the picture crowding the column.
+
+   The constraint that sets the FLOOR under this number is the copy column: it has to stay wide
+   enough for a featured project name at --t-5xl without an accidental wrap. At 1.3 it retains
+   roughly 512px on a 1440 viewport, leaving the current titles and a meaningfully longer future
+   name room to breathe. */
 .stack__row {
   position: relative;
   display: grid;
   grid-template-columns:
     min(
-      calc((100% - var(--stack-col-gap)) * 1.05 / 2),
+      calc((100% - var(--stack-col-gap)) * 1.3 / 2.3),
       calc(var(--stack-well-h) * 16 / 10)
     )
     minmax(0, 1fr);
@@ -1314,7 +1356,9 @@ a:focus-visible .work-card__arrow {
   will-change: clip-path;
 }
 
-/* One masked edge per line, so the words ride in and out from behind it rather than fading.
+/* One clipped edge per line. It no longer HIDES the line — the deck's copy moves 4–12px and carries
+   its own fade, so a block is invisible long before it reaches an edge — it only guarantees that
+   nothing bleeds past its own box while three projects share one grid cell.
    The em of padding is descender room, given straight back as margin. */
 .work-card__clip {
   display: block;
@@ -1331,11 +1375,20 @@ a:focus-visible .work-card__arrow {
   margin-top: 0;
 }
 
-/* The title's own descender room, in the TITLE's em rather than the clip's. The shared 0.12em above
+/* The title's own extender room, in the TITLE's em rather than the clip's. The shared 0.12em above
    is a fraction of the wrapper's inherited body size — about 2px — which was room enough under a
    44px sans and is not room enough under a 60px serif, where one descending letter drops further
-   than the whole allowance. Stated against the rung the title is set at, so the two move together. */
+   than the whole allowance. Stated against the rung the title is set at, so the two move together.
+
+   Room at BOTH edges now. Instrument Serif is set here at --lh-tight, and a line box 1.1× the em
+   leaves 0.05em of half-leading above the em box — less than this face's ascenders and its
+   capital accents need. It never showed while the title rode a full line-height out of this
+   wrapper, because the only frames in which the type was near the top edge were frames in which it
+   was travelling too fast to read. At 12px and a fade it sits at rest a few pixels under that edge
+   for the whole time it is on screen, so the shave would be permanent and legible. */
 .work-card__clip--title {
+  padding-top: calc(var(--t-5xl) * 0.12);
+  margin-top: calc(var(--t-5xl) * -0.12);
   padding-bottom: calc(var(--t-5xl) * 0.2);
   margin-bottom: calc(var(--t-5xl) * -0.2);
 }
@@ -1344,12 +1397,12 @@ a:focus-visible .work-card__arrow {
   margin-top: 20px;
 }
 
-.work-card__clip--meta {
-  margin-top: 28px;
-}
-
+/* Shorter than the 48px .work-card__cta carries in the flat layout, and the difference is the line
+   that is missing above it. There, the CTA has to stand off from a credit line set in the same size
+   and weight it is; here it follows the claim directly, and holding the full step would have left
+   a hole where the credit used to be. */
 .work-card__clip--cta {
-  margin-top: 48px;
+  margin-top: 40px;
 }
 
 .stack-card__link {
@@ -1397,16 +1450,137 @@ a:focus-visible .work-card__arrow {
   display: block;
 }
 
+/* ── the credit rail ──────────────────────────────────────────────────────────
+   The year and the role, on their side in the left margin — the only rotated type on the site, and
+   it earns that because of where it is rather than because it is decorative: a margin is a column
+   about 15px wide, which is a line of type turned ninety degrees and nothing else.
+
+   Three credits in one cell, exactly as the copy blocks are, each riding the same clock.
+
+   THE COLUMN IS THE FRAME'S HEIGHT, and each credit is pinned to its two ends: the year at the top,
+   the role's tail at the bottom. That is what keeps it honest across three very different roles
+   ("Founder" against "Client work · Design & build") — both anchors are fixed for every project and
+   only the role's own start moves, so nothing shuffles at a handover.
+
+   It replaces a column that was centred as a block with a fixed gap between the two lines. That
+   arrangement had the year drifting with the LONGEST role in the set, because the tallest credit
+   set the cell and every credit was flush to its top: at ~130px of gap the pair stood ~400px tall
+   against a 398px frame, so the year hung above the picture's top edge and the role's tail below
+   its bottom — and once the frame receded 5% they were plainly outside it. Anchoring to the frame's
+   own edges makes that impossible to reintroduce: the credit cannot be taller than the thing it
+   captions, whatever the role says. */
+/* Seated by its RIGHT edge, not its left. The thing being held constant is the air between the
+   caption and the frame it captions, and that air is measured from the credit's inner edge — so
+   anchoring the outer edge and letting the gap fall out of the line's own width is what made this
+   sit closer to the picture than the copy column does on the other side. `right: 100%` puts the
+   outer edge on the row's left edge; the gap pushes it out from there. */
+.stack-credits {
+  position: absolute;
+  right: calc(100% + var(--stack-credit-gap));
+  /* Stretched to the row rather than centred in it. The row's height IS the frame's height — the
+     copy column never out-measures the picture — so this hands each credit the frame's own top and
+     bottom to hang from, with no value anywhere that has to be kept in step with the well's size. */
+  top: 0;
+  bottom: 0;
+  display: grid;
+  /* All three credits are in this cell at once and two of them are behind a mask, so a drag that
+     crossed the rail would select three roles stacked on one another. The copy column solves the
+     same problem by toggling the pointer per active block; this one is a caption with nothing to
+     click, so it can simply decline the pointer outright. */
+  pointer-events: none;
+}
+
+/* The air between the two lines is what makes this a rail rather than a stacked label — at a normal
+   text gap the year reads as the first word of the role — and it is no longer a declared value.
+   `space-between` against the frame's height gives whatever is left after the two lines, which for
+   the shortest role in the set is most of the picture and for the longest is still ~50px. Air that
+   falls out of the composition rather than being asserted against it, and the reason nothing here
+   has to be re-checked when a role of a new length joins the set. */
+.stack-credit {
+  grid-area: 1 / 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  padding-block: var(--stack-credit-inset);
+  /* A floor under the air, for the case the frame is too short to give any. `space-between` with
+     negative free space packs from the top and the role's tail runs out of the bottom of the
+     picture — the exact fault this rail was rebuilt to make impossible — so the two lines hold each
+     other apart first and the frame's edges are honoured with what is left. */
+  gap: 1rem;
+  /* Sized against the viewport's HEIGHT, unlike every other rung on the site. Turned on its side a
+     line's length runs down the frame rather than across it, so this is the one piece of type whose
+     size is a vertical measurement: at --t-sm the longest role in the set is ~235px of column, which
+     fits inside a 400px frame and does not fit inside the 300px one a 700px-tall window leaves.
+
+     Both ends are ramp steps, and the floor is the step the ramp already names for this exact use —
+     --t-xs is annotated "labels, stack, year". Between them it simply tracks the picture. */
+  font-size: clamp(var(--t-xs), 1.7svh, var(--t-sm));
+  font-weight: 500;
+  line-height: var(--lh-flat);
+  /* Small mixed-case meta takes air, and rotated type takes a little more: the eye reads a vertical
+     line by the gaps between letters, and this face's own fit closes them up on its side. */
+  letter-spacing: var(--track-wide);
+  color: var(--color-ink-muted);
+}
+
+/* Same demotion as .work-card__clip: this used to mask a full-length ride and now only guards the
+   edge, since the credit moves 5px and fades. The room either side is what the ride needs to happen
+   inside rather than against the edge — given straight back as margin, so the flex gap above still
+   measures the air the two lines were designed with. */
+.stack-credit__clip {
+  display: block;
+  overflow: hidden;
+  padding-block: 8px;
+  margin-block: -8px;
+}
+
+/* The mask's content, and the ONLY element the scroll drives. The rotation is one element further
+   in on purpose: a transform written here would be composed with the ride's own translate, and the
+   line would travel along the screen's axis instead of along its own. */
+.stack-credit__line {
+  display: block;
+}
+
+/* Bottom-to-top, which is the convention for a left margin — the reader's head tilts left, and the
+   line runs the way the page does. `vertical-rl` + a half turn rather than `sideways-lr`, which
+   says exactly this in one keyword and is not yet safe to rely on across engines.
+
+   Tabular figures because the year is one of the two things in here, and the three of them sit in
+   a column that must not shuffle sideways as the deck hands over. */
+.stack-credit__text {
+  display: block;
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
 /* The rail: three stations always drawn. The one you are on stretches from a dot into a bar and
    fills top-down as its window is spent; the other two stay dots. Nothing travels between them, so
    there is no in-between position to misread — the long mark is where you are, and how full it is
    says how long until the next. The column's total length is constant, because the stretching and
    collapsing stations are exactly complementary. */
+/* On the RIGHT margin, and it answers to two different things in its two axes.
+
+   VERTICALLY it belongs to the picture: centred on the row, which is the frame's own height. The
+   title above is not part of what the rail is counting — it is the section's name, and it holds
+   still while the three projects change underneath it — so centring the mark on the whole pinned
+   screen put it a good way above the middle of the thing it indexes.
+
+   HORIZONTALLY it stands off the copy by --stack-rail-gap, which is a fixed distance from the ROW
+   rather than an inset from the window — see the token for why the window turned out to be the
+   wrong thing to anchor to.
+
+   The pair of rails is deliberately NOT symmetric about the row. The credit is content — it captions
+   the picture, so it takes the composition's own gap and sits tight against it. The rail is not
+   content; it is an indicator, and standing it well off is what stops five pixels of furniture
+   reading as something the eye has to account for beside the words. */
 .stack-dots {
   position: absolute;
-  left: calc(var(--stack-rail-inset) * -1);
   top: 50%;
   transform: translateY(-50%);
+  left: calc(100% + var(--stack-rail-gap));
   width: 5px;
 }
 
@@ -1666,72 +1840,445 @@ a.archive__link:focus-visible .archive__arrow {
 /* ── case page ────────────────────────────────────────────────────────────── */
 
 .case {
+  padding-block: clamp(128px, 17vh, 200px) var(--space-chapter);
+}
+
+/* The only entrance on a case page: the identity, claim, and lead artifact arrive as one opening
+   movement. Everything below is a reading surface and stays still. */
+.case__opening {
   display: flex;
   flex-direction: column;
-  gap: 100px;
-  padding-block: 25vh 100px;
+  gap: clamp(28px, 3vw, 48px);
 }
 
 .case__intro {
   display: flex;
   flex-direction: column;
-  gap: 30px;
+  align-items: center;
+  text-align: center;
 }
 
-/* The brief sits a step below the title and carries the serif. Same size it has always been (.h2's
-   rung), but with a measure of its own: .case is on .measure's 90rem, so a 44px line was running
-   about 65 characters, and the briefs that fall back to a work's full description were setting
-   five of them. The cap is what makes this a paragraph instead of a banner. Wider than the
-   statement's — this one describes a project, where the statement lands a single claim. */
+/* The title states what the work is; this line is the human premise that makes somebody want to
+   explore it. The serif connects it to the landing statement without turning the body into an
+   editorial costume. */
 .case__brief {
-  max-width: 45ch;
+  max-width: 24ch;
   font-size: var(--t-3xl);
+  line-height: var(--lh-tight);
+  text-align: center;
+  text-wrap: balance;
+}
+
+.case__media-gallery {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(20px, 2vw, 32px);
+}
+
+.case__media-context {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(28px, 3vw, 48px);
+}
+
+/* Instagram highlights are the interaction reference, not the visual finish: circular media
+   selectors, mixed-case names, then one large hard-edged stage. The rail scrolls only when it has
+   to; it never turns into a carousel with hidden arrows or pagination. */
+.case__highlights {
+  display: flex;
+  align-items: flex-start;
+  gap: clamp(1.25rem, 2.5vw, 2.25rem);
+  width: fit-content;
+  max-width: 100%;
+  margin-inline: auto;
+  padding: 6px 6px 10px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.case__highlights::-webkit-scrollbar {
+  display: none;
+}
+
+.case__highlight {
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.7rem;
+  min-width: 4.75rem;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font-family: var(--font-instrument), Helvetica, Arial, sans-serif;
+  font-size: var(--t-sm);
+  line-height: var(--lh-snug);
+}
+
+.case__highlight-thumb {
+  position: relative;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  width: clamp(3.75rem, 6.5vw, 4.75rem);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: var(--color-bone-sunk);
+  opacity: 0.72;
+  outline: 1px solid transparent;
+  outline-offset: 4px;
+  transition:
+    opacity var(--dur-hover) var(--ease),
+    outline-color var(--dur-hover) var(--ease),
+    transform var(--dur-hover) var(--ease);
+}
+
+.case__highlight-thumb--lead {
+  background: var(--color-ink);
+  color: var(--color-bone);
+}
+
+.case__highlight[aria-pressed="true"] .case__highlight-thumb {
+  opacity: 1;
+  outline-color: var(--color-ink);
+}
+
+.case__highlight:hover .case__highlight-thumb,
+.case__highlight:focus-visible .case__highlight-thumb {
+  opacity: 1;
+  transform: scale(0.94);
+}
+
+.case__highlight-thumb-image {
+  object-fit: cover;
+}
+
+.case__highlight-play {
+  width: 0;
+  height: 0;
+  border-top: 0.42rem solid transparent;
+  border-bottom: 0.42rem solid transparent;
+  border-left: 0.68rem solid currentColor;
+  transform: translateX(0.08rem);
+}
+
+.case__highlight-letter {
+  font-family: var(--font-instrument-serif), Georgia, "Times New Roman", serif;
+  font-size: var(--t-xl);
+  line-height: var(--lh-flat);
+}
+
+.case__media-view {
+  width: 100%;
+  max-width: 64rem;
+  margin-inline: auto;
+}
+
+.case__media-stage {
+  position: relative;
+  overflow: hidden;
+  background: var(--color-bone-sunk);
+}
+
+.case__media-panel {
+  position: absolute;
+  inset: 0;
+}
+
+/* The stage is one fixed rectangle for every panel, so screenshots crop to fill it rather than
+   sitting inside letterbox bars. Losing an edge reads better than a framed thumbnail. */
+.case__media-image {
+  object-fit: cover;
+}
+
+.case__demo {
+  position: relative;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  width: 100%;
+  height: 100%;
+  background: var(--color-ink);
+  color: var(--color-bone);
+}
+
+.case__demo-video {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: var(--color-ink);
+  object-fit: contain;
+  opacity: 0;
+  transition: opacity var(--dur-media) var(--ease);
+}
+
+.case__demo-video--visible {
+  opacity: 1;
+}
+
+/* A real button fills the field, so the entire quiet plate is one generous keyboard/touch target.
+   It stays mounted while loading to preserve keyboard focus, then hands control to the video. */
+.case__demo-gate,
+.case__demo-error {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  background: var(--color-ink);
+  color: var(--color-bone);
+}
+
+.case__demo-gate:focus-visible {
+  outline-offset: -6px;
+}
+
+.case__demo-error {
+  align-content: center;
+  gap: 1rem;
+  padding: 2rem;
+  text-align: center;
+}
+
+.case__demo-error p {
+  margin: 0;
+}
+
+.case__demo-error-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.75rem 1.5rem;
+}
+
+.case__demo-error-actions button,
+.case__demo-error-actions a {
+  min-height: 44px;
+  padding: 0.5rem;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+}
+
+.demo-mark {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: clamp(9rem, 18vw, 13rem);
+  aspect-ratio: 1;
+}
+
+.demo-mark__orbit {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  transition: transform var(--dur-media) var(--ease);
+}
+
+.demo-mark__orbit text {
+  fill: currentColor;
+  font-family: var(--font-instrument), Helvetica, Arial, sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: var(--track-wide);
+}
+
+.demo-mark--loading .demo-mark__orbit {
+  animation: demo-orbit 1.8s linear infinite;
+}
+
+@keyframes demo-orbit {
+  to {
+    transform: rotate(1turn);
+  }
+}
+
+.demo-mark__button {
+  display: grid;
+  place-items: center;
+  width: clamp(3.5rem, 6vw, 4.5rem);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: var(--color-bone);
+  color: var(--color-ink);
+  transition: transform var(--dur-hover) var(--ease);
+}
+
+.demo-mark__triangle {
+  width: 0;
+  height: 0;
+  border-top: 0.55rem solid transparent;
+  border-bottom: 0.55rem solid transparent;
+  border-left: 0.85rem solid currentColor;
+  transform: translateX(0.12rem);
+}
+
+.case__demo-gate:hover .demo-mark__orbit,
+.case__demo-gate:focus-visible .demo-mark__orbit {
+  transform: rotate(34deg);
+}
+
+.case__demo-gate:hover .demo-mark__button,
+.case__demo-gate:focus-visible .demo-mark__button {
+  transform: scale(0.92);
+}
+
+.case__poster {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  height: 100%;
+  background: var(--color-ink);
+  color: var(--color-bone);
+}
+
+/* Results appear before process because a short visit still deserves the answer. Centring makes
+   this the case page's echo of the landing statement; the narrative then returns to the site's
+   left-reading axis. */
+.case__outcome {
+  max-width: 28ch;
+  margin: var(--space-block) auto 0;
+  font-size: var(--t-5xl);
+  line-height: var(--lh-tight);
+  text-align: center;
+}
+
+.case__narrative {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-block);
+  max-width: 78rem;
+  margin: var(--space-chapter) auto 0;
+}
+
+.case__beat {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.case__beat-title {
+  font-size: var(--t-5xl);
   line-height: var(--lh-tight);
 }
 
-.case__body {
+.case__beat-content {
   display: flex;
   flex-direction: column;
-  gap: 30px;
+  gap: clamp(32px, 4vw, 56px);
 }
 
-.case__stack {
+.case__beat-content > .prose {
+  max-width: 66ch;
+}
+
+.case__decisions {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr));
+  gap: var(--col-gap);
+}
+
+.case__decision {
   display: flex;
-  flex-wrap: wrap;
-  gap: 15px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
+  flex-direction: column;
+  gap: 1rem;
 }
 
-/* Type comes from .label on the <li>. What is left here is the chip: its border, its padding and
-   its tone. The three metrics that used to be re-declared inline were identical to .label's and
-   had no way of staying that way. */
-.case__stack li {
-  padding: 0.55em 1em;
-  border: 1px solid var(--color-rule);
+.case__decision h3 {
+  margin: 0;
+  font-size: var(--t-xl);
+  font-weight: 500;
+  line-height: var(--lh-snug);
+  letter-spacing: var(--track-snug);
+  text-wrap: balance;
+}
+
+.case__decision p {
+  margin: 0;
   color: var(--color-ink-muted);
+  font-size: var(--t-base);
+  line-height: var(--lh-copy);
+  text-wrap: pretty;
 }
 
 .case__links {
   display: flex;
   flex-wrap: wrap;
-  gap: 30px;
+  justify-content: center;
+  gap: var(--col-gap);
+  margin-top: var(--space-block);
+}
+
+.case__links a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45em;
+  min-height: 44px;
+  font-size: var(--t-3xl);
+  font-weight: 500;
+  line-height: var(--lh-tight);
+  letter-spacing: var(--track-tight);
 }
 
 .case__nav {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  gap: 30px;
-  padding-top: 30px;
-  border-top: 1px solid var(--color-rule);
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: start;
+  gap: var(--col-gap);
+  margin-top: var(--space-chapter);
 }
 
 .case__nav-item {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6em;
+  min-height: 44px;
+  font-size: var(--t-base);
+  line-height: var(--lh-snug);
+}
+
+.case__nav-item:not(.case__nav-item--previous, .case__nav-item--next) {
+  justify-self: center;
+}
+
+.case__nav-item--previous {
+  justify-self: start;
+}
+
+.case__nav-item--next {
+  justify-self: end;
+  text-align: right;
+}
+
+@media (min-width: 768px) {
+  .case__beat {
+    grid-template-columns: minmax(10rem, 0.55fr) minmax(0, 1.45fr);
+    column-gap: var(--col-gap);
+  }
+}
+
+@media (max-width: 767px) {
+  .case__nav {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1rem;
+  }
+
+  .case__nav-item:not(.case__nav-item--previous, .case__nav-item--next),
+  .case__nav-item--previous,
+  .case__nav-item--next {
+    justify-self: start;
+    text-align: left;
+  }
 }
 
 /* ── my past ──────────────────────────────────────────────────────────────── */

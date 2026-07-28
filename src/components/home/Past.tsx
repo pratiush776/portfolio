@@ -1,11 +1,19 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { motion, useReducedMotion } from "motion/react";
 
 import { ArrowUpRight } from "@/components/icons";
 import { past } from "@/data/past";
-import { DUR, EASE, STAGGER, THRESHOLD, reveal, rise } from "@/lib/motion";
+import {
+  DUR,
+  EASE,
+  STAGGER,
+  THRESHOLD,
+  reveal,
+  rise,
+  useGlide,
+} from "@/lib/motion";
 
 /**
  * MY PAST — the background, as four words you open.
@@ -36,8 +44,19 @@ export function Past() {
   const reduce = useReducedMotion() ?? false;
   const [open, setOpen] = useState<string | null>(null);
 
+  // Its leaving window is the one on the page that may not finish, since the footer beneath it is
+  // around a viewport tall and the document stops there. Any residue is a few tens of pixels inside
+  // a chapter step of ~280px, so it is invisible — but it is the reason the footer itself is left
+  // out entirely, where the same residue would show as bare page under the ink.
+  const section = useRef<HTMLElement>(null);
+  const { drift } = useGlide(section);
+
   return (
-    <section className="past gutter measure">
+    <motion.section
+      ref={section}
+      className="past gutter measure"
+      style={{ y: drift }}
+    >
       {/* A centred title above the block rather than the reference's label tucked into the left
           margin. The margin version was too small and too far off the words to say what the
           section was; this reads as a title at a glance, and the serif keeps it from looking
@@ -142,6 +161,6 @@ export function Past() {
           );
         })}
       </motion.ul>
-    </section>
+    </motion.section>
   );
 }

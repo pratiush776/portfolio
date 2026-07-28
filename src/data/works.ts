@@ -24,8 +24,6 @@ export type WorkMedia =
       word: string;
       /** Small caps line under the word. */
       caption: string;
-      /** Poster field colour (keep it in the warm/plum family). */
-      tint: string;
     };
 
 export type CaseDecision = {
@@ -35,13 +33,11 @@ export type CaseDecision = {
   detail: string;
 };
 
-export type CaseArtifact = {
+export type CaseHighlight = {
+  /** Short control label under the circular media preview. */
+  label: string;
   src: string;
   alt: string;
-  /** A human annotation: what to notice and why it mattered. */
-  note: string;
-  /** Preserves the real artifact without forcing every screenshot through one crop. */
-  aspectRatio: string;
 };
 
 export type CaseStudy = {
@@ -56,9 +52,8 @@ export type CaseStudy = {
   how: string;
   /** Two or three project-specific decisions that expose judgment rather than list tasks. */
   decisions: CaseDecision[];
-  /** Real screens that add evidence beyond the demo. Optional because a decision can be the
-      stronger artifact when the repository does not contain a distinct, honest image. */
-  artifacts?: CaseArtifact[];
+  /** Real screens offered directly beneath the case premise as compact media highlights. */
+  highlights?: CaseHighlight[];
 };
 
 export type FeaturedWork = {
@@ -83,8 +78,8 @@ export type FeaturedWork = {
   /** The dedicated case narrative. Every page follows the same Why / What / How reading path,
       while the actual copy and decision evidence stay specific to the work. */
   caseStudy: CaseStudy;
-  /** A photographed product still. Preferred as the frame image in the index and on the case
-      page; falls back to the video's own poster frame when absent. */
+  /** A photographed product still for the landing index; the case route leads with the real demo
+      instead of repeating this image. */
   cover?: string;
   /** Voiced alt text for the cover still — describes the actual scene, not "Title product".
       Falls back to a generic label when absent. */
@@ -106,45 +101,52 @@ export type ArchiveWork = {
 
 export const works: FeaturedWork[] = [
   {
-    title: "NIL Marketplace",
+    title: "NILINK",
     slug: "nilink",
     tier: "primary",
     year: "2025",
     role: "Software Engineer",
-    tagline: "Athletes on one side. Brands on the other.",
+    tagline:
+      "A two-sided marketplace that keeps NIL deals out of scattered DMs.",
     description:
       "A platform connecting college athletes and local brands through one streamlined deal workflow.",
     caseStudy: {
       outcome:
-        "The shipped MVP gives both sides one place to move a deal from discovery to agreement.",
+        "A working MVP where athletes and brands can find each other and carry one deal through.",
       why:
-        "College athletes can earn from their name, image, and likeness, but the practical work still gets scattered across DMs, spreadsheets, and handshakes. For a local brand, even finding the right athlete can become its own project. The problem was not another profile directory; it was the broken handoff between discovery and a real agreement.",
+        "NIL deals often start in a DM and disappear into spreadsheets and handshakes. Athletes need a clear way to show what they offer; local brands need a practical way to find them and follow a deal.",
       what:
-        "I worked as the software engineer on the product and built the marketplace as two connected experiences. Athletes can present what they offer, brands can find the right fit, and both sides can keep the deal in one place. What shipped is a working MVP, not a concept deck.",
+        "As the software engineer, I built two connected experiences: athletes present their offers, brands find a fit, and both work from the same deal state.",
       how:
-        "Next.js and Supabase carry the product surface, data, and authentication. TypeScript keeps the shared deal shapes honest, SWR keeps marketplace state fresh, and Vitest covers the boundaries where one side’s action changes what the other side sees.",
+        "Next.js and Supabase handle the product, data, and authentication. TypeScript keeps deal shapes shared across both sides; SWR keeps listings current; Vitest protects auth and state changes.",
       decisions: [
         {
           title: "Keep the deal visible",
           detail:
-            "Discovery, outreach, and agreement belong to one flow. Moving the handoff out of private messages makes the status legible to both sides.",
+            "Discovery, outreach, and agreement share one flow, so neither side has to rebuild the story from private messages.",
         },
         {
           title: "Respect the two sides",
           detail:
-            "Athletes and brands need different entry points and permissions, but they still have to meet around one shared deal rather than two disconnected products.",
+            "Athletes and brands get different permissions and entry points, but meet around the same deal.",
         },
         {
           title: "Test the handoffs",
           detail:
-            "The risky moments are state changes and auth boundaries, so those are the parts the test suite protects instead of chasing broad, shallow coverage.",
+            "Tests focus on the moments when one person’s action changes what the other can see.",
+        },
+      ],
+      highlights: [
+        {
+          label: "Product",
+          src: "/projects_assets/NILINK/NILINK_product_img.png",
+          alt: "The NILINK marketplace open on a laptop, showing athlete and brand deal listings side by side.",
         },
       ],
     },
     cover: "/projects_assets/NILINK/NILINK_product_img.png",
     coverAlt:
       "The NILINK marketplace open on a laptop, showing athlete and brand deal listings side by side.",
-    // Headline tech first — the case meta line shows the first two.
     stack: ["Next.js", "Supabase", "TypeScript", "SWR", "Vitest"],
     media: {
       kind: "video",
@@ -161,32 +163,40 @@ export const works: FeaturedWork[] = [
     tier: "primary",
     year: "2025",
     role: "Founder",
+    tagline: "Focus music that composes itself as the session unfolds.",
     description:
       "A focus app that composes its audio in real time instead of looping a playlist. The engine paces every session through an entry, anchor, sustain, and re-focus arc, so the sound shifts with your attention rather than against it.",
     caseStudy: {
       outcome:
-        "The result is a focus session that changes with time instead of giving itself away as a loop.",
+        "A live audio stream with a beginning, a middle, and a way back when focus slips.",
       why:
-        "Most focus audio eventually gives itself away. Once I can predict the restart, the sound stops supporting attention and starts asking for it. I wanted music that behaved more like a work session: settle in, hold, then help you recover when attention drifts.",
+        "Looping focus tracks work until you can hear the restart. Once I noticed it, the sound became another interruption.",
       what:
-        "I started Lucid Tone as my own product and built a real-time audio system that generates a changing stream for each session. Instead of asking someone to pick another playlist, it shapes the listening arc while they work.",
+        "I started Lucid Tone and built the real-time audio system behind it. Each session composes a changing stream instead of serving another playlist.",
       how:
-        "A Python and FastAPI service runs the composition engine while React and TypeScript own the session interface. Redis and persistent connections keep the long-running stream in step. The custom Markov Chain is there to vary the music with rules, not to sprinkle AI over a playlist.",
+        "A Python and FastAPI service runs a custom Markov Chain; React and TypeScript control the session; Redis and persistent connections keep the stream alive.",
       decisions: [
         {
           title: "Compose instead of catalog",
           detail:
-            "The product is the engine, not a shelf of tracks. That keeps the experience responsive to a session rather than limited by a fixed recording.",
+            "The engine is the product. A fixed library would only hide the same looping problem behind more tracks.",
         },
         {
           title: "Give attention an arc",
           detail:
-            "Entry, anchor, sustain, and re-focus became the pacing model so the audio has somewhere to go without demanding a user’s attention.",
+            "Entry, anchor, sustain, and re-focus give the music direction without asking the listener to manage it.",
         },
         {
           title: "Treat continuity as product",
           detail:
-            "A generative session only works if it feels unbroken, so persistent data flow, long-running processes, and fault tolerance shaped the architecture early.",
+            "If the stream breaks, the idea breaks. Persistent playback shaped the architecture from the start.",
+        },
+      ],
+      highlights: [
+        {
+          label: "Session",
+          src: "/projects_assets/LucidTone/lucidTone_product_img.png",
+          alt: "The Lucid Tone focus app open mid-session, with its real-time audio arc on screen.",
         },
       ],
     },
@@ -208,50 +218,48 @@ export const works: FeaturedWork[] = [
     tier: "secondary",
     year: "2024",
     role: "Team build · Backend & integration",
+    tagline:
+      "A legal research assistant that keeps confidential files off the cloud.",
     archiveNote:
       "Local-only RAG over confidential legal records — nothing leaves the building.",
     description:
       "A research assistant for law firms that can't ship documents to the cloud. Ingestion, embeddings, retrieval, and generation all run on local infrastructure, so decades of confidential records become searchable without a byte leaving the building.",
     caseStudy: {
       outcome:
-        "The prototype retrieves from private files, shows the context behind each answer, and runs inside controlled infrastructure.",
+        "A private prototype that answers from local records and shows the context it used.",
       why:
-        "A law firm may have decades of useful case material and still be unable to send any of it to a cloud model. Confidentiality changes the architecture before model choice even enters the conversation. The useful question was simple: can retrieval and generation stay inside the firm’s environment?",
+        "Law firms have years of useful case files they cannot send to a cloud model. Privacy was not a setting; it decided the architecture.",
       what:
-        "I contributed the backend logic and system integration in a team build. The prototype ingests a firm’s own files, retrieves the relevant passages, and grounds a local model’s response in that material without uploading the source documents to a third party.",
+        "I handled backend logic and integration as part of a team. The prototype ingests a firm’s files, finds the relevant passages, and grounds a local model’s answer in them.",
       how:
-        "Python handles ingestion and chunking, ChromaDB stores the embeddings, and Ollama runs LLaMA locally. A Streamlit interface exposes both the answer and its retrieved context, while Docker makes the pieces reproducible on a private machine or server.",
+        "Python chunks the documents, ChromaDB stores embeddings, and Ollama runs LLaMA locally. Streamlit shows the answer and its source context; Docker packages the private deployment.",
       decisions: [
         {
           title: "Move the whole pipeline inside",
           detail:
-            "Local generation alone was not enough. Ingestion, embeddings, retrieval, and the model runtime all had to stay within the same controlled boundary.",
+            "Ingestion, embeddings, retrieval, and generation all stay inside the same controlled boundary.",
         },
         {
           title: "Separate ingestion from answering",
           detail:
-            "New documents can be processed into the store without retraining the model, which keeps the knowledge base maintainable as the archive changes.",
+            "New files can enter the knowledge base without retraining the model.",
         },
         {
           title: "Show what the model used",
           detail:
-            "The interface exposes retrieved context and can disable RAG, making it possible to inspect where an answer came from instead of treating it as a black box.",
+            "Retrieved context stays visible, and RAG can be switched off to check what the model actually knows.",
         },
       ],
-      artifacts: [
+      highlights: [
         {
+          label: "Home",
           src: "/projects_assets/RAG/homescreen.png",
           alt: "The private legal assistant home screen with a document question field and local RAG controls.",
-          note:
-            "The opening screen makes the boundary visible: this assistant answers from the records supplied to the private deployment.",
-          aspectRatio: "770 / 488",
         },
         {
+          label: "Context",
           src: "/projects_assets/RAG/example.png",
           alt: "A legal assistant response shown with the retrieved source context used to produce it.",
-          note:
-            "Retrieved context stays beside the response, so a useful answer can still be checked against the underlying material.",
-          aspectRatio: "1038 / 592",
         },
       ],
     },
@@ -260,7 +268,6 @@ export const works: FeaturedWork[] = [
       kind: "poster",
       word: "Private, by design",
       caption: "Local-only RAG. Nothing leaves the building.",
-      tint: "#3A2A22",
     },
     links: [
       {
@@ -275,41 +282,41 @@ export const works: FeaturedWork[] = [
     tier: "primary",
     year: "2025",
     role: "Client work · Design & build",
+    tagline:
+      "A bakery website the owner can update without calling a developer.",
     description:
       "A real website for a real bakery. I led design and development for a local business owner: story, services, testimonials, and a CMS they update without calling me. Small project, real stakes, actual customers.",
     caseStudy: {
       outcome:
-        "The bakery left with a live front door it can keep current without waiting on a developer.",
+        "A live front door for the bakery that stays in the owner’s hands.",
       why:
-        "Whisk It All had a real business, a real owner, and no useful digital front door. The site had to feel personal enough for a neighborhood bakery, but practical enough to answer what people could order, why the business was different, and how to get in touch.",
+        "The bakery needed more than an online menu. Its site had to introduce the owner, explain dietary options, and make the business easy to reach.",
       what:
-        "I worked directly with the owner and carried the job from design through development and deployment. The finished site brings the story, services, testimonials, and contact into one place, then leaves the owner with a CMS instead of a dependency on me.",
+        "I worked directly with the owner and handled design, development, and deployment. Story, services, testimonials, and contact now live together, with a CMS for everyday updates.",
       how:
-        "Next.js and Tailwind carry the site, with GSAP used for the moments where motion adds some handmade warmth. Tina CMS keeps the content in the owner’s hands, which mattered more here than building an elaborate editing system nobody wanted to learn.",
+        "Next.js and Tailwind carry the site. GSAP adds warmth where it helps; Tina CMS keeps routine changes out of the codebase.",
       decisions: [
         {
           title: "Start with the person",
           detail:
-            "The bakery’s story gives the products context and trust, so the site opens like a local business rather than an anonymous menu.",
+            "The owner’s story builds trust before the site asks anyone to order.",
         },
         {
           title: "Make updates boring",
           detail:
-            "A familiar CMS flow means changing services or copy is routine. The handoff only works if the owner can keep using the site after mine ends.",
+            "Services and copy change through a familiar CMS instead of a developer handoff.",
         },
         {
           title: "Let motion add warmth",
           detail:
-            "Animation supports the handmade character, but ordering information and contact stay still, direct, and easy to find.",
+            "Animation carries the handmade feel; ordering details and contact stay direct.",
         },
       ],
-      artifacts: [
+      highlights: [
         {
+          label: "Site",
           src: "/projects_assets/WhiskItAll/page.png",
           alt: "A full page from the Whisk It All bakery website showing its story, offerings, testimonials, and contact flow.",
-          note:
-            "The long page carries the business from story to proof to contact in one editable flow, without making customers learn a complicated site.",
-          aspectRatio: "1170 / 1750",
         },
       ],
     },
@@ -329,6 +336,126 @@ export const works: FeaturedWork[] = [
       },
     ],
   },
+  {
+    title: "HomeDoc",
+    slug: "homedoc",
+    tier: "secondary",
+    year: "2023",
+    role: "Hackathon start · Finished solo",
+    tagline:
+      "A symptom checker that gives you a read, then sends you to a doctor.",
+    archiveNote:
+      "AI symptom checker started at a hackathon, finished solo when the weekend ran out.",
+    description:
+      "A health insight prototype built around a local Llama 3 model. You give it your age, gender, and what you're feeling, and it returns a plain-language preliminary read — with the reminder, every time, that a real diagnosis comes from a healthcare professional.",
+    caseStudy: {
+      outcome:
+        "A finished prototype that turns symptoms into a readable assessment and never presents it as a diagnosis.",
+      why:
+        "Searching a symptom usually lands somewhere between useless and terrifying. The idea was a checker that reads the actual input and answers in proportion to it — which meant the hard constraint was what the thing is allowed to claim, not how well it generates text.",
+      what:
+        "It began at a hackathon with two teammates and did not get finished inside the weekend. I took it back afterwards and completed the prototype on my own: the AI layer was my part from the start, and the frontend and backend became mine too.",
+      how:
+        "React runs the intake, Node and Express carry the API, and Llama 3 generates the assessment. Age, gender, and symptoms go into the prompt together, so the response is about a person rather than about a word.",
+      decisions: [
+        {
+          title: "Bound what it is allowed to claim",
+          detail:
+            "Every response carries the reminder to see a professional. The app offers a preliminary read, and it says so in the same breath.",
+        },
+        {
+          title: "Ask for what changes the answer",
+          detail:
+            "Age and gender travel with the symptoms, because the same complaint does not mean the same thing across them.",
+        },
+        {
+          title: "Finish it after the weekend ended",
+          detail:
+            "The hackathon build was a concept. Making it real meant owning the parts that were never my assignment.",
+        },
+      ],
+    },
+    stack: ["React", "Node", "Express", "Llama 3"],
+    media: {
+      kind: "video",
+      src: "/projects_assets/HomeDoc/demo.mp4",
+      aspectRatio: "1 / 1",
+    },
+    links: [
+      {
+        label: "Visit HomeDoc",
+        href: "https://homedoc-backend.onrender.com/",
+      },
+    ],
+  },
+  {
+    title: "RoomMates",
+    slug: "roommates",
+    tier: "secondary",
+    year: "2022",
+    role: "Solo build · First full-stack app",
+    tagline: "A weekly chore rota housemates settle once instead of arguing about daily.",
+    archiveNote:
+      "Chore management for housemates. My first full-stack app end to end.",
+    description:
+      "Household chore management for people sharing a flat. Housemates join a group, one of them lays out the week, and everybody else opens the app to a single question answered: what am I doing today.",
+    caseStudy: {
+      outcome:
+        "A working rota app where one housemate builds the week and everyone else just sees today.",
+      why:
+        "Chores between housemates fail as a memory problem long before they fail as a fairness problem. What was missing was not effort but a shared record of who agreed to what, visible to everyone at once.",
+      what:
+        "My first application built end to end. Groups you create or join by ID, an admin screen that assigns tasks across Monday through Sunday and finalises the week, and a per-person view of the day.",
+      how:
+        "Node and Express serve the app; NeDB's promise API stores groups, members, and assignments as file-backed documents. No database server to stand up, which was the right size for a first full-stack build and kept the whole thing deployable as one process.",
+      decisions: [
+        {
+          title: "Make the week a decision",
+          detail:
+            "The admin fills Monday through Sunday and finalises it, so the rota gets settled once rather than renegotiated every evening.",
+        },
+        {
+          title: "Give everyone the smallest view",
+          detail:
+            "Once the week is set, a housemate's home screen is just Today. The full schedule exists, but nobody has to read it to know their part.",
+        },
+        {
+          title: "Onboard with one field",
+          detail:
+            "A group is created or joined by ID, because an app for shared chores is worth nothing until the second person is in it.",
+        },
+      ],
+      highlights: [
+        {
+          label: "Today",
+          src: "/projects_assets/RoomMates/dashboard.png",
+          alt: "The RoomMates home card headed Today, listing the day's chores each paired with the housemate assigned to it.",
+        },
+        {
+          label: "Week",
+          src: "/projects_assets/RoomMates/admin.png",
+          alt: "The RoomMates admin screen with a Monday-to-Sunday rail beside the day's assigned tasks, a member picker, and a Finalize control.",
+        },
+        {
+          label: "Group",
+          src: "/projects_assets/RoomMates/welcome.png",
+          alt: "The RoomMates welcome panel inviting a new user to create a group or join an existing one with a group ID.",
+        },
+      ],
+    },
+    stack: ["Node", "Express", "JavaScript", "NeDB"],
+    media: {
+      kind: "poster",
+      word: "Whose turn is it?",
+      caption: "A week of chores, agreed once.",
+    },
+    links: [
+      {
+        label: "Visit RoomMates",
+        href: "https://roommatesapp.onrender.com/",
+      },
+    ],
+  },
 ];
 
 /** The primary-tier subset — the big cards in the landing grid. */
@@ -343,34 +470,14 @@ export function getWork(slug: string): FeaturedWork | undefined {
   return works.find((work) => work.slug === slug);
 }
 
-/** The external-only pieces — no case page of their own, so their rows link straight out. */
-const externalArchive: ArchiveWork[] = [
-  {
-    title: "HomeDoc",
-    year: "2023",
-    note: "AI symptom checker started at a hackathon, finished solo when the weekend ran out.",
-    href: "https://homedoc-backend.onrender.com/",
-  },
-  {
-    title: "RoomMates",
-    year: "2022",
-    note: "Chore management for housemates. My first full-stack app end to end.",
-    href: "https://roommatesapp.onrender.com/",
-  },
-];
-
-/** The archive list: secondary-tier case works (linking in to their own case page) above the
-    external-only pieces. Newest-first falls out on its own — RAG (2024) → HomeDoc (2023) →
-    RoomMates (2022). */
-export const archive: ArchiveWork[] = [
-  ...works
-    .filter((work) => work.tier === "secondary")
-    .map((work) => ({
-      title: work.title,
-      year: work.year,
-      note: work.archiveNote ?? work.description,
-      href: `/works/${work.slug}`,
-      internal: true,
-    })),
-  ...externalArchive,
-];
+/** The archive list: every secondary-tier case work, each row linking in to its own case page.
+    Newest-first falls out of the `works` order — RAG (2024) → HomeDoc (2023) → RoomMates (2022). */
+export const archive: ArchiveWork[] = works
+  .filter((work) => work.tier === "secondary")
+  .map((work) => ({
+    title: work.title,
+    year: work.year,
+    note: work.archiveNote ?? work.description,
+    href: `/works/${work.slug}`,
+    internal: true,
+  }));

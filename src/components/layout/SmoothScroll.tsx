@@ -2,6 +2,7 @@
 
 import { ReactLenis, type LenisRef } from "lenis/react";
 import { cancelFrame, frame, useReducedMotion } from "motion/react";
+import { usePathname } from "next/navigation";
 import { useEffect, useRef } from "react";
 
 import { useIntro } from "@/components/intro/IntroContext";
@@ -25,6 +26,7 @@ export function SmoothScroll({ children }: { children: React.ReactNode }) {
   const prefersReducedMotion = useReducedMotion() ?? false;
   const { locked } = useIntro();
   const lenis = useRef<LenisRef>(null);
+  const pathname = usePathname();
 
   useEffect(() => {
     if (prefersReducedMotion) return;
@@ -49,6 +51,46 @@ export function SmoothScroll({ children }: { children: React.ReactNode }) {
     else instance.start();
   }, [locked]);
 
+  // A route change lands the new page at the old page's scroll offset, and the reason is that
+  // Next's scroll-to-top and Lenis disagree about who owns the position. Next calls
+  // `window.scrollTo(0, 0)`; Lenis only adopts an outside scroll while it believes itself idle —
+  // `onNativeScroll` returns early whenever `isScrolling === "smooth"`. Click a card during the
+  // ~150ms the wheel is still settling and Lenis never sees the reset, so it holds the landing
+  // page's target and the next frame drives the case page straight back down to it.
+  //
+  // Resetting the instance is what makes the arrival stick. `force` because the intro stops Lenis
+  // and a stopped instance refuses `scrollTo`; `immediate` because there is nothing to animate
+  // across a page that has just been replaced.
+  const restoringTo = useRef<string | null>(null);
+  const navigated = useRef(false);
+
+  // Back and forward are Next's to restore — it remembers those offsets, and the landing page's
+  // pinned deck is a long way to make somebody scroll again. Recording the path popstate is
+  // heading to (rather than a bare flag) keeps a hash-only step in history, which never changes
+  // `pathname` and so never reaches the effect below, from swallowing the next real navigation.
+  useEffect(() => {
+    const remember = () => {
+      restoringTo.current = window.location.pathname;
+    };
+    window.addEventListener("popstate", remember);
+    return () => window.removeEventListener("popstate", remember);
+  }, []);
+
+  useEffect(() => {
+    // The first pass is the initial load, where the browser's own restoration and any `/#…`
+    // fragment in the URL already own the position.
+    if (!navigated.current) {
+      navigated.current = true;
+      return;
+    }
+
+    const restoring = restoringTo.current === pathname;
+    restoringTo.current = null;
+    if (restoring) return;
+
+    lenis.current?.lenis?.scrollTo(0, { immediate: true, force: true });
+  }, [pathname]);
+
   if (prefersReducedMotion) return <>{children}</>;
 
   return (
@@ -61,11 +103,14 @@ export function SmoothScroll({ children }: { children: React.ReactNode }) {
       root
       ref={lenis}
       options={{
-        // 0.13, matched from adcker.com — the reference for how this should feel. Lenis damps
-        // frame-rate independently with lambda = lerp × 60, so this is a settling time constant of
-        // 1/7.8 ≈ 128ms against the 167ms of the 0.1 we had: the glide keeps its weight but stops
-        // trailing the wheel, which is the whole difference between inertial and floaty.
-        lerp: 0.13,
+        // Lenis damps frame-rate independently with lambda = lerp × 60, so this is a settling time
+        // constant of 1/6.6 ≈ 152ms. It has been 0.1 (167ms, which trailed the wheel and read as
+        // floaty) and 0.13 (128ms, matched from adcker.com), and this sits between them: the extra
+        // ~24ms of settle spreads each wheel tick over more frames, which is what takes the
+        // hardness off the scrubbed deck without giving the page back its float. The deck's own
+        // scroll length (--stack-step) is the other half of that knob and is deliberately untouched
+        // — it sets the ms the copy's choreography was calibrated against.
+        lerp: 0.11,
         smoothWheel: true,
         autoRaf: false,
         // In-page links glide instead of jumping. Off by default, which left the nav's `/#work`

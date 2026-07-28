@@ -1,12 +1,13 @@
 "use client";
 
+import { useRef } from "react";
 import Image from "next/image";
 import { motion, useReducedMotion } from "motion/react";
 
 import { TypedLine } from "@/components/home/TypedLine";
 import { useIntro } from "@/components/intro/IntroContext";
 import { kerned } from "@/lib/kerning";
-import { STAGGER, rise } from "@/lib/motion";
+import { STAGGER, rise, useGlide } from "@/lib/motion";
 
 /**
  * The opening, as one sentence down the page's centre line: the script greeting, the name at
@@ -37,9 +38,18 @@ export function Hero() {
   const reduce = useReducedMotion() ?? false;
   const { ready } = useIntro();
 
+  // Only the LEAVING half ever runs here: the hero opens at the top of the document, so its
+  // entering window is already spent before a visitor can scroll. What is left is the hero holding
+  // back a little as the statement comes up past it — which is the one seam on the page where the
+  // two blocks deliberately overlap, and so the one where a difference in speed reads most.
+  const section = useRef<HTMLElement>(null);
+  const { drift } = useGlide(section);
+
   return (
     <motion.header
+      ref={section}
       className="hero gutter measure"
+      style={{ y: drift }}
       variants={reduce ? undefined : STAGGER}
       initial={reduce ? false : "hidden"}
       animate={reduce ? undefined : ready ? "visible" : "hidden"}
