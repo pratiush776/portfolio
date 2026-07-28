@@ -74,8 +74,8 @@ const RISE = {
 } as const;
 
 /**
- * THE RHYTHM. One step between children, one beat before the first — so a hero, a footer, a list
- * of capabilities and a case page all cascade at the same speed and read as one hand.
+ * THE RHYTHM. One step between children, one beat before the first — so a hero, a footer, the
+ * archive and a case page all cascade at the same speed and read as one hand.
  */
 const CASCADE = { stagger: 0.09, delayChildren: 0.06 } as const;
 
@@ -84,8 +84,8 @@ const CASCADE = { stagger: 0.09, delayChildren: 0.06 } as const;
  * single value, so nothing arrives noticeably earlier or later than its neighbours.
  *
  * Expressed as a bottom margin rather than a visible fraction, because the page's blocks range
- * from one line (the statement) to well over a screen (the capability list), and a fraction of a
- * block that tall can never be reached.
+ * from a compact archive row to well over a screen (the past wall), and a fraction of a block
+ * that tall can never be reached.
  */
 export const THRESHOLD = "0px 0px -15% 0px";
 

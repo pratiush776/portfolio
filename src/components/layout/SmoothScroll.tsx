@@ -70,8 +70,8 @@ export function SmoothScroll({ children }: { children: React.ReactNode }) {
         autoRaf: false,
         // In-page links glide instead of jumping. Off by default, which left the nav's `/#work`
         // and `/#contact` as the only hard cuts on a page whose whole character is the glide —
-        // Lenis' handler matches the `/#…` form these use, so it is one flag away. The `<Link>`s
-        // pass `scroll={false}` so Next's own router scroll doesn't race this to the same target.
+        // Lenis' handler matches the `/#…` form these use, so it is one flag away. They remain
+        // plain anchors so native fragment navigation still works when reduced motion skips Lenis.
         anchors: true,
       }}
     >

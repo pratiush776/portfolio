@@ -1,12 +1,14 @@
-import { Capabilities } from "@/components/home/Capabilities";
 import { Hero } from "@/components/home/Hero";
+import { Past } from "@/components/home/Past";
 import { SiteFooter } from "@/components/footer/SiteFooter";
 import { Statement } from "@/components/home/Statement";
 import { WorkIndex } from "@/components/works/WorkIndex";
 
 /**
- * The landing, in five beats: who I am → what I do → a promise → the work → the ask. "What I do"
- * is the first beat down, then the statement hands off into the work.
+ * The landing, in five beats: who I am → the promise → the proof → where I come from → the ask.
+ * The promise is deliberately only one line: it gives the projects a lens without previewing the
+ * same destinations the work index is about to show. Background follows proof, where it adds
+ * credibility without delaying the first shipped artifact.
  *
  * The work is the one pinned beat: on a desktop viewport the featured three hold still while the
  * deck scrolls through them (see FeaturedStack), then the page releases into the archive and the
@@ -16,9 +18,9 @@ export default function Home() {
   return (
     <main id="main" className="chapters">
       <Hero />
-      <Capabilities />
       <Statement />
       <WorkIndex />
+      <Past />
       <SiteFooter />
     </main>
   );

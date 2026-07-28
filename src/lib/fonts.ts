@@ -15,13 +15,17 @@ import {
 
 /**
  * DISPLAY — the name and section titles, set huge in uppercase with tight tracking and sub-1
- * line-height. Kumbh Sans is a geometric sans whose caps stay even at 12vw. Bold (700) only:
- * the display never appears at another weight.
+ * line-height. Kumbh Sans is a geometric sans whose caps stay even at 12vw.
+ *
+ * TWO weights, and the second has exactly one user. 700 is the display voice everywhere — the
+ * hero name, the section titles, the PROJECTS word, the footer signature. 900 is spent only on
+ * the "My Past" wall, where four words stack into a single block and the extra weight is what
+ * makes that block read as one mass rather than as four headings. Anywhere else, 700.
  */
 export const kumbhSans = Kumbh_Sans({
   variable: "--font-kumbh",
   subsets: ["latin"],
-  weight: "700",
+  weight: ["700", "900"],
   display: "swap",
 });
 

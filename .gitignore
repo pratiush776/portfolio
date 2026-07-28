@@ -12,6 +12,12 @@
 
 # testing
 /coverage
+/test-results/
+/playwright-report/
+/blob-report/
+/.nyc_output/
+/vitest-report/
+/junit.xml
 
 # next.js
 /.next/
@@ -19,6 +25,9 @@
 
 # production
 /build
+
+CLAUDE.md
+AGENTS.md
 
 # misc
 .DS_Store
@@ -29,6 +38,10 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
+*.log
+*.tmp
+*.temp
+*.swp
 
 # env files (can opt-in for committing if needed)
 .env*
@@ -50,8 +63,19 @@ public/_next-video
 # large original video files
 public/projects_assets/LucidTone/demo_original.mp4
 
-# impeccable design skill + its artifacts (local design tooling, not part of the site)
-/.claude/skills/impeccable/
+# local agent tooling (not part of the site)
+/.agents/
+/.claude/
+/.codex/
+/AGENTS.md
+/CLAUDE.md
+
+# local tooling caches
+/.cache/
+/.turbo/
+/.eslintcache
+
+# impeccable design artifacts
 /.impeccable/
 /PRODUCT.md
 /DESIGN.md

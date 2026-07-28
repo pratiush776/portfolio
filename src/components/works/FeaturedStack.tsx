@@ -96,7 +96,7 @@ const shrinkEnd = (k: number) => k + SHRINK_SHARE;
  * The words deliberately do not move during the shrink. The picture receding is already carrying
  * that phase, and a block of copy that leaves the moment its picture starts to recede gives you no
  * window in which the work is on screen and its title is still there to be read and clicked. So
- * the copy holds through the whole shrink — a third of a handover, ~46svh of scroll — and only
+ * the copy holds through the whole shrink — a third of a handover, ~32svh of scroll — and only
  * starts leaving once the next curtain is actually rising. The incoming block then takes the rest
  * of the curtain and lands with it.
  *

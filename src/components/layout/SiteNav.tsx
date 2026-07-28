@@ -1,5 +1,9 @@
 import Link from "next/link";
 
+/* The two landing-page fragment links intentionally stay native anchors: Next's `scroll={false}`
+   leaves reduced-motion visitors with no scroll owner, while its default scroll races Lenis. */
+/* eslint-disable @next/next/no-html-link-for-pages */
+
 /**
  * The fixed bar. `mix-blend-mode: difference` (see .site-nav) inverts it against whatever
  * scrolls underneath, so it stays legible over bone, over the ink footer, and over imagery
@@ -16,13 +20,14 @@ export function SiteNav() {
           Pratiush
         </Link>
 
-        {/* `scroll={false}` on the two in-page links: Lenis owns anchor navigation now (see
-            SmoothScroll), and Next's router would otherwise jump to the same target instantly
-            while Lenis was still gliding toward it. */}
+        {/* Plain anchors for the in-page destinations. Lenis intercepts them while it is mounted;
+            under reduced motion it is deliberately absent, so the browser's native fragment
+            navigation remains the working fallback instead of a Next link with scrolling
+            disabled and nobody left to move the page. */}
         <div className="site-nav__links">
-          <Link href="/#work" className="site-nav__link underline-link" scroll={false}>
+          <a href="/#work" className="site-nav__link underline-link">
             Work
-          </Link>
+          </a>
           <Link
             href="/CV.pdf"
             className="site-nav__link underline-link"
@@ -31,9 +36,9 @@ export function SiteNav() {
           >
             Resume
           </Link>
-          <Link href="/#contact" className="site-nav__link underline-link" scroll={false}>
+          <a href="/#contact" className="site-nav__link underline-link">
             Contact
-          </Link>
+          </a>
         </div>
       </div>
     </nav>

@@ -9,15 +9,17 @@ import { kerned } from "@/lib/kerning";
 import { STAGGER, rise } from "@/lib/motion";
 
 /**
- * The opening: the script greeting leading into the name at display scale, and the bracketed
- * portrait, role and statement beneath it. It takes the whole fold and sits centred in it on both
- * axes — balanced silence above and below, balanced weight left and right, nothing of the next
- * section peeking in.
+ * The opening, as one sentence down the page's centre line: the script greeting, the name at
+ * display scale, then the bracketed portrait and the meta beneath them. It takes the whole fold and
+ * sits centred in it on both axes — balanced silence above and below, balanced weight left and
+ * right, nothing of the next section peeking in.
  *
  * The row under the name is TWO systems that read as one: the bracketed portrait, and the meta.
  * They are held apart by the page's --col-gap, which is about twice the bracket's own internal
- * rhythm — enough to tell them apart, not enough to let them come loose from each other. Nothing
- * here is tied to scroll.
+ * rhythm — enough to tell them apart, not enough to let them come loose from each other.
+ *
+ * All three rows arrive on the one gesture, and only the typed line keeps moving afterwards.
+ * Nothing here is tied to scroll.
  *
  * The cascade waits for the intro's cue rather than firing on mount. Mounting happens BEHIND the
  * ink field, so an unconditional entrance would spend itself where nobody can see it and the
@@ -43,10 +45,10 @@ export function Hero() {
       animate={reduce ? undefined : ready ? "visible" : "hidden"}
     >
       <div className="hero__block">
-        {/* Decorative — the heading below carries the real accessible name. */}
+        {/* Read, not decorative: it lands ahead of the h1 as "Hi, I'm" → "Pratiush Karki", which is
+            the sentence it is. It arrives on the same gesture as the two rows below it. */}
         <motion.p
           className="hero__greeting script"
-          aria-hidden
           variants={reduce ? undefined : rise}
         >
           Hi, I&apos;m

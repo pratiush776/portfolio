@@ -24,7 +24,8 @@ import { useMediaQuery } from "@/lib/useMediaQuery";
 export function WorkIndex() {
   const reduce = useReducedMotion() ?? false;
   // False on the server and until hydration, so the flat spread is what ships and what renders
-  // first. The section sits several screens down; nobody sees the upgrade happen.
+  // first. The hero and statement bridge precede it, so the responsive upgrade still completes
+  // before the pinned stage enters the viewport.
   const wide = useMediaQuery("(min-width: 1024px)");
   const stacked = wide && !reduce;
   const enter = reduce ? {} : reveal();
@@ -67,15 +68,22 @@ export function WorkIndex() {
         </div>
       )}
 
-      {/* The archive rows cascade, the way the capability rows above them do — a compact list is
-          the one place on the page where several things ARE in view together, which is exactly
-          where a sequence reads as a sequence instead of as a block landing. */}
+      {/* The archive rows cascade because a compact list is the one place on the page where
+          several things ARE in view together — exactly where a sequence reads as a sequence
+          instead of as a block landing. When the pinned deck is active, the archive begins at
+          its release edge and observes the real viewport edge: no spacing or trigger delay is
+          inserted between the last featured handoff and "Also built." */}
       <motion.div
-        className="gutter measure work-archive"
+        className={`gutter measure work-archive${
+          stacked ? " work-archive--stacked" : ""
+        }`}
         variants={reduce ? undefined : STAGGER}
         initial={reduce ? false : "hidden"}
         whileInView={reduce ? undefined : "visible"}
-        viewport={{ once: true, margin: THRESHOLD }}
+        viewport={{
+          once: true,
+          margin: stacked ? "0px" : THRESHOLD,
+        }}
       >
         <motion.h3 className="archive__title" variants={reduce ? undefined : rise}>
           Also built

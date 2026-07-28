@@ -71,7 +71,12 @@ export function Cover({ work }: { work: FeaturedWork }) {
 }
 
 /**
- * The words: a claim, then two meta lines stepped so there is a clear next-read.
+ * The words: the title in the serif, a claim under it, the credit line, then the way in.
+ *
+ * Four lines, and the order is the read: what it is, what it does, what I was and when, where to
+ * go. The tech stack used to sit at the foot of this block and is gone from it — it is a list of
+ * nouns competing with the one line that asks for a click, and the case page already sets it
+ * properly as chips (see .case__stack).
  *
  * `lines` lets the pinned stack drive each of the four lines on its own scroll window, so they
  * cascade rather than moving as one slab. The flat grid passes nothing and the elements render
@@ -91,7 +96,7 @@ export function WorkCopy({
   clip = false,
 }: {
   work: FeaturedWork;
-  /** Per-line motion props, in reading order: title, description, meta, stack. */
+  /** Per-line motion props, in reading order: title, description, meta, cta. */
   lines?: MotionProps[];
   clip?: boolean;
 }) {
@@ -109,14 +114,8 @@ export function WorkCopy({
       {wrap(
         0,
         "title",
-        <motion.h3 className="work-card__title h2" {...lines?.[0]}>
-          <span className="underline-link">{work.title}</span>
-          <ArrowUpRight
-            className="work-card__arrow"
-            width="22"
-            height="22"
-            aria-hidden
-          />
+        <motion.h3 className="work-card__title editorial" {...lines?.[0]}>
+          {work.title}
         </motion.h3>,
       )}
       {wrap(
@@ -135,9 +134,18 @@ export function WorkCopy({
       )}
       {wrap(
         3,
-        "stack",
-        <motion.p className="work-card__stack" {...lines?.[3]}>
-          {work.stack.slice(0, 3).join(" · ")}
+        "cta",
+        // A cue, not a link: the whole card — frame and words together — is already one anchor, in
+        // both layouts. So this is a <p> carrying the affordance, and the hover states it lights up
+        // are driven from the anchor above it, exactly as the arrow always was.
+        <motion.p className="work-card__cta" {...lines?.[3]}>
+          <span className="work-card__cta-label">View case study</span>
+          <ArrowUpRight
+            className="work-card__arrow"
+            width="18"
+            height="18"
+            aria-hidden
+          />
         </motion.p>,
       )}
     </>

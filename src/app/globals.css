@@ -118,6 +118,68 @@ a {
      value from the shared measure. */
   --display-size: clamp(2.75rem, 18cqi, 15.5rem);
 
+  /* ── the wall ─────────────────────────────────────────────────────────────
+     "My Past", and the second `cqi` size on the site. It sits outside the nine rungs below for
+     the same reason --display-size does: it is measured against the container rather than the
+     viewport, because the whole layout is derived from how wide its longest word comes out.
+
+     Everything here is read off the Kumbh binary at wght 900 (the face is variable, so 700 and
+     900 are the same file instanced twice) rather than estimated:
+
+       "RESEARCH PAPER"  9.0801em raw  →  8.5201em at --past-track's -0.04em
+       cap height        0.7324em      (identical at 700 and 900)
+       cap J descender  -0.1758em      (identical at 700 and 900)
+       cap side bearing  0.0488em      (0.0596em at 700 — it tightens with weight)
+
+     9.6cqi puts the longest word at 1058px of the 1253px the measure leaves at 1440 — 84.5% of
+     the column, holding that ratio at every width because both terms scale with the container.
+     The ~8% left either side is what the + sits in. An earlier pass reserved 30% for a margin
+     annotation beside each word; the annotation is gone (everything a row has to say now lives
+     in its panel, where there is room to say it properly), and the words took the space back.
+
+     Deliberately below --display-size, so the hero name and the PROJECTS word stay the two
+     largest things on the site and the wall reads as loud rather than as a third contender. */
+  --past-size: clamp(2.25rem, 9.6cqi, 8.5rem);
+
+  /* The centre column, exactly as wide as the longest word — so "RESEARCH PAPER" fills it and
+     the other three centre inside it. Stated as one multiplication rather than a second clamp,
+     so the column can never drift out of step with the type it is built around. Update BOTH this
+     multiplier and --past-track together: the multiplier is the word's measured advance at the
+     tracking below, and changing one without the other silently breaks the fit. */
+  --past-track: -0.02em;
+  --past-col: calc(var(--past-size) * 8.8001);
+
+  /* Vertical air per row — the value that decides whether the section lands on a screenful.
+     Three terms, and each one is doing a job:
+
+       0.34em  the ceiling, a fraction of the word rather than a fixed step, so the rhythm holds
+               from a 36px phone to a 120px desktop
+       3.2vh   the preferred value, which is what makes the section respond to screen HEIGHT.
+               Type here is sized by container WIDTH, so without this term a 1440×900 laptop got
+               desktop-sized words in two thirds the vertical space and the section ran to 114vh.
+       12px    the floor, so it never collapses back to the cramped block it started as
+
+     This gap is deliberately SMALLER than the one under the title (see .past__title). Four items
+     spaced as widely as they are from their own heading stop reading as a set — the heading has
+     to own more air than the things it introduces, or the first item looks like it belongs to it
+     and the other three to something else. */
+  --past-row-pad: clamp(12px, 3.2vh, 0.34em);
+
+  /* The compact statement is also the hero's scroll cue. This slight pull exposes only the first
+     edge of its line across the fold; the statement still reads as the start of the next chapter,
+     not as part of the hero lockup. */
+  --statement-peek: clamp(8px, 1.3vh, 16px);
+
+  /* The air between the words and the + beside them. Its own value rather than --col-gap, which
+     at 5rem is for a frame standing beside its copy. */
+  --past-gap: clamp(1rem, 2vw, 2rem);
+
+  /* The serif in this section runs LOOSER than --track-snug, which is the tracking the serif
+     wears at statement scale. These lines are a third of that size and read as copy rather than
+     as a headline, and Instrument Serif's own fit is tight enough that negative tracking closed
+     the words up to the point of being hard to read. */
+  --past-serif-track: 0.012em;
+
   /* ── the column gap ───────────────────────────────────────────────────────
      The air between two things standing side by side, wherever the page does that: the frame and
      the copy in a work row, the well and the copy in the deck, the bracketed portrait and the meta
@@ -164,8 +226,8 @@ a {
   --t-xl: clamp(1.15rem, 0.95rem + 0.6vw, 1.6rem); /*          18→26 — .h3 */
   --t-2xl: clamp(1.3125rem, 1.05rem + 1.1vw, 2rem); /*         21→32 — archive name */
   --t-3xl: clamp(1.5rem, 1rem + 1.4vw, 2.75rem); /*            24→44 — .h2, brief, email */
-  --t-4xl: clamp(1.6rem, 1rem + 2vw, 3rem); /*                 26→48 — capabilities line */
-  --t-5xl: clamp(1.75rem, 1.1rem + 2.6vw, 3.75rem); /*         28→60 — the statement */
+  --t-5xl: clamp(1.75rem, 1.1rem + 2.6vw, 3.75rem); /*         28→60 — My Past title */
+  --t-6xl: clamp(2rem, 1.25rem + 3.2vw, 4.125rem); /*          32→66 — the statement */
   --t-section: clamp(2rem, calc(0.75rem + 6vw), 7rem); /*      32→112 — .display-section */
 
   /* ── tracking ─────────────────────────────────────────────────────────────
@@ -207,14 +269,18 @@ a {
   margin-top: var(--space-chapter);
 }
 
-/* THE rule's one stated exception, and the only one it gets. The hero is the single section that
-   fills the fold, and it centres its block inside that fold — so it already ends with half a
-   screen of silence below the lockup (~430px at a 1237px-tall window). Charging a full chapter on
-   top of that would put ~670px between the name and the first thing it leads to. A half-step lands
-   the total slightly UNDER what the shorter hero used to give, while the fold itself now reads
-   centred. Specificity (0,2,0) is what carries it over the flow rule's (0,1,0). */
-.chapters > .hero + * {
-  margin-top: var(--space-block);
+/* The statement is the hero's scroll cue as well as the bridge into the work. Pulling just its
+   top edge across the fold makes the next beat discoverable without folding the whole sentence
+   into the hero composition. */
+.chapters > .hero + .statement-bridge {
+  margin-top: calc(-1 * var(--statement-peek));
+}
+
+/* PROJECTS begins behind a mask and only becomes visible on the deck's approach. A smaller
+   physical gap compensates for that delayed ink, keeping the statement from looking top-heavy
+   while still leaving more than a normal internal text gap beneath it. */
+.chapters > .statement-bridge + .work-section {
+  margin-top: clamp(48px, calc(27.9px + 5.35vw), 105px);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -285,9 +351,14 @@ a {
   text-wrap: balance;
 }
 
-/* The editorial voice: the two lines where the site speaks about itself rather than describing
-   something — the statement on the landing page, and the brief at the top of a case page. The
-   serif is the whole signal, so it is spent at one weight, in two places, and never on body copy.
+/* The editorial voice: the statement on the landing page, the brief at the top of a case page, the
+   supporting type of the My Past wall, and — as of the metadata pass — the name of each project.
+   The serif is the whole signal, so it is spent at one weight and never on body copy.
+
+   A project's name is the one line in that block that IS the work rather than a fact about it, and
+   setting it in the same grotesque as the description beneath it left the two separated by size
+   alone. The face change does the separating now, which is what lets the credit line and the claim
+   sit at the same rung without the block flattening.
    Tracking is a step looser than the sans would take at the same size: the serif's own sidebearings
    already do part of that work, and closing it further muddies the joins. */
 .editorial {
@@ -493,86 +564,6 @@ a:focus-visible .underline-link::after {
   transform: scaleX(1);
 }
 
-/* ── what I do ────────────────────────────────────────────────────────────── */
-/* Capabilities as proof: each row is a claim that links to the work backing it. Own classes
-   (not a shared row pattern) and a larger line at .h2, so this chapter and the compact archive
-   read as two different sections. Same row-nudge + arrow language as the archive, for a
-   consistent "this navigates" signal. */
-.capabilities__list {
-  list-style: none;
-  margin: var(--space-block) 0 0;
-  padding: 0;
-  border-top: 1px solid var(--color-rule);
-}
-
-.capabilities__row {
-  border-bottom: 1px solid var(--color-rule);
-}
-
-.capabilities__link {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 12px 40px;
-  padding: 44px 0;
-}
-
-/* The nudge moves the left of the row and leaves the right-aligned proof where it is — a squeeze,
-   not a slide. It rides on the two left items rather than on the row's own padding: padding would
-   narrow the flex container mid-transition, which can re-wrap the gloss under the cursor. The 14px
-   comes out of the 40px column gap, so the two halves never meet. */
-.capabilities__line,
-.capabilities__sub {
-  transition: transform var(--dur-hover) var(--ease);
-}
-
-.capabilities__link:hover .capabilities__line,
-.capabilities__link:hover .capabilities__sub,
-.capabilities__link:focus-visible .capabilities__line,
-.capabilities__link:focus-visible .capabilities__sub {
-  transform: translateX(14px);
-}
-
-.capabilities__line {
-  flex: 0 0 auto;
-  min-width: min(100%, 20rem);
-  /* A step above base .h2: "What I do" is now the first content beat, so the domain must carry
-     real weight under the big section title rather than reading as a caption. */
-  font-size: var(--t-4xl);
-  line-height: var(--lh-tight);
-}
-
-.capabilities__sub {
-  flex: 1 1 22rem;
-  color: var(--color-ink-muted);
-}
-
-/* The proof pointer — names the project and lights up with the row. */
-.capabilities__proof {
-  margin-left: auto;
-  flex: none;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.45em;
-  color: var(--color-ink-muted);
-  transition: color var(--dur-hover) var(--ease);
-}
-
-.capabilities__link:hover .capabilities__proof,
-.capabilities__link:focus-visible .capabilities__proof {
-  color: var(--color-accent);
-}
-
-.capabilities__proof-arrow {
-  flex: none;
-  transition: transform var(--dur-hover) var(--ease);
-}
-
-.capabilities__link:hover .capabilities__proof-arrow,
-.capabilities__link:focus-visible .capabilities__proof-arrow {
-  transform: translate(3px, -3px);
-}
-
 /* ── accessibility ────────────────────────────────────────────────────────── */
 
 .skip-link {
@@ -620,6 +611,12 @@ a:focus-visible .underline-link::after {
 /* Only the controls take the pointer — the bar itself must not eat clicks. */
 .site-nav a {
   pointer-events: auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
+  margin-block: -13px;
 }
 
 /* The display face at its smallest, which is the one size where it needs tracking ADDED rather
@@ -642,6 +639,12 @@ a:focus-visible .underline-link::after {
 .site-nav__link {
   font-size: var(--t-base);
   line-height: var(--lh-flat);
+}
+
+/* Keep the underline on the word when the short "Work" label borrows width for its hit target. */
+.site-nav__link::after {
+  left: 4px;
+  width: calc(100% - 8px);
 }
 
 /* ── the intro ────────────────────────────────────────────────────────────── */
@@ -743,18 +746,26 @@ html.is-loading .preloader {
 /* `cqi` rather than `vw`: the name is sized against the measure it actually sits in, so it
    keeps its proportion once .measure caps the page at 90rem. */
 .hero {
-  /* Trims the nav clearance back out of the centring — negative up, positive down, 1:1.
-     `margin-block: auto` below centres the block in the space UNDER the 90px padding, which lands
-     it half that padding (45px) low; this pulls it back to within a few pixels of true centre.
-     The block is top-heavy — the display name is nearly all of its mass — so stopping a hair below
-     geometric centre is what reads as centred. THE knob for the hero's vertical balance. */
-  --hero-bias: -2.5rem;
+  /* Lifts the block off geometric centre — negative up, positive down, 1:1. THE knob for the hero's
+     vertical balance.
+
+     It is doing two jobs. 40px of it trims the nav clearance back out: `margin-block: auto` centres
+     the block in the space UNDER the 90px padding, which lands it half that padding low. The rest
+     pays for the greeting.
+
+     The greeting occupies a row but carries almost none of the block's weight — a hairline script
+     against a bold display word and a solid black square — so the eye reads the composition as
+     starting at the CAPS, not at the script, and counts the script's row as air. Measured at
+     1436×1235: balancing the ink outright wants about -2.5rem, and balancing the caps against the
+     air below wants -4.5rem (417px above the cap line, 407px below the parens). Since the reason
+     the block needs lifting at all is that the script reads as air, the caps measure is the one
+     served. Raise it further if the greeting ever gains weight. */
+  --hero-bias: -4.5rem;
   container-type: inline-size;
   /* The hero owns the whole fold, and the block is centred in it: balanced silence above and
      below, nothing of the next section peeking in. It used to stop short so that the section
-     following it would crop against the viewport edge and act as a scroll cue — but that section
-     is now Capabilities rather than the work, and at any normal desktop aspect its title landed
-     well below the fold, so the cue was paid for in dead space and never delivered. */
+     following it would crop against the viewport edge and act as a scroll cue. The compact
+     statement now handles that cue with its own small overlap, leaving this composition centred. */
   min-height: 100svh;
   display: flex;
   flex-direction: column;
@@ -783,20 +794,23 @@ html.is-loading .preloader {
   transform: translateY(var(--hero-bias));
 }
 
-/* Rests just on the cap line and lightly crosses it — the script has to stay readable on
-   the bone, not sink into the black letterforms. */
+/* The first line of a two-line sentence, on the same centre line as everything else. It used to be
+   a small script hanging off the name's left edge and lightly crossing the cap line — which read as
+   a lead-in when the composition had a left axis, and as a stray label once it did not.
+
+   `fit-content` + `auto` rather than `text-align: center` so the box hugs the script rather than
+   spanning the name's full width — the row is then as wide as what is in it, which is what the
+   other two rows are.
+
+   THE GAP to the name is 0.0615 of the display size — 13.8px at 1436 — and no rule sets it. It is
+   what the two line boxes already leave between their ink: 0.038em of this box below the script's
+   tail, plus 0.024em of the name's box above its caps. Hence `margin-bottom: 0`; there is no number
+   here to drift. Set one if the two should sit further apart. */
 .hero__greeting {
-  margin: 0 0 calc(var(--display-size) * -0.028);
-  /* Sits just inside the name's box edge and so just left of the P's STEM — the script leads into
-     the word rather than lining up with it. It does NOT centre itself: "Hi, I'm" reads into
-     "PRATIUSH" as one sentence, and a phrase centred over the middle of the word would break the
-     reading. Was -0.18em when the name's own box was pulled left by 0.04em of display size; that
-     is 0.2286em of the greeting's own size, which is where this value comes from. THE knob for the
-     greeting's horizontal position; the vertical overlap is the margin above. */
-  margin-left: 0.05em;
-  font-size: calc(var(--display-size) * 0.175);
-  position: relative;
-  z-index: 1;
+  width: fit-content;
+  margin: 0 auto;
+  /* THE knob for the greeting's presence. Was 0.175, which is where it read as decoration. */
+  font-size: calc(var(--display-size) * 0.26);
 }
 
 /* Size and tracking are both .display's now — the same values the projects word and the footer
@@ -918,17 +932,13 @@ html.is-loading .preloader {
   letter-spacing: var(--track-snug);
 }
 
-/* The expressive line: larger than the role but a step down in weight AND lifted a modest
-   step off full ink — so the role stays the harder mark and this earns prominence by scale.
-   Not the muted grey; just ink carried 15% toward bone. No width cap: the column governs the
-   measure, so it holds one line on desktop and wraps only when stacked. */
+/* Size and tracking are .h3's, from the JSX — the same rung the role above it wears. The two lines
+   are separated by weight and by tone, not by scale: this is a line being TYPED, and a typewriter
+   line set larger than everything around it stops reading as one. It briefly ran at --t-3xl to give
+   the meta more voice, which bought presence at the cost of the whole conceit. */
 .hero__tagline {
   margin: 0;
-  /* Two rungs up from .h3's --t-xl, which keeps it the larger of the two meta lines by the same
-     step it had before. Tracking follows size, so --track-tight comes with the rung. */
-  font-size: var(--t-3xl);
   font-weight: 400;
-  letter-spacing: var(--track-tight);
   color: color-mix(in srgb, var(--color-ink) 85%, var(--color-bone));
   /* The line types and clears itself, so its width changes constantly. These two reserve the box
      it will need at its widest, on both axes, and they exist for the same reason.
@@ -939,8 +949,14 @@ html.is-loading .preloader {
      WIDTH: the row is centred, so the meta's width sets where the whole lockup starts — an
      unreserved line would slide the portrait left and right on every keystroke. 6.3em covers the
      longest phrase, "I build with AI.", measured off Instrument Sans: 6.355em of advances, less
-     0.32em of tracking, plus 0.12em for the caret and its margin = 6.155em. Both are in the
-     element's own em, so both track the size above. Keep the phrases inside it (see TypedLine). */
+     0.32em of tracking, plus 0.12em for the caret and its margin = 6.155em.
+
+     The width half is INERT at the current size — 6.3em is ~150px against the locator's fixed
+     223px, so that line is what actually pins the column, at every viewport. It stays because the
+     invariant it protects (the meta's width must not depend on the typed text) currently holds only
+     by luck of the locator being the longer string: shorten that line, or raise this one's size,
+     and the jitter is back without it. A guard, not a size — the same reason --stack-well-h is
+     written the way it is. Both are in the element's own em, so both track the size above. */
   min-height: calc(1em * var(--lh-snug));
   min-width: 6.3em;
 }
@@ -992,19 +1008,20 @@ html.is-loading .preloader {
 .projects-title {
   container-type: inline-size;
   margin-bottom: var(--space-block);
-  /* A small vertical nudge only. The word takes no horizontal shift: it has to sit on the same
-     left edge as the frame directly beneath it, and at this scale 29px of daylight between the
-     two reads as a mistake rather than as an axis. Transform doesn't change the cqi the word
-     sizes to. */
+  /* The landing's chapter markers share its centred axis; the project rows beneath keep their
+     editorial left alignment. The small transform is vertical only and does not affect the cqi
+     the word sizes to. */
+  text-align: center;
   transform: translateY(0.65rem);
 }
 
 /* Size and tracking are .display's — this word is where that tracking value came from. */
 .projects-word {
-  /* Kumbh's P carries a left side bearing, so its box edge sits left of its ink. Pulling the box
-     out by that bearing puts the STEM on the gutter — the edge the frame below, the archive rows
-     and the statement above all sit on. Same value the hero name uses on the same glyph. */
-  margin-left: -0.04em;
+  display: inline-block;
+  /* Negative letter-spacing also applies after the final glyph, leaving the ink slightly outside
+     its measured box. Cancelling that trailing space keeps the visible word—not only its CSS
+     rectangle—centred on the statement and the hero. */
+  margin-right: calc(-1 * var(--track-display));
 }
 
 /* ── work index ───────────────────────────────────────────────────────────── */
@@ -1066,14 +1083,21 @@ html.is-loading .preloader {
   }
 }
 
-/* Title with a trailing link cue on one line. The cue's slide, the frame's colour reveal and
-   the title underline all fire together on hover/focus, so the card reads as clickable without
-   a button and without leaning on colour alone. */
+/* The title, in the editorial serif. Face, weight and tracking come from .editorial; what is local
+   is the rung and the leading.
+
+   --t-5xl rather than the --t-3xl this used to wear as .h2. The change of face is not size-neutral:
+   Instrument Serif's x-height is well under Instrument Sans's, so the same nominal size reads
+   noticeably smaller, and a project's name is the loudest thing in this column. The rung above
+   restores the presence the .h2 had — and it is a pairing the site already proves, since
+   .past__title is this exact face at this exact rung.
+
+   No arrow and no underline here any more. Both moved to .work-card__cta at the foot of the block,
+   where a line that names the destination can carry them better than a title can. */
 .work-card__title {
-  display: flex;
-  align-items: center;
-  gap: 0.4em;
   margin: 0;
+  font-size: var(--t-5xl);
+  line-height: var(--lh-tight);
 }
 
 .work-card__arrow {
@@ -1098,17 +1122,19 @@ a:focus-visible .work-card__arrow {
    travel to find the next line, so 1.55 there and 1.45 here are the same decision applied twice,
    not two body styles. That is what --lh-copy and --lh-body are for. */
 .work-card__desc {
-  margin: 14px 0 0;
+  margin: 20px 0 0;
   max-width: 48ch;
   font-size: var(--t-base);
   line-height: var(--lh-copy);
   text-wrap: pretty;
 }
 
-/* Two meta lines under the claim, stepped so there is a clear next-read: relationship + year is
-   the stronger line, then the stack recedes into a quiet tag row. */
+/* The credit line. It sits further from the claim than the claim does from the title, which is the
+   block's whole structure in one number: title and claim are one thought and bond tight, the credit
+   is the next thing down, and the way in stands off from all three (see .work-card__cta). Three
+   gaps, each larger than the last — the eye is told the order without a rule or a change of size. */
 .work-card__meta {
-  margin: 16px 0 0;
+  margin: 28px 0 0;
   font-size: var(--t-base);
   font-weight: 500;
   letter-spacing: var(--track-normal);
@@ -1118,13 +1144,39 @@ a:focus-visible .work-card__arrow {
   color: var(--color-ink-muted);
 }
 
-/* Dot-separated fragments rather than a sentence, so this one DOES want tracking added: the
-   extra air is what stops "Next.js · TypeScript · Postgres" reading as one long word. */
-.work-card__stack {
-  margin: 8px 0 0;
-  font-size: var(--t-xs);
-  letter-spacing: var(--track-wide);
-  color: var(--color-ink-muted);
+/* The way in. It is the last line and the largest gap, so it reads as the block's conclusion rather
+   than as a fourth fact about the project — and it names the destination, which the bare arrow
+   hanging off the old title never did. */
+.work-card__cta {
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+  margin: 48px 0 0;
+  width: fit-content;
+  font-size: var(--t-base);
+  font-weight: 500;
+  line-height: var(--lh-flat);
+}
+
+/* THE one rule on the site that is drawn at rest rather than wiped in on hover, and the reason is
+   that this is not a link. .underline-link is a word inside an anchor answering a pointer; this
+   line is the anchor's only standing declaration that the card goes somewhere, and a declaration
+   that appears only once you are already hovering has arrived too late to have said anything.
+
+   `0.2em` and 1px are the .underline-link values, so the two rules sit at the same distance and the
+   same weight — one underline drawn two ways, not two underlines. It is a real border rather than a
+   `text-decoration`, because a border grows the box: in the pinned deck this line rides inside an
+   `overflow: hidden` mask, and an underline that sits outside its own box is one the mask shaves. */
+.work-card__cta-label {
+  padding-bottom: 0.2em;
+  border-bottom: 1px solid currentColor;
+}
+
+/* The label is 0.2em taller than the arrow on account of that rule, so centring the two against
+   each other would leave the arrow sitting low against the WORDS. Handing the arrow the same gap
+   makes the two boxes the same shape, and the flex centre becomes the type's centre again. */
+.work-card__cta .work-card__arrow {
+  margin-bottom: 0.2em;
 }
 
 /* ── the featured deck ────────────────────────────────────────────────────── */
@@ -1137,7 +1189,7 @@ a:focus-visible .work-card__arrow {
      pin lasts --stack-steps × this, and the section is that plus the one viewport the pin
      occupies. Three projects are two handovers, so the deck no longer spends a whole step on the
      first piece just to sit still through it. */
-  --stack-step: 130svh;
+  --stack-step: 90svh;
   /* Half the content gutter, roughly — enough air that the rail reads as page furniture rather
      than as part of the row. */
   --stack-rail-inset: clamp(1.25rem, 3.25vw, 4.5rem);
@@ -1279,16 +1331,25 @@ a:focus-visible .work-card__arrow {
   margin-top: 0;
 }
 
+/* The title's own descender room, in the TITLE's em rather than the clip's. The shared 0.12em above
+   is a fraction of the wrapper's inherited body size — about 2px — which was room enough under a
+   44px sans and is not room enough under a 60px serif, where one descending letter drops further
+   than the whole allowance. Stated against the rung the title is set at, so the two move together. */
+.work-card__clip--title {
+  padding-bottom: calc(var(--t-5xl) * 0.2);
+  margin-bottom: calc(var(--t-5xl) * -0.2);
+}
+
 .work-card__clip--desc {
-  margin-top: 14px;
+  margin-top: 20px;
 }
 
 .work-card__clip--meta {
-  margin-top: 16px;
+  margin-top: 28px;
 }
 
-.work-card__clip--stack {
-  margin-top: 8px;
+.work-card__clip--cta {
+  margin-top: 48px;
 }
 
 .stack-card__link {
@@ -1384,13 +1445,22 @@ a:focus-visible .work-card__arrow {
 
 /* ── the archive ──────────────────────────────────────────────────────────── */
 
-/* The step down from the work to the list of it — a block, not a chapter: still the same section. */
+/* The step down from flat featured work to the list of it — a block, not a chapter: still the same
+   section. Mobile and reduced-motion layouts need this separation because their final card is in
+   normal flow rather than held in a viewport-sized stage. */
 .work-archive {
   margin-top: var(--space-block);
 }
 
-/* "Also built" takes its own classes rather than the shared .rows, so it and the capabilities
-   list below read as two different sections instead of one repeated row pattern. */
+/* The pinned deck already ends on a complete viewport and releases only after the final card has
+   finished receding. Its archive starts directly on that release edge, so the first next-scroll
+   movement brings "Also built" into view as the continuation of PROJECTS, not a later chapter. */
+.work-archive--stacked {
+  margin-top: 0;
+}
+
+/* "Also built" keeps its own compact row language. The featured work already made the large
+   gesture; this is the quieter index beneath it. */
 /* An eyebrow one rung above .label, and tracked one step LESS because of it — caps need less
    separation as they grow, so holding 0.14em here would have opened it past the point where
    "Also built" reads as two words. The only place on the site that uses this pair. */
@@ -1425,9 +1495,9 @@ a:focus-visible .work-card__arrow {
   padding: 34px 0;
 }
 
-/* Same squeeze as the capabilities row, on transforms for the same reason — the year is pinned
-   right by `margin-left: auto` and holds still while the name and note slide under it. The `a.`
-   prefix stays: a row with no link renders as a div and must not respond. */
+/* A restrained squeeze on transforms — the year is pinned right by `margin-left: auto` and holds
+   still while the name and note slide under it. The `a.` prefix stays: a row with no link renders
+   as a div and must not respond. */
 .archive__name,
 .archive__note {
   transition: transform var(--dur-hover) var(--ease);
@@ -1478,10 +1548,9 @@ a.archive__link:focus-visible .archive__arrow {
 }
 
 /* ── statement ────────────────────────────────────────────────────────────── */
-/* The promise, and the hand-off into the work. It sits on the plain gutter edge, which is now also
-   where the PROJECTS word's stem and the frames below it land — so the statement, the display word
-   and the work share one left edge with no per-element compensation between them. Sized well below
-   the display word so it leads into PROJECTS rather than competing.
+/* The promise, and the hand-off into the work. It shares a centred axis with the hero and the
+   PROJECTS chapter marker; the detailed work beneath returns to the editorial left edge where
+   longer copy is easier to scan. Sized below the display word so it leads rather than competing.
 
    The serif is the beat. Everything either side of this line is a grotesque, so the one place the
    site makes a claim about itself is the one place the letterforms change — which does more than
@@ -1493,15 +1562,12 @@ a.archive__link:focus-visible .archive__arrow {
      30ch is the serif's equivalent. THE knob for where the line breaks; it should land after
      "ideas". */
   max-width: 30ch;
-  font-size: var(--t-5xl);
+  margin-inline: auto;
+  font-size: var(--t-6xl);
   /* A notch above --lh-tight: the serif carries longer extenders than the sans does, and at this
      size two lines set at the sans's leading start to interlock. */
   line-height: 1.15;
-}
-
-@media (max-width: 767px) {
-  /* Tighten the capability rows on phones so the work arrives sooner. */
-  .capabilities__link { padding: 32px 0; }
+  text-align: center;
 }
 
 /* ── footer ───────────────────────────────────────────────────────────────── */
@@ -1563,6 +1629,8 @@ a.archive__link:focus-visible .archive__arrow {
   display: inline-flex;
   align-items: center;
   gap: 0.4em;
+  min-height: 44px;
+  margin-block: -10px;
 }
 
 /* The sign-off name at display scale — a bookend to the hero's opening "PRATIUSH", with a big
@@ -1664,4 +1732,254 @@ a.archive__link:focus-visible .archive__arrow {
   display: flex;
   flex-direction: column;
   gap: 15px;
+}
+
+/* ── my past ──────────────────────────────────────────────────────────────── */
+/* The background, as four words you open — a WALL of type rather than a list of rows. The words
+   are centred so the block is ragged on BOTH sides and reads as one shape, sized so the longest
+   nearly fills the measure, and spaced by --past-row-pad rather than left to collide.
+
+   Three deliberate exceptions to DESIGN.md live here, all recorded there: the centred axis,
+   Kumbh at 900, and the serif reaching a third place on the site. */
+.past {
+  /* The words are sized against the measure they sit in, not the viewport, so the block holds
+     its proportions once .measure caps the page. Same technique the hero name and the projects
+     word use. */
+  container-type: inline-size;
+}
+
+/* A title, centred over the block. Serif and sentence case rather than the display face, so it
+   names the section without reading as a fifth, quieter row of the same list — at Kumbh caps it
+   competed with the words instead of introducing them. Sized between the two: unmistakably a
+   title, unmistakably subordinate to a 120px word. */
+.past__title {
+  /* More air below the heading than between adjacent rows: at every supported size this bottom
+     margin exceeds one --past-row-pad, so title → first item is larger than item → item. */
+  margin: 0 0 clamp(32px, 4vw, 56px);
+  font-family: var(--font-instrument-serif), Georgia, "Times New Roman", serif;
+  font-weight: 400;
+  font-size: var(--t-5xl);
+  line-height: var(--lh-tight);
+  letter-spacing: var(--track-snug);
+  text-align: center;
+}
+
+.past__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+/* Below the breakpoint there is no margin to put the + in — the words already take most of a
+   phone's width — so the row collapses to a single centred column and the mark drops under its
+   word. The three-column layout is added at 768px, the site's one breakpoint. */
+.past__toggle {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  justify-items: center;
+  align-items: center;
+  gap: 0.25em var(--past-gap);
+  width: 100%;
+  /* The row's air. It lives here rather than on the line-height because leading that loose would
+     also open the gap INSIDE a word that wraps on a phone. */
+  padding: var(--past-row-pad) 0;
+  background: none;
+  border: 0;
+  color: inherit;
+  text-align: center;
+  cursor: pointer;
+  font-family: var(--font-kumbh), sans-serif;
+  font-size: var(--past-size);
+}
+
+.past__word {
+  font-size: 1em;
+  /* 900, and the one place on the site the display is not 700. Four words stacked into a block
+     need the extra weight to read as one mass; a lone display word never does. */
+  font-weight: 900;
+  text-transform: uppercase;
+  /* 0.95, and the value is set by ONE glyph. Kumbh's cap J drops 0.1758em below the baseline —
+     measured off the binary, and the only descender in the four words ("NY JETS"). Cap height is
+     0.7324em, so rows clear only where line-height > 0.7324 + 0.1758 = 0.908. Both figures are
+     identical at 700 and 900, so moving the weight did not move this floor. The air BETWEEN rows
+     is --past-row-pad's job, not this one's. */
+  line-height: 0.95;
+  letter-spacing: var(--past-track);
+  /* CSS applies letter-spacing after the LAST character as well as between characters, so a
+     negative value leaves the ink overhanging the box on the right. On left-aligned text nobody
+     sees it; on centred text it shifts every word off-centre by half the tracking. This cancels
+     the trailing step. What it does not cancel is Kumbh's own asymmetry — a 0.0488em left bearing
+     against right bearings from 0.0098em (R) to 0.0488em (N) — leaving at most 2.5px of drift on
+     the longest word, which is left alone.
+
+     The -0.04em LEFT pull that used to live here is gone with it: that existed to square a stem
+     against the gutter, and a centred word has no left edge to square. */
+  margin-right: calc(-1 * var(--past-track));
+  font-kerning: normal;
+  transition: transform var(--dur-hover) var(--ease);
+}
+
+/* Two hairlines crossed into a +, turned 45° into a × when the row opens. Sized in em so it
+   scales with the word it marks, and it is the only thing saying the row opens — the form
+   language has no borders or fills to spend on an affordance. */
+.past__sign {
+  position: relative;
+  flex: none;
+  width: 0.17em;
+  height: 0.17em;
+  color: var(--color-ink);
+  transition: transform var(--dur-hover) var(--ease);
+}
+
+.past__sign::before,
+.past__sign::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background: currentColor;
+}
+
+.past__sign::after {
+  transform: rotate(90deg);
+}
+
+.past__toggle[aria-expanded="true"] .past__sign {
+  transform: rotate(45deg);
+}
+
+/* The clip the panel's height animates inside. `height: 0` is declared here as well as driven
+   from JS so the served HTML is already collapsed: the panels are rendered open (they have no
+   inline height until Motion hydrates), and without this every one of them would be visible for
+   the frame between paint and hydration. */
+.past__panel {
+  overflow: hidden;
+  height: 0;
+}
+
+/* Everything a row has to say, in one order across all four: where, what, when, then the
+   specifics. Centred, to sit under a centred block. */
+.past__body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: clamp(8px, 1vw, 18px) 0 clamp(28px, 3vw, 44px);
+  max-width: 54ch;
+  margin-inline: auto;
+  text-align: center;
+}
+
+/* The serif's third place on the site. Its own rule says it is for where the site speaks about
+   itself rather than describing something — the statement and the case brief — and a biography
+   is the same voice, which is the argument for widening the remit rather than adding a face.
+
+   Tracking runs POSITIVE here, against --track-snug at statement scale. Tracking is a function
+   of size, and these lines are a third of that size; at the statement's -0.015em the words
+   closed up to the point of being hard to read. */
+.past__where {
+  margin: 0;
+  font-family: var(--font-instrument-serif), Georgia, "Times New Roman", serif;
+  font-weight: 400;
+  font-size: var(--t-2xl);
+  line-height: var(--lh-snug);
+  letter-spacing: var(--past-serif-track);
+  text-wrap: balance;
+}
+
+.past__what {
+  margin: 6px 0 0;
+  font-family: var(--font-instrument-serif), Georgia, "Times New Roman", serif;
+  font-weight: 400;
+  font-size: var(--t-lg);
+  line-height: var(--lh-copy);
+  letter-spacing: var(--past-serif-track);
+  color: var(--color-ink-muted);
+  text-wrap: balance;
+}
+
+/* The date, small and quiet under the heading — the same slot in all four panels, so a visitor
+   who wants "when" always finds it in one place. Tabular figures so the four line up. */
+.past__period {
+  margin: 14px 0 0;
+  font-size: var(--t-xs);
+  font-weight: 500;
+  line-height: var(--lh-flat);
+  letter-spacing: var(--track-caps);
+  text-transform: uppercase;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-ink-muted);
+}
+
+/* The specifics: quiet meta in the text face, so the serif heading stays the thing that answers
+   the word and these read as the receipts beneath it. */
+.past__detail {
+  list-style: none;
+  margin: 22px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: var(--t-xs);
+  line-height: var(--lh-snug);
+  letter-spacing: var(--track-wide);
+  color: var(--color-ink-muted);
+  text-wrap: pretty;
+}
+
+/* The one link in the section. It carries the site's underline-wipe AND the arrow, because it
+   leaves the site and because a lone line of muted meta gives no other sign it is a target. */
+.past__link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45em;
+  margin-top: 22px;
+  font-size: var(--t-xs);
+  letter-spacing: var(--track-wide);
+  color: var(--color-ink-muted);
+  transition: color var(--dur-hover) var(--ease);
+}
+
+.past__link:hover,
+.past__link:focus-visible {
+  color: var(--color-accent);
+}
+
+.past__link-arrow {
+  flex: none;
+  transition: transform var(--dur-hover) var(--ease);
+}
+
+.past__link:hover .past__link-arrow,
+.past__link:focus-visible .past__link-arrow {
+  transform: translate(3px, -3px);
+}
+
+@media (min-width: 768px) {
+  /* THE three-column grid, the same template on every row so the four words share one centre
+     line and the four marks share one left edge. The centre column is exactly the longest word
+     wide; the two 1fr columns split what is left — about 97px each at 1440 — and the + sits in
+     the right one. */
+  .past__toggle {
+    grid-template-columns: minmax(0, 1fr) var(--past-col) minmax(0, 1fr);
+  }
+
+  .past__word {
+    grid-column: 2;
+  }
+
+  .past__sign {
+    grid-column: 3;
+    justify-self: start;
+  }
+}
+
+@media (hover: hover) {
+  .past__toggle:hover .past__word,
+  .past__toggle:focus-visible .past__word {
+    /* In em, so the nudge stays proportional to a word that ranges from 36px to 120px. A fixed
+       14px is a shove at the small end and invisible at the large one. */
+    transform: translateY(-0.02em);
+  }
 }

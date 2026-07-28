@@ -35,8 +35,8 @@ const STEM = "I ";
  * What rotates. Kept parallel in shape and rising in length, so the line grows across the cycle
  * and resets, rather than jittering between two similar widths.
  *
- * They are also the three Capabilities rows in the order that section lists them, which is what
- * makes this an introduction to that section rather than a second, competing claim.
+ * They are also the three dimensions the selected projects demonstrate. The line names the range
+ * once; the work supplies the proof instead of repeating it in a skills index.
  */
 const PHRASES = ["code.", "design.", "build with AI."] as const;
 

@@ -1,16 +1,18 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
-import { motion, useReducedMotion } from "motion/react";
+import { useState } from "react";
+import { motion, useReducedMotion, type Variants } from "motion/react";
 
 import { ArrowUpRight } from "@/components/icons";
 import { STAGGER, rise } from "@/lib/motion";
 import type { FeaturedWork } from "@/data/works";
 
 /**
- * One project's case page. A calm read: the facts line, the title at display scale, the
- * brief, the cover, the write-up, the demo, the stack, and prev/next. One mount cascade,
- * then the page just sits there.
+ * One project's case page. The opening earns a fast skim — context, title, brief, real media,
+ * outcome — before the page settles into Why / What / How and the decisions underneath. The
+ * structure repeats so a reader knows where to look; the evidence does not.
  */
 
 export function CaseView({
@@ -24,138 +26,290 @@ export function CaseView({
 }) {
   const reduce = useReducedMotion() ?? false;
 
-  const body = work.caseBody ?? [work.description];
   const brief = work.tagline ?? work.description;
-  const stackLine = work.stack.slice(0, 2).join(" · ");
+  const stackLine = work.stack.join(" · ");
   const v = reduce ? undefined : rise;
 
   return (
-    <motion.main
-      className="case gutter measure"
-      variants={reduce ? undefined : STAGGER}
-      initial={reduce ? false : "hidden"}
-      animate={reduce ? undefined : "visible"}
-    >
+    <main id="main" className="case gutter measure">
+      <motion.div
+        className="case__opening"
+        variants={reduce ? undefined : STAGGER}
+        initial={reduce ? false : "hidden"}
+        animate={reduce ? undefined : "visible"}
+      >
+        <CaseOpening
+          work={work}
+          brief={brief}
+          stackLine={stackLine}
+          variants={v}
+        />
+      </motion.div>
+
+      <CaseNarrative work={work} />
+      <CaseActions work={work} prev={prev} next={next} />
+    </main>
+  );
+}
+
+function CaseOpening({
+  work,
+  brief,
+  stackLine,
+  variants,
+}: {
+  work: FeaturedWork;
+  brief: string;
+  stackLine: string;
+  variants?: Variants;
+}) {
+  return (
+    <>
       <header className="case__intro">
-        <motion.p className="label muted" variants={v}>
-          {work.year} · {work.role}
-          {stackLine ? ` · ${stackLine}` : ""}
+        <motion.p className="case__meta" variants={variants}>
+          {work.year} · {work.role} · {stackLine}
         </motion.p>
-        <motion.h1 className="display-section" variants={v}>
+        <motion.h1 className="display-section" variants={variants}>
           {work.title}
         </motion.h1>
-        {/* The serif's second and last appearance on the site. This line and the landing
-            statement are the two places the writing is a claim rather than a description. */}
-        <motion.p className="case__brief editorial muted" variants={v}>
+        <motion.p className="case__brief editorial" variants={variants}>
           {brief}
         </motion.p>
       </header>
 
-      <motion.div className="frame frame--wide" variants={v}>
-        <CaseCover work={work} />
+      <motion.div variants={variants}>
+        <CaseLeadMedia work={work} />
       </motion.div>
+    </>
+  );
+}
 
-      <motion.div className="case__body" variants={v}>
-        {body.map((para, i) => (
-          <p key={i} className="prose">
-            {para}
-          </p>
-        ))}
-      </motion.div>
+function CaseNarrative({ work }: { work: FeaturedWork }) {
+  const { caseStudy } = work;
 
-      {/* A poster-kind work already shows its plate as the cover above — rendering the same
-          words again here would just stamp them twice on one page. */}
-      {work.media.kind === "video" && (
-        <motion.section
-          className="frame frame--video"
-          aria-label={`${work.title} demo`}
-          variants={v}
-        >
-          <video
-            className="frame__media"
-            src={work.media.src}
-            poster={work.media.poster}
-            muted
-            loop
-            playsInline
-            controls
-            preload="metadata"
-          />
-        </motion.section>
-      )}
+  return (
+    <>
+      <p className="case__outcome editorial">{caseStudy.outcome}</p>
 
-      <motion.section aria-label="Tech stack" variants={v}>
-        <ul className="case__stack">
-          {work.stack.map((tech) => (
-            <li key={tech} className="label">
-              {tech}
-            </li>
+      <article className="case__narrative">
+        <CaseBeat title="Why">
+          <p className="prose">{caseStudy.why}</p>
+        </CaseBeat>
+
+        <CaseBeat title="What">
+          <p className="prose">{caseStudy.what}</p>
+        </CaseBeat>
+
+        <CaseBeat title="How" wide>
+          <p className="prose">{caseStudy.how}</p>
+          <div className="case__decisions">
+            {caseStudy.decisions.map((decision) => (
+              <section className="case__decision" key={decision.title}>
+                <h3>{decision.title}</h3>
+                <p>{decision.detail}</p>
+              </section>
+            ))}
+          </div>
+        </CaseBeat>
+      </article>
+
+      {caseStudy.artifacts && caseStudy.artifacts.length > 0 && (
+        <section className="case__artifacts" aria-label="Project artifacts">
+          {caseStudy.artifacts.map((artifact) => (
+            <figure className="case__artifact" key={artifact.src}>
+              <div
+                className="case__artifact-frame"
+                style={{ aspectRatio: artifact.aspectRatio }}
+              >
+                <Image
+                  src={artifact.src}
+                  alt={artifact.alt}
+                  fill
+                  sizes="(max-width: 767px) 100vw, 78vw"
+                  className="case__artifact-image"
+                />
+              </div>
+              <figcaption>{artifact.note}</figcaption>
+            </figure>
           ))}
-        </ul>
-      </motion.section>
+        </section>
+      )}
+    </>
+  );
+}
 
+function CaseBeat({
+  title,
+  wide = false,
+  children,
+}: {
+  title: string;
+  wide?: boolean;
+  children: React.ReactNode;
+}) {
+  return (
+    <section className={`case__beat${wide ? " case__beat--wide" : ""}`}>
+      <h2 className="case__beat-title editorial">{title}</h2>
+      <div className="case__beat-content">{children}</div>
+    </section>
+  );
+}
+
+function CaseActions({
+  work,
+  prev,
+  next,
+}: {
+  work: FeaturedWork;
+  prev: FeaturedWork;
+  next: FeaturedWork;
+}) {
+  return (
+    <>
       {work.links.length > 0 && (
-        <motion.nav
-          className="case__links"
-          aria-label="Project links"
-          variants={v}
-        >
+        <nav className="case__links" aria-label="Project links">
           {work.links.map(({ label, href }) => (
             <a
               key={href}
               href={href}
               target="_blank"
               rel="noopener noreferrer"
-              className="h3"
             >
               <span className="underline-link">{label}</span>
-              <ArrowUpRight width="14" height="14" aria-hidden />
+              <ArrowUpRight width="16" height="16" aria-hidden />
             </a>
           ))}
-        </motion.nav>
+        </nav>
       )}
 
-      <motion.nav className="case__nav" aria-label="More projects" variants={v}>
-        <Link href={`/works/${prev.slug}`} className="case__nav-item">
-          <span className="label muted">Previous</span>
-          <span className="h3 underline-link">{prev.title}</span>
+      <nav className="case__nav" aria-label="More projects">
+        <Link
+          href={`/works/${prev.slug}`}
+          className="case__nav-item case__nav-item--previous"
+          aria-label={`Previous project: ${prev.title}`}
+        >
+          <span aria-hidden>←</span>
+          <span className="underline-link">{prev.title}</span>
         </Link>
 
         <Link href="/#work" className="case__nav-item">
-          <span className="label muted">Index</span>
-          <span className="h3 underline-link">All work</span>
+          <span className="underline-link">All work</span>
         </Link>
 
-        <Link href={`/works/${next.slug}`} className="case__nav-item">
-          <span className="label muted">Next</span>
-          <span className="h3 underline-link">{next.title}</span>
+        <Link
+          href={`/works/${next.slug}`}
+          className="case__nav-item case__nav-item--next"
+          aria-label={`Next project: ${next.title}`}
+        >
+          <span className="underline-link">{next.title}</span>
+          <span aria-hidden>→</span>
         </Link>
-      </motion.nav>
-    </motion.main>
+      </nav>
+    </>
   );
 }
 
-/** The cover: the photographed still, or the typographic plate for a poster-kind work. */
-function CaseCover({ work }: { work: FeaturedWork }) {
-  const still =
-    work.media.kind === "video" ? work.cover ?? work.media.poster : work.cover;
-
+/** Video leads when it exists. Poster-only work keeps its honest typographic plate. */
+function CaseLeadMedia({ work }: { work: FeaturedWork }) {
   if (work.media.kind === "poster") {
     return (
-      <div className="plate" aria-hidden>
-        <span className="plate__word">{work.media.word}</span>
-        <span className="plate__caption">{work.media.caption}</span>
+      <div
+        className="frame frame--wide case__poster"
+        role="img"
+        aria-label={`${work.media.word}. ${work.media.caption}`}
+      >
+        <div className="plate" aria-hidden>
+          <span className="plate__word">{work.media.word}</span>
+          <span className="plate__caption">{work.media.caption}</span>
+        </div>
       </div>
     );
   }
 
-  return still ? (
-    // eslint-disable-next-line @next/next/no-img-element
-    <img
-      className="frame__media"
-      src={still}
-      alt={work.coverAlt ?? `${work.title} — project cover`}
-      draggable={false}
+  return (
+    <CaseDemo
+      title={work.title}
+      src={work.media.src}
+      aspectRatio={work.media.aspectRatio}
     />
-  ) : null;
+  );
+}
+
+function CaseDemo({
+  title,
+  src,
+  aspectRatio,
+}: {
+  title: string;
+  src: string;
+  aspectRatio: string;
+}) {
+  const [phase, setPhase] = useState<
+    "idle" | "loading" | "playing" | "error"
+  >("idle");
+  const requested = phase !== "idle";
+
+  return (
+    <section
+      className="case__demo"
+      style={{ aspectRatio }}
+      aria-label={`${title} demo`}
+    >
+      {requested && (
+        <video
+          className={`case__demo-video${
+            phase === "playing" ? " case__demo-video--visible" : ""
+          }`}
+          src={src}
+          muted
+          playsInline
+          controls
+          autoPlay
+          preload="auto"
+          onPlaying={() => setPhase("playing")}
+          onError={() => setPhase("error")}
+        >
+          <a href={src}>Open the {title} demo video</a>
+        </video>
+      )}
+
+      {phase === "idle" && (
+        <button
+          type="button"
+          className="case__demo-gate"
+          onClick={() => setPhase("loading")}
+          aria-label={`Play ${title} demo`}
+        >
+          <DemoMark />
+        </button>
+      )}
+
+      {phase === "loading" && (
+        <div className="case__demo-wait" role="status">
+          <DemoMark />
+          <span className="sr-only">Loading {title} demo</span>
+        </div>
+      )}
+
+      {phase === "error" && (
+        <div className="case__demo-error" role="status">
+          <p>The demo could not load.</p>
+          <a href={src} className="underline-link">
+            Open the video
+          </a>
+        </div>
+      )}
+    </section>
+  );
+}
+
+function DemoMark() {
+  return (
+    <span className="demo-mark" aria-hidden>
+      <span className="demo-mark__word">Demo</span>
+      <span className="demo-mark__play demo-mark__play--one" />
+      <span className="demo-mark__play demo-mark__play--two" />
+      <span className="demo-mark__play demo-mark__play--three" />
+    </span>
+  );
 }

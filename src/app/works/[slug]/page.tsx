@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
+import { SiteFooter } from "@/components/footer/SiteFooter";
 import { CaseView } from "@/components/works/CaseView";
 import { works, getWork } from "@/data/works";
 
@@ -44,5 +45,10 @@ export default async function CasePage({
   const prev = works[(index - 1 + works.length) % works.length];
   const next = works[(index + 1) % works.length];
 
-  return <CaseView work={work} prev={prev} next={next} />;
+  return (
+    <>
+      <CaseView work={work} prev={prev} next={next} />
+      <SiteFooter />
+    </>
+  );
 }

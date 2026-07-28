@@ -32,7 +32,7 @@ Web3Forms must be called from the client — the API blocks server-side requests
 ```
 src/app/         routes, layout, globals.css
 src/components/  UI
-src/data/        works + capabilities content
+src/data/        work + background content
 src/lib/         fonts, motion helpers
 src/fonts/       self-hosted faces
 public/          images, video posters, logos

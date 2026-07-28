@@ -1,23 +1,18 @@
-"use client";
-
-import { motion, useReducedMotion } from "motion/react";
-
-import { reveal } from "@/lib/motion";
-
 /**
- * The promise, placed as the lead-in to the work: a left-aligned line that hands off into the
- * PROJECTS section right below it, on the same gutter edge the display word's stem and the work
- * frames sit on. Set in the text face at statement scale; the three-face rule holds (the beat is
- * scale + placement, not a new serif).
+ * The promise, and nothing more: a compact bridge from identity to proof. Its top edge crosses the
+ * hero fold, so it stays rendered at rest instead of using the shared positive-y reveal — hiding
+ * the line until after a visitor scrolls would erase the cue it exists to provide.
+ *
+ * It shares the landing's centred chapter axis with the hero and PROJECTS. The physical gap below
+ * is tightened to compensate for PROJECTS arriving from a mask, so the initially empty area
+ * beneath the statement does not outweigh the space above it.
  */
 export function Statement() {
-  const reduce = useReducedMotion() ?? false;
-
   return (
-    <section className="gutter measure">
-      <motion.p className="statement editorial" {...(reduce ? {} : reveal())}>
+    <div className="statement-bridge gutter measure">
+      <p className="statement editorial">
         I turn rough ideas into polished products.
-      </motion.p>
-    </section>
+      </p>
+    </div>
   );
 }
