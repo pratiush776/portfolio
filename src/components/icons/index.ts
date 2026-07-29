@@ -1,0 +1,1 @@
+export { ArrowUpRight } from "./ArrowUpRight";
