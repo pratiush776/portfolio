@@ -26,7 +26,7 @@ export async function generateMetadata({
   const work = getWork(slug);
   if (!work) return { title: "Project not found" };
   return {
-    title: `${work.title} — Pratiush Karki`,
+    title: `${work.title} — PRATIUSH`,
     description: work.description,
   };
 }

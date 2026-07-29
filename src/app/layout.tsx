@@ -16,9 +16,9 @@ import { SmoothScroll } from "@/components/layout/SmoothScroll";
 import { BackgroundWork } from "@/components/layout/BackgroundWork";
 
 export const metadata: Metadata = {
-  title: "Pratiush Karki",
+  title: "PRATIUSH",
   description:
-    "Pratiush Karki — I build and ship products across the full stack, AI, and design.",
+    "PRATIUSH — I build and ship products across the full stack, AI, and design.",
   icons: {
     icon: "/favicon.png",
   },

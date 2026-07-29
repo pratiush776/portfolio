@@ -93,7 +93,7 @@ export function SiteFooter() {
               className="footer__line-inner"
               variants={reduce ? undefined : lineRise}
             >
-              {kerned("Pratiush").map(({ char, style }, i) => (
+              {kerned("PRATIUSH").map(({ char, style }, i) => (
                 <span key={i} style={style}>
                   {char}
                 </span>
@@ -106,7 +106,7 @@ export function SiteFooter() {
           className="footer__colophon label"
           variants={reduce ? undefined : rise}
         >
-          © {year} Pratiush
+          © {year} PRATIUSH
         </motion.p>
       </motion.div>
     </footer>

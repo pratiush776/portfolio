@@ -444,9 +444,9 @@ export function Preloader({
                 at final size and only ever CLIPPED — never scaled, never blurred — so the word is
                 pixel-crisp at every point of the climb. Same construction as the deck's rail: a
                 track with its fill drawn over it. */}
-            <span className="preloader__word-base">Pratiush</span>
+            <span className="preloader__word-base">PRATIUSH</span>
             <motion.span className="preloader__word-fill" style={{ clipPath }}>
-              Pratiush
+              PRATIUSH
             </motion.span>
           </span>
         </span>
