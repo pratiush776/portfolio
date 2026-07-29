@@ -32,7 +32,7 @@ import { STAGGER, rise, useGlide } from "@/lib/motion";
 
 /* Set letter by letter so the pairs can be spaced individually — see lib/kerning for what the
    values are and how they were measured. The aria-label below is what keeps the split readable. */
-const NAME = "Pratiush";
+const NAME = "PRATIUSH";
 
 export function Hero() {
   const reduce = useReducedMotion() ?? false;
@@ -55,7 +55,7 @@ export function Hero() {
       animate={reduce ? undefined : ready ? "visible" : "hidden"}
     >
       <div className="hero__block">
-        {/* Read, not decorative: it lands ahead of the h1 as "Hi, I'm" → "Pratiush Karki", which is
+        {/* Read, not decorative: it lands ahead of the h1 as "Hi, I'm" → "PRATIUSH Karki", which is
             the sentence it is. It arrives on the same gesture as the two rows below it. */}
         <motion.p
           className="hero__greeting script"
@@ -66,7 +66,7 @@ export function Hero() {
 
         <motion.h1
           className="hero__name display"
-          aria-label="Pratiush Karki"
+          aria-label="PRATIUSH Karki"
           variants={reduce ? undefined : rise}
         >
           {kerned(NAME).map(({ char, style }, i) => (

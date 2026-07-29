@@ -16,8 +16,8 @@ export function SiteNav() {
   return (
     <nav className="site-nav" aria-label="Primary">
       <div className="site-nav__inner">
-        <Link href="/" className="site-nav__brand" aria-label="Pratiush — home">
-          Pratiush
+        <Link href="/" className="site-nav__brand" aria-label="PRATIUSH — home">
+          PRATIUSH
         </Link>
 
         {/* Plain anchors for the in-page destinations. Lenis intercepts them while it is mounted;
