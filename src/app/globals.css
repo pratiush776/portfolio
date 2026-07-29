@@ -334,6 +334,19 @@ a {
   margin-top: clamp(48px, calc(27.9px + 5.35vw), 105px);
 }
 
+/* THE DECK IS NOT HERE, so neither is the reason for the short gap. The pinned stage needs 1024px
+   (see WorkIndex); a phone gets the flat spread, whose title is on screen the moment the section
+   is, with no mask and no approach to wait through. The compensation above was paying for delayed
+   ink that never arrives, and what it bought instead was 49px under a line whose whole composition
+   is the silence around it — the statement had a screen of air above and a hairline below.
+
+   A full chapter step restores the balance the bridge is built on. Above 767px nothing changes. */
+@media (max-width: 767px) {
+  .chapters > .statement-bridge + .work-section {
+    margin-top: var(--space-chapter);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -485,6 +498,31 @@ a {
 @media (min-width: 768px) {
   :root {
     --gutter: clamp(2rem, 6.5vw, 9rem);
+  }
+}
+
+/* THE PHONE'S OWN FLOOR under the two spacing steps, and nothing else — the ramps, their ratio and
+   every value from 768px up are untouched.
+
+   Both steps are a straight line in vw, which is the right shape for a page whose columns get
+   narrower as the window does, and the wrong one for a phone. At 390px the linear term has run
+   down to almost nothing and the chapter step lands on its 128px floor: 46% of the desktop gap,
+   holding apart content that is TALLER than the desktop version rather than shorter, because
+   every row that sat side by side up there is stacked down here. The gaps shrank while the things
+   they separate grew, which is the whole of why it reads as crammed.
+
+   Raising only the floors lifts the small end and leaves the slope alone. Both new floors are
+   reached by about 600px and give way to the existing ramp before 768, so the two regimes meet
+   continuously and there is no step at the breakpoint.
+
+   84 is exactly half of 168 because the block step is exactly half the chapter step — the ramps
+   are already written that way (37.2/7.13 against 74.5/14.27), and that 2:1 is what makes "more
+   space above a heading than below it" structural. A floor that broke the ratio would quietly
+   undo it on phones only. */
+@media (max-width: 767px) {
+  :root {
+    --space-chapter: clamp(168px, calc(74.5px + 14.27vw), 280px);
+    --space-block: clamp(84px, calc(37.2px + 7.13vw), 140px);
   }
 }
 
@@ -888,6 +926,31 @@ html.is-loading .preloader {
      exactly. (This replaced a -0.04em left pull, which existed to stand the P's stem on a left
      axis that the centred composition no longer has.) */
   margin-right: -0.03em;
+}
+
+/* THE NAME IS THE ONE ROW WITH NOTHING HOLDING IT ON THE CENTRE LINE. The greeting centres itself
+   (`margin: 0 auto` on a fit-content box) and the lockup centres its own items; the name has only
+   ever been centred by ACCIDENT, because .hero__block is `width: fit-content` and the name was the
+   widest thing in it, so the box ended up hugging the word exactly.
+
+   That accident does not survive a phone. `fit-content` resolves to min(max-content, available),
+   and the lockup's max-content — bracket, column gap, meta column, all on one line before it wraps
+   — is wider than any handset. The block therefore takes the full width, stops hugging anything,
+   and the name falls to its left edge while the two rows around it stay centred.
+
+   `text-align` rather than another fit-content box, because the -0.03em above must survive: it
+   cancels the trailing letter-space that CSS hangs off the last glyph, and it works by widening
+   this box a hair to the right. Centred text in that widened box lands the word's INK on the
+   centre line, which is the thing being centred. `margin-inline: auto` would have overwritten the
+   correction and centred the box instead — right to within a hundredth of an em, and wrong in the
+   one way this rule exists to prevent.
+
+   Scoped to phones only: at 768px and up the block still hugs the name and there is no free space
+   for an alignment to act on, so the desktop composition is bit-for-bit what it was. */
+@media (max-width: 767px) {
+  .hero__name {
+    text-align: center;
+  }
 }
 
 /* Where the measured kerning lands. Any display word rendered through lib/kerning emits its
