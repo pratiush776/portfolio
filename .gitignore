@@ -79,3 +79,24 @@ public/projects_assets/LucidTone/demo_original.mp4
 /.impeccable/
 /PRODUCT.md
 /DESIGN.md
+
+# Source material kept on the working machine but out of the deploy. None of these are referenced
+# by src/ — they are earlier portraits, superseded resumes, project logos and spare screenshots
+# that may get used in a later pass. Untracked rather than deleted so they stay to hand locally;
+# every one of them is still recoverable from history (`git log --all -- <path>`) if a fresh clone
+# ever needs them back.
+public/portrait.png
+public/portrait-Photoroom.png
+public/pk_portrait.png
+public/pomelli-image.png
+public/CV1.pdf
+public/images/hero-image.png
+public/images/NYJETS_1.webp
+public/projects_assets/HomeDoc/logo.png
+public/projects_assets/LucidTone/logo.svg
+public/projects_assets/NILINK/logo.png
+public/projects_assets/RAG/logo.png
+public/projects_assets/RAG/example.png
+public/projects_assets/RoomMates/logo.png
+public/projects_assets/RoomMates/login.png
+public/projects_assets/WhiskItAll/logo.png

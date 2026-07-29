@@ -189,6 +189,16 @@ const FILL_FROM = CAP_BOTTOM + AMPLITUDE;
  * `currentSrc` before `src`, because that is the entry the browser actually chose out of the
  * srcset — asking for `src` would fetch a different, larger file than the one the page is waiting on.
  *
+ * LAZY IMAGES ARE SKIPPED, and the two reasons compound. The first is the plain one: a lazy image is
+ * by definition one the browser has decided not to fetch yet, so waiting on it inverts the whole
+ * point of the attribute and holds a title sequence hostage to a picture six screens down. The
+ * second is what makes it a bug rather than a nicety — a lazy image has not chosen out of its srcset
+ * yet, so `currentSrc` is empty and the fallback above lands on `src`, which for next/image is the
+ * LARGEST variant it generated. The intro would be fetching a 3840px re-encode of a photo that will
+ * be painted at a hundred. (Everything eager on the landing page — the portrait and the three
+ * featured covers — is unaffected: those are already in flight, so `currentSrc` is populated and
+ * this reads the exact entry the browser picked.)
+ *
  * Every job resolves on failure as well as on success. A 404 on one cover must not hold the page
  * hostage; the intro's contract is "this is what has landed", not "all of this landed".
  */
@@ -197,6 +207,7 @@ function manifest(): Promise<unknown>[] {
   const urls = new Set<string>();
 
   for (const image of Array.from(document.images)) {
+    if (image.loading === "lazy") continue;
     const url = image.currentSrc || image.src;
     if (url) urls.add(url);
   }

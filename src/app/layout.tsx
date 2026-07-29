@@ -13,6 +13,7 @@ import { IntroProvider } from "@/components/intro/IntroContext";
 import { GATE_SCRIPT } from "@/lib/intro";
 import { SiteNav } from "@/components/layout/SiteNav";
 import { SmoothScroll } from "@/components/layout/SmoothScroll";
+import { BackgroundWork } from "@/components/layout/BackgroundWork";
 
 export const metadata: Metadata = {
   title: "Pratiush Karki",
@@ -50,6 +51,9 @@ export default function RootLayout({
         </IntroProvider>
 
         <Analytics />
+        {/* Renders nothing. Mounted last because it is the lowest-priority thing on the page —
+            it works around the load rather than taking part in it. */}
+        <BackgroundWork />
       </body>
     </html>
   );

@@ -174,6 +174,45 @@ a {
      at 5rem is for a frame standing beside its copy. */
   --past-gap: clamp(1rem, 2vw, 2rem);
 
+  /* ── the panel's photographs ──────────────────────────────────────────────
+     The Jets panel carries a pair of pictures under its specifics, and they are the one thing in
+     this section wider than the copy above them.
+
+     54ch is a measure for READING, and it is the wrong ceiling for a photograph — held to it, a
+     pair of squares comes out around 240px each and reads as thumbnails rather than as evidence.
+     46rem puts a pair near 360px each and a triptych near 200px tall, which is where the room, the
+     podium and the table in them stay legible. Wider than the text they follow, which is the
+     ordinary editorial relationship between media and a column of copy, and still comfortably
+     inside the wall's own ~1056px column.
+
+     THE knob for how much the panel's pictures matter. */
+  --past-shot-measure: 46rem;
+
+  /* ── one height for every panel ───────────────────────────────────────────
+     THE REFERENCE ROW, in units, where a unit is one square. 3.5 is the education triptych: two
+     squares and a 1.5-wide centre.
+
+     Every gallery is sized to be worth this many units, so a two-up does not fill the measure — it
+     takes the width two units are worth and centres. Without this each row divided the SAME width
+     by its own count, so a pair came out 358px tall against a triptych's 199px, and opening two
+     rows in turn jumped between two scales of photograph. The pictures now stand the same height
+     whichever row you open, and the row's WIDTH is what varies, which is the way a picture row is
+     supposed to breathe.
+
+     Change this and every panel's pictures resize together; it is the one number that sets their
+     scale. */
+  --past-shot-span: 3.5;
+
+  /* One unit — the height every shot comes out at, and the width of a square one. Derived from the
+     measure rather than stated, so the two can never disagree. */
+  --past-shot-unit: calc(
+    (var(--past-shot-measure) - 2 * var(--past-shot-gap)) / var(--past-shot-span)
+  );
+
+  /* The air between the two. Deliberately tight — at anything like --col-gap the pair stops
+     reading as one object and becomes two pictures that happen to be adjacent. */
+  --past-shot-gap: clamp(12px, 1.6vw, 20px);
+
   /* The serif in this section runs LOOSER than --track-snug, which is the tracking the serif
      wears at statement scale. These lines are a third of that size and read as copy rather than
      as a headline, and Instrument Serif's own fit is tight enough that negative tracking closed
@@ -649,10 +688,24 @@ a:focus-visible .underline-link::after {
   line-height: var(--lh-flat);
 }
 
-/* Keep the underline on the word when the short "Work" label borrows width for its hit target. */
+/* Keep the underline on the word when the short "Work" label borrows width for its hit target.
+
+   And hang it off the TEXT rather than off the box. Every other underline on the site sits on an
+   inline-block that is exactly as tall as its own line, so the shared `bottom: -0.2em` lands just
+   under the baseline. A nav link is a 44px touch target with the word centred in it, so the same
+   rule measured from the bottom of the hit area and put the line some 14px lower than anywhere
+   else — far enough that it read as belonging to the bar instead of to the word.
+
+   Measured from the centre instead, which is where the word actually is. The number is Instrument
+   Sans's own metrics, not a guess: ascent 0.970, descent 0.250, so the content area's centre sits
+   0.36em ABOVE the baseline, and a line-height-1 box's bottom edge lands 0.14em below it. 0.36 +
+   0.14 + the shared 0.2em clearance is 0.7em — the same distance under the word that every other
+   underline on the site holds, arrived at from the one anchor a 44px box has not moved. */
 .site-nav__link::after {
   left: 4px;
   width: calc(100% - 8px);
+  bottom: auto;
+  top: calc(50% + 0.7em);
 }
 
 /* ── the intro ────────────────────────────────────────────────────────────── */
@@ -1177,15 +1230,21 @@ a:focus-visible .work-card__arrow {
      occupies. Three projects are two handovers, so the deck no longer spends a whole step on the
      first piece just to sit still through it. */
   --stack-step: 90svh;
-  /* THE CREDIT's air, on the left. It is the column gap — the same air that separates the frame
-     from the copy on its right — so the frame sits between two equal silences instead of being
-     nudged off-centre by a caption pressed closer to it than the words are.
+  /* THE CREDIT's air, on the left. Three fifths of the gap the copy takes on the right, and the
+     asymmetry is the point: the two sides are not the same kind of thing. The right holds a column
+     that stands on its own — a title, a claim, a way in — and wants the full gap to be read as its
+     own block. The left holds two words that only mean anything against the picture they caption,
+     and at matched air they stopped belonging to it and started floating in the margin. A caption
+     sits nearer to its subject than a neighbour does; the ratio is what says which is which.
 
      Capped against the page margin, because the two are not the same size at every viewport: at
      1440 the gutter is narrower than the column gap, and a credit seated at the full gap would
      hang off the window. The cap keeps its outer edge ~15px inside the page edge, so the rule
-     degrades to "as close to matched as the margin allows" rather than to overflow. */
-  --stack-credit-gap: min(var(--stack-col-gap), calc(var(--gutter) - 2rem));
+     degrades to "as close as the margin allows" rather than to overflow. */
+  --stack-credit-gap: min(
+    calc(var(--stack-col-gap) * 0.6),
+    calc(var(--gutter) - 2rem)
+  );
 
   /* How far the credit holds off the frame's top and bottom edges. It has two jobs in one number:
      clear the 5% the frame gives up when it recedes (half of that at each edge), and then leave a
@@ -1627,10 +1686,16 @@ a:focus-visible .work-card__arrow {
 }
 
 /* The pinned deck already ends on a complete viewport and releases only after the final card has
-   finished receding. Its archive starts directly on that release edge, so the first next-scroll
-   movement brings "Also built" into view as the continuation of PROJECTS, not a later chapter. */
+   finished receding, so its archive needs nothing like the chapter step the flat spread takes
+   above — the release edge does most of the separating on its own.
+
+   What it does need is a seam. At zero the last card and "Also built" met flush and the eyebrow
+   read as a caption on the deck rather than the head of the list under it. This is a deliberate
+   fraction of the block step and not the step itself: enough that the two are distinct, far short
+   of the distance that would make "Also built" a later chapter instead of the continuation of
+   PROJECTS. */
 .work-archive--stacked {
-  margin-top: 0;
+  margin-top: calc(var(--space-block) * 0.4);
 }
 
 /* "Also built" keeps its own compact row language. The featured work already made the large
@@ -1841,6 +1906,18 @@ a.archive__link:focus-visible .archive__arrow {
 
 .case {
   padding-block: clamp(128px, 17vh, 200px) var(--space-chapter);
+
+  /* THE TALLEST A STAGE MAY STAND. The stage's width is capped at 64rem for every work, which is
+     the right constraint for a landscape demo and the wrong one for a square: at full width a 1:1
+     video came out 1024px tall — half again the tallest landscape demo on the site — and it was
+     the one recording whose source is small enough that filling that box meant upscaling it.
+     Both faults are the same fault, so one number fixes both: cap the HEIGHT, and a tall piece
+     takes a narrower box instead of a taller one.
+
+     42rem is Lucid Tone's demo, the tallest of the landscape set, rounded up so it stays exactly
+     as it is. Everything already shorter than it is untouched; the square lands at 672px, which
+     is inside its own 720px source rather than stretched past it. */
+  --case-stage-cap: 42rem;
 }
 
 /* The only entrance on a case page: the identity, claim, and lead artifact arrive as one opening
@@ -1980,6 +2057,12 @@ a.archive__link:focus-visible .archive__arrow {
   position: relative;
   overflow: hidden;
   background: var(--color-bone-sunk);
+  /* Height, expressed as the width that produces it — `max-height` cannot be used here, because a
+     box with an aspect ratio and a full-width block would keep the width and break the ratio,
+     cropping the media rather than shrinking its frame. --stage-ratio is the media's own ratio as
+     a number, set per work in CaseView. The fallback keeps the rule valid if it is ever absent. */
+  max-width: calc(var(--case-stage-cap) * var(--stage-ratio, 1.6));
+  margin-inline: auto;
 }
 
 .case__media-panel {
@@ -2141,17 +2224,6 @@ a.archive__link:focus-visible .archive__arrow {
   height: 100%;
   background: var(--color-ink);
   color: var(--color-bone);
-}
-
-/* Results appear before process because a short visit still deserves the answer. Centring makes
-   this the case page's echo of the landing statement; the narrative then returns to the site's
-   left-reading axis. */
-.case__outcome {
-  max-width: 28ch;
-  margin: var(--space-block) auto 0;
-  font-size: var(--t-5xl);
-  line-height: var(--lh-tight);
-  text-align: center;
 }
 
 .case__narrative {
@@ -2364,6 +2436,112 @@ a.archive__link:focus-visible .archive__arrow {
   margin-right: calc(-1 * var(--past-track));
   font-kerning: normal;
   transition: transform var(--dur-hover) var(--ease);
+}
+
+/* ── the panel's photographs ────────────────────────────────────────────────
+   A pair of squares at the end of the Jets panel, under its specifics.
+
+   THEY ARE A SIBLING OF .past__body, NOT A CHILD, and that is the whole layout: the body is a 54ch
+   reading measure, and a photograph held to the width of a paragraph comes out a thumbnail. Out
+   here the pair takes --past-shot-measure instead and runs wider than the copy it follows.
+
+   The body's own bottom padding is the air above them, so nothing new is declared for it; this only
+   has to close the panel underneath.
+
+   ONE ROW, ONE HEIGHT, WIDTHS BY RATIO. Flex rather than grid, and that is the whole trick: with
+   `flex-basis: 0` every shot's width comes out as its share of the row, so setting the grow factor
+   to the SAME number as the frame's aspect ratio makes width ÷ ratio — the height — identical for
+   all of them. A wide frame between two squares gets a wide column automatically, and no rule here
+   has to know how many shots there are or which one is the wide one. Grid cannot do it: a track
+   cannot size itself from its item's aspect ratio.
+
+   Two shots of ratio 1 fall out of the same formula as an even pair, which is what the Jets panel
+   has.
+
+   AND THE WIDTH IS WHAT HOLDS THE HEIGHT CONSTANT. The row is given exactly the width its own units
+   are worth — `--shot-sum` of them, plus the gaps it has to pay for — rather than the whole
+   measure. Only the education triptych is worth the full 3.5, so only it fills the measure; the
+   two-ups take less and centre. That is the entire mechanism behind every panel's pictures being
+   the same height: the flex division above always divides by the row's own sum, so fixing the width
+   in proportion to that sum fixes the quotient.
+
+   The `min(…, 100%)` is the escape hatch for a panel narrower than the measure — between 768px and
+   about 830px the column is the smaller of the two, and there the row goes back to fitting rather
+   than to standing at the reference height. */
+.past__gallery {
+  display: flex;
+  /* Not the default `stretch`. Stretch applies to an item whose cross size is `auto` and OVERRIDES
+     the aspect ratio that would otherwise have set it — which is exactly the box that has to stay
+     reserved while a photograph is still loading. Every shot happens to compute to the same height
+     here, so stretch would currently be invisible, and that is precisely why it is worth naming:
+     the day a ratio is mistyped, stretch would silently paper over it and the frames would stop
+     being the shape they declare. */
+  align-items: flex-start;
+  gap: var(--past-shot-gap);
+  max-width: min(
+    calc(
+      var(--past-shot-unit) * var(--shot-sum) + var(--past-shot-gap) *
+        (var(--shot-count) - 1)
+    ),
+    100%
+  );
+  margin-inline: auto;
+  padding-bottom: clamp(28px, 3vw, 44px);
+}
+
+/* It borrows .frame for the box (hard edges, no shadow, the bone-sunk ground to load against) and
+   supplies only its own proportion. Not .frame--wide: that 16/10 is derived from the project
+   stills, and these are phone photographs whose ratios have nothing to do with a laptop render.
+
+   The two uses of --shot-ratio are the point. As the ratio it decides what the frame crops; as the
+   grow factor it decides how wide the frame is. Split into two numbers they would drift, and the
+   row would stop being one height.
+
+   LONGHANDS, NOT THE `flex` SHORTHAND. A `var()` inside a shorthand is fragile: the minifier
+   legitimately strips the space after the closing paren, and `flex:var(--shot-ratio,1)1 0` then
+   depends on the browser keeping those tokens apart through substitution. Three declarations cannot
+   be misread, and the aspect ratio here is the only thing holding the frame's box open before its
+   photograph arrives — so it is not a place to be clever.
+
+   `flex-basis: 0` is what makes the widths pure shares of the row: with no basis to subtract, all
+   of the space is distributed by the grow factors, which ARE the ratios. */
+.past__shot {
+  flex-grow: var(--shot-ratio, 1);
+  flex-shrink: 1;
+  flex-basis: 0;
+  aspect-ratio: var(--shot-ratio, 1);
+}
+
+/* Stacked below the breakpoint, at the panel's full width. Three across a phone is 100px a shot,
+   which is a contact sheet rather than a picture — and the panel is something you opened on
+   purpose, so it can afford the length. `flex: none` because the shorthand above sizes along the
+   main axis, and in a column that axis is the height. */
+@media (max-width: 767px) {
+  .past__gallery {
+    flex-direction: column;
+  }
+
+  .past__shot {
+    flex-grow: 0;
+    flex-basis: auto;
+    width: 100%;
+  }
+}
+
+/* In colour, and NOT .frame__media. The grayscale-until-engaged rule belongs to the work — a
+   project's still developing under your pointer is the site rewarding attention, and it has an
+   anchor to hang the hover on. These sit inside a panel you have already opened: the engagement
+   has happened, there is nothing left to reward, and greyed they are two rectangles of concrete
+   and overcast sky with the one recognisable thing in them thrown away. */
+/* `--shot-zoom` pushes into a photograph whose subject sits small in a wide scene — a hall from the
+   back, a table from across the floor. It crops from the centre out, the same way the frame's ratio
+   does, and .frame's own overflow is what clips it.
+
+   A transform rather than a wider `sizes`, because the frame is not changing size: the picture is
+   being enlarged INSIDE a box that stays put, which is what a crop is. */
+.past__shot-media {
+  object-fit: cover;
+  transform: scale(var(--shot-zoom, 1));
 }
 
 /* Two hairlines crossed into a +, turned 45° into a × when the row opens. Sized in em so it

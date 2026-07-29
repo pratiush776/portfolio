@@ -70,9 +70,10 @@ export function WorkIndex() {
 
       {/* The archive rows cascade because a compact list is the one place on the page where
           several things ARE in view together — exactly where a sequence reads as a sequence
-          instead of as a block landing. When the pinned deck is active, the archive begins at
-          its release edge and observes the real viewport edge: no spacing or trigger delay is
-          inserted between the last featured handoff and "Also built." */}
+          instead of as a block landing. When the pinned deck is active, the archive observes the
+          real viewport edge rather than the shared threshold, so no trigger delay is inserted
+          between the last featured handoff and "Also built" — it opens on a seam (see
+          .work-archive--stacked) and nothing more. */}
       <motion.div
         className={`gutter measure work-archive${
           stacked ? " work-archive--stacked" : ""

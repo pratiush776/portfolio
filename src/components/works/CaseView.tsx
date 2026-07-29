@@ -7,6 +7,7 @@ import {
   useId,
   useRef,
   useState,
+  type CSSProperties,
   type MouseEvent,
 } from "react";
 import { motion, useReducedMotion, type Variants } from "motion/react";
@@ -16,9 +17,13 @@ import { STAGGER, rise } from "@/lib/motion";
 import type { FeaturedWork } from "@/data/works";
 
 /**
- * One project's case page. The opening earns a fast skim — context, title, brief, real media,
- * outcome — before the page settles into Why / What / How and the decisions underneath. The
- * structure repeats so a reader knows where to look; the evidence does not.
+ * One project's case page. The opening earns a fast skim — title, brief, real media — before the
+ * page settles into Why / What / How and the decisions underneath. The structure repeats so a
+ * reader knows where to look; the evidence does not.
+ *
+ * The brief above the media is the page's ONLY summary line. An outcome statement used to sit
+ * under the media as a second one, and at that distance the two read as the same claim made
+ * twice — Why / What / How already carries the result in prose.
  */
 
 export function CaseView({
@@ -85,8 +90,6 @@ function CaseNarrative({ work }: { work: FeaturedWork }) {
 
   return (
     <>
-      <p className="case__outcome editorial">{caseStudy.outcome}</p>
-
       <article className="case__narrative">
         <CaseBeat title="Why">
           <p className="prose">{caseStudy.why}</p>
@@ -138,7 +141,13 @@ function CaseMediaGallery({
   const highlights = work.caseStudy.highlights ?? [];
   const leadLabel = work.media.kind === "video" ? "Demo" : "Overview";
   const stageRatio =
-    work.media.kind === "video" ? work.media.aspectRatio : "16 / 10";
+    work.media.kind === "poster" ? "16 / 10" : work.media.aspectRatio;
+
+  // The same ratio as a NUMBER, handed to the stylesheet so it can cap the stage by HEIGHT — see
+  // --case-stage-cap. CSS cannot multiply the `16 / 9` form, and the data is written that way
+  // because that is the form `aspect-ratio` reads.
+  const [ratioW, ratioH] = stageRatio.split("/").map((n) => parseFloat(n));
+  const stageScalar = ratioW / ratioH;
 
   return (
     <section
@@ -148,6 +157,13 @@ function CaseMediaGallery({
       <div className="case__media-context">
         <p className="case__brief editorial">{brief}</p>
 
+        {/* ALWAYS RENDERED, including on a work with a single piece of media. The rail is part of
+            what a case page IS — brief, marks, stage, in that order on all six — and hiding it on
+            the pages that happen to have one artifact made those read as a different template
+            rather than as the same one with less in it. A lone mark is not a choice going
+            unoffered; it is the label for what is on the stage, which is the job it does on every
+            page. It keeps its pressed state for the same reason: it is the current thing, and the
+            mark's active styling is what says so. */}
         <div
           className="case__highlights"
           role="group"
@@ -162,6 +178,14 @@ function CaseMediaGallery({
             <span className="case__highlight-thumb case__highlight-thumb--lead">
               {work.media.kind === "video" ? (
                 <span className="case__highlight-play" aria-hidden />
+              ) : work.media.kind === "image" ? (
+                <Image
+                  src={work.media.src}
+                  alt=""
+                  fill
+                  sizes="80px"
+                  className="case__highlight-thumb-image"
+                />
               ) : (
                 <span className="case__highlight-letter" aria-hidden>
                   {work.title.charAt(0)}
@@ -197,7 +221,12 @@ function CaseMediaGallery({
       <div className="case__media-view">
         <div
           className="case__media-stage"
-          style={{ aspectRatio: stageRatio }}
+          style={
+            {
+              aspectRatio: stageRatio,
+              "--stage-ratio": stageScalar,
+            } as CSSProperties
+          }
         >
           <div className="case__media-panel" hidden={selected !== 0}>
             <CaseLeadMedia work={work} active={selected === 0} />
@@ -298,6 +327,19 @@ function CaseLeadMedia({
           <span className="plate__caption">{work.media.caption}</span>
         </div>
       </div>
+    );
+  }
+
+  // The stage already carries this still's own ratio, so it fills the frame without a crop.
+  if (work.media.kind === "image") {
+    return (
+      <Image
+        src={work.media.src}
+        alt={work.media.alt}
+        fill
+        sizes="(max-width: 767px) 100vw, 1024px"
+        className="case__media-image"
+      />
     );
   }
 

@@ -2,7 +2,8 @@
  * Real shipped work, modelled on two independent axes — *has a case page* vs *where it shows on
  * the landing page*:
  *  • `works` — every piece with a case page at /works/[slug]. Media is honest: a demo video
- *    where one exists, a typographic poster where the only artifacts are rough screenshots.
+ *    where one exists, a real screen where the artifacts are stills, and a typographic poster
+ *    only where neither exists.
  *  • `featured` — the `primary`-tier subset shown as big cards in the landing index.
  *  • `archive` — the text rows under the index: `secondary`-tier case works (which link in to
  *    their own case page) above the smaller external-only pieces.
@@ -19,6 +20,15 @@ export type WorkMedia =
       poster?: string;
     }
   | {
+      kind: "image";
+      src: string;
+      /** Native ratio of the still, so the stage frames the screen as shot rather than cropping
+          a capture that is not 16:10 to fit a plate's proportions. */
+      aspectRatio: string;
+      alt: string;
+    }
+  | {
+      /** The last resort, for work with no demo and no screen worth standing at full width. */
       kind: "poster";
       /** Big display word on the poster face. */
       word: string;
@@ -41,9 +51,6 @@ export type CaseHighlight = {
 };
 
 export type CaseStudy = {
-  /** The result readers see directly after the demo. No invented metrics: shipped state, changed
-      workflow, or demonstrated capability are valid outcomes when numbers do not exist. */
-  outcome: string;
   /** Why the work needed to exist: problem and binding constraint. */
   why: string;
   /** What Pratiush owned and what actually shipped. */
@@ -107,47 +114,42 @@ export const works: FeaturedWork[] = [
     year: "2025",
     role: "Software Engineer",
     tagline:
-      "A two-sided marketplace that keeps NIL deals out of scattered DMs.",
+      "A platform that connects college athletes with brands centralizing NIL deals.",
     description:
-      "A platform connecting college athletes and local brands through one streamlined deal workflow.",
+      "NILINK connects college athletes and local brands through discovery, campaign & application management and deal tracking adhering to NIL laws. This was a software engineering capstone project where my role was Full-Stack Software Engineer.",
     caseStudy: {
-      outcome:
-        "A working MVP where athletes and brands can find each other and carry one deal through.",
-      why:
-        "NIL deals often start in a DM and disappear into spreadsheets and handshakes. Athletes need a clear way to show what they offer; local brands need a practical way to find them and follow a deal.",
-      what:
-        "As the software engineer, I built two connected experiences: athletes present their offers, brands find a fit, and both work from the same deal state.",
-      how:
-        "Next.js and Supabase handle the product, data, and authentication. TypeScript keeps deal shapes shared across both sides; SWR keeps listings current; Vitest protects auth and state changes.",
+      why: "NIL—short for name, image, and likeness—allows college athletes to earn through sponsorships, endorsements, and other brand partnerships. Yet these deals often begin in direct messages, then fragment across spreadsheets, emails, and informal agreements. Athletes need a clear way to present their value, while local brands need a practical way to discover talent and manage each opportunity.",
+      what: "NILINK is a two-sided NIL marketplace where college athletes showcase their audience, interests, and partnership offers, while brands discover relevant athletes and manage collaborations in one place. It replaces fragmented outreach and deal tracking with a shared workflow from discovery through completion.",
+      how: "The platform uses Next.js and TypeScript for the athlete and brand experiences, Supabase for authentication and data storage, SWR for current marketplace activity, and Vitest to protect critical access and deal-state transitions.",
       decisions: [
         {
-          title: "Keep the deal visible",
+          title: "My role",
           detail:
-            "Discovery, outreach, and agreement share one flow, so neither side has to rebuild the story from private messages.",
+            "I worked on the athlete & brand interfaces with authentication and role-based authorization, protected API flows, and developed explore, campaign, application, offer, and deal-management experiences and workflows.",
         },
         {
-          title: "Respect the two sides",
+          title: "Requirements",
           detail:
-            "Athletes and brands get different permissions and entry points, but meet around the same deal.",
+            "We worked backward from the business and legal requirements of NIL partnerships to technology. Eligibility, contracts, deliverables, and so on were translated into product roles and clear actions for each side.",
         },
         {
-          title: "Test the handoffs",
+          title: "Collaboration",
           detail:
-            "Tests focus on the moments when one person’s action changes what the other can see.",
+            "We combined product, technical, and domain expertise. I contributed to the product design and technical architecture, while other team members focused on the database, project management and legal compliance.",
         },
       ],
       highlights: [
         {
-          label: "Product",
+          label: "Explore",
           src: "/projects_assets/NILINK/NILINK_product_img.png",
-          alt: "The NILINK marketplace open on a laptop, showing athlete and brand deal listings side by side.",
+          alt: "The NILINK athlete explore view on a laptop, with popular and aligned athletes in a card grid above search and filters.",
         },
       ],
     },
     cover: "/projects_assets/NILINK/NILINK_product_img.png",
     coverAlt:
-      "The NILINK marketplace open on a laptop, showing athlete and brand deal listings side by side.",
-    stack: ["Next.js", "Supabase", "TypeScript", "SWR", "Vitest"],
+      "The NILINK athlete explore view open on a laptop, its card grid of athletes lit by afternoon shadow.",
+    stack: ["Next.js", "Supabase", "TypeScript", "Vercel"],
     media: {
       kind: "video",
       src: "/projects_assets/NILINK/demo.mp4",
@@ -163,33 +165,31 @@ export const works: FeaturedWork[] = [
     tier: "primary",
     year: "2025",
     role: "Founder",
-    tagline: "Focus music that composes itself as the session unfolds.",
+    tagline:
+      "Focus app that generates customizable background music in real time.",
     description:
       "A focus app that composes its audio in real time instead of looping a playlist. The engine paces every session through an entry, anchor, sustain, and re-focus arc, so the sound shifts with your attention rather than against it.",
     caseStudy: {
-      outcome:
-        "A live audio stream with a beginning, a middle, and a way back when focus slips.",
-      why:
-        "Looping focus tracks work until you can hear the restart. Once I noticed it, the sound became another interruption.",
-      what:
-        "I started Lucid Tone and built the real-time audio system behind it. Each session composes a changing stream instead of serving another playlist.",
-      how:
-        "A Python and FastAPI service runs a custom Markov Chain; React and TypeScript control the session; Redis and persistent connections keep the stream alive.",
+      why: "I built this app out of own experience: Finding the perfect background music to focus takes valuable time away from the actual work. Browsing several playlists to find that one track that fits your mood is tedious.",
+      what: "I started Lucid Tone and built the real-time audio system behind it. Rather than serving another playlist, each session composes an evolving stream with fine-grained controls that shape the music around the listener’s mood.",
+
+      how: "A FastAPI server runs a Markov chain–based music engine and streams each composition to the client over WebSockets. React and TypeScript power the listening interface, while Redis maintains session state and supports stream continuity across persistent connections.",
+
       decisions: [
         {
           title: "Compose instead of catalog",
           detail:
-            "The engine is the product. A fixed library would only hide the same looping problem behind more tracks.",
+            "The generative engine is the product. A larger fixed library would only spread repetition across more tracks, eventually making the listening experience predictable and stale.",
         },
         {
           title: "Give attention an arc",
           detail:
-            "Entry, anchor, sustain, and re-focus give the music direction without asking the listener to manage it.",
+            "Entry, anchor, sustain, and refocus phases give each session direction, allowing the music to support changing attention without requiring the listener to manage it.",
         },
         {
-          title: "Treat continuity as product",
+          title: "Treat egress as a constraint",
           detail:
-            "If the stream breaks, the idea breaks. Persistent playback shaped the architecture from the start.",
+            "Minimizing audio egress was a core engineering priority. The streaming format and delivery strategy were designed around the right balance of sound quality, performance, cost, and connection stability.",
         },
       ],
       highlights: [
@@ -213,26 +213,20 @@ export const works: FeaturedWork[] = [
     links: [],
   },
   {
-    title: "Private Law RAG Agent",
-    slug: "private-law-rag",
+    title: "Private Law",
+    slug: "private-law",
     tier: "secondary",
     year: "2024",
-    role: "Team build · Backend & integration",
+    role: "Hackathon · Backend & LLM integration",
     tagline:
-      "A legal research assistant that keeps confidential files off the cloud.",
-    archiveNote:
-      "Local-only RAG over confidential legal records — nothing leaves the building.",
+      "A research assistant that is completely local and keeps confidential files off the cloud.",
+    archiveNote: "Completely local RAG agent for confidential legal records.",
     description:
       "A research assistant for law firms that can't ship documents to the cloud. Ingestion, embeddings, retrieval, and generation all run on local infrastructure, so decades of confidential records become searchable without a byte leaving the building.",
     caseStudy: {
-      outcome:
-        "A private prototype that answers from local records and shows the context it used.",
-      why:
-        "Law firms have years of useful case files they cannot send to a cloud model. Privacy was not a setting; it decided the architecture.",
-      what:
-        "I handled backend logic and integration as part of a team. The prototype ingests a firm’s files, finds the relevant passages, and grounds a local model’s answer in them.",
-      how:
-        "Python chunks the documents, ChromaDB stores embeddings, and Ollama runs LLaMA locally. Streamlit shows the answer and its source context; Docker packages the private deployment.",
+      why: "Law firms have years of useful case files they cannot send to a cloud model. Privacy was not a setting; it decided the architecture.",
+      what: "I handled backend logic and integration as part of a team. The prototype ingests a firm’s files, finds the relevant passages, and grounds a local model’s answer in them.",
+      how: "Python chunks the documents, ChromaDB stores embeddings, and Ollama runs LLaMA locally. Streamlit shows the answer and its source context; Docker packages the private deployment.",
       decisions: [
         {
           title: "Move the whole pipeline inside",
@@ -250,24 +244,13 @@ export const works: FeaturedWork[] = [
             "Retrieved context stays visible, and RAG can be switched off to check what the model actually knows.",
         },
       ],
-      highlights: [
-        {
-          label: "Home",
-          src: "/projects_assets/RAG/homescreen.png",
-          alt: "The private legal assistant home screen with a document question field and local RAG controls.",
-        },
-        {
-          label: "Context",
-          src: "/projects_assets/RAG/example.png",
-          alt: "A legal assistant response shown with the retrieved source context used to produce it.",
-        },
-      ],
     },
     stack: ["Python", "Streamlit", "ChromaDB", "Ollama", "Docker"],
     media: {
-      kind: "poster",
-      word: "Private, by design",
-      caption: "Local-only RAG. Nothing leaves the building.",
+      kind: "image",
+      src: "/projects_assets/RAG/homescreen.png",
+      aspectRatio: "770 / 488",
+      alt: "The private legal assistant running locally: the model and ChromaDB collection it is connected to, the retrieval controls, and the question field.",
     },
     links: [
       {
@@ -281,47 +264,42 @@ export const works: FeaturedWork[] = [
     slug: "whisk-it-all",
     tier: "primary",
     year: "2025",
-    role: "Client work · Design & build",
-    tagline:
-      "A bakery website the owner can update without calling a developer.",
+    role: "Full-stack Engineer",
+    tagline: "A local café  & bakery website optimized for homely experience.",
     description:
       "A real website for a real bakery. I led design and development for a local business owner: story, services, testimonials, and a CMS they update without calling me. Small project, real stakes, actual customers.",
     caseStudy: {
-      outcome:
-        "A live front door for the bakery that stays in the owner’s hands.",
-      why:
-        "The bakery needed more than an online menu. Its site had to introduce the owner, explain dietary options, and make the business easy to reach.",
-      what:
-        "I worked directly with the owner and handled design, development, and deployment. Story, services, testimonials, and contact now live together, with a CMS for everyday updates.",
-      how:
-        "Next.js and Tailwind carry the site. GSAP adds warmth where it helps; Tina CMS keeps routine changes out of the codebase.",
+      why: "The business wanted to elevate their online presence. Similarly, they wanted a self-maintainable site to reduce external vendor dependencies for frequent updates.",
+      what: "The outcome was a user-friendly and elegant website that tells a story. Also, story, services, testimonials, and menu now live together, with a light-weight and secure CMS for everyday updates.",
+      how: "Next.js for the frontend and route handling; Tailwind & GSAP for the desing & motion. And, Tina CMS for the content management with Next.js middleware for secure authentication.",
       decisions: [
         {
-          title: "Start with the person",
+          title: "Context",
           detail:
-            "The owner’s story builds trust before the site asks anyone to order.",
+            "The owner’s story and the business's values builds trust for anyone to place an order. Therefore, the website is designed to tell a story and showcase the business's values.",
         },
         {
-          title: "Make updates boring",
+          title: "Why Tina CMS?",
           detail:
-            "Services and copy change through a familiar CMS instead of a developer handoff.",
+            "It integrates through github triggering a CI/CD pipeline whenever a change is triggered. Best for a site with low writes than read and is free.",
         },
         {
-          title: "Let motion add warmth",
+          title: "Motion",
           detail:
-            "Animation carries the handmade feel; ordering details and contact stay direct.",
+            "It has animations to elevate the handmade feel. It also makes the site feel alive and engaging, enhancing the user experience.",
         },
       ],
       highlights: [
         {
           label: "Site",
-          src: "/projects_assets/WhiskItAll/page.png",
-          alt: "A full page from the Whisk It All bakery website showing its story, offerings, testimonials, and contact flow.",
+          src: "/projects_assets/WhiskItAll/whisk-it-all-product-img.png",
+          alt: "The Whisk It All homepage open on a laptop at a café table, its custom-order and menu calls to action on screen.",
         },
       ],
     },
+    cover: "/projects_assets/WhiskItAll/whisk-it-all-product-img.png",
     coverAlt:
-      "The Whisk It All bakery site on screen — its story, menu, and booking laid out for local customers.",
+      "The Whisk It All homepage open on a laptop at a café table, beside a latte, a croissant, and a printed specials card.",
     stack: ["Next.js", "Tailwind", "GSAP", "Tina CMS"],
     media: {
       kind: "video",
@@ -345,18 +323,13 @@ export const works: FeaturedWork[] = [
     tagline:
       "A symptom checker that gives you a read, then sends you to a doctor.",
     archiveNote:
-      "AI symptom checker started at a hackathon, finished solo when the weekend ran out.",
+      "AI health diagnoser that predicts possible conditions based on input symptoms.",
     description:
       "A health insight prototype built around a local Llama 3 model. You give it your age, gender, and what you're feeling, and it returns a plain-language preliminary read — with the reminder, every time, that a real diagnosis comes from a healthcare professional.",
     caseStudy: {
-      outcome:
-        "A finished prototype that turns symptoms into a readable assessment and never presents it as a diagnosis.",
-      why:
-        "Searching a symptom usually lands somewhere between useless and terrifying. The idea was a checker that reads the actual input and answers in proportion to it — which meant the hard constraint was what the thing is allowed to claim, not how well it generates text.",
-      what:
-        "It began at a hackathon with two teammates and did not get finished inside the weekend. I took it back afterwards and completed the prototype on my own: the AI layer was my part from the start, and the frontend and backend became mine too.",
-      how:
-        "React runs the intake, Node and Express carry the API, and Llama 3 generates the assessment. Age, gender, and symptoms go into the prompt together, so the response is about a person rather than about a word.",
+      why: "Searching a symptom usually lands somewhere between useless and terrifying. The idea was a checker that reads the actual input and answers in proportion to it — which meant the hard constraint was what the thing is allowed to claim, not how well it generates text.",
+      what: "It began at a hackathon with two teammates and did not get finished inside the weekend. I took it back afterwards and completed the prototype on my own: the AI layer was my part from the start, and the frontend and backend became mine too.",
+      how: "React runs the intake, Node and Express carry the API, and Llama 3 generates the assessment. Age, gender, and symptoms go into the prompt together, so the response is about a person rather than about a word.",
       decisions: [
         {
           title: "Bound what it is allowed to claim",
@@ -394,20 +367,16 @@ export const works: FeaturedWork[] = [
     tier: "secondary",
     year: "2022",
     role: "Solo build · First full-stack app",
-    tagline: "A weekly chore rota housemates settle once instead of arguing about daily.",
+    tagline:
+      "A weekly chore rota housemates settle once instead of arguing about daily.",
     archiveNote:
-      "Chore management for housemates. My first full-stack app end to end.",
+      "Chore management web app project made for housemates. Built from scratch with Vanilla JS and Express.",
     description:
       "Household chore management for people sharing a flat. Housemates join a group, one of them lays out the week, and everybody else opens the app to a single question answered: what am I doing today.",
     caseStudy: {
-      outcome:
-        "A working rota app where one housemate builds the week and everyone else just sees today.",
-      why:
-        "Chores between housemates fail as a memory problem long before they fail as a fairness problem. What was missing was not effort but a shared record of who agreed to what, visible to everyone at once.",
-      what:
-        "My first application built end to end. Groups you create or join by ID, an admin screen that assigns tasks across Monday through Sunday and finalises the week, and a per-person view of the day.",
-      how:
-        "Node and Express serve the app; NeDB's promise API stores groups, members, and assignments as file-backed documents. No database server to stand up, which was the right size for a first full-stack build and kept the whole thing deployable as one process.",
+      why: "Chores between housemates fail as a memory problem long before they fail as a fairness problem. What was missing was not effort but a shared record of who agreed to what, visible to everyone at once.",
+      what: "My first application built end to end. Groups you create or join by ID, an admin screen that assigns tasks across Monday through Sunday and finalises the week, and a per-person view of the day.",
+      how: "Node and Express serve the app; NeDB's promise API stores groups, members, and assignments as file-backed documents. No database server to stand up, which was the right size for a first full-stack build and kept the whole thing deployable as one process.",
       decisions: [
         {
           title: "Make the week a decision",

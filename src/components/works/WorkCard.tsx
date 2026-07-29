@@ -22,9 +22,14 @@ import type { FeaturedWork } from "@/data/works";
  * They sit greyscale until hovered (see .frame__media) — in the stack, until scrolled to.
  */
 export function Cover({ work }: { work: FeaturedWork }) {
-  // A dedicated still where one exists, else the video's own poster frame.
+  // A dedicated still where one exists, else whatever the media itself can stand in with — a
+  // video's poster frame, or, for a work whose media IS a still, that still.
   const still =
-    work.media.kind === "video" ? work.cover ?? work.media.poster : work.cover;
+    work.media.kind === "video"
+      ? work.cover ?? work.media.poster
+      : work.media.kind === "image"
+        ? work.cover ?? work.media.src
+        : work.cover;
 
   if (work.media.kind === "poster") {
     return (

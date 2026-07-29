@@ -1,6 +1,7 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useRef, useState, type CSSProperties } from "react";
+import Image from "next/image";
 import { motion, useReducedMotion } from "motion/react";
 
 import { ArrowUpRight } from "@/components/icons";
@@ -39,6 +40,20 @@ import {
  * One row is open at a time. Two open panels turn a list of claims into a wall of text and lose
  * the reason the section is closed to begin with — you should be able to see all four words at
  * once and choose one.
+ *
+ * ONE ROW HAS PHOTOGRAPHS, and they live INSIDE its panel — a pair under the specifics, at the end,
+ * so all four panels still open the same way and the eye finds "where" and "what" in the same place
+ * whichever row it opened.
+ *
+ * That took three tries, and the first two were the same mistake twice: a photo card set into the
+ * word itself, then hung off the word's edge. Both treated the picture as an ornament on the wall,
+ * and at that scale a photograph is texture — the only sizes that read as a picture are the sizes
+ * that fight the display type beside it. It is content, and the panel is where this section keeps
+ * content. Closed, the wall is still four words and nothing else; opened, the Jets row has the
+ * evidence in it.
+ *
+ * They are one row's and not four on purpose: pictures on every row turn the wall back into the
+ * logo bar this section was built instead of.
  */
 export function Past() {
   const reduce = useReducedMotion() ?? false;
@@ -131,11 +146,16 @@ export function Past() {
                     <p className="past__period">{chapter.period}</p>
                   ) : null}
 
-                  <ul className="past__detail">
-                    {chapter.detail.map((line) => (
-                      <li key={line}>{line}</li>
-                    ))}
-                  </ul>
+                  {/* Rendered only where there are specifics. An empty list still spends its own
+                      22px above itself, which on the thesis row would open a gap under the heading
+                      that reads as something missing. */}
+                  {chapter.detail?.length ? (
+                    <ul className="past__detail">
+                      {chapter.detail.map((line) => (
+                        <li key={line}>{line}</li>
+                      ))}
+                    </ul>
+                  ) : null}
 
                   {chapter.link ? (
                     <a
@@ -156,6 +176,72 @@ export function Past() {
                     </a>
                   ) : null}
                 </div>
+
+                {/* A SIBLING of the body rather than a child of it, because the body is a 54ch
+                    text measure and these are not text — sitting inside it they would be held to
+                    the width of a paragraph. Out here they take their own, wider one, which is the
+                    ordinary editorial move for media under a column of copy.
+
+                    Left LAZY, and the collapsed panel is what makes that exactly right: a panel at
+                    height 0 never intersects, so a visitor who opens no rows never fetches a photo.
+                    They land during the 0.7s the panel takes to open, over the frame's own ground.
+
+                    Real alt text here, unlike everywhere else images have appeared in this section:
+                    the panel is content, not a control, so nothing is swallowed into an accessible
+                    name and these can say what they are. */}
+                {chapter.gallery ? (
+                  <div
+                    className="past__gallery"
+                    // What the row is worth in units, and how many gaps it has to pay for. The
+                    // stylesheet turns the two into a width that makes THIS row's pictures exactly
+                    // as tall as every other row's — see --past-shot-span. Measured here rather
+                    // than in CSS because CSS cannot add up a list it never sees.
+                    style={
+                      {
+                        "--shot-sum": chapter.gallery.reduce(
+                          (sum, shot) => sum + (shot.ratio ?? 1),
+                          0,
+                        ),
+                        "--shot-count": chapter.gallery.length,
+                      } as CSSProperties
+                    }
+                  >
+                    {chapter.gallery.map((shot) => (
+                      <span
+                        key={shot.src}
+                        className="frame past__shot"
+                        // The frame's ratio is also what sizes it — the row splits its width by
+                        // these so every shot comes out the same height. One number, spent twice,
+                        // so a wide frame can never end up in a column that is not wide.
+                        style={
+                          {
+                            "--shot-ratio": shot.ratio ?? 1,
+                            "--shot-zoom": shot.zoom ?? 1,
+                          } as CSSProperties
+                        }
+                      >
+                        <Image
+                          className="past__shot-media"
+                          src={shot.src}
+                          alt={shot.alt}
+                          fill
+                          // The frame's box is already held open by its ratio, so this is not
+                          // load-bearing for the layout — it is so an opening panel shows the shape
+                          // of the photograph instead of a grey rectangle for the moment the real
+                          // file is in flight. See `blur` in data/past.ts.
+                          placeholder="blur"
+                          blurDataURL={shot.blur}
+                          // The widest a shot lays out at anywhere in this section, now that every
+                          // row shares one height: education's wide centre at ~298px, against
+                          // ~265px for the honours 4:3 and ~199px for a square. Declared for the
+                          // widest, since a `sizes` under the real width picks a variant that has
+                          // to be upscaled.
+                          sizes="(max-width: 768px) 92vw, 310px"
+                        />
+                      </span>
+                    ))}
+                  </div>
+                ) : null}
               </motion.div>
             </motion.li>
           );
