@@ -12,6 +12,7 @@ import { Analytics } from "@vercel/analytics/next";
 import { IntroProvider } from "@/components/intro/IntroContext";
 import { GATE_SCRIPT } from "@/lib/intro";
 import { SiteNav } from "@/components/layout/SiteNav";
+import { MenuPanel, MenuProvider } from "@/components/layout/MobileMenu";
 import { SmoothScroll } from "@/components/layout/SmoothScroll";
 import { BackgroundWork } from "@/components/layout/BackgroundWork";
 
@@ -43,11 +44,18 @@ export default function RootLayout({
         <script dangerouslySetInnerHTML={{ __html: GATE_SCRIPT }} />
 
         <IntroProvider>
-          <a href="#main" className="skip-link">
-            Skip to content
-          </a>
-          <SiteNav />
-          <SmoothScroll>{children}</SmoothScroll>
+          {/* Wraps the bar AND the scroller, because both read the menu: the bar holds the
+              toggle, and SmoothScroll owns the Lenis instance that has to stop while the panel
+              is up. The panel is a sibling of the nav rather than a child of it — .site-nav's
+              `mix-blend-mode: difference` would otherwise invert it. */}
+          <MenuProvider>
+            <a href="#main" className="skip-link">
+              Skip to content
+            </a>
+            <SiteNav />
+            <MenuPanel />
+            <SmoothScroll>{children}</SmoothScroll>
+          </MenuProvider>
         </IntroProvider>
 
         <Analytics />

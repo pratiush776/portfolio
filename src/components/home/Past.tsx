@@ -67,8 +67,13 @@ export function Past() {
   const { drift } = useGlide(section);
 
   return (
+    // `id` + `tabIndex={-1}` is the shape #work already uses: the fragment gives the phone menu
+    // somewhere to send people, and the negative tabindex lets focus actually land here when it
+    // does, without putting the section into the tab order for everyone else.
     <motion.section
       ref={section}
+      id="past"
+      tabIndex={-1}
       className="past gutter measure"
       style={{ y: drift }}
     >

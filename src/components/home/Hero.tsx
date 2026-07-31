@@ -117,7 +117,17 @@ export function Hero() {
                 <TypedLine start={ready} reduced={reduce} />
               </p>
             </div>
-            <p className="hero__foot label muted">Open to relocation · USA</p>
+            {/* Split so the phone can break it after the separator — the one place this line
+                may fold is between the two facts it states, and a wrap point left to the measure
+                would move with the font metrics instead. The spans lay out inline, so above
+                768px this is character-for-character the string it has always been. */}
+            <p className="hero__foot label muted">
+              <span>Open to relocation</span>
+              <span className="hero__foot-sep" aria-hidden>
+                {" · "}
+              </span>
+              <span>USA</span>
+            </p>
           </div>
         </motion.div>
       </div>

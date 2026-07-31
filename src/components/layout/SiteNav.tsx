@@ -1,5 +1,7 @@
 import Link from "next/link";
 
+import { MenuToggle } from "@/components/layout/MobileMenu";
+
 /* The two landing-page fragment links intentionally stay native anchors: Next's `scroll={false}`
    leaves reduced-motion visitors with no scroll owner, while its default scroll races Lenis. */
 /* eslint-disable @next/next/no-html-link-for-pages */
@@ -40,6 +42,12 @@ export function SiteNav() {
             Contact
           </a>
         </div>
+
+        {/* Below 768px this is the navigation and the row of links above is hidden; above it, the
+            reverse. The two swap in CSS, so this stays a server component and only the toggle
+            itself ships as client JS. The panel it controls is NOT in here — see MobileMenu for
+            why the bar's blend mode forces it to be a sibling. */}
+        <MenuToggle />
       </div>
     </nav>
   );
