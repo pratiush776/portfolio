@@ -118,6 +118,38 @@ a {
      value from the shared measure. */
   --display-size: clamp(2.75rem, 18cqi, 15.5rem);
 
+  /* The phone menu's three words, and the third display size on the site. Named here rather than
+     written inline for the same reason the other two are: display type sits outside the ten rungs
+     below (see the note on the type scale), so the only thing keeping it coherent is that every
+     size in the family is declared in one place and can be read against its neighbours.
+
+     `vw` rather than `cqi`, which is the one way it differs: the panel is `position: fixed` at the
+     full width of the window and declares no container of its own, so the viewport IS its measure.
+
+     Deliberately the smallest of the three. 11vw lands ~41px on a 375px phone against the hero
+     name's ~62px there — the menu is a set of destinations, and a destination that sets larger
+     than the name it sits under has stopped being navigation. It exists only below 768px; the cap
+     is what stops it growing past that on the way to the breakpoint. */
+  --menu-size: clamp(2.25rem, 11vw, 3.25rem);
+
+  /* THE PHONE'S TWO RESTATEMENTS OF --display-size, and the last members of the display family.
+     Both are spent only below 768px, and both are the same number the desktop rule computes —
+     restated as one clamp rather than derived, because nesting a token that is itself a clamp()
+     inside calc() inside max() is three math functions deep, and an engine that declines to parse
+     that drops the whole declaration in silence and the type simply stays small.
+
+     Named here rather than written inline in the phone block for the reason the other three are:
+     display type sits outside the ten rungs below, so the only thing holding it together is that
+     every size in the family is declared in one place and can be read against its neighbours.
+     They resolve against .hero, which is the container both are used inside.
+
+       greeting  0.26 × 18cqi = 4.68cqi, 0.26 × 15.5rem = 4.03rem, floored where a script face at
+                 16px stops being readable at arm's length
+       bracket   2 × 18cqi = 36cqi, floor is 2 × --display-size's own 2.75rem, and the 8.5rem cap
+                 is what stops a doubled portrait crossing 768px LARGER than the desktop one */
+  --hero-greeting-size: clamp(1.75rem, 4.68cqi, 4.03rem);
+  --hero-bracket-size: clamp(5.5rem, 36cqi, 8.5rem);
+
   /* ── the wall ─────────────────────────────────────────────────────────────
      "My Past", and the second `cqi` size on the site. It sits outside the nine rungs below for
      the same reason --display-size does: it is measured against the container rather than the
@@ -270,6 +302,7 @@ a {
 
      --display-size, above, is deliberately NOT part of this: it is `cqi`-based and there is only
      ever one word per screen wearing it. */
+  --t-2xs: 0.75rem; /*                                         12    — the hero locator, phones only */
   --t-xs: 0.8125rem; /*                                        13    — labels, stack, year */
   --t-sm: 0.9375rem; /*                                        15    — archive eyebrow */
   --t-base: clamp(1rem, 0.95rem + 0.2vw, 1.125rem); /*         16→18 — prose, card desc, body */
@@ -746,6 +779,216 @@ a:focus-visible .underline-link::after {
   top: calc(50% + 0.7em);
 }
 
+/* ── the phone's navigation ───────────────────────────────────────────────── */
+/* Nothing in this block exists above 768px. The toggle and the panel are `display: none` by
+   default and switched on at the bottom of the section, so the desktop bar is untouched — it does
+   not merely look the same, it renders the same boxes.
+
+   THE PANEL IS NOT INSIDE THE BAR, and could not be. `.site-nav` carries `mix-blend-mode:
+   difference`, which makes it a stacking context; a panel nested in it would be inverted along
+   with the links. It is a sibling instead, painted UNDER the bar — which is what gives the brand
+   and the toggle their colour for free: bone-on-ink, by the same inversion that already handles
+   the footer scrolling beneath them. See MobileMenu for the component side. */
+
+/* Three rules that become two. The bars carry their rest offsets as TRANSFORMS, not as `top`
+   values, so the open state replaces one transform with another and there is nothing for the
+   transition to interpolate across — the same reason .past__sign builds its + → × the way it
+   does. currentColor, so the bar's blend mode owns the colour. */
+.menu-toggle {
+  display: none;
+  position: relative;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  cursor: pointer;
+  /* THE BAR IS `pointer-events: none` AND ONLY `.site-nav a` TAKES IT BACK. The nav is a fixed
+     full-width strip over the whole page, so it has to be transparent to the pointer or it would
+     eat every click along the top of the document; the links opt back in one by one. A <button>
+     is not an <a>, so without this the toggle renders perfectly and is completely dead to taps —
+     which is exactly how it failed. Not folded into `.site-nav a` as `.site-nav a, .site-nav
+     button`: that selector is 0,1,1 and would outrank this rule's own `display: none`, putting a
+     hamburger on the desktop bar. */
+  pointer-events: auto;
+  /* The same cancel the links carry. `.site-nav__inner` pads 18px, and a 44px control inside that
+     would make the bar 80px tall instead of the 54px it is everywhere else — which is both wrong
+     and would silently invalidate the hero's 72px nav clearance. -13px puts the control's
+     effective height back to the links' 18px while leaving the full 44px target. */
+  margin-block: -13px;
+}
+
+.menu-toggle__bar {
+  position: absolute;
+  width: 22px;
+  height: 1px;
+  background: currentColor;
+  transition:
+    transform var(--dur-hover) var(--ease),
+    opacity var(--dur-hover) var(--ease);
+}
+
+.menu-toggle__bar--top {
+  transform: translateY(-6px);
+}
+
+.menu-toggle__bar--bot {
+  transform: translateY(6px);
+}
+
+.menu-toggle[aria-expanded="true"] .menu-toggle__bar--top {
+  transform: rotate(45deg);
+}
+
+.menu-toggle[aria-expanded="true"] .menu-toggle__bar--mid {
+  opacity: 0;
+}
+
+.menu-toggle[aria-expanded="true"] .menu-toggle__bar--bot {
+  transform: rotate(-45deg);
+}
+
+/* The ink field, arriving downward out of the bar. `clip-path` is declared HERE as well as in the
+   component because the panel is server-rendered: without it the markup would be on screen, at
+   full height, for the gap between first paint and hydration. The same reason .past__panel
+   declares its own `height: 0`.
+
+   z-index 90 puts it under .site-nav's 100 — that ordering is the whole colour story above.
+
+   Height is the "about halfway" you asked for, floored so the FOUR links and the socials always
+   fit and capped so it does not swallow a tall phone. svh rather than vh: this sits under a
+   browser's collapsing address bar, and vh would measure the tallest the viewport ever gets.
+
+   The floor is a measurement, not a round number. 110px of padding (a nav's clearance above, a
+   short foot below), four links at 1.05 line-height on --menu-size, three 0.08em gaps and a 44px
+   icon row come to 337px at 375px wide — 22rem is the next clean value above it. It was 20rem
+   when there were three links, which the fourth would have overflowed on any viewport short
+   enough to reach the floor.
+
+   `max-height` is what a floor needs and a clamp cannot give: on a landscape phone the floor is
+   most of the screen, and without this a panel could be taller than the viewport holding it. */
+.menu-panel {
+  display: none;
+  position: fixed;
+  inset: 0 0 auto 0;
+  z-index: 90;
+  height: clamp(22rem, 56svh, 30rem);
+  max-height: 92svh;
+  clip-path: inset(0% 0% 100% 0%);
+  background: var(--color-ink);
+  color: var(--color-bone);
+  will-change: clip-path;
+}
+
+/* The nav's own pair, so the panel's contents start on the exact edge the brand does — the same
+   borrowing the preloader does for its word. The top inset clears the bar itself: one pad block
+   above a 44px control. */
+.menu-panel__inner {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100%;
+  padding: calc(var(--nav-pad-block) * 2 + 44px) var(--nav-gutter)
+    calc(var(--nav-pad-block) + 12px);
+}
+
+.menu-panel__links {
+  display: flex;
+  flex-direction: column;
+  gap: 0.08em;
+}
+
+/* Each line rides out of its own mask. `overflow: hidden` on the clip, the transform on the span
+   inside it — the footer signature's idiom, and the preloader's. */
+.menu-panel__clip {
+  display: block;
+  overflow: hidden;
+}
+
+.menu-panel__line {
+  display: block;
+}
+
+/* Display type, deliberately off the ten-rung text ramp for the same reason --display-size is:
+   these are looked at rather than read, and there is one set of them per screen. The size is a
+   token beside the other two display sizes rather than a literal here — see --menu-size. */
+.menu-panel__link {
+  display: block;
+  font-family: var(--font-kumbh), sans-serif;
+  font-weight: 700;
+  font-size: var(--menu-size);
+  line-height: 1.05;
+  letter-spacing: var(--track-tight);
+  text-transform: uppercase;
+}
+
+.menu-panel__socials {
+  display: flex;
+  align-items: center;
+  gap: 26px;
+}
+
+/* 44px of target under a 20px mark, the same floor every other control on the site keeps. The
+   negative margin pulls the row back onto the panel's own left edge so the first icon lines up
+   with the words above it rather than with its hit area. */
+.menu-panel__social {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  margin-left: -12px;
+  color: var(--color-bone-muted);
+  transition: color var(--dur-hover) var(--ease);
+}
+
+.menu-panel__social + .menu-panel__social {
+  margin-left: 0;
+}
+
+/* The document half of the hold. The other half — stopping Lenis — is SmoothScroll's, because it
+   owns the instance.
+
+   `touch-action`, NOT `overflow: clip` — and the difference is a bug, not a preference. Clipping
+   the document removes the scrollbar, and on any platform that draws a classic one that CHANGES
+   THE WIDTH MEDIA QUERIES ARE EVALUATED AGAINST. Open the menu in a window sized just under the
+   breakpoint and the page reflows ~15px wider, `max-width: 767px` stops matching, the provider's
+   own resize listener sees the layout leave the phone and closes what was just opened. One tap,
+   opened and shut, and only at some widths — which is precisely how it presented.
+
+   This locks the same scroll without touching layout. Touch is the axis that actually needs it:
+   Lenis runs with `syncTouch` off, so on a phone the page is scrolled natively and stopping the
+   instance does nothing about a swipe. Wheel is already covered by that stop. Nothing here
+   reflows, so the breakpoint cannot move and the loop cannot start. */
+html.is-menu-open {
+  touch-action: none;
+}
+
+@media (hover: hover) {
+  .menu-panel__social:hover {
+    color: var(--color-bone);
+  }
+}
+
+/* THE SWAP. One block, both directions, so there is no width at which both navigations exist or
+   neither does. */
+@media (max-width: 767px) {
+  .site-nav__links {
+    display: none;
+  }
+
+  .menu-toggle {
+    display: inline-flex;
+  }
+
+  .menu-panel {
+    display: block;
+  }
+}
+
 /* ── the intro ────────────────────────────────────────────────────────────── */
 /* The first-load field (see Preloader). Built from parts the page already owns: the footer's
    inversion, the nav brand's exact metrics on the nav's exact gutter, the rail's track/fill pair
@@ -947,11 +1190,8 @@ html.is-loading .preloader {
 
    Scoped to phones only: at 768px and up the block still hugs the name and there is no free space
    for an alignment to act on, so the desktop composition is bit-for-bit what it was. */
-@media (max-width: 767px) {
-  .hero__name {
-    text-align: center;
-  }
-}
+/* The rule itself is in the phone block at the end of this section, with the rest of the
+   hero's sub-768px pass — it has to come after the base rules to win, see the note there. */
 
 /* Where the measured kerning lands. Any display word rendered through lib/kerning emits its
    per-letter correction as `--kern`, and this is the one rule that spends it — so the hero name,
@@ -1124,6 +1364,153 @@ html.is-loading .preloader {
   padding-bottom: 0.2rem;
 }
 
+/* THE HERO'S PHONE PASS, and the whole of it — every rule below 768px lives in this one block so
+   there is a single place to read what a handset gets that a desktop does not.
+   Nothing here is a redesign: each rule is a FLOOR or a CAP under a value that is correct at
+   1440px and has run out of room by 375px. The composition, the order of the rows and the ratios
+   between them are the desktop's.
+
+   IT SITS AT THE END OF THE SECTION, AFTER EVERY BASE RULE, and that placement is load-bearing.
+   A media query adds NO specificity, so `@media … { .hero__meta { gap } }` and `.hero__meta { gap }`
+   are both 0,1,0 and the LATER one wins. Written higher up — next to the name it started as — the
+   block lost `gap` to the base rule silently, and would have lost every future property the base
+   rules happen to declare. Keep new phone rules in here, and keep this block last. */
+@media (max-width: 767px) {
+  /* THE VERTICAL RHYTHM IS RE-CUT FOR THE PHONE, and the reason is that every gap in this
+     composition was measured against a 220px portrait sitting BESIDE a meta column. Down here the
+     row has wrapped: the bracket and the meta are stacked, so the gaps that used to separate two
+     side-by-side systems are now separating a short vertical stack, and at their desktop values
+     they read as holes rather than as air. The rows themselves are untouched — only the space
+     between them. */
+  .hero {
+    /* -4.5rem was measured at 1436×1235, where the greeting reads as air against a bold display
+       word and a solid black square — hence a bias that balances the CAPS rather than the ink.
+       Down here the greeting is floored (0.45 of the name rather than 0.26), the portrait is
+       doubled and the locator has folded to two lines, so the block's weight sits much closer to
+       its own centre and it no longer needs that much lift. THE knob for the phone's vertical
+       balance. */
+    --hero-bias: -1.5rem;
+    /* Nav clearance, not rhythm — and the nav is 18px of padding around a 44px control, so 62px
+       is the whole of what has to be cleared. 90px was clearance plus a desktop-sized cushion. */
+    padding-block: 72px 0;
+  }
+
+  .hero__name {
+    text-align: center;
+  }
+
+  /* 40px separated the name from a row that ran the full width of the block. It now separates the
+     name from a portrait directly beneath it, on the same centre line, which needs less. The row
+     gap is the one between the bracket and the meta, and it only exists at all because the row
+     wraps here — 20px was its desktop floor, for a case that never arrives above 768px. */
+  .hero__lockup {
+    margin-top: 24px;
+    gap: 16px var(--col-gap);
+  }
+
+  /* A FLOOR, not a new ramp. The greeting is written as a fraction of the display size so it can
+     never outgrow the name it introduces — right at every width except the small end, where 0.26
+     of a 62px word is 16px of a script face whose x-height is barely a third of its em, and the
+     first line of the page's one sentence stops being readable at arm's length.
+
+     max() lifts only where that ratio has run out. Above about 634px the fraction is already the
+     larger of the two and this is inert, so there is one continuous size through the breakpoint
+     rather than a step at it.
+
+     The size itself is --hero-greeting-size, declared with the rest of the display family — see
+     the note there for why it is one clamp rather than a fraction of --display-size. */
+  .hero__greeting {
+    font-size: var(--hero-greeting-size);
+  }
+
+  /* The portrait is 0.893em of the BRACKET (Kumbh's ( glyph height, see .hero__portrait), so the
+     only way to grow the face is to grow the bracket — which moves the parens with it and keeps
+     the ( ▣ ) exactly as drawn instead of cutting a bigger square into a fixed frame. Doubling
+     takes the 55px square to 111px at 375px, which is where a face reads as a face.
+
+     THE CAP IS WHAT KEEPS THIS OFF THE BREAKPOINT. Uncapped, ×2 at 767px would set a 237px
+     portrait — larger than the 201px it takes at 1440px — and crossing 768 would SHRINK it.
+     At 8.5rem it lands on 121px against the 107px it takes at 768px, so the doubling is spent
+     where phones actually are (2.00× at 375, 1.96× at 414) and has tapered to nothing by the
+     seam.
+
+     The size itself is --hero-bracket-size, declared with the rest of the display family. */
+  .hero__bracket {
+    font-size: var(--hero-bracket-size);
+  }
+
+  /* The lockup wraps here — the bracket and the meta each take a row — and `justify-content:
+     center` centres the meta's BOX. Nothing has ever centred what is inside it, so the three
+     lines ragged against a left edge that was itself floating in the middle of the screen.
+     `align-items` shrink-wraps each line onto its own ink and centres that; `text-align` is the
+     guard for a line that wraps.
+
+     BOTH COLUMNS NEED IT, which is the part that is easy to miss: the meta's children are
+     .hero__meta-top and the locator, not the three lines. Centring only the outer one shrinks the
+     inner column to its own widest line and centres THAT — and then stretches the role and the
+     tagline across it, so the two of them come out flush-left against each other, moved sideways
+     as a pair. Both columns centred is what lets each of the three lines find the axis on its
+     own. */
+  .hero__meta {
+    align-items: center;
+    text-align: center;
+    /* Once the row wraps, the column collapses to its content height and .hero__foot's
+       `margin-top: auto` has no free space left to spend — so this gap, not the stretch, is what
+       holds the locator off the tagline. 30px was the floor for a column being stretched to a
+       220px bracket; the row it sits in now is its own, and the locator it holds off is now two
+       quiet lines rather than one loud one. */
+    gap: 14px;
+  }
+
+  .hero__meta-top {
+    align-items: center;
+  }
+
+  /* THE TYPED LINE IS CENTRED LIKE EVERYTHING ELSE, and it inherits that from .hero__meta —
+     there is deliberately no rule for it here.
+
+     It briefly kept `text-align: start` so its start edge could not move: the line types and
+     clears itself, and centred text slides half a character sideways on every keystroke. But
+     `min-width: 6.3em` reserves the LONGEST phrase, so pinning the start edge centres the box on
+     "I build with AI." and leaves "I code." and "I design." sitting visibly left of the axis —
+     which is worse than the shimmy, because it is wrong while the line is at rest rather than
+     while it is moving. Centred text in that same reserved box puts every phrase on the axis. */
+
+  /* .label's 13px is the one size in the hero with no fluid term at all, so it arrives on a
+     375px screen at exactly the width it has on a 1440px one: 223px of uppercase, wider than the
+     tagline above it (116px). The quietest line in the column was setting its width, and reading
+     as its loudest.
+
+     THREE THINGS TOGETHER, because size alone could not do it. --t-2xs took it to 206px, which
+     was still wider than the role. Breaking after the separator is what actually gives up the
+     width — "OPEN TO RELOCATION" is 18 of the 24 characters, so the longest line lands near
+     155px, level with the role instead of a third wider than it. Dropping .label's 500 to 400
+     is what stops it reading as a heading now that it is two lines.
+
+     TRACKING IS LEFT ALONE ON PURPOSE. Squeezing it would have taken off more width than the
+     size step did, but the scale's own rule runs the other way — 15px caps take 0.12em and 13px
+     caps take 0.14em, because smaller counters need MORE air, not less — so a tightened 12px
+     line buys its width back out of legibility. --track-caps stays.
+
+     The break is done in the markup (a separator span, hidden here) rather than by wrapping a
+     max-width, because a wrap point that depends on the measure moves with the font metrics; the
+     one place this line may break is between the two facts it states. Above 768px the spans lay
+     out inline and the string is character-for-character what it always was. */
+  .hero__foot {
+    font-size: var(--t-2xs);
+    font-weight: 400;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    /* .label sets --lh-flat, which is right for one line and airless for two. */
+    gap: 3px;
+  }
+
+  .hero__foot-sep {
+    display: none;
+  }
+}
+
 /* ── the projects title ───────────────────────────────────────────────────── */
 /* One word at the SAME display scale as the hero name — one giant word per screen, never
    two. Its own container so the `cqi`-based --display-size resolves against the same
@@ -1173,6 +1560,19 @@ html.is-loading .preloader {
 
 .work-card__body {
   margin-top: 30px;
+}
+
+/* A CHAPTER STEP IS THE WRONG STEP HERE, on a phone. At ≥768px each project is a full-measure row
+   — a frame and a text block side by side, alternating — and separating two of those wants the
+   chapter silence, because each one reads as its own spread.
+   Stacked, they are not spreads; they are blocks in one list inside the work chapter. The step
+   between them should be the step the scale reserves for exactly that, and at 168px against a
+   card barely taller than the screen the chapter version reads as the section having ended. The
+   half-step is 84px, and it is the site's own number rather than an invented one. */
+@media (max-width: 767px) {
+  .work-grid {
+    gap: var(--space-block);
+  }
 }
 
 @media (min-width: 768px) {
@@ -1280,6 +1680,36 @@ a:focus-visible .work-card__arrow {
   font-size: var(--t-base);
   font-weight: 500;
   line-height: var(--lh-flat);
+}
+
+/* THE CARD'S OWN INTERNALS, RE-CUT FOR THE PHONE. These four numbers were measured against the
+   ≥768px layout, where the body is a column standing BESIDE a frame and has that frame's full
+   height to fill — so the gaps are doing two jobs, separating the lines and taking up the slack
+   that keeps the column optically centred against the picture. Stacked under the frame there is no
+   slack to take up, and the same numbers read as four unrelated fragments rather than one block:
+   30 + 20 + 28 + 48 is 126px of air inside a card whose text is barely taller than that.
+
+   The 48px above the way-in is the one that gives it away. It exists up there to stand the link
+   clear of the meta line AND off the bottom of the frame; down here only the first half is true.
+
+   The ratios are kept — title tight to the frame, description tighter still, meta a step out, the
+   way-in furthest — so it is the same card at a smaller scale, not a different one. */
+@media (max-width: 767px) {
+  .work-card__body {
+    margin-top: 22px;
+  }
+
+  .work-card__desc {
+    margin-top: 14px;
+  }
+
+  .work-card__meta {
+    margin-top: 18px;
+  }
+
+  .work-card__cta {
+    margin-top: 28px;
+  }
 }
 
 /* ── the featured deck ────────────────────────────────────────────────────── */
@@ -1761,6 +2191,24 @@ a:focus-visible .work-card__arrow {
   margin-top: calc(var(--space-block) * 0.4);
 }
 
+/* THE STEP HAS TO BEAT THE ONE BETWEEN THE CARDS, and on a phone it no longer did. Above 768px
+   this is a block step against a chapter step between the featured rows — the archive sits closer
+   to the work than the work sits to itself, and that is right up there, because each featured row
+   is a full-measure spread and the eyebrow-plus-rule below is doing the separating on its own.
+
+   Reducing the card gap to the block step (see .work-grid) left the two distances EQUAL, and equal
+   spacing says equal rank: "Also built" stopped reading as the index under the featured work and
+   started reading as a fourth featured card that had lost its picture.
+
+   A chapter step restores the difference, and 2:1 is the ratio the whole scale is built on — the
+   same "more space above a heading than below it" that separates every other pair on the site.
+   It is still inside PROJECTS; it is the next movement of it, not the next chapter. */
+@media (max-width: 767px) {
+  .work-archive {
+    margin-top: var(--space-chapter);
+  }
+}
+
 /* "Also built" keeps its own compact row language. The featured work already made the large
    gesture; this is the quieter index beneath it. */
 /* An eyebrow one rung above .label, and tracked one step LESS because of it — caps need less
@@ -1847,6 +2295,49 @@ a.archive__link:hover .archive__arrow,
 a.archive__link:focus-visible .archive__arrow {
   color: var(--color-accent);
   transform: translate(3px, -3px);
+}
+
+/* THE ROW STOPS WRAPPING AND STARTS BEING A GRID. `flex-wrap` is the right mechanism at a width
+   where all four items fit on one line and the only question is how the slack is spent. At 345px
+   none of that holds: the name's `min-width: min(100%, 16rem)` takes the whole line, the note
+   drops to the second, and the year — pushed by `margin-left: auto`, which has no meaning until
+   there is free space on ITS line — lands alone at the bottom right, detached from the name it
+   belongs to. Three lines, and the last one reads as a stray.
+
+   Naming the columns says the thing the wrap was only implying: the name and its year are one
+   line, the note is the line under it. `margin-left: 0` is the important half — the auto margin
+   is what stranded the year, and a grid column does the same job deterministically.
+
+   34px of padding is a desktop row's breathing room; three of them stacked on a phone is most of
+   a screen spent on rules. */
+@media (max-width: 767px) {
+  .archive__link {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    align-items: baseline;
+    gap: 6px 10px;
+    padding: 22px 0;
+  }
+
+  /* Clears the 16rem floor, which in a grid track would force an overflow rather than a wrap. */
+  .archive__name {
+    grid-column: 1;
+    min-width: 0;
+  }
+
+  .archive__year {
+    grid-column: 2;
+    margin-left: 0;
+  }
+
+  .archive__arrow {
+    grid-column: 3;
+    align-self: baseline;
+  }
+
+  .archive__note {
+    grid-column: 1 / -1;
+  }
 }
 
 /* ── statement ────────────────────────────────────────────────────────────── */
@@ -2402,17 +2893,81 @@ a.archive__link:focus-visible .archive__arrow {
   }
 }
 
+/* THE CASE PAGE'S PHONE PASS. Like the hero's, every rule below 768px is in this one block.
+   The top of the page — title, brief, highlights, stage — is untouched; it composes correctly at
+   every width already. Everything here is about what happens BELOW the demo. */
 @media (max-width: 767px) {
-  .case__nav {
-    grid-template-columns: minmax(0, 1fr);
-    gap: 1rem;
+  /* THE CASE PAGE OPTS OUT OF THE PHONE FLOOR RAISE, and it is the only thing that does.
+     That raise (see the long note above `:root`'s override) exists because on the landing "every
+     row that sat side by side up there is stacked down here" — the gaps shrank while the things
+     they separate grew. None of that is true here: this page is ONE reading column at 375px and
+     at 1440px alike, so it never had side-by-side rows to compensate for and the raised floors
+     land as pure excess. 168px between the demo and "Why", 252px between the nav and the footer.
+
+     A NEW RAMP, NOT A LOWER FLOOR — the distinction matters. The root's linear term already
+     returns 128px at 375px, so lowering only the floor would change nothing where the problem is;
+     the 168px floor does not even bite until about 600px. This line is drawn through 112px at
+     375px and 184px at 767px, and 184px is exactly what the root ramp returns at 768px, so the
+     two regimes meet with no step at the breakpoint. Block stays exactly half at both ends,
+     which is what keeps "more space above a heading than below it" structural.
+
+     Set on .case rather than :root so it cannot leak: the footer is a SIBLING of this element
+     (see the case route's page.tsx), and it keeps the root values. */
+  .case {
+    --space-chapter: clamp(112px, calc(43px + 18.4vw), 280px);
+    --space-block: clamp(56px, calc(21.5px + 9.2vw), 140px);
+
+    /* The bottom only. The top of a case page is exactly as it should be, and it is written as
+       viewport height rather than as a step, so it is not the pair above's to move. */
+    padding-bottom: var(--space-block);
   }
 
-  .case__nav-item:not(.case__nav-item--previous, .case__nav-item--next),
-  .case__nav-item--previous,
-  .case__nav-item--next {
-    justify-self: start;
-    text-align: left;
+  /* HORIZONTAL HERE TOO. This used to collapse to a single left-aligned column, which turned
+     three peers into a stacked list where "All work" read as a step between two projects rather
+     than as the way out of both. The base grid — start / centre / end across three equal
+     columns — is the right shape at any width; it only ever needed to be made to fit.
+
+     --col-gap floors at 2rem, which spends 64px of a 345px row on air and leaves 93px a column.
+     0.75rem leaves 107px, and the longest label on the site ("← Whisk It All" at --t-sm, ~103px)
+     clears it. Below about 340px that one title wraps to two lines, which the base rule's
+     `align-items: center` and the end-column's right alignment already handle. `min-height: 44px`
+     is untouched, so the tap targets do not shrink with the type. */
+  .case__nav {
+    gap: 0.75rem;
+  }
+
+  .case__nav-item {
+    font-size: var(--t-sm);
+    gap: 0.4em;
+  }
+
+  /* THE DECISIONS STOP BEING HEADINGS. On desktop their subordination to "How" is POSITIONAL —
+     the beat title steps out into its own 0.55fr rail (see the min-width rule above) and the
+     decisions stay in the reading column, so the layout says which contains which before the
+     type has to. On a phone that rail is gone and the whole burden falls on a size step the
+     scale cannot pay: --t-5xl and --t-xl both hit their floors here, 28px against 18.4px, a
+     1.52× where the desktop has 2.31×.
+
+     Raising the beat title is not available — the next rung up is 32px, which is exactly what
+     the page's own h1 sets at this width, and a section heading may not tie the title. So the
+     decisions move DOWN and OUT: at 15px uppercase on --track-eyebrow they leave the heading
+     hierarchy altogether and read as labels introducing a paragraph, which is what they are.
+     The distinction is carried by the case change, not by a size step, so it survives the floor.
+
+     Semantics are untouched: still an h3 inside its own <section>, exactly as on desktop. */
+  .case__decision h3 {
+    font-size: var(--t-sm);
+    letter-spacing: var(--track-eyebrow);
+    text-transform: uppercase;
+    line-height: var(--lh-snug);
+  }
+
+  /* A label bonds to the thing it labels. 1rem was the gap between a heading and its body, and
+     at that distance three labels and three paragraphs read as six blocks. Tightening it here
+     leaves --col-gap's 32px between decisions as the larger gap by far, so the three read as a
+     list of pairs. */
+  .case__decision {
+    gap: 0.55rem;
   }
 }
 
@@ -2575,19 +3130,65 @@ a.archive__link:focus-visible .archive__arrow {
   aspect-ratio: var(--shot-ratio, 1);
 }
 
-/* Stacked below the breakpoint, at the panel's full width. Three across a phone is 100px a shot,
-   which is a contact sheet rather than a picture — and the panel is something you opened on
-   purpose, so it can afford the length. `flex: none` because the shorthand above sizes along the
-   main axis, and in a column that axis is the height. */
+/* Stacked below the breakpoint — three across a phone is 100px a shot, which is a contact sheet
+   rather than a picture. But stacking them AT THE PANEL'S FULL WIDTH hands the height over to the
+   ratio: a square becomes 345×345, and Education's three shots come to 972px of photograph inside
+   a 1180px panel. The panel is something you opened on purpose, so it can afford some length; it
+   cannot afford two and a half screenfuls.
+
+   THE FIX IS TO MOVE THE AUTHORITY FROM WIDTH TO HEIGHT. Fix the height and let `aspect-ratio`
+   derive the width, and three things fall out at once: the gallery halves (972px → 532px), the
+   shots stop being wider than they are tall or the reverse depending on which photo it is, and
+   every shot in a set shares a height again — which is the invariant the desktop row is built on
+   and the one the full-width stack had quietly dropped.
+
+   10rem is the knob. Below about 8rem a face in a group shot stops being readable at arm's
+   length; above about 12rem the saving stops being worth having. `flex: none` because the
+   shorthand above sizes along the main axis, and in a column that axis is the height — the very
+   thing being fixed here. `align-items` because the shots are now narrower than the column. */
 @media (max-width: 767px) {
+  /* SIDEWAYS, NOT DOWNWARDS. Stacking spent one screen height per photograph, so a panel cost two
+     or three screens of scrolling to get past — and the fix for that was to shrink the pictures,
+     which is paying for the layout with the thing the layout is for. Scrolling the row instead
+     spends ONE shot's height no matter how many there are, which buys the size back: 12rem here
+     against the 10rem the stack could afford.
+
+     THE PEEK IS THE AFFORDANCE. There is no scrollbar on a phone and no arrows here, so the only
+     thing that says "there is more" is the next shot showing at the right edge — which is why the
+     row must never exactly fit. It cannot: the narrowest set is two 4/3 shots at 256px each, and
+     256 + 12 + 256 is 524 against a 345px column, so the second always shows ~77px of itself. The
+     square sets show ~141px.
+
+     `max-width` and `margin-inline` are undone because the base ones exist to CENTRE a row that
+     fits; this row is meant to overflow, and a centred overflowing row starts off-screen on the
+     left. No full-bleed for the same reason: .past__panel is `overflow: hidden` for its height
+     animation, so a negative inline margin would simply be clipped.
+
+     Lenis is not in the way — `syncTouch` is off, so touch scrolling is native and a child that
+     wants the horizontal axis simply takes it. `overscroll-behavior-x: contain` is what stops a
+     swipe past the last shot turning into the browser's back gesture. */
   .past__gallery {
-    flex-direction: column;
+    max-width: none;
+    margin-inline: 0;
+    gap: 12px;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x proximity;
+    /* Proximity, not mandatory: mandatory would fight the peek by pulling a half-shown shot fully
+       into view the moment a swipe ended near it. */
+    scroll-padding-inline: 0;
+    scrollbar-width: none;
+  }
+
+  .past__gallery::-webkit-scrollbar {
+    display: none;
   }
 
   .past__shot {
-    flex-grow: 0;
-    flex-basis: auto;
-    width: 100%;
+    flex: none;
+    width: auto;
+    height: 12rem;
+    scroll-snap-align: start;
   }
 }
 

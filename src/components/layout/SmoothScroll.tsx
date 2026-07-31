@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useRef } from "react";
 
 import { useIntro } from "@/components/intro/IntroContext";
+import { useMenu } from "@/components/layout/MobileMenu";
 
 /**
  * Root smooth-scroll provider, and the page's single animation clock.
@@ -25,6 +26,7 @@ import { useIntro } from "@/components/intro/IntroContext";
 export function SmoothScroll({ children }: { children: React.ReactNode }) {
   const prefersReducedMotion = useReducedMotion() ?? false;
   const { locked } = useIntro();
+  const { open: menuOpen } = useMenu();
   const lenis = useRef<LenisRef>(null);
   const pathname = usePathname();
 
@@ -44,12 +46,19 @@ export function SmoothScroll({ children }: { children: React.ReactNode }) {
   // <html> stops the document scrolling, but Lenis keeps its own target position and would go on
   // accumulating wheel delta behind the curtain — then spend all of it at once the moment the lock
   // came off. Stopping the instance is what makes the held page actually still.
+  //
+  // TWO REASONS TO HOLD, ONE PLACE THAT HOLDS. The open mobile menu wants exactly the same thing
+  // for exactly the same reason, and it would have exactly the same bug if it settled for the CSS
+  // half. It cannot stop the instance itself — this component owns it — so it raises its flag here
+  // instead. Two components calling stop() and start() on one instance would race: whichever
+  // released last would win, and a menu closing during the intro would hand the page over early.
+  const held = locked || menuOpen;
   useEffect(() => {
     const instance = lenis.current?.lenis;
     if (!instance) return;
-    if (locked) instance.stop();
+    if (held) instance.stop();
     else instance.start();
-  }, [locked]);
+  }, [held]);
 
   // A route change lands the new page at the old page's scroll offset, and the reason is that
   // Next's scroll-to-top and Lenis disagree about who owns the position. Next calls
