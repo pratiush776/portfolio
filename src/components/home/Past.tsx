@@ -143,43 +143,51 @@ export function Past() {
                 }
                 inert={!isOpen}
               >
+                {/* One block per role, in the same four slots every time — where, what, when,
+                    the specifics. A chapter with one role renders exactly what it always did; the
+                    map is what lets EXPERIENCE stack three of them without inventing a second
+                    layout for the case. */}
                 <div className="past__body">
-                  <p className="past__where">{chapter.lines[0]}</p>
-                  <p className="past__what">{chapter.lines[1]}</p>
+                  {chapter.roles.map((role) => (
+                    <div className="past__role" key={role.lines[0]}>
+                      <p className="past__where">{role.lines[0]}</p>
+                      <p className="past__what">{role.lines[1]}</p>
 
-                  {chapter.period ? (
-                    <p className="past__period">{chapter.period}</p>
-                  ) : null}
+                      {role.period ? (
+                        <p className="past__period">{role.period}</p>
+                      ) : null}
 
-                  {/* Rendered only where there are specifics. An empty list still spends its own
-                      22px above itself, which on the thesis row would open a gap under the heading
-                      that reads as something missing. */}
-                  {chapter.detail?.length ? (
-                    <ul className="past__detail">
-                      {chapter.detail.map((line) => (
-                        <li key={line}>{line}</li>
-                      ))}
-                    </ul>
-                  ) : null}
+                      {/* Rendered only where there are specifics. An empty list still spends its
+                          own 22px above itself, which on the thesis row would open a gap under the
+                          heading that reads as something missing. */}
+                      {role.detail?.length ? (
+                        <ul className="past__detail">
+                          {role.detail.map((line) => (
+                            <li key={line}>{line}</li>
+                          ))}
+                        </ul>
+                      ) : null}
 
-                  {chapter.link ? (
-                    <a
-                      className="past__link"
-                      href={chapter.link.href}
-                      target="_blank"
-                      rel="noreferrer"
-                    >
-                      <span className="underline-link">
-                        {chapter.link.label}
-                      </span>
-                      <ArrowUpRight
-                        className="past__link-arrow"
-                        width="13"
-                        height="13"
-                        aria-hidden
-                      />
-                    </a>
-                  ) : null}
+                      {role.link ? (
+                        <a
+                          className="past__link"
+                          href={role.link.href}
+                          target="_blank"
+                          rel="noreferrer"
+                        >
+                          <span className="underline-link">
+                            {role.link.label}
+                          </span>
+                          <ArrowUpRight
+                            className="past__link-arrow"
+                            width="13"
+                            height="13"
+                            aria-hidden
+                          />
+                        </a>
+                      ) : null}
+                    </div>
+                  ))}
                 </div>
 
                 {/* A SIBLING of the body rather than a child of it, because the body is a 54ch
