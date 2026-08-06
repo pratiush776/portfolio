@@ -3275,11 +3275,20 @@ a.archive__link:focus-visible .archive__arrow {
 }
 
 /* THE SEPARATION HAS TO BEAT THE LARGEST GAP INSIDE A ROLE, or three roles read as one list of
-   nine lines. Inside, the widest step is the 22px above the specifics; this is comfortably past
-   it at every width, so the eye breaks the panel where the roles break and not where a detail
-   list starts. Only ever spent between siblings, so a single-role panel pays nothing. */
+   nine lines. Inside, the widest step is the 22px above the specifics.
+
+   FIXED, NOT FLUID, AND THAT IS THE WHOLE POINT. This started as a clamp and it was wrong at both
+   ends, because the thing it has to out-rank does not scale: the gaps inside a role are literal
+   px — 6, 14, 22 — identical on a phone and at 1440. A fluid separation measured against fixed
+   internal gaps drifts by definition, and it did: 46px at the top of the ramp was 2.1x the 22px,
+   its 30px floor was 1.36x, and at 1.36x three roles ran together into one column of nine lines.
+
+   64px is 2.9x at every width, which is what "these are separate positions" needs to read as at a
+   glance rather than on inspection. Only ever spent between siblings, so the three single-role
+   panels pay nothing for it. THE knob if the panel wants to be shorter — but lower it by ratio,
+   not by feel, and 44px (2x) is the floor below which the structure stops being legible. */
 .past__role + .past__role {
-  margin-top: clamp(30px, 3.4vw, 46px);
+  margin-top: 64px;
 }
 
 /* The serif's third place on the site. Its own rule says it is for where the site speaks about

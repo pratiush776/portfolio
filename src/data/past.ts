@@ -115,7 +115,7 @@ export const past: PastChapter[] = [
         },
       },
       {
-        lines: ["Whisk It All", "Full-Stack Software Engineer"],
+        lines: ["Whisk It All", "Full-Stack Software Engineer (Intern)"],
         period: "Summer 2025",
         detail: [
           "Designed, built and deployed the customer-facing production site.",
