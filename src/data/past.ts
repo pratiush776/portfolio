@@ -82,7 +82,6 @@ export const past: PastChapter[] = [
       "Caldwell University",
       "B.S. Computer Science, minor in Business Analytics · 3.85 GPA",
     ],
-    period: "May 2026",
     detail: [
       "Honors Student · Dean's List · Recognition Award · Co-founder & Secretary of Computer Science Club",
     ],
