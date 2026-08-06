@@ -3260,6 +3260,37 @@ a.archive__link:focus-visible .archive__arrow {
   text-align: center;
 }
 
+/* ONE ROLE'S BLOCK. Most panels hold a single one and this changes nothing for them; EXPERIENCE
+   holds three, and this is what keeps them three blocks instead of one running column.
+
+   It repeats the body's own column because the body no longer parents the lines directly — the
+   centring has to move down with them, exactly as it did in the hero's meta when that grew a
+   second column. `width: 100%` so each role still wraps against the 54ch measure rather than
+   shrinking to its own longest line, which would rag the three of them against each other. */
+.past__role {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+/* THE SEPARATION HAS TO BEAT THE LARGEST GAP INSIDE A ROLE, or three roles read as one list of
+   nine lines. Inside, the widest step is the 22px above the specifics.
+
+   FIXED, NOT FLUID, AND THAT IS THE WHOLE POINT. This started as a clamp and it was wrong at both
+   ends, because the thing it has to out-rank does not scale: the gaps inside a role are literal
+   px — 6, 14, 22 — identical on a phone and at 1440. A fluid separation measured against fixed
+   internal gaps drifts by definition, and it did: 46px at the top of the ramp was 2.1x the 22px,
+   its 30px floor was 1.36x, and at 1.36x three roles ran together into one column of nine lines.
+
+   64px is 2.9x at every width, which is what "these are separate positions" needs to read as at a
+   glance rather than on inspection. Only ever spent between siblings, so the three single-role
+   panels pay nothing for it. THE knob if the panel wants to be shorter — but lower it by ratio,
+   not by feel, and 44px (2x) is the floor below which the structure stops being legible. */
+.past__role + .past__role {
+  margin-top: 64px;
+}
+
 /* The serif's third place on the site. Its own rule says it is for where the site speaks about
    itself rather than describing something — the statement and the case brief — and a biography
    is the same voice, which is the argument for widening the remit rather than adding a face.

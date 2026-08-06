@@ -11,16 +11,24 @@
  * panel answers in the same order so the four read as one form rather than four write-ups:
  * where it was, what it was, when, then the specifics.
  */
-export type PastChapter = {
-  id: string;
-  /** The word that stands at scale. Two words at most — it is set in caps and has to hold one
-      line on a phone. */
-  word: string;
+/**
+ * ONE ROLE, in the slots every role on the page shares.
+ *
+ * A chapter used to BE a role — one word, one thing behind it — and EXPERIENCE is where that
+ * stopped being true: three positions belong under one category word. Giving each of them a
+ * display word of its own would have turned the section into a list of jobs, which is the logo
+ * bar this design exists to avoid; leaving them out would have been dishonest.
+ *
+ * So the shared shape moved down a level. The promise is no longer "every panel answers in the
+ * same order", it is "every ROLE does" — the same promise, and it now survives a panel holding
+ * more than one. A chapter with a single role reads exactly as it did.
+ */
+export type PastRole = {
   /**
-   * The panel's heading, as exactly two lines: the thing, then what it is. Usually that reads as
-   * the organisation and then the role; on the thesis, where there is no employer, it is the
-   * paper's title and then "Honors Thesis". The SLOTS are what the four panels share, not the kind
-   * of noun that fills them.
+   * The heading, as exactly two lines: the thing, then what it is. Usually that reads as the
+   * organisation and then the role; on the thesis, where there is no employer, it is the paper's
+   * title and then "Honors Thesis". The SLOTS are what every role shares, not the kind of noun
+   * that fills them.
    *
    * Two lines rather than one sentence because that shared shape is the whole point — the eye finds
    * "what this was" and "what I was in it" in the same place every time instead of reading a
@@ -32,8 +40,23 @@ export type PastChapter = {
   /** The specifics, one per line. Quiet meta rather than prose. Absent on the thesis, whose two
       heading lines and link already say everything there is to say about it. */
   detail?: string[];
-  /** Present only where the claim is publicly verifiable — currently the thesis alone. */
+  /** Present only where the claim is publicly verifiable — the thesis and the MicroJournal repo. */
   link?: { label: string; href: string };
+};
+
+export type PastChapter = {
+  id: string;
+  /** The word that stands at scale. Two words at most — it is set in caps and has to hold one
+      line on a phone. */
+  word: string;
+  /**
+   * What sits behind the word, most recent first. Usually one; EXPERIENCE is three.
+   *
+   * An array even where there is only ever going to be one, because the alternative — flat fields
+   * for the single case and a list for the many — is two ways to say the same thing, and every
+   * rule that reads a chapter would have to handle both.
+   */
+  roles: PastRole[];
   /**
    * Photographs of the place, shown inside the panel under the specifics.
    *
@@ -71,19 +94,136 @@ export type PastChapter = {
 
 export const past: PastChapter[] = [
   {
+    id: "experience",
+    // Three roles under one word. "Internship" was accurate when there was one and became a lie
+    // when there were three — the tutoring post is a campus job, not an internship. A category
+    // covers all of them without claiming anything, which is what every other word here does.
+    word: "Experience",
+    // Most recent first, which is the order a CV is read in and the order these were lived in.
+    roles: [
+      {
+        lines: ["MicroJournal", "Tech & Infrastructure Lead"],
+        period: "Spring 2026",
+        detail: [
+          "Took a journaling product from zero to one in a week, on React and Firebase.",
+          "Built the event-analytics layer the team read behaviour from.",
+          "Pitched direction and pricing to Instructure's CTO and CPO, then shipped on their notes.",
+        ],
+        link: {
+          label: "View Code",
+          href: "https://github.com/pratiush776/Microjournal",
+        },
+      },
+      {
+        lines: ["Whisk It All", "Full-Stack Software Engineer (Intern)"],
+        period: "Summer 2025",
+        detail: [
+          "Designed, built and deployed the customer-facing production site.",
+          "Owned it end to end, from design through to deployment.",
+          "Worked directly with stakeholders to turn business needs into the build.",
+        ],
+      },
+      {
+        lines: ["Caldwell University", "Systems Assistant & Student Tutor"],
+        period: "2023 — 2025",
+        detail: [
+          "Tutored data structures, algorithms and full-stack development.",
+          "Ran front-line software, hardware and network support.",
+        ],
+      },
+    ],
+  },
+  {
+    id: "jets",
+    // The Jets are the one name here a visitor will place, so the word is theirs. The detail
+    // carries the collaboration rather than burying it: the role sat inside a Caldwell x Jets
+    // team, and a bare "Data Analyst, New York Jets" would claim they employed him directly.
+    word: "NY Jets",
+    roles: [
+      {
+        lines: ["New York Jets", "Data Analyst"],
+        detail: [
+          "A Caldwell University collaboration with the New York Jets.",
+          "Worked as part of the analysis team on the club's data.",
+        ],
+      },
+    ],
+    // A pair, and both are square as shot — so the frames crop nothing and the two sit as one
+    // object. They also answer the two halves of the claim above: one is the work, one is the
+    // place. The third shot from the visit is left out; three across this measure drops each of
+    // them to a thumbnail, and a pair is the shape that keeps them at a size worth opening for.
+    gallery: [
+      {
+        src: "/images/NYJETS_2.webp",
+        blur: "data:image/webp;base64,UklGRkIAAABXRUJQVlA4IDYAAAAQAgCdASoIAAgABABoJQBOj+DE/wPl6riAAM19C/TUtzbnFSAXD0K5jwAIxMAZbskT8WQAAAA=",
+        alt: "Presenting the fan-segment analysis to the room at the Jets facility.",
+      },
+      {
+        src: "/images/NYJETS_3.webp",
+        blur: "data:image/webp;base64,UklGRkAAAABXRUJQVlA4IDQAAACwAQCdASoIAAgABABoJZQCdADbGlAwAP6jZeFBdl4tnnqyLz0jbo0lYKs+YAJOxBcWVVAA",
+        alt: "Pratiush on the practice field, the Jets logo on the facility behind him.",
+      },
+    ],
+  },
+  {
+    id: "research",
+    word: "Research Paper",
+    roles: [
+      {
+        // The one row where the first line is not an organisation. A thesis has no employer — the
+        // paper IS the thing, so it takes the heading slot and "Honors Thesis" drops to the line
+        // that says what it is, exactly where a role sits on every other row. The shape is
+        // unchanged; only what fills it is. Where it was published used to live on this line and
+        // is gone: the link below already says the paper can be read, and saying it twice made the
+        // heading about a database rather than about the work.
+        lines: ["AI Sycophancy and Human Cognitive Biases", "Honors Thesis"],
+        // Named for its destination rather than the click. "Click here" tells a screen reader
+        // nothing when links are read out of context, and the arrow already says it is a link
+        // leaving the site — so the words are free to say what is at the other end.
+        link: {
+          label: "Read Paper",
+          href: "https://www.jstor.org/stable/community.42398302",
+        },
+      },
+    ],
+    // BOTH FRAMES TAKE THE LEFT ONE'S 4:3. Left at its native ratio and right at its own, the pair
+    // came out a wide landscape beside a narrow portrait — two pictures of the same poster session
+    // that read as two different things. Matching them makes it one pair, and the price is paid by
+    // the portrait: a 3:4 photograph in a 4:3 frame loses an equal band off the top and the bottom,
+    // and keeps the poster and him from the chest up.
+    gallery: [
+      {
+        src: "/images/honors_1.webp",
+        blur: "data:image/webp;base64,UklGRkoAAABXRUJQVlA4ID4AAAAQAgCdASoIAAYABABoJYgCdH8AGBi0ZldYAPRM0m0xcfgfZxb9/7aZLg4B3SnkP8vj3tjIxOHP4Ik24oAAAA==",
+        alt: "Presenting the thesis poster at the Caldwell University research symposium.",
+        ratio: 4 / 3,
+      },
+      {
+        src: "/images/honors_2.webp",
+        blur: "data:image/webp;base64,UklGRkgAAABXRUJQVlA4IDwAAADQAQCdASoGAAgABABoJagCdAEUmfIBQAD3276EXaMSj5h2pedn+55o5o9a2aFpmxLlcDNIIChsVtgAAAA=",
+        alt: "Pratiush standing beside his thesis poster at the symposium.",
+        ratio: 4 / 3,
+      },
+    ],
+  },
+  {
     id: "education",
     word: "Education",
-    // The GPA rides the end of the degree line rather than taking a row of its own below. It is
-    // part of what the degree IS, not a separate specific about it — and given a line to itself it
-    // read as the panel's headline number, which is more weight than a GPA should carry against
-    // the degree it belongs to. Here it closes the sentence, where it is available to anyone
-    // looking for it and quiet to everyone else.
-    lines: [
-      "Caldwell University",
-      "B.S. Computer Science, minor in Business Analytics · 3.85 GPA",
-    ],
-    detail: [
-      "Honors Student · Dean's List · Recognition Award · Co-founder & Secretary of Computer Science Club",
+    roles: [
+      {
+        // The GPA rides the end of the degree line rather than taking a row of its own below. It is
+        // part of what the degree IS, not a separate specific about it — and given a line to itself
+        // it read as the panel's headline number, which is more weight than a GPA should carry
+        // against the degree it belongs to. Here it closes the sentence, where it is available to
+        // anyone looking for it and quiet to everyone else.
+        lines: [
+          "Caldwell University",
+          "B.S. Computer Science, minor in Business Analytics · 3.85 GPA",
+        ],
+        detail: [
+          "Honors Student · Dean's List · Recognition Award · Co-founder & Secretary of Computer Science Club",
+        ],
+      },
     ],
     // A triptych, with the graduation portrait held in the middle and given a wide frame — the
     // widest thing here, flanked by two squares at the same height. The other two are the two
@@ -112,82 +252,6 @@ export const past: PastChapter[] = [
         blur: "data:image/webp;base64,UklGRk4AAABXRUJQVlA4IEIAAADQAQCdASoIAAgABABoJbACdAELMk0VYAD+tAl07IF8lvQMpKDcFYrVAMpK8Y+CdLM5wo/5Ndikl8bTdZIR3HcAAAA=",
         alt: "At the Computer Science Club table during the Caldwell University club fair.",
         zoom: 1.25,
-      },
-    ],
-  },
-  {
-    id: "jets",
-    // The Jets are the one name here a visitor will place, so the word is theirs. The detail
-    // carries the collaboration rather than burying it: the role sat inside a Caldwell × Jets
-    // team, and a bare "Data Analyst, New York Jets" would claim they employed him directly.
-    word: "NY Jets",
-    lines: ["New York Jets", "Data Analyst"],
-    detail: [
-      "A Caldwell University collaboration with the New York Jets.",
-      "Worked as part of the analysis team on the club's data.",
-    ],
-    // A pair, and both are square as shot — so the frames crop nothing and the two sit as one
-    // object. They also answer the two halves of the claim above: one is the work, one is the
-    // place. The third shot from the visit is left out; three across this measure drops each of
-    // them to a thumbnail, and a pair is the shape that keeps them at a size worth opening for.
-    gallery: [
-      {
-        src: "/images/NYJETS_2.webp",
-        blur: "data:image/webp;base64,UklGRkIAAABXRUJQVlA4IDYAAAAQAgCdASoIAAgABABoJQBOj+DE/wPl6riAAM19C/TUtzbnFSAXD0K5jwAIxMAZbskT8WQAAAA=",
-        alt: "Presenting the fan-segment analysis to the room at the Jets facility.",
-      },
-      {
-        src: "/images/NYJETS_3.webp",
-        blur: "data:image/webp;base64,UklGRkAAAABXRUJQVlA4IDQAAACwAQCdASoIAAgABABoJZQCdADbGlAwAP6jZeFBdl4tnnqyLz0jbo0lYKs+YAJOxBcWVVAA",
-        alt: "Pratiush on the practice field, the Jets logo on the facility behind him.",
-      },
-    ],
-  },
-  {
-    id: "internship",
-    word: "Internship",
-    lines: ["Whisk It All", "Full-Stack Software Engineer"],
-    period: "Summer 2025",
-    detail: [
-      "Designed, built and deployed the customer-facing production site.",
-      "Owned it end to end, from design through to deployment.",
-      "Worked directly with stakeholders to turn business needs into the build.",
-    ],
-  },
-  {
-    id: "research",
-    word: "Research Paper",
-    // The one row where the first line is not an organisation. A thesis has no employer — the
-    // paper IS the thing, so it takes the heading slot and "Honors Thesis" drops to the line that
-    // says what it is, exactly where a role sits on every other row. The panel's shape is
-    // unchanged; only what fills it is. Where it was published used to live on this line and is
-    // gone: the link below already says the paper can be read, and saying it twice made the
-    // heading about a database rather than about the work.
-    lines: ["AI Sycophancy and Human Cognitive Biases", "Honors Thesis"],
-    // Named for its destination rather than the click. "Click here" tells a screen reader
-    // nothing when links are read out of context, and the arrow already says it is a link
-    // leaving the site — so the words are free to say what is at the other end.
-    link: {
-      label: "Read Paper",
-      href: "https://www.jstor.org/stable/community.42398302",
-    },
-    // BOTH FRAMES TAKE THE LEFT ONE'S 4:3. Left at its native ratio and right at its own, the pair
-    // came out a wide landscape beside a narrow portrait — two pictures of the same poster session
-    // that read as two different things. Matching them makes it one pair, and the price is paid by
-    // the portrait: a 3:4 photograph in a 4:3 frame loses an equal band off the top and the bottom,
-    // and keeps the poster and him from the chest up.
-    gallery: [
-      {
-        src: "/images/honors_1.webp",
-        blur: "data:image/webp;base64,UklGRkoAAABXRUJQVlA4ID4AAAAQAgCdASoIAAYABABoJYgCdH8AGBi0ZldYAPRM0m0xcfgfZxb9/7aZLg4B3SnkP8vj3tjIxOHP4Ik24oAAAA==",
-        alt: "Presenting the thesis poster at the Caldwell University research symposium.",
-        ratio: 4 / 3,
-      },
-      {
-        src: "/images/honors_2.webp",
-        blur: "data:image/webp;base64,UklGRkgAAABXRUJQVlA4IDwAAADQAQCdASoGAAgABABoJagCdAEUmfIBQAD3276EXaMSj5h2pedn+55o5o9a2aFpmxLlcDNIIChsVtgAAAA=",
-        alt: "Pratiush standing beside his thesis poster at the symposium.",
-        ratio: 4 / 3,
       },
     ],
   },
