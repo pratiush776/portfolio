@@ -170,7 +170,7 @@ export const works: FeaturedWork[] = [
     description:
       "A focus app that composes its audio in real time instead of looping a playlist. The engine paces every session through an entry, anchor, sustain, and re-focus arc, so the sound shifts with your attention rather than against it.",
     caseStudy: {
-      why: "I built this app out of own experience: Finding the perfect background music to focus takes valuable time away from the actual work. Browsing several playlists to find that one track that fits your mood is tedious.",
+      why: "I built this app out of my own experience: Finding the perfect background music to focus takes valuable time away from the actual work. Browsing several playlists to find that one track that fits your mood is tedious.",
       what: "I started Lucid Tone and built the real-time audio system behind it. Rather than serving another playlist, each session composes an evolving stream with fine-grained controls that shape the music around the listener’s mood.",
 
       how: "A FastAPI server runs a Markov chain–based music engine and streams each composition to the client over WebSockets. React and TypeScript power the listening interface, while Redis maintains session state and supports stream continuity across persistent connections.",
@@ -211,6 +211,53 @@ export const works: FeaturedWork[] = [
       poster: "/projects_assets/LucidTone/poster.jpg",
     },
     links: [],
+  },
+  {
+    title: "MicroJournal",
+    slug: "microjournal",
+    tier: "secondary",
+    year: "2026",
+    role: "Startup studio · Tech & Infrastructure Lead",
+    tagline:
+      "A journaling app that replaces the blank page with two or three prompts a day.",
+    archiveNote:
+      "Habit-first micro-journaling app for iOS, built zero to one in Instructure's startup studio.",
+    description:
+      "A journaling app built for the people who quit journaling. MicroJournal swaps the blank page for two or three guided prompts a day, a one-to-three-minute entry, and a streak worth keeping. We built it from zero to one as a team of four in a startup studio run by Instructure's CTO and CPO.",
+    caseStudy: {
+      why: "People know journaling helps, and most of them stop anyway: 83% of new journalers quit within two weeks. Our early research showed the problem was starting, not writing. A blank page asks for a decision before it asks for a thought.",
+      what: "MicroJournal is a habit-first journal for iOS: a few guided prompts each day, a mood check-in and tags, then streaks, history, and mood trends over time. We validated demand with a public waitlist and submitted the app to the App Store. I led tech and infrastructure: backend architecture, deployment, and the data behind the app.",
+      how: "The app is React Native on Expo, with Expo Router for navigation and TanStack Query for data. Supabase handles accounts and storage, with sessions kept in the device's secure store. Streaks and mood trends are computed from the entries themselves, and a PIN-locked vault keeps private notes AES-encrypted on the device.",
+      decisions: [
+        {
+          title: "Prompts, not pages",
+          detail:
+            "Every entry starts from a prompt. Users told us starting was the hard part, so the product takes the decision of what to write off their hands.",
+        },
+        {
+          title: "Habit over features",
+          detail:
+            "It started as a journaling app and became habit-first micro-journaling. Short, repeatable entries kept people coming back where richer features did not.",
+        },
+        {
+          title: "Built under review",
+          detail:
+            "We pitched direction and pricing to Instructure's CTO and CPO, and shipped on feedback from their engineering team.",
+        },
+      ],
+    },
+    stack: ["React Native", "Expo", "TypeScript", "Supabase"],
+    media: {
+      kind: "video",
+      src: "/projects_assets/Microjournal/demo.mp4",
+      aspectRatio: "444 / 960",
+    },
+    links: [
+      {
+        label: "Browse the code",
+        href: "https://github.com/pratiush776/microjournal-app",
+      },
+    ],
   },
   {
     title: "Private Law",
@@ -265,18 +312,18 @@ export const works: FeaturedWork[] = [
     tier: "primary",
     year: "2025",
     role: "Full-stack Engineer",
-    tagline: "A local café  & bakery website optimized for homely experience.",
+    tagline: "A local café & bakery website optimized for homely experience.",
     description:
       "A real website for a real bakery. I led design and development for a local business owner: story, services, testimonials, and a CMS they update without calling me. Small project, real stakes, actual customers.",
     caseStudy: {
       why: "The business wanted to elevate their online presence. Similarly, they wanted a self-maintainable site to reduce external vendor dependencies for frequent updates.",
       what: "The outcome was a user-friendly and elegant website that tells a story. Also, story, services, testimonials, and menu now live together, with a light-weight and secure CMS for everyday updates.",
-      how: "Next.js for the frontend and route handling; Tailwind & GSAP for the desing & motion. And, Tina CMS for the content management with Next.js middleware for secure authentication.",
+      how: "Next.js for the frontend and route handling; Tailwind & GSAP for the design & motion. And, Tina CMS for the content management with Next.js middleware for secure authentication.",
       decisions: [
         {
           title: "Context",
           detail:
-            "The owner’s story and the business's values builds trust for anyone to place an order. Therefore, the website is designed to tell a story and showcase the business's values.",
+            "The owner’s story and the business's values build trust for anyone to place an order. Therefore, the website is designed to tell a story and showcase the business's values.",
         },
         {
           title: "Why Tina CMS?",
@@ -440,7 +487,8 @@ export function getWork(slug: string): FeaturedWork | undefined {
 }
 
 /** The archive list: every secondary-tier case work, each row linking in to its own case page.
-    Newest-first falls out of the `works` order — RAG (2024) → HomeDoc (2023) → RoomMates (2022). */
+    Newest-first falls out of the `works` order — MicroJournal (2026) → RAG (2024) → HomeDoc (2023)
+    → RoomMates (2022). */
 export const archive: ArchiveWork[] = works
   .filter((work) => work.tier === "secondary")
   .map((work) => ({
