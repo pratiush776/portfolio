@@ -2525,6 +2525,36 @@ a.archive__link:focus-visible .archive__arrow {
   gap: clamp(28px, 3vw, 48px);
 }
 
+/* Back to the work: a bare arrow on the nav brand's left edge, just under the bar, so the two
+   read as one column. Absolute against the page itself (nothing above it is positioned), which is
+   what lets it sit on the bar's --nav-gutter rather than the content's wider inset, and keeps it
+   out of the flow so the title stands exactly where it does without it. The 44px target opens to
+   the right of the glyph, so the arrow's own edge is the one on the line. */
+.case__back {
+  position: absolute;
+  top: calc(var(--nav-pad-block) * 2 + 18px);
+  left: var(--nav-gutter);
+  display: inline-flex;
+  align-items: center;
+  min-width: 44px;
+  min-height: 44px;
+  font-size: var(--t-base);
+  line-height: var(--lh-flat);
+}
+
+/* The site's arrow cue — amber, and a nudge the way it points. */
+.case__back-arrow {
+  transition:
+    color var(--dur-hover) var(--ease),
+    transform var(--dur-hover) var(--ease);
+}
+
+.case__back:hover .case__back-arrow,
+.case__back:focus-visible .case__back-arrow {
+  color: var(--color-accent);
+  transform: translateX(-3px);
+}
+
 .case__intro {
   display: flex;
   flex-direction: column;
