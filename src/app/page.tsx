@@ -1,8 +1,14 @@
+import type { Metadata } from "next";
+
 import { Hero } from "@/components/home/Hero";
 import { Past } from "@/components/home/Past";
 import { SiteFooter } from "@/components/footer/SiteFooter";
 import { Statement } from "@/components/home/Statement";
 import { WorkIndex } from "@/components/works/WorkIndex";
+
+export const metadata: Metadata = {
+  alternates: { canonical: "/" },
+};
 
 /**
  * The landing, in five beats: who I am → the promise → the proof → where I come from → the ask.
