@@ -1594,6 +1594,19 @@ html.is-loading .preloader {
   gap: var(--space-chapter);
 }
 
+/* THE TALLEST A COVER MAY STAND in the flat layout — the deck's height guard (--stack-well-h),
+   given to the layout that never had one. The frame is 16/10 at the width of its column, so a wide
+   window that is also short (a narrowed desktop window, a phone on its side) grew a cover taller
+   than the screen. Only the height is capped: the frame keeps its full width, turns wider than
+   16/10, and `object-fit: cover` takes the difference off the top and bottom of the still — which
+   on these laptop renders is desk and background (see .frame--wide). A phone held upright never
+   reaches the cap. Width is stated outright so the ratio resolves height from it, and the cap then
+   trims that height without pulling the width in after it. */
+.work-grid .frame {
+  width: 100%;
+  max-height: max(220px, 60svh);
+}
+
 /* Each featured cell is one link wrapping the frame and the text as a single target — stacked
    (frame over body) on mobile, a side-by-side row at ≥768px (see below). Base rules first so the
    media-query overrides win at desktop (equal specificity resolves on source order). */
