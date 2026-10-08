@@ -25,10 +25,14 @@ export async function generateMetadata({
   const { slug } = await params;
   const work = getWork(slug);
   if (!work) return { title: "Project not found" };
+  // Search shows the landing page alone; a case page is reached from it or by its own URL, never
+  // as a result or a sitelink under it. `follow` keeps its links crawlable, and it stays open in
+  // robots.txt on purpose — a blocked page can still be listed, because Google never reads the
+  // noindex. No canonical: one saying "index this URL" beside a noindex is a contradiction.
   return {
     title: `${work.title} — PRATIUSH`,
     description: work.description,
-    alternates: { canonical: `/works/${work.slug}` },
+    robots: { index: false, follow: true },
   };
 }
 

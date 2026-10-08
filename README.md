@@ -27,8 +27,10 @@ Web3Forms must be called from the client — the API blocks server-side requests
 
 ## SEO
 
-`/sitemap.xml` and `/robots.txt` are generated from `src/app/sitemap.ts` and `src/app/robots.ts`;
-the canonical host lives in `src/lib/site.ts`. Google Search Console verifies the domain by a DNS
+Only the landing page is meant to appear in search. Case pages are `noindex, follow` and left out
+of `/sitemap.xml`, but stay crawlable in `/robots.txt` so Google can read the noindex. Both files
+are generated from `src/app/sitemap.ts` and `src/app/robots.ts`; the canonical host lives in
+`src/lib/site.ts`. Google Search Console verifies the domain by a DNS
 TXT record in Vercel (Domains → pratiush.com → DNS Records) — keep that record, Google re-checks it.
 
 ## Layout
