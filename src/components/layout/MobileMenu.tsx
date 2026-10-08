@@ -221,6 +221,8 @@ export function MenuPanel() {
     <motion.div
       id={PANEL_ID}
       className="menu-panel"
+      /* Navigation, not content: kept out of search snippets so Google quotes the page instead. */
+      data-nosnippet=""
       /* No entrance on mount — the closed clip is also declared in CSS, so the server's markup is
          already shut before this ever runs. */
       initial={false}

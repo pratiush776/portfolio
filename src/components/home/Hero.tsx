@@ -80,9 +80,14 @@ export function Hero() {
             portrait is the only thing on the page that isn't ink or bone — its ground is
             transparent, so the square reads as a block of ink that resolves into a face up
             close. */}
+        {/* Out of search snippets. Read as text, the lockup is the brackets' bare parentheses,
+            the portrait's alt, the typing line twice over (its first state, then the sentence kept
+            for screen readers) and the locator — which Google stitched into the result's summary
+            in place of the meta description. The greeting and name above stay quotable. */}
         <motion.div
           className="hero__lockup"
           variants={reduce ? undefined : rise}
+          data-nosnippet=""
         >
           <span className="hero__bracket display">
             <span className="hero__bracket-paren--open" aria-hidden>
