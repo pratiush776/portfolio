@@ -5,9 +5,52 @@ import { Past } from "@/components/home/Past";
 import { SiteFooter } from "@/components/footer/SiteFooter";
 import { Statement } from "@/components/home/Statement";
 import { WorkIndex } from "@/components/works/WorkIndex";
+import {
+  GITHUB_URL,
+  LINKEDIN_URL,
+  PERSON,
+  SITE_DESCRIPTION,
+  SITE_URL,
+} from "@/lib/site";
 
 export const metadata: Metadata = {
   alternates: { canonical: "/" },
+};
+
+/**
+ * Structured data, in schema.org's vocabulary, for the one page meant to be found. The Person ties
+ * the name people search for to this site and to the profiles that are also him (`sameAs`); the
+ * WebSite is where Google reads the site name it shows above the result.
+ */
+const STRUCTURED_DATA = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Person",
+      "@id": `${SITE_URL}/#person`,
+      name: PERSON.name,
+      alternateName: "PRATIUSH",
+      url: SITE_URL,
+      image: `${SITE_URL}/images/portrait_v2.png`,
+      jobTitle: PERSON.role,
+      description: SITE_DESCRIPTION,
+      address: {
+        "@type": "PostalAddress",
+        addressRegion: "NJ",
+        addressCountry: "US",
+      },
+      alumniOf: { "@type": "CollegeOrUniversity", name: "Caldwell University" },
+      sameAs: [GITHUB_URL, LINKEDIN_URL],
+    },
+    {
+      "@type": "WebSite",
+      "@id": `${SITE_URL}/#website`,
+      name: PERSON.name,
+      alternateName: "PRATIUSH",
+      url: SITE_URL,
+      publisher: { "@id": `${SITE_URL}/#person` },
+    },
+  ],
 };
 
 /**
@@ -22,12 +65,23 @@ export const metadata: Metadata = {
  */
 export default function Home() {
   return (
-    <main id="main" className="chapters">
-      <Hero />
-      <Statement />
-      <WorkIndex />
-      <Past />
-      <SiteFooter />
-    </main>
+    <>
+      {/* Outside <main>: inside it, the script would be the chapters' first child and the flow
+          rule (`.chapters > * + *`) would hand the hero a chapter step above it. `<` is escaped
+          so nothing in the data can close the tag early — Next's recommended form for JSON-LD. */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(STRUCTURED_DATA).replace(/</g, "\\u003c"),
+        }}
+      />
+      <main id="main" className="chapters">
+        <Hero />
+        <Statement />
+        <WorkIndex />
+        <Past />
+        <SiteFooter />
+      </main>
+    </>
   );
 }

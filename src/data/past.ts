@@ -40,7 +40,8 @@ export type PastRole = {
   /** The specifics, one per line. Quiet meta rather than prose. Absent on the thesis, whose two
       heading lines and link already say everything there is to say about it. */
   detail?: string[];
-  /** Present only where the claim is publicly verifiable — the thesis and the MicroJournal repo. */
+  /** Present only where the claim is publicly verifiable — the employer's site, the MicroJournal
+      repo, the thesis. */
   link?: { label: string; href: string };
 };
 
@@ -102,13 +103,14 @@ export const past: PastChapter[] = [
     // Most recent first, which is the order a CV is read in and the order these were lived in.
     roles: [
       {
-        lines: ["TaxCurb System", "Software Engineer"],
+        lines: ["TaxCurb", "Software Engineer"],
         period: "Dec 2025 — Present",
         detail: [
           "Gated every deployment behind CI/CD compliance checks, so no push reaches production without passing them.",
           "Designed the Node, Express and Firebase Admin backend: server-side credentials, token auth, rate limiting, input validation.",
           "Built the pipelines that turn sparse user input into normalised, document-ready output.",
         ],
+        link: { label: "Visit TaxCurb", href: "https://taxcurb.net/" },
       },
       {
         // The studio is the organisation and MicroJournal is what was built in it, so the product

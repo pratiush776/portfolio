@@ -22,7 +22,8 @@ export function SiteNav() {
     <>
       <NavScroll />
       <nav className="site-nav" aria-label="Primary">
-        <div className="site-nav__inner">
+        {/* Navigation, not content: kept out of search snippets so Google quotes the page. */}
+        <div className="site-nav__inner" data-nosnippet="">
           <Link
             href="/"
             className="site-nav__brand"

@@ -5,6 +5,7 @@ import { motion, useReducedMotion, type Variants } from "motion/react";
 import { ArrowUpRight } from "@/components/icons";
 import { kerned } from "@/lib/kerning";
 import { ENTER, STAGGER, THRESHOLD, rise } from "@/lib/motion";
+import { GITHUB_URL, LINKEDIN_URL } from "@/lib/site";
 
 /**
  * The page's only inverted surface — ink field, bone text — and its sign-off. Contact and
@@ -23,11 +24,8 @@ const lineRise: Variants = {
 };
 
 const PROFILES = [
-  { label: "GitHub", href: "https://github.com/pratiush776" },
-  {
-    label: "LinkedIn",
-    href: "https://www.linkedin.com/in/pratiush-k-810324223",
-  },
+  { label: "GitHub", href: GITHUB_URL },
+  { label: "LinkedIn", href: LINKEDIN_URL },
   { label: "Resume", href: "/CV.pdf" },
 ];
 

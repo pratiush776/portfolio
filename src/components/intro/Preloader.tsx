@@ -426,6 +426,9 @@ export function Preloader({
     <motion.div
       className="preloader"
       aria-hidden
+      /* Out of search snippets too — `aria-hidden` hides it from screen readers, not from Google,
+         which would otherwise quote the curtain's word as the page's first line. */
+      data-nosnippet=""
       initial={{ clipPath: "inset(0% 0% 0% 0%)" }}
       animate={{
         clipPath: lifting ? "inset(0% 0% 100% 0%)" : "inset(0% 0% 0% 0%)",
