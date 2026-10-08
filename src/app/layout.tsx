@@ -11,21 +11,34 @@ import {
 import { Analytics } from "@vercel/analytics/next";
 import { IntroProvider } from "@/components/intro/IntroContext";
 import { GATE_SCRIPT } from "@/lib/intro";
-import { SITE_URL } from "@/lib/site";
+import { PERSON, SITE_DESCRIPTION, SITE_TITLE, SITE_URL } from "@/lib/site";
 import { SiteNav } from "@/components/layout/SiteNav";
 import { MenuPanel, MenuProvider } from "@/components/layout/MobileMenu";
 import { SmoothScroll } from "@/components/layout/SmoothScroll";
 import { BackgroundWork } from "@/components/layout/BackgroundWork";
 
 /* No canonical here: a layout's metadata is inherited, so one set at this level would point every
-   case page at the landing page. Each page states its own. */
+   case page at the landing page. Each page states its own. The preview image and the touch icon
+   come from their files in this folder (opengraph-image.tsx, apple-icon.png). */
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
-  title: "PRATIUSH",
-  description:
-    "PRATIUSH — I build and ship products across the full stack, AI, and design.",
+  title: { default: SITE_TITLE, template: `%s — ${PERSON.name}` },
+  description: SITE_DESCRIPTION,
   icons: {
     icon: "/favicon.png",
+  },
+  openGraph: {
+    type: "website",
+    siteName: PERSON.name,
+    locale: "en_US",
+    url: "/",
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
   },
 };
 

@@ -1,9 +1,10 @@
-import type { Metadata } from "next";
+import type { Metadata, ResolvingMetadata } from "next";
 import { notFound } from "next/navigation";
 
 import { SiteFooter } from "@/components/footer/SiteFooter";
 import { CaseView } from "@/components/works/CaseView";
 import { works, getWork } from "@/data/works";
+import { PERSON } from "@/lib/site";
 
 /**
  * A case page per case work. Server Component: it resolves the work by slug
@@ -17,11 +18,14 @@ export function generateStaticParams() {
   return works.map((work) => ({ slug: work.slug }));
 }
 
-export async function generateMetadata({
-  params,
-}: {
-  params: Promise<{ slug: string }>;
-}): Promise<Metadata> {
+export async function generateMetadata(
+  {
+    params,
+  }: {
+    params: Promise<{ slug: string }>;
+  },
+  parent: ResolvingMetadata,
+): Promise<Metadata> {
   const { slug } = await params;
   const work = getWork(slug);
   if (!work) return { title: "Project not found" };
@@ -29,10 +33,30 @@ export async function generateMetadata({
   // as a result or a sitelink under it. `follow` keeps its links crawlable, and it stays open in
   // robots.txt on purpose — a blocked page can still be listed, because Google never reads the
   // noindex. No canonical: one saying "index this URL" beside a noindex is a contradiction.
+  // Its own preview text when the URL is shared directly, on the root's card image. A page that
+  // declares `openGraph` REPLACES the inherited block rather than merging into it — image and all —
+  // so the parent's resolved images are carried across by hand, as Next documents.
+  const images = (await parent).openGraph?.images ?? [];
+  const title = `${work.title} — ${PERSON.name}`;
   return {
-    title: `${work.title} — PRATIUSH`,
+    title: work.title,
     description: work.description,
     robots: { index: false, follow: true },
+    openGraph: {
+      type: "article",
+      siteName: PERSON.name,
+      locale: "en_US",
+      url: `/works/${work.slug}`,
+      title,
+      description: work.description,
+      images,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description: work.description,
+      images,
+    },
   };
 }
 

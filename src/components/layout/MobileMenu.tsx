@@ -13,6 +13,7 @@ import { motion, useReducedMotion } from "motion/react";
 
 import { GitHub, LinkedIn, Mail } from "@/components/icons";
 import { DUR, EASE } from "@/lib/motion";
+import { GITHUB_URL, LINKEDIN_URL } from "@/lib/site";
 
 /**
  * The phone's navigation, and the only thing on the site that exists below 768px and not above it.
@@ -152,12 +153,8 @@ const LINKS = [
 /* The same three profiles the footer lists, minus Resume — which is one of the big links above,
    and does not want to be in the room twice. */
 const SOCIALS = [
-  { label: "GitHub", href: "https://github.com/pratiush776", Icon: GitHub },
-  {
-    label: "LinkedIn",
-    href: "https://www.linkedin.com/in/pratiush-k-810324223",
-    Icon: LinkedIn,
-  },
+  { label: "GitHub", href: GITHUB_URL, Icon: GitHub },
+  { label: "LinkedIn", href: LINKEDIN_URL, Icon: LinkedIn },
   { label: "Email", href: "mailto:pratiush776@gmail.com", Icon: Mail },
 ];
 
