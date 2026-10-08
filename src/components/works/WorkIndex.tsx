@@ -8,6 +8,7 @@ import { ArrowUpRight } from "@/components/icons";
 import { kerned } from "@/lib/kerning";
 import { Cover, WorkCopy } from "@/components/works/WorkCard";
 import { FeaturedStack } from "@/components/works/FeaturedStack";
+import { rememberHomeScroll } from "@/lib/homeScroll";
 import { STAGGER, THRESHOLD, reveal, rise } from "@/lib/motion";
 import { useMediaQuery } from "@/lib/useMediaQuery";
 
@@ -31,7 +32,15 @@ export function WorkIndex() {
   const enter = reduce ? {} : reveal();
 
   return (
-    <section id="work" className="work-section" tabIndex={-1}>
+    // Every way into a case page from here — card, deck, archive row — is a link inside this
+    // section, so one capture-phase listener records where the page was left for the case page's
+    // back arrow (see lib/homeScroll), before the navigation moves anything.
+    <section
+      id="work"
+      className="work-section"
+      tabIndex={-1}
+      onClickCapture={rememberHomeScroll}
+    >
       {stacked ? (
         <FeaturedStack />
       ) : (

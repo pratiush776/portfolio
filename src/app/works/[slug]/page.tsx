@@ -28,6 +28,7 @@ export async function generateMetadata({
   return {
     title: `${work.title} — PRATIUSH`,
     description: work.description,
+    alternates: { canonical: `/works/${work.slug}` },
   };
 }
 

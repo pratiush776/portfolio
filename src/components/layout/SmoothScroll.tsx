@@ -7,6 +7,7 @@ import { useEffect, useRef } from "react";
 
 import { useIntro } from "@/components/intro/IntroContext";
 import { useMenu } from "@/components/layout/MobileMenu";
+import { takeHomeRestore } from "@/lib/homeScroll";
 
 /**
  * Root smooth-scroll provider, and the page's single animation clock.
@@ -97,7 +98,19 @@ export function SmoothScroll({ children }: { children: React.ReactNode }) {
     restoringTo.current = null;
     if (restoring) return;
 
-    lenis.current?.lenis?.scrollTo(0, { immediate: true, force: true });
+    // The case page's back arrow lands the landing page where it was left (see lib/homeScroll)
+    // rather than at the top. Lenis clamps to the scroll limit it last measured, which is still the
+    // shorter case page's until its debounced observer catches up, so it measures the landing page
+    // first. Native scrolling under reduced motion has no instance to tell, so the window takes it
+    // directly — Next's own reset to the top has already run by now.
+    const target = takeHomeRestore() ?? 0;
+    const instance = lenis.current?.lenis;
+    if (instance) {
+      if (target) instance.resize();
+      instance.scrollTo(target, { immediate: true, force: true });
+    } else if (target) {
+      window.scrollTo(0, target);
+    }
   }, [pathname]);
 
   if (prefersReducedMotion) return <>{children}</>;

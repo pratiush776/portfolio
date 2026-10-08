@@ -15,7 +15,7 @@
  * ONE ROLE, in the slots every role on the page shares.
  *
  * A chapter used to BE a role — one word, one thing behind it — and EXPERIENCE is where that
- * stopped being true: three positions belong under one category word. Giving each of them a
+ * stopped being true: several positions belong under one category word. Giving each of them a
  * display word of its own would have turned the section into a list of jobs, which is the logo
  * bar this design exists to avoid; leaving them out would have been dishonest.
  *
@@ -50,7 +50,7 @@ export type PastChapter = {
       line on a phone. */
   word: string;
   /**
-   * What sits behind the word, most recent first. Usually one; EXPERIENCE is three.
+   * What sits behind the word, most recent first. Usually one; EXPERIENCE holds several.
    *
    * An array even where there is only ever going to be one, because the alternative — flat fields
    * for the single case and a list for the many — is two ways to say the same thing, and every
@@ -95,40 +95,45 @@ export type PastChapter = {
 export const past: PastChapter[] = [
   {
     id: "experience",
-    // Three roles under one word. "Internship" was accurate when there was one and became a lie
-    // when there were three — the tutoring post is a campus job, not an internship. A category
+    // Several roles under one word. "Internship" was accurate when there was one and became a lie
+    // when there were more — the tutoring post is a campus job, not an internship. A category
     // covers all of them without claiming anything, which is what every other word here does.
     word: "Experience",
     // Most recent first, which is the order a CV is read in and the order these were lived in.
     roles: [
       {
-        lines: ["MicroJournal", "Tech & Infrastructure Lead"],
+        lines: ["TaxCurb System", "Software Engineer"],
+        period: "Dec 2025 — Present",
+        detail: [
+          "Gated every deployment behind CI/CD compliance checks, so no push reaches production without passing them.",
+          "Designed the Node, Express and Firebase Admin backend: server-side credentials, token auth, rate limiting, input validation.",
+          "Built the pipelines that turn sparse user input into normalised, document-ready output.",
+        ],
+      },
+      {
+        // The studio is the organisation and MicroJournal is what was built in it, so the product
+        // rides the role line.
+        lines: [
+          "Instructure Startup & Innovation Studio",
+          "MicroJournal · Tech & Infrastructure Lead",
+        ],
         period: "Spring 2026",
         detail: [
-          "Took a journaling product from zero to one in a week, on React and Firebase.",
-          "Built the event-analytics layer the team read behaviour from.",
-          "Pitched direction and pricing to Instructure's CTO and CPO, then shipped on their notes.",
+          "Built MicroJournal from zero to one in a team of four, in a studio run by Instructure's CTO and CPO.",
+          "Shipped on feedback from the Instructure engineering team.",
+          "Validated demand with a public waitlist, then submitted the app to the iOS App Store.",
         ],
         link: {
           label: "View Code",
-          href: "https://github.com/pratiush776/Microjournal",
+          href: "https://github.com/pratiush776/microjournal-app",
         },
-      },
-      {
-        lines: ["Whisk It All", "Full-Stack Software Engineer (Intern)"],
-        period: "Summer 2025",
-        detail: [
-          "Designed, built and deployed the customer-facing production site.",
-          "Owned it end to end, from design through to deployment.",
-          "Worked directly with stakeholders to turn business needs into the build.",
-        ],
       },
       {
         lines: ["Caldwell University", "Systems Assistant & Student Tutor"],
         period: "2023 — 2025",
         detail: [
-          "Tutored data structures, algorithms and full-stack development.",
-          "Ran front-line software, hardware and network support.",
+          "Tutored data structures, algorithms, front-end and full-stack development, reaching up to 1,500 students.",
+          "Ran the audio-visual systems for campus events of 100+, fixing failures live.",
         ],
       },
     ],
@@ -142,9 +147,12 @@ export const past: PastChapter[] = [
     roles: [
       {
         lines: ["New York Jets", "Data Analyst"],
+        period: "Spring 2026",
         detail: [
           "A Caldwell University collaboration with the New York Jets.",
-          "Worked as part of the analysis team on the club's data.",
+          "Led a five-person student analytics team through the club's historical data and ~1,000 survey responses.",
+          "Found an underserved college-age fan segment, 62% of respondents.",
+          "Pitched three growth strategies to Jets executives, sized at up to ~$110K in game-day spend per 1,000 students.",
         ],
       },
     ],
@@ -221,7 +229,7 @@ export const past: PastChapter[] = [
           "B.S. Computer Science, minor in Business Analytics · 3.85 GPA",
         ],
         detail: [
-          "Honors Student · Dean's List · Recognition Award · Co-founder & Secretary of Computer Science Club",
+          "Honors Student · Dean's List (8×) · Recognition Award · Co-founder & Secretary of Computer Science Club · University Choir",
         ],
       },
     ],

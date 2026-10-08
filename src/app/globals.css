@@ -714,6 +714,7 @@ a:focus-visible .underline-link::after {
   mix-blend-mode: difference;
   color: var(--color-bone);
   pointer-events: none;
+  transition: transform var(--dur-hover) var(--ease);
 }
 
 .site-nav__inner {
@@ -724,6 +725,47 @@ a:focus-visible .underline-link::after {
   /* The bar's own inset — both values are tokens in :root, where the reasoning lives. */
   padding-block: var(--nav-pad-block);
   padding-inline: var(--nav-gutter);
+}
+
+/* The frosted plate under the bar (see NavScroll), painted beneath it so the bar's difference
+   blend inverts against one even tone instead of the content's full detail:
+   ink words on the bone plate, bone words on the ink one. 75% with a faint 3px frost keeps the
+   page just visible moving underneath without letting it reach the words.
+
+   Exactly the bar's height, so the plate ends on a clean edge at the bar's foot: its padding twice
+   plus the 18px row every control collapses to (a 44px target pulled in by -13px each side). */
+.site-nav-veil {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  /* Under the phone menu's panel (90) as well as the bar (100). The panel's curtain then runs
+     over the plate from the very top of the screen, so opening the menu is one ink edge travelling
+     down, and closing is the same edge drawn back up off a plate that never changed. */
+  z-index: 80;
+  height: calc(var(--nav-pad-block) * 2 + 18px);
+  background-color: color-mix(in srgb, var(--color-bone) 75%, transparent);
+  -webkit-backdrop-filter: blur(3px);
+  backdrop-filter: blur(3px);
+  transition:
+    background-color var(--dur-hover) var(--ease),
+    transform var(--dur-hover) var(--ease);
+  pointer-events: none;
+}
+
+/* Over the footer. */
+.site-nav-veil[data-tone="ink"] {
+  background-color: color-mix(in srgb, var(--color-ink) 75%, transparent);
+}
+
+
+/* Scrolling down sends the bar and its plate up out of view together; scrolling up brings them
+   back (see NavScroll). Each moves by its own height, which clears the viewport either way. The
+   bar stays in while the phone menu is open, and while a control in it has keyboard focus, so a
+   tab into the hidden bar brings it back rather than focusing something off-screen. */
+html.is-nav-hidden:not(.is-menu-open, :has(.site-nav:focus-within))
+  :is(.site-nav, .site-nav-veil) {
+  transform: translateY(-100%);
 }
 
 /* Only the controls take the pointer — the bar itself must not eat clicks. */
@@ -856,7 +898,8 @@ a:focus-visible .underline-link::after {
    full height, for the gap between first paint and hydration. The same reason .past__panel
    declares its own `height: 0`.
 
-   z-index 90 puts it under .site-nav's 100 — that ordering is the whole colour story above.
+   z-index 90 puts it under .site-nav's 100 — that ordering is the whole colour story above — and
+   over the bar's frosted plate (80), so the curtain covers the plate in the same stroke.
 
    Height is the "about halfway" you asked for, floored so the FOUR links and the socials always
    fit and capped so it does not swallow a tall phone. svh rather than vh: this sits under a
@@ -1549,6 +1592,19 @@ html.is-loading .preloader {
   display: grid;
   grid-template-columns: 1fr;
   gap: var(--space-chapter);
+}
+
+/* THE TALLEST A COVER MAY STAND in the flat layout — the deck's height guard (--stack-well-h),
+   given to the layout that never had one. The frame is 16/10 at the width of its column, so a wide
+   window that is also short (a narrowed desktop window, a phone on its side) grew a cover taller
+   than the screen. Only the height is capped: the frame keeps its full width, turns wider than
+   16/10, and `object-fit: cover` takes the difference off the top and bottom of the still — which
+   on these laptop renders is desk and background (see .frame--wide). A phone held upright never
+   reaches the cap. Width is stated outright so the ratio resolves height from it, and the cap then
+   trims that height without pulling the width in after it. */
+.work-grid .frame {
+  width: 100%;
+  max-height: max(220px, 60svh);
 }
 
 /* Each featured cell is one link wrapping the frame and the text as a single target — stacked
@@ -2480,6 +2536,36 @@ a.archive__link:focus-visible .archive__arrow {
   display: flex;
   flex-direction: column;
   gap: clamp(28px, 3vw, 48px);
+}
+
+/* Back to the work: a bare arrow on the nav brand's left edge, just under the bar, so the two
+   read as one column. Absolute against the page itself (nothing above it is positioned), which is
+   what lets it sit on the bar's --nav-gutter rather than the content's wider inset, and keeps it
+   out of the flow so the title stands exactly where it does without it. The 44px target opens to
+   the right of the glyph, so the arrow's own edge is the one on the line. */
+.case__back {
+  position: absolute;
+  top: calc(var(--nav-pad-block) * 2 + 18px);
+  left: var(--nav-gutter);
+  display: inline-flex;
+  align-items: center;
+  min-width: 44px;
+  min-height: 44px;
+  font-size: var(--t-base);
+  line-height: var(--lh-flat);
+}
+
+/* The site's arrow cue — amber, and a nudge the way it points. */
+.case__back-arrow {
+  transition:
+    color var(--dur-hover) var(--ease),
+    transform var(--dur-hover) var(--ease);
+}
+
+.case__back:hover .case__back-arrow,
+.case__back:focus-visible .case__back-arrow {
+  color: var(--color-accent);
+  transform: translateX(-3px);
 }
 
 .case__intro {

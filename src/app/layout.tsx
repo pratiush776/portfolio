@@ -11,12 +11,16 @@ import {
 import { Analytics } from "@vercel/analytics/next";
 import { IntroProvider } from "@/components/intro/IntroContext";
 import { GATE_SCRIPT } from "@/lib/intro";
+import { SITE_URL } from "@/lib/site";
 import { SiteNav } from "@/components/layout/SiteNav";
 import { MenuPanel, MenuProvider } from "@/components/layout/MobileMenu";
 import { SmoothScroll } from "@/components/layout/SmoothScroll";
 import { BackgroundWork } from "@/components/layout/BackgroundWork";
 
+/* No canonical here: a layout's metadata is inherited, so one set at this level would point every
+   case page at the landing page. Each page states its own. */
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   title: "PRATIUSH",
   description:
     "PRATIUSH — I build and ship products across the full stack, AI, and design.",

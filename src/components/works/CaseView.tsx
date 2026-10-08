@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   useEffect,
   useId,
@@ -13,6 +14,7 @@ import {
 import { motion, useReducedMotion, type Variants } from "motion/react";
 
 import { ArrowUpRight } from "@/components/icons";
+import { requestHomeRestore } from "@/lib/homeScroll";
 import { STAGGER, rise } from "@/lib/motion";
 import type { FeaturedWork } from "@/data/works";
 
@@ -36,12 +38,42 @@ export function CaseView({
   next: FeaturedWork;
 }) {
   const reduce = useReducedMotion() ?? false;
+  const router = useRouter();
 
   const brief = work.tagline ?? work.description;
   const v = reduce ? undefined : rise;
 
+  // Home to wherever the landing page was left (see lib/homeScroll). The link's own `/#work`
+  // stands when nothing was remembered — a case opened directly — and for a modified click, which
+  // is asking for a new tab rather than for this page to move.
+  const goBack = (event: MouseEvent<HTMLAnchorElement>) => {
+    if (
+      event.button !== 0 ||
+      event.metaKey ||
+      event.ctrlKey ||
+      event.shiftKey ||
+      event.altKey
+    ) {
+      return;
+    }
+    if (!requestHomeRestore()) return;
+    event.preventDefault();
+    router.push("/");
+  };
+
   return (
     <main id="main" className="case gutter measure">
+      <Link
+        href="/#work"
+        className="case__back"
+        aria-label="Back to all work"
+        onClick={goBack}
+      >
+        <span className="case__back-arrow" aria-hidden>
+          ←
+        </span>
+      </Link>
+
       <motion.div
         className="case__opening"
         variants={reduce ? undefined : STAGGER}
@@ -158,7 +190,7 @@ function CaseMediaGallery({
         <p className="case__brief editorial">{brief}</p>
 
         {/* ALWAYS RENDERED, including on a work with a single piece of media. The rail is part of
-            what a case page IS — brief, marks, stage, in that order on all six — and hiding it on
+            what a case page IS — brief, marks, stage, in that order on every one — and hiding it on
             the pages that happen to have one artifact made those read as a different template
             rather than as the same one with less in it. A lone mark is not a choice going
             unoffered; it is the label for what is on the stage, which is the job it does on every
